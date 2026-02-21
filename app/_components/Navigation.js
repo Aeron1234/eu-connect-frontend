@@ -34,7 +34,7 @@ function Navigation() {
           className={`${pathName === "/account" ? "text-primary-500 shadow-[0_4px_0_0] shadow-primary-500" : ""} py-2 px-4 hover:text-primary-500 transition-all flex items-center gap-2`}
         >
           {icon ? icon : <CircleUserRound />}
-          <span>Roronoa</span>
+          <span>Account</span>
         </Link>
       </li>
     </ul>

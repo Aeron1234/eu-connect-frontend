@@ -46,7 +46,7 @@ async function StudentPage() {
                 <h2 className="text-lg font-semibold text-stone-700">
                   Daily Time Record
                 </h2>
-                <p className="text-stone-500">Record your attendance here 🙂</p>
+                <p className="text-stone-500">Record your attendance here</p>
               </div>
 
               <DtrButton />
@@ -62,7 +62,7 @@ async function StudentPage() {
                   Narrative Report
                 </h2>
                 <p className="text-stone-500">
-                  Post your daily narratives here 🙂
+                  Post your daily narratives here
                 </p>
               </div>
 
