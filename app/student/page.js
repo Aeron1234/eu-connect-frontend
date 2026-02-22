@@ -28,7 +28,7 @@ async function StudentPage() {
 
   return (
     <PageContainer>
-      <PageTitle title="Welcome back, Aeron!">
+      <PageTitle title="Welcome back, Student!">
         <Button
           className={
             "bg-primary-500 hover:bg-primary-400 cursor-pointer rounded-md"

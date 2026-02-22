@@ -6,6 +6,12 @@ import { Check, Plus } from "lucide-react";
 import Filter from "app/_components/Filter";
 import { notFound } from "next/navigation";
 import { auth } from "@/app/_services/auth";
+import Modal from "@/app/_components/Modal";
+import StorageUploadForm from "@/app/_components/StorageUploadForm";
+import StorageFilesList from "@/app/_components/StorageFilesList";
+import { Suspense } from "react";
+import RequirementsBefore from "@/app/_components/RequirementsBefore";
+import RequirementsAfter from "@/app/_components/RequirementsAfter";
 
 export const metadata = {
   title: "Student's Storage",
@@ -29,102 +35,38 @@ async function StoragePage() {
 
         <div className="pb-4 border-b border-stone-300 grid grid-cols-2 gap-4 font-semibold">
           <div className="flex flex-col gap-2 text-sm font-semi-bold">
-            <h3 className="font-bold text-stone-600">Before Internship</h3>
-
-            <ul className="pl-2">
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                {/* <Checkbox /> */}
-
-                <p>Curriculum Vitae</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Student's Registration</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Endorsement letter / Recommendation letter</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Training Agreement - notarize</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Parent's Consent with valid ID - notarize</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Memorandum of Agreement - notarize</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Medical / Psychological Certificate</p>
-              </li>
-            </ul>
+            <RequirementsBefore />
           </div>
 
           <div className="flex flex-col gap-2">
-            <h3 className="font-bold text-stone-600">After Internship</h3>
-
-            <ul className="pl-2">
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Weekly Journal</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Summary Report</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Daily Time Record (DTR)</p>
-              </li>
-              <li className="flex gap-1 items-center">
-                <Check strokeWidth={3} color="var(--color-primary-500)" />
-
-                <p>Certificate of Completion</p>
-              </li>
-            </ul>
+            <RequirementsAfter />
           </div>
         </div>
 
         <div className="flex-1 flex flex-col gap-2 font-bold text-base">
           <div className="flex items-center justify-between py-2">
             <div className="flex gap-2 items-center">
-              <Button
-                className={
-                  "bg-primary-500 hover:bg-primary-400 cursor-pointer w-fit"
+              <Modal
+                trigger={
+                  <div>
+                    <Plus strokeWidth={2} color="var(--color-primary-50)" />
+                  </div>
                 }
+                triggerStyles={
+                  "bg-primary-500 hover:bg-primary-400 cursor-pointer p-0.5 rounded-sm"
+                }
+                title={"Upload file"}
               >
-                <Plus strokeWidth={4} />
-              </Button>
+                <StorageUploadForm />
+              </Modal>
               <h3 className="">Upload Files</h3>
             </div>
             <Filter />
           </div>
 
-          <ul className=" grid grid-cols-6 gap-4 items-start font-normal text-xs">
-            <FileCard />
-            <FileCard />
-            <FileCard />
-            <FileCard />
-            <FileCard />
-            <FileCard />
-            <FileCard />
-            <FileCard />
-          </ul>
+          <Suspense fallback={<div>Loading...</div>}>
+            <StorageFilesList />
+          </Suspense>
         </div>
       </div>
     </PageContainer>
