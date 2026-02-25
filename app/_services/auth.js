@@ -21,11 +21,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const [rows] = await db.execute(
           `
-            SELECT *, roles.role
-            FROM users
-            LEFT JOIN roles ON users.role_id = roles.id
-            WHERE email = ?
-          `,
+          SELECT 
+          u.id AS user_uuid, 
+          u.email, 
+          u.password_hash, 
+          r.role 
+          FROM users AS u
+          JOIN roles r ON u.role_id = r.id
+          WHERE u.email = ?
+        `,
           [credentials.email],
         );
 
@@ -43,7 +47,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         return {
-          id: user.id.toString(),
+          // We use the alias 'user_uuid' to ensure no collision with role IDs
+          id: user.user_uuid,
           email: user.email,
           role: user.role,
         };

@@ -53,7 +53,7 @@ async function StoragePage() {
                   </div>
                 }
                 triggerStyles={
-                  "bg-primary-500 hover:bg-primary-400 cursor-pointer p-0.5 rounded-sm"
+                  "bg-primary-500 hover:bg-primary-400 cursor-pointer p-0.5 rounded-sm transition-colors"
                 }
                 title={"Upload file"}
               >

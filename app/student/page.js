@@ -2,18 +2,14 @@ import DtrTable from "@/app/_components/DtrTable";
 import CalendarUi from "@/app/_components/Calendar";
 import HoursProgressDonut from "@/app/_components/HoursProgressDonut";
 import DtrButton from "@/app/_components/DtrButton";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Ellipsis,
-  Plus,
-  SquarePlus,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Ellipsis, Plus } from "lucide-react";
 import { Button } from "components/ui/button";
 import PageTitle from "app/_components/PageTitle";
 import PageContainer from "app/_components/PageContainer";
 import { notFound } from "next/navigation";
 import { auth } from "@/app/_services/auth";
+import Modal from "../_components/Modal";
+import StudentInternshipForm from "../_components/StudentInternshipForm";
 
 export const metadata = {
   title: "Student",
@@ -29,13 +25,16 @@ async function StudentPage() {
   return (
     <PageContainer>
       <PageTitle title="Welcome back, Student!">
-        <Button
-          className={
-            "bg-primary-500 hover:bg-primary-400 cursor-pointer rounded-md"
+        <Modal
+          trigger={"Start Internship"}
+          triggerStyles={
+            "bg-primary-500 hover:bg-primary-400 cursor-pointer rounded-md text-primary-50 font-semibold p-2 transition-colors"
           }
+          title={"Create Internship"}
+          description={"Kindly fill up the details of your internship."}
         >
-          <SquarePlus /> Start Internship
-        </Button>
+          <StudentInternshipForm />
+        </Modal>
       </PageTitle>
 
       <div className="flex gap-4 h-full">
@@ -80,7 +79,7 @@ async function StudentPage() {
                 <h3 className="font-bold">Day 1</h3>
                 <p>
                   Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry's
+                  typesetting industry. Lorem Ipsum has been the industry&apos;s
                   standard dummy text ever since the 1500s.
                 </p>
               </li>
@@ -88,7 +87,7 @@ async function StudentPage() {
                 <h3 className="font-bold">Day 2</h3>
                 <p>
                   Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry's
+                  typesetting industry. Lorem Ipsum has been the industry&apos;s
                   standard dummy text ever since the 1500s.
                 </p>
               </li>
@@ -96,7 +95,7 @@ async function StudentPage() {
                 <h3 className="font-bold">Day 3</h3>
                 <p>
                   Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry's
+                  typesetting industry. Lorem Ipsum has been the industry&apos;s
                   standard dummy text ever since the 1500s.
                 </p>
               </li>

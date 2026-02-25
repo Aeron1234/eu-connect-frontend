@@ -25,17 +25,22 @@ function StorageUploadForm() {
       </div>
 
       <DialogFooter>
-        <DialogClose asChild>
-          <Button variant="outline">Cancel</Button>
-        </DialogClose>
+        <div className="flex gap-2 font-semibold self-end">
+          <DialogClose asChild>
+            <Button variant="outline" className={"w-fit"}>
+              Cancel
+            </Button>
+          </DialogClose>
 
-        <Button
-          className={
-            "bg-primary-500 hover:bg-primary-400 w-fit self-end font-semibold"
-          }
-        >
-          Save
-        </Button>
+          <DialogClose asChild>
+            <Button
+              className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+              type="submit"
+            >
+              Save
+            </Button>
+          </DialogClose>
+        </div>
       </DialogFooter>
     </form>
   );

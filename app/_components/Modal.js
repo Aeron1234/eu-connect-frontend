@@ -10,13 +10,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-function Modal({ children, trigger = null, triggerStyles = "", title }) {
+function Modal({
+  children,
+  trigger = null,
+  triggerStyles = "",
+  title,
+  description = "",
+}) {
   return (
     <Dialog>
       <DialogTrigger className={triggerStyles}>{trigger}</DialogTrigger>
       <DialogContent showCloseButton={true}>
         <DialogHeader>
           <DialogTitle className={"text-base"}>{title}</DialogTitle>
+          {description && (
+            <DialogDescription className={"text-sm"}>
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
         {children}
       </DialogContent>
