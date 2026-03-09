@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import { Label, Pie, PieChart } from "recharts";
 
 import {
@@ -14,60 +15,61 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useMemo } from "react";
-import { useEffect, useState } from "react";
 
-export const description = "A donut chart with text";
+// Your database record
 
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false);
+export default function HoursProgressDonut({ internshipData }) {
+  const chartData = useMemo(() => {
+    const total = Number(internshipData?.total_hours) || 0;
+    const accumulated = Number(internshipData?.accumulated_hours) || 0;
 
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 1024);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+    // 2. Calculate remaining as a number
+    const remaining = total - accumulated;
+    return [
+      {
+        status: "completed",
+        hours: internshipData?.accumulated_hours,
+        fill: "var(--color-primary-500)",
+      },
+      {
+        status: "remaining",
+        hours: remaining > 0 ? remaining : 0,
+        fill: "var(--color-primary-100)",
+      },
+    ];
+  }, [internshipData]);
 
-  return isDesktop;
-}
+  const chartConfig = {
+    hours: {
+      label: "Hours",
+    },
+    completed: {
+      label: "Completed",
+    },
+    remaining: {
+      label: "Remaining",
+    },
+  };
 
-const chartData = [
-  { browser: "chrome", visitors: 20, fill: "var(--color-primary-200)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-primary-500)" },
-];
-
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "var(--chart-1)",
-  },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
-  },
-};
-
-export default function HoursProgressDonut() {
-  const totalVisitors = useMemo(() => {
-    return chartData.reduce((acc, curr) => acc - curr.visitors, 400);
-  }, []);
-
-  if (!useIsDesktop()) return null;
+  const percentage = (
+    (Number(internshipData?.accumulated_hours || 0) /
+      Number(internshipData?.total_hours || 1)) *
+    100
+  ).toFixed(1);
 
   return (
-    <div className="w-full h-75">
-      <Card className="flex flex-col text-stone-800 rounded-md">
+    <div className="w-full shadow-sm rounded-sm">
+      <Card className="flex flex-col h-full text-stone-800 rounded-md border-none shadow-none">
         <CardHeader className="items-center">
-          <CardTitle className="font-bold">Hours Progress</CardTitle>
+          <CardTitle className="font-bold text-lg">Hours Progress</CardTitle>
+          {/* <p className="text-sm text-stone-500 font-medium">
+            {internshipData.company_name}
+          </p> */}
         </CardHeader>
-        <CardContent className="flex-1">
+        <CardContent className="flex-1 pb-0">
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square max-h-62.5 h-full w-full"
+            className="mx-auto aspect-square max-h-50.5 w-full"
           >
             <PieChart>
               <ChartTooltip
@@ -76,8 +78,8 @@ export default function HoursProgressDonut() {
               />
               <Pie
                 data={chartData}
-                dataKey="visitors"
-                nameKey="browser"
+                dataKey="hours"
+                nameKey="status"
                 innerRadius={60}
                 strokeWidth={5}
               >
@@ -96,14 +98,14 @@ export default function HoursProgressDonut() {
                             y={viewBox.cy}
                             className="fill-foreground text-3xl font-bold"
                           >
-                            {totalVisitors.toLocaleString()}
+                            {internshipData.accumulated_hours.toFixed(2)}
                           </tspan>
                           <tspan
                             x={viewBox.cx}
                             y={(viewBox.cy || 0) + 24}
-                            className="fill-muted-foreground"
+                            className="fill-muted-foreground text-xs font-medium"
                           >
-                            Total Hours
+                            out of {internshipData.total_hours} hrs
                           </tspan>
                         </text>
                       );
@@ -114,9 +116,12 @@ export default function HoursProgressDonut() {
             </PieChart>
           </ChartContainer>
         </CardContent>
-        <CardFooter>
-          <p className="text-stone-500 text-xs font-semibold">
-            January - June 2024
+        <CardFooter className="flex-col gap-1 text-center">
+          <div className="text-sm font-bold text-stone-700">
+            {percentage}% Progress
+          </div>
+          <p className="text-stone-400 text-[10px] uppercase tracking-wider font-bold">
+            Status: {internshipData.status}
           </p>
         </CardFooter>
       </Card>

@@ -2,6 +2,7 @@
 
 import { login } from "@/app/_services/actions";
 import Logo from "./Logo";
+import { Spinner } from "@/components/ui/spinner";
 import { useActionState } from "react";
 
 function LoginForm() {
@@ -45,10 +46,14 @@ function LoginForm() {
       </label>
 
       <button
-        className="bg-primary-500 text-primary-50 px-4 py-2 rounded-full font-bold"
+        className="bg-primary-500 text-primary-50 px-4 py-2 rounded-full font-bold flex items-center justify-center"
         disabled={isPending}
       >
-        {isPending ? "Logging in..." : "Log in"}
+        {isPending ? (
+          <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
+        ) : (
+          "Log in"
+        )}
       </button>
 
       {state?.error && (

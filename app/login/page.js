@@ -13,9 +13,7 @@ async function page() {
 
   return (
     <div className="grid items-center justify-items-center h-full">
-      <Suspense fallback={<div>Loading...</div>}>
-        <LoginForm />
-      </Suspense>
+      <LoginForm />
     </div>
   );
 }

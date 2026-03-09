@@ -1,10 +1,7 @@
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,14 +10,16 @@ import {
 function Modal({
   children,
   trigger = null,
-  triggerStyles = "",
   title,
   description = "",
+  disabled = false,
 }) {
+  if (disabled) return null;
+
   return (
     <Dialog>
-      <DialogTrigger className={triggerStyles}>{trigger}</DialogTrigger>
-      <DialogContent showCloseButton={true}>
+      <DialogTrigger disabled={disabled}>{trigger}</DialogTrigger>
+      <DialogContent showCloseButton={true} className={"flex flex-col"}>
         <DialogHeader>
           <DialogTitle className={"text-base"}>{title}</DialogTitle>
           {description && (

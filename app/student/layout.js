@@ -1,5 +1,7 @@
 import SideNavigation from "@/app/_components/SideNavigation";
+import { Spinner } from "@/components/ui/spinner";
 import { ChartArea, Folder } from "lucide-react";
+import { Suspense } from "react";
 
 function Layout({ children }) {
   const navigation = [
@@ -16,7 +18,7 @@ function Layout({ children }) {
   ];
 
   return (
-    <div className="h-full grid grid-cols-[auto_1fr] gap-4">
+    <div className="h-full grid grid-cols-[auto_1fr] mx-auto max-w-7xl gap-4">
       <SideNavigation navigation={navigation} />
 
       {children}

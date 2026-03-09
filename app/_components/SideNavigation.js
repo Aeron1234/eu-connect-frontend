@@ -12,7 +12,7 @@ function SideNavigation({ navigation }) {
   const role = roles.includes(pathName.split("/").at(1)) ?? null;
 
   return (
-    <nav className="bg-white rounded-md shadow-sm text-sm text-stone-800 h-full font-semibold hidden lg:block py-4 px-1">
+    <nav className="bg-white rounded-md shadow-sm text-sm text-stone-800 font-semibold hidden lg:block py-4 px-1">
       <ul className="flex flex-col gap-1 h-full">
         {navigation.map((item) => (
           <li key={item.name}>
