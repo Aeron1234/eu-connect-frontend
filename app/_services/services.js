@@ -33,11 +33,14 @@ export async function getTodayDtr() {
     }
     const user = session.user;
 
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
+
     const [rows] = await db.execute(
       `SELECT * FROM daily_time_records 
-       WHERE user_id = ? AND DATE(created_at) = CURDATE() 
+       WHERE user_id = ? AND DATE(created_at) = CURDATE() AND internship_id = ?
        LIMIT 1`,
-      [user.id],
+      [user.id, internshipData.id],
     );
     return rows[0] || null;
   } catch (err) {

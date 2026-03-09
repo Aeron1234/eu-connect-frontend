@@ -1,6 +1,7 @@
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -22,7 +23,7 @@ async function DtrTable({ params }) {
 
   const dtrData = await getDtrs(currentDtrPage);
 
-  if (!dtrData) return <div>No narratives found.</div>;
+  if (!dtrData) return <div>No daily time record found.</div>;
 
   const { dtrs, totalPages } = dtrData;
 
@@ -35,6 +36,9 @@ async function DtrTable({ params }) {
   return (
     <>
       <Table>
+        {!dtrs.length && (
+          <TableCaption>Clock-in to save a record of dtr</TableCaption>
+        )}
         <TableHeader className={""}>
           <TableRow>
             <TableHead className="">Date</TableHead>

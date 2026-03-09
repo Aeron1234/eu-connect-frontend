@@ -6,7 +6,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTodayDtr, getOngoingInternshipRecord } from "./services";
 import { AuthError } from "next-auth";
-import { toast } from "sonner";
 
 ////////////////////////////////////////////////////
 // AUTHENTICATION
