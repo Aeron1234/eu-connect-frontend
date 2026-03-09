@@ -101,7 +101,7 @@ export async function createInternshipRecord(formData) {
   }
 }
 
-export async function finishInternshipRecord(internshipId, formData) {
+export async function finishInternshipRecord(internshipId, formData = {}) {
   try {
     const session = await auth();
     if (!session?.user) throw new Error("You must be logged in");
@@ -116,7 +116,9 @@ export async function finishInternshipRecord(internshipId, formData) {
     const [result] = await db.execute(
       `
       UPDATE internship_records
-      SET status = CASE
+      SET
+        date_ended = CURRENT_DATE(),
+        status = CASE
         WHEN accumulated_hours >= total_hours THEN "finished"
         ELSE "ongoing"
       END

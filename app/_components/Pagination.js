@@ -2,6 +2,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 function Pagination({ hrefPrev, hrefNext, currentPage, totalPages }) {
+  if (totalPages <= 0) return null;
+
   return (
     <div className="flex items-center gap-4 font-semibold px-2">
       <Link

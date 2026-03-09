@@ -1,6 +1,5 @@
 import DtrButton from "@/app/_components/DtrButton";
 import DtrTable from "@/app/_components/DtrTable";
-import { getDtrs } from "@/app/_services/actions";
 
 async function DtrPage({ searchParams }) {
   const params = await searchParams;

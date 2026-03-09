@@ -2,8 +2,10 @@
 
 import { db } from "@/lib/db";
 import { auth } from "./auth";
+import { cache } from "react";
 
-export async function getOngoingInternshipRecord() {
+export const getOngoingInternshipRecord = cache(async () => {
+  console.log("--- DATABASE FETCH TRIGGERED ---");
   try {
     const session = await auth();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
@@ -22,7 +24,7 @@ export async function getOngoingInternshipRecord() {
   } catch (err) {
     return null;
   }
-}
+});
 
 // NEW: Optimized for checking status without downloading the whole history
 export async function getTodayDtr() {
