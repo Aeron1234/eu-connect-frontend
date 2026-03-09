@@ -1,10 +1,17 @@
 import { Clock } from "lucide-react";
 import Modal from "./Modal";
 import DtrForm from "./DtrForm";
-import { checkDtrStatus } from "../_services/services";
+import {
+  checkDtrStatus,
+  getOngoingInternshipRecord,
+} from "../_services/services";
 import TriggerButton from "./TriggerButton";
 
 async function DtrButton() {
+  const internshipData = await getOngoingInternshipRecord();
+
+  if (!internshipData) return null;
+
   const { status } = await checkDtrStatus();
 
   const isOut = status === "clocked-out";

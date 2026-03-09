@@ -15,7 +15,7 @@ async function DtrPage({ searchParams }) {
         <DtrButton />
       </div>
 
-      <div className="w-full flex flex-col relative gap-4 justify-between">
+      <div className="flex-1 w-full flex flex-col relative gap-4 justify-between">
         <DtrTable params={params} />
       </div>
     </>

@@ -1,4 +1,5 @@
 import { getOngoingInternshipRecord } from "../_services/services";
+import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 import Modal from "./Modal";
 import StudentInternshipForm from "./StudentInternshipForm";
 
@@ -16,7 +17,11 @@ async function InternshipRecordButton() {
     description: isFinished
       ? "Congratulations for finishing your internship!"
       : "Kindly fill up the details of your internship.",
-    form: isFinished ? null : <StudentInternshipForm />,
+    form: isFinished ? (
+      <InternshipRecordFinishForm internshipId={internshipData.id} />
+    ) : (
+      <StudentInternshipForm />
+    ),
   };
 
   return (

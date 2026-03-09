@@ -25,7 +25,7 @@ async function layout({ children, narratives, dtr, calendar, doughnut }) {
 
       <div className="flex gap-4 h-full">
         <div className="flex-1 gap-4 flex flex-col h-full">
-          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4">
+          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 flex-1">
             <Suspense
               fallback={
                 <div className="self-center justify-self-center p-5">
@@ -37,7 +37,7 @@ async function layout({ children, narratives, dtr, calendar, doughnut }) {
             </Suspense>
           </div>
 
-          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 h-full">
+          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 h-full flex-1">
             <Suspense
               fallback={
                 <div className="self-center justify-self-center p-5">

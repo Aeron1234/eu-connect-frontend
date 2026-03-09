@@ -7,7 +7,7 @@ export async function toastAndAction({
   successLabel,
   errorLabel,
   action,
-  formData,
+  formData = {},
   id = null,
 }) {
   // 1. Call the action and get the result immediately

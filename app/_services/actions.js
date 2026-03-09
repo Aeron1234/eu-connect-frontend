@@ -102,6 +102,45 @@ export async function createInternshipRecord(formData) {
   }
 }
 
+export async function finishInternshipRecord(internshipId, formData) {
+  try {
+    const session = await auth();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["student", "admin"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship to finish.");
+
+    const [result] = await db.execute(
+      `
+      UPDATE internship_records
+      SET status = CASE
+        WHEN accumulated_hours >= total_hours THEN "finished"
+        ELSE "ongoing"
+      END
+      WHERE user_id = ? AND id = ?
+      `,
+      [userId, internshipId],
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error("Updating internship status failed.");
+    }
+
+    revalidatePath("/student");
+    return {
+      success: true,
+      message: "Congrats on finishing your current internship!",
+    };
+  } catch (err) {
+    console.error("Error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 ////////////////////////////////////////////////////
 // DAILY TIME RECORDS
 ////////////////////////////////////////////////////
