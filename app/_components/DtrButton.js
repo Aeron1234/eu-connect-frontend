@@ -10,7 +10,11 @@ import TriggerButton from "./TriggerButton";
 async function DtrButton() {
   const internshipData = await getOngoingInternshipRecord();
 
-  if (!internshipData) return null;
+  if (
+    !internshipData ||
+    internshipData?.accumulated_hours >= internshipData?.total_hours
+  )
+    return null;
 
   const { status } = await checkDtrStatus();
 
