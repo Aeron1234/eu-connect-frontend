@@ -1,11 +1,8 @@
-"use server";
-
 import { db } from "@/lib/db";
 import { auth } from "./auth";
 import { cache } from "react";
 
 export const getOngoingInternshipRecord = cache(async () => {
-  console.log("--- DATABASE FETCH TRIGGERED ---");
   try {
     const session = await auth();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
@@ -16,6 +13,24 @@ export const getOngoingInternshipRecord = cache(async () => {
     const [rows] = await db.execute(
       `SELECT * FROM internship_records
        WHERE user_id = ? AND status = "ongoing"
+       LIMIT 1`,
+      [user.id],
+    );
+
+    return rows[0] || null;
+  } catch (err) {
+    return null;
+  }
+});
+
+export const getStudentUserProfile = cache(async () => {
+  try {
+    const session = await auth();
+    const user = session.user;
+
+    const [rows] = await db.execute(
+      `SELECT * FROM student_profiles
+       WHERE user_id = ?
        LIMIT 1`,
       [user.id],
     );
