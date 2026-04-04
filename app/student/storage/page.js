@@ -1,73 +1,61 @@
-import FileCard from "app/_components/FileCard";
 import PageContainer from "app/_components/PageContainer";
-import PageTitle from "app/_components/PageTitle";
-import { Button } from "components/ui/button";
-import { Check, Plus } from "lucide-react";
-import Filter from "app/_components/Filter";
-import { notFound } from "next/navigation";
-import { auth } from "@/app/_services/auth";
 import Modal from "@/app/_components/Modal";
 import StorageUploadForm from "@/app/_components/StorageUploadForm";
 import StorageFilesList from "@/app/_components/StorageFilesList";
+import { getInternshipFiles } from "@/app/_services/services";
+import { Upload } from "lucide-react";
+
 import { Suspense } from "react";
-import RequirementsBefore from "@/app/_components/RequirementsBefore";
-import RequirementsAfter from "@/app/_components/RequirementsAfter";
+import { Spinner } from "@/components/ui/spinner";
 
 export const metadata = {
   title: "Student's Storage",
 };
 
-async function StoragePage() {
-  const session = await auth();
-  if (!session?.user) return notFound();
+async function StoragePage({ searchParams }) {
+  const params = await searchParams;
 
-  const role = session.user.role;
-  if (role !== "student") return notFound();
+  const internshipFiles = await getInternshipFiles();
 
   return (
     <PageContainer>
-      <PageTitle title="Internship Documents Storage" />
-
-      <div className="p-4 flex flex-col flex-1 bg-white rounded-md shadow-sm gap-4 text-stone-800">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">List of Requirements</h2>
+      <header className="flex items-start justify-between gap-4 mt-4 max-xs:flex-col">
+        <div>
+          <h1 className="text-xl self-start font-bold text-stone-800 max-md:text-lg max-xs:text-base">
+            Internship Documents Storage
+          </h1>
+          <span className="text-stone-600 max-xs:text-xs">
+            Upload all of your internship-related files here
+          </span>
         </div>
 
-        <div className="pb-4 border-b border-stone-300 grid grid-cols-2 gap-4 font-semibold">
-          <div className="flex flex-col gap-2 text-sm font-semi-bold">
-            <RequirementsBefore />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <RequirementsAfter />
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col gap-2 font-bold text-base">
-          <div className="flex items-center justify-between py-2">
-            <div className="flex gap-2 items-center">
-              <Modal
-                trigger={
-                  <div>
-                    <Plus strokeWidth={2} color="var(--color-primary-50)" />
-                  </div>
-                }
-                triggerStyles={
-                  "bg-primary-500 hover:bg-primary-400 cursor-pointer p-0.5 rounded-sm transition-colors"
-                }
-                title={"Upload file"}
-              >
-                <StorageUploadForm />
-              </Modal>
-              <h3 className="">Upload Files</h3>
+        <Modal
+          trigger={
+            <div className="bg-primary-500 hover:bg-primary-400 cursor-pointer p-2 rounded-sm transition-colors flex gap-2 items-center justify-center max-xs:w-full">
+              <Upload strokeWidth={3} size={16} color="#fff" />
+              <span className="text-white text-sm font-semibold">
+                Upload File
+              </span>
             </div>
-            <Filter />
-          </div>
+          }
+          description="Save your internship related documents here."
+          triggerStyles="max-xs:w-full"
+          title={"Upload file"}
+        >
+          <StorageUploadForm />
+        </Modal>
+      </header>
 
-          <Suspense fallback={<div>Loading...</div>}>
-            <StorageFilesList />
-          </Suspense>
-        </div>
+      <div className="flex flex-col gap-2 mt-2">
+        <Suspense
+          fallback={
+            <div className="self-center justify-self-center p-5">
+              <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
+            </div>
+          }
+        >
+          <StorageFilesList params={params} internshipFiles={internshipFiles} />
+        </Suspense>
       </div>
     </PageContainer>
   );

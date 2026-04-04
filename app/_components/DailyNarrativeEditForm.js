@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useTransition } from "react";
-import { editNarrative } from "../_services/actions";
+import { editNarrative } from "../_services/student-actions";
 import { toastAndAction } from "../_services/helpers";
 import DailyNarrativeForm from "./DailyNarrativeForm";
 

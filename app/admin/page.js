@@ -1,13 +1,7 @@
-import { auth } from "@/app/_services/auth";
 import { notFound } from "next/navigation";
+import { getUserSession } from "../_services/services";
 
-async function AdminPage() {
-  const session = await auth();
-  if (!session?.user) return notFound();
-
-  const role = session.user.role;
-  if (role !== "admin") return notFound();
-
+function AdminPage() {
   return <div>Admin Page</div>;
 }
 

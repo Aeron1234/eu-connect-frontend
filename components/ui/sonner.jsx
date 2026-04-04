@@ -29,6 +29,12 @@ const Toaster = ({ ...props }) => {
         "--normal-text": "#292524",
         "--normal-border": "var(--border)",
         "--border-radius": "var(--radius)",
+        "--success-bg": "#DCFCE7",
+        "--success-text": "#166534",
+        "--success-border": "#4ADE80",
+        "--error-bg": "#FEE2E2",
+        "--error-text": "#991B1B",
+        "--error-border": "#FCA5A5",
       }}
       {...props}
     />

@@ -13,12 +13,15 @@ function Modal({
   title,
   description = "",
   disabled = false,
+  triggerStyles = "",
 }) {
   if (disabled) return null;
 
   return (
     <Dialog>
-      <DialogTrigger disabled={disabled}>{trigger}</DialogTrigger>
+      <DialogTrigger disabled={disabled} className={triggerStyles}>
+        {trigger}
+      </DialogTrigger>
       <DialogContent showCloseButton={true} className={"flex flex-col"}>
         <DialogHeader>
           <DialogTitle className={"text-base"}>{title}</DialogTitle>

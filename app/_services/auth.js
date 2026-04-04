@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
+import bcrypt from "bcryptjs";
 
 import Credentials from "next-auth/providers/credentials";
 
@@ -24,10 +25,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           SELECT 
           u.id AS user_uuid, 
           u.email, 
-          u.password_hash, 
-          r.role 
+          u.password_hash,
+          u.status,
+          r.role
           FROM users AS u
-          JOIN roles r ON u.role_id = r.id
+          INNER JOIN roles AS r ON u.role_id = r.id
           WHERE u.email = ?
         `,
           [credentials.email],
@@ -38,16 +40,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const user = rows[0];
 
-        // logic to salt and hash password
-        // no hash for now since im using dummy account
-        if (user.password_hash !== credentials.password) {
-          // increment the failed_login_attempt table here
-
-          return null;
+        if (user.status === "inactive") {
+          const error = new CredentialsSignin();
+          error.code = "inactive_account";
+          throw error;
         }
 
+        const isMatch = await bcrypt.compare(
+          credentials.password,
+          user.password_hash,
+        );
+
+        if (!isMatch) {
+          return null; // Triggers "Invalid email or password"
+        }
+
+        // if (credentials.password !== user.password_hash) {
+        //   return null;
+        // }
+
         return {
-          // We use the alias 'user_uuid' to ensure no collision with role IDs
           id: user.user_uuid,
           email: user.email,
           role: user.role,
@@ -60,12 +72,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.role = token.role;
       session.user.id = token.id;
+      session.user.email = token.email;
       return session;
     },
   },

@@ -58,18 +58,21 @@ export default function HoursProgressDonut({ internshipData }) {
   ).toFixed(1);
 
   return (
-    <div className="w-full shadow-sm rounded-sm">
-      <Card className="flex flex-col h-full text-stone-800 rounded-md border-none shadow-none">
+    <div className="w-full h-full shadow-sm rounded-sm max-lg:w-fit max-lg:h-fit max-sm:w-full max-sm:h-full">
+      <Card className="flex flex-col h-full max-sm:w-full text-stone-800 rounded-md border-none shadow-none ">
         <CardHeader className="items-center">
-          <CardTitle className="font-bold text-lg">Hours Progress</CardTitle>
-          {/* <p className="text-sm text-stone-500 font-medium">
+          {/* <CardTitle className="font-bold text-base">Hours Progress</CardTitle> */}
+          <CardTitle className="font-bold text-base max-xs:text-sm">
+            Hours Progress
+          </CardTitle>
+          <p className="text-sm text-stone-500 font-medium max-xs:text-sm">
             {internshipData.company_name}
-          </p> */}
+          </p>
         </CardHeader>
         <CardContent className="flex-1 pb-0">
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square max-h-50.5 w-full"
+            className="mx-auto aspect-square h-45 w-full"
           >
             <PieChart>
               <ChartTooltip
@@ -117,10 +120,10 @@ export default function HoursProgressDonut({ internshipData }) {
           </ChartContainer>
         </CardContent>
         <CardFooter className="flex-col gap-1 text-center">
-          <div className="text-sm font-bold text-stone-700">
+          <div className="text-sm font-bold text-stone-700 max-xs:text-xs">
             {percentage}% Progress
           </div>
-          <p className="text-stone-400 text-[10px] uppercase tracking-wider font-bold">
+          <p className="text-stone-400 text-[10px] uppercase tracking-wider font-bold max-xs:text-xs">
             Status: {internshipData.status}
           </p>
         </CardFooter>

@@ -1,7 +1,7 @@
 // "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getDailyNarratives } from "../_services/actions";
+import { getDailyNarratives } from "../_services/student-actions";
 import DailyNarrativeContent from "./DailyNarrativeContent";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,10 +25,10 @@ async function DailyNarrativeList({ params }) {
 
   return (
     <>
-      <ul className="flex-1 border border-stone-200 grid grid-cols-2">
+      <ul className="flex-1 border border-stone-200 grid grid-cols-4">
         {narratives.map((narrative) => (
           <li
-            className="flex flex-col gap-2 border-r border-stone-200 p-2"
+            className="flex flex-col gap-1 border-r border-stone-200 p-2"
             key={narrative.id}
           >
             <DailyNarrativeContent narrative={narrative} />

@@ -4,13 +4,78 @@ import { db } from "@/lib/db";
 import { auth, signIn, signOut } from "./auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getTodayDtr, getOngoingInternshipRecord } from "./services";
+import {
+  getTodayDtr,
+  getOngoingInternshipRecord,
+  getUserSession,
+} from "./services";
 import { AuthError } from "next-auth";
+import { supabase } from "./supabase";
 
 ////////////////////////////////////////////////////
 // AUTHENTICATION
 ////////////////////////////////////////////////////
+// export async function login(prevState, formData) {
+//   const email = formData.get("email");
+
+//   if (!email || typeof email !== "string") {
+//     return { error: "Email is required." };
+//   }
+
+//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+//   if (!emailRegex.test(email)) {
+//     return { error: "Invalid email format." };
+//   }
+
+//   try {
+//     await signIn("credentials", {
+//       ...Object.fromEntries(formData),
+//       redirect: false,
+//     });
+
+//     const session = await auth();
+
+//     if (!session?.user) {
+//       return { error: "Invalid email or password." };
+//     }
+
+//     redirect("/");
+//   } catch (error) {
+//     console.log("LOGIN ERROR:", error);
+
+//     if (error instanceof AuthError) {
+//       // 🔥 extract cause safely
+//       const causeMessage = error.cause?.err?.message || error.cause?.message;
+
+//       if (causeMessage === "AccountInactive") {
+//         return {
+//           error: "Your account is inactive. Contact admin.",
+//         };
+//       }
+
+//       if (error.type === "CredentialsSignin") {
+//         return { error: "Invalid email or password." };
+//       }
+//     }
+
+//     return { error: "Something went wrong during sign in." };
+//   }
+// }
+
 export async function login(prevState, formData) {
+  const email = formData.get("email");
+
+  //Validate email safely
+  if (!email || typeof email !== "string") {
+    return { error: "Email is required." };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { error: "Invalid email format." };
+  }
+
   try {
     await signIn("credentials", {
       ...Object.fromEntries(formData),
@@ -18,16 +83,26 @@ export async function login(prevState, formData) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return { error: "Invalid email or password." };
-        default:
-          return { error: "Something went wrong." };
+      // Access the code you passed in the authorize function
+      const errorCode = error.cause?.err?.code || error.code;
+
+      if (errorCode === "inactive_account") {
+        return {
+          error: "This account has been deactivated. Please contact the Admin.",
+        };
       }
+
+      if (error.type === "CredentialsSignin") {
+        return { error: "Invalid email or password." };
+      }
+
+      return { error: "Something went wrong during sign in." };
     }
-    throw error; // Let Next.js handle other errors
+
+    // This re-throws the error if it's a redirect (success case)
+    throw error;
   }
-  // Redirect MUST happen outside the try-catch block
+
   redirect("/");
 }
 
@@ -38,9 +113,9 @@ export async function logout() {
 ////////////////////////////////////////////////////
 //INTERNSHIP RECORDS
 ////////////////////////////////////////////////////
-export async function createInternshipRecord(formData) {
+export async function createInternshipRecord(prevState, formData) {
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user) throw new Error("You must be logged in");
 
     const userId = session.user.id;
@@ -52,12 +127,11 @@ export async function createInternshipRecord(formData) {
     // 1. Validation including Address Line 2
     const requiredFields = [
       "company_name",
-      "address_line_1",
-      "address_line_2", // Now strictly required
-      "town_or_city",
-      "state_or_province",
+      "company_address",
       "date_started",
       "total_hours",
+      "lon",
+      "lat",
     ];
 
     for (const field of requiredFields) {
@@ -69,8 +143,8 @@ export async function createInternshipRecord(formData) {
     // 2. Atomic Check & Insert
     const [result] = await db.execute(
       `
-      INSERT INTO internship_records (user_id, company_name, address_line_1, address_line_2, town_or_city, state_or_province, date_started, total_hours)
-      SELECT ?, ?, ?, ?, ?, ?, ?, ?
+      INSERT INTO internship_records (user_id, company_name, company_address, lon, lat, date_started, total_hours, city_or_town, state_or_province)
+      SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?
       FROM DUAL
       WHERE NOT EXISTS (
         SELECT 1 FROM internship_records WHERE user_id = ? AND status = 'ongoing'
@@ -79,12 +153,13 @@ export async function createInternshipRecord(formData) {
       [
         userId,
         data.company_name,
-        data.address_line_1,
-        data.address_line_2,
-        data.town_or_city,
-        data.state_or_province,
+        data.company_address,
+        data.lon,
+        data.lat,
         data.date_started,
         Number(data.total_hours),
+        data.city_or_town,
+        data.state_or_province,
         userId,
       ],
     );
@@ -103,7 +178,7 @@ export async function createInternshipRecord(formData) {
 
 export async function finishInternshipRecord(internshipId, formData = {}) {
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user) throw new Error("You must be logged in");
 
     const userId = session.user.id;
@@ -152,7 +227,7 @@ export async function getDtrs(page = 1) {
   const offset = (validatedPage - 1) * limit;
 
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -185,9 +260,9 @@ export async function getDtrs(page = 1) {
   }
 }
 
-export async function clockIn() {
+export async function clockIn(prevState, formData) {
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -200,10 +275,13 @@ export async function clockIn() {
     const alreadyClockedIn = await getTodayDtr();
     if (alreadyClockedIn) throw new Error("You have already clocked in today.");
 
+    const locationIn = formData.get("location_in");
+    if (!locationIn) throw new Error("Can't get your location.");
+
     // 3. Simple Insert
     await db.execute(
-      `INSERT INTO daily_time_records (internship_id, user_id, clock_in) VALUES (?, ?, CURRENT_TIME())`,
-      [internship.id, session.user.id],
+      `INSERT INTO daily_time_records (internship_id, user_id, clock_in, location_in) VALUES (?, ?, CURRENT_TIME(), ?)`,
+      [internship.id, session.user.id, locationIn],
     );
 
     revalidatePath("/student");
@@ -213,15 +291,16 @@ export async function clockIn() {
   }
 }
 
-export async function clockOut() {
+export async function clockOut(prevState, formData) {
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
 
-    // Use the optimized SQL UPDATE we discussed earlier
-    // This handles the math and the link between tables in one go
+    const locationOut = formData.get("location_out");
+    if (!locationOut) throw new Error("Can't get your location.");
+
     const [result] = await db.execute(
       `
       UPDATE daily_time_records AS dtr
@@ -229,12 +308,13 @@ export async function clockOut() {
       SET 
         dtr.clock_out = CURRENT_TIME(),
         dtr.total_hours = TIMESTAMPDIFF(MINUTE, dtr.clock_in, CURRENT_TIME()) / 60,
+        dtr.location_out = ?,
         ir.accumulated_hours = ir.accumulated_hours + (TIMESTAMPDIFF(MINUTE, dtr.clock_in, CURRENT_TIME()) / 60)
       WHERE dtr.user_id = ? 
         AND DATE(dtr.created_at) = CURDATE() 
         AND dtr.clock_out IS NULL
       `,
-      [session.user.id],
+      [locationOut, session.user.id],
     );
 
     if (result.affectedRows === 0) {
@@ -253,7 +333,7 @@ export async function deleteDtr(prevState, formData) {
   const connection = await db.getConnection();
 
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -308,13 +388,13 @@ export async function deleteDtr(prevState, formData) {
 // DAILY NARRATIVES
 ////////////////////////////////////////////////////
 export async function getDailyNarratives(page = 1) {
-  const limit = 2;
+  const limit = 4;
 
   const validatedPage = Math.max(1, parseInt(page));
   const offset = (validatedPage - 1) * limit;
 
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -350,7 +430,7 @@ export async function getDailyNarratives(page = 1) {
 
 export async function createNarrative(prevState, formData) {
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -399,7 +479,7 @@ export async function createNarrative(prevState, formData) {
 
 export async function editNarrative(narrativeId, formData) {
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -447,7 +527,7 @@ export async function deleteNarrative(prevState, formData) {
   const connection = await db.getConnection();
 
   try {
-    const session = await auth();
+    const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
@@ -476,6 +556,140 @@ export async function deleteNarrative(prevState, formData) {
     await connection.commit();
 
     revalidatePath("/student");
+    return { success: true, message: "Record deleted." };
+  } catch (err) {
+    await connection.rollback();
+    console.error("Delete Error:", err.message);
+    return { success: false, error: err.message };
+  } finally {
+    connection.release();
+  }
+}
+
+////////////////////////////////////////////////////
+// STORAGE
+////////////////////////////////////////////////////
+export async function uploadInternshipFile(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["student", "admin"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+    const userId = session.user.id;
+
+    const file = formData.get("file");
+    const fileName = formData.get("file_name");
+    const companyName = formData.get("company_name");
+    const category = formData.get("category").toLowerCase();
+
+    if (!file || file.size === 0) throw new Error("No file to upload.");
+
+    const ALLOWED_TYPES = [
+      "application/pdf", // .pdf
+      "text/plain", // .txt
+      "application/msword", // .doc
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+      "application/vnd.ms-excel", // .xls
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      "text/csv", // .csv
+    ];
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      throw new Error(
+        "Invalid file type. Please upload PDF, TXT, Word, or Excel files only.",
+      );
+    }
+
+    // File Size Limit (e.g., 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error("File is too large. Maximum size is 10MB.");
+    }
+
+    if (category !== "before" && category !== "after")
+      throw new Error(`Category must be "Before" or "After" only.`);
+
+    if (!fileName || !companyName) throw new Error("All fields are required.");
+
+    const fileExt = file.name.split(".").pop();
+
+    const uploadFilePath = `requirements/${userId}/${Date.now()}.${fileExt}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("eu-connect_storage")
+      .upload(uploadFilePath, file);
+
+    if (uploadError) throw new Error(`Upload Error: ${uploadError.message}`);
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("eu-connect_storage")
+      .getPublicUrl(uploadFilePath);
+
+    const [result] = await db.execute(
+      `
+      INSERT INTO internship_documents (user_id, file_name, company_name, category, file_type, url)
+      VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      [userId, fileName, companyName, category, file.type, publicUrl],
+    );
+
+    if (result.affectedRows === 0 && !result.insertId)
+      throw new Error("Uploading file failed.");
+
+    revalidatePath("/student/storage");
+    return { success: true, message: "File uploaded!" };
+  } catch (err) {
+    console.log(err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function deleteFile(prevState, formData) {
+  // Added prevState for useActionState compatibility
+  const connection = await db.getConnection();
+
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["student", "admin"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+    const user = session.user;
+
+    if (!formData || typeof formData.get !== "function") {
+      throw new Error("Invalid form submission.");
+    }
+
+    const fileId = Number(formData.get("fileId"));
+    const fileUrl = formData.get("fileUrl");
+    if (!fileId) throw new Error("File ID is missing.");
+
+    const filePath = fileUrl.split("/public/eu-connect_storage/")[1];
+
+    if (!filePath) throw new Error("Invalid file path");
+
+    // 2. Delete from Supabase Storage
+    const { error: storageError } = await supabase.storage
+      .from("eu-connect_storage")
+      .remove([filePath]);
+
+    if (storageError) throw new Error(`Storage Error: ${storageError.message}`);
+
+    await connection.beginTransaction();
+
+    // 2. Delete the record
+    const [result] = await connection.execute(
+      `DELETE FROM internship_documents WHERE id = ? AND user_id = ?`,
+      [fileId, user.id],
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error("Delete failed. Record not found.");
+    }
+
+    await connection.commit();
+
+    revalidatePath("/student/storage");
     return { success: true, message: "Record deleted." };
   } catch (err) {
     await connection.rollback();

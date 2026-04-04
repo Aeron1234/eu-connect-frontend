@@ -1,34 +1,70 @@
 "use client";
 
-import { MapPin } from "lucide-react";
-import { useState } from "react";
+import { Search, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-function MapSearch() {
-  const [search, setSearch] = useState("");
+function MapSearch({ setQuery, search, setSearch }) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  function handleSearch(formData) {
-    console.log(formData.get("search"));
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!search.trim()) {
+      setQuery("");
+
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams);
+
+    if (searchParams.get("filter") !== "all") {
+      params.set("filter", "all");
+    }
+
+    setQuery(search.trim().toLocaleLowerCase());
+
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  function handleClear() {
+    const params = new URLSearchParams(searchParams);
+
+    if (searchParams.get("filter") !== "all") {
+      params.set("filter", "all");
+    }
 
     setSearch("");
+    setQuery("");
+
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
     <form
-      action={handleSearch}
-      className="w-full max-w-[350px] rounded-full flex items-center gap-1 self-start justify-self-center"
+      onSubmit={handleSubmit}
+      className="w-full max-w-87 bg-white border rounded-sm flex items-center gap-1 self-start justify-self-center px-2"
     >
       <label htmlFor="search-location">
-        <MapPin color="var(--color-primary-500)" />
+        <Search size={20} />
       </label>
       <input
         id="search-location"
         type="text"
         name="search"
-        placeholder="Search via location..."
+        placeholder="Student name, course, or company..."
         onChange={(e) => setSearch(e.target.value)}
         value={search}
-        className="outline-none px-4 py-2 rounded-full bg-stone-100 w-full"
+        className="outline-none p-2 w-full"
       />
+
+      {search.trim() && (
+        <div className="text-stone-500" onClick={handleClear}>
+          <span>
+            <X className="h4 w-4" />
+          </span>
+        </div>
+      )}
     </form>
   );
 }

@@ -1,29 +1,28 @@
-import SideNavigation from "@/app/_components/SideNavigation";
-import { Spinner } from "@/components/ui/spinner";
-import { ChartArea, Folder } from "lucide-react";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import Header from "../_components/Header";
+import SideNavigation from "../_components/SideNavigation";
+import { getUserSession } from "../_services/services";
 
-function Layout({ children }) {
-  const navigation = [
-    {
-      name: "Dashboard",
-      href: "/student",
-      icon: <ChartArea className="h-5 w-5" />,
-    },
-    {
-      name: "Storage",
-      href: "/student/storage",
-      icon: <Folder className="h-5 w-5" />,
-    },
-  ];
+async function StudentLayout({ children }) {
+  const session = await getUserSession();
+  if (!session?.user) return notFound();
+
+  const role = session.user.role;
+  if (role !== "student") return notFound();
 
   return (
-    <div className="h-full grid grid-cols-[auto_1fr] mx-auto max-w-7xl gap-4">
-      <SideNavigation navigation={navigation} />
+    <div className="relative grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] max-md:grid-rows-[auto_1fr_auto] max-lg:grid-cols-1 h-screen antialiased text-stone-800 overflow-x-hidden">
+      <header className="col-span-2 px-2 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 sticky top-0 h-16 z-10 border-b border-stone-300">
+        <Header />
+      </header>
 
-      {children}
+      <SideNavigation />
+
+      <main className="w-full h-full py-4 px-8 max-lg:px-4 grid bg-stone-100 overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
 
-export default Layout;
+export default StudentLayout;

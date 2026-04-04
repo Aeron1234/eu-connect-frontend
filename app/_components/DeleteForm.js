@@ -3,6 +3,8 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 
 function DeleteForm({ handleAction, isPending, id, name }) {
+  // console.log(id);
+
   return (
     <form action={handleAction}>
       <input
@@ -20,7 +22,7 @@ function DeleteForm({ handleAction, isPending, id, name }) {
           </DialogClose>
 
           <Button
-            className={"bg-red-600 hover:bg-primary-500 w-fit "}
+            className={"bg-primary-500 hover:bg-primary-400 w-fit "}
             type="submit"
             disabled={isPending}
             // onClick={() => toast.success("Event has been created")}

@@ -1,7 +1,5 @@
 "use client";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
-
-import DailyNarrativeContent from "./DailyNarrativeContent";
 import { useState } from "react";
 import { getDailyNarratives } from "../_services/services";
 import DailyNarrativeDropdown from "./DailyNarrativeDropdown";

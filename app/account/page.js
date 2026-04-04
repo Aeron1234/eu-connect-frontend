@@ -1,23 +1,39 @@
 import AccountStudent from "@/app/_components/AccountStudent";
-import AccountAdmin from "@/app/_components/AccountAdmin";
 import AccountEmployer from "@/app/_components/AccountEmployer";
 import AccountSuperAdmin from "@/app/_components/AccountSuperAdmin";
-import { auth } from "@/app/_services/auth";
 import { redirect } from "next/navigation";
+import { getUserProfile, getUserSession } from "../_services/services";
+import AccountDepartmentHead from "@/app/_components/AccountDepartmentHead";
+import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export const metadata = {
   title: "Account",
 };
 
 async function AccountPage() {
-  const session = await auth();
+  const session = await getUserSession();
   if (!session?.user) redirect("/login");
 
   const role = session.user.role;
 
-  if (role === "student") return <AccountStudent />;
+  if (role === "student") {
+    const userProfile = await getUserProfile();
 
-  if (role === "admin") return <AccountAdmin />;
+    return (
+      <Suspense
+        fallback={
+          <div className="self-center justify-self-center p-5">
+            <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
+          </div>
+        }
+      >
+        <AccountStudent userProfile={userProfile} />
+      </Suspense>
+    );
+  }
+
+  if (role === "department_head") return <AccountDepartmentHead />;
 
   if (role === "employer") return <AccountEmployer />;
 

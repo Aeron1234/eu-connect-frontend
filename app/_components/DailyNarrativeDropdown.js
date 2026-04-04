@@ -6,12 +6,12 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import Modal from "./Modal";
 import DailyNarrativeEditForm from "./DailyNarrativeEditForm";
 import DailyNarrativeDelete from "./DailyNarrativeDelete";
 
-function DailyNarrativeDropdown({ trigger, narrative, isTextLong }) {
+function DailyNarrativeDropdown({ trigger, narrative }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
@@ -41,22 +41,6 @@ function DailyNarrativeDropdown({ trigger, narrative, isTextLong }) {
             >
               <DailyNarrativeDelete narrativeId={narrative.id} />
             </Modal>
-
-            {isTextLong && (
-              <Modal
-                title={`Day ${narrative.day_number}`}
-                description={
-                  <span className="font-semibold">{narrative.title}</span>
-                }
-                trigger={
-                  <div className="flex gap-2 items-center py-1 px-2 text-sm text-stone-600 font-semibold rounded-sm hover:bg-stone-100 transition-colors">
-                    <Eye size={16} /> View full
-                  </div>
-                }
-              >
-                {narrative.narrative}
-              </Modal>
-            )}
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
       </DropdownMenuContent>

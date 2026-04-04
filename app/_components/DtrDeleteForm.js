@@ -1,23 +1,24 @@
 "use client";
 
-import { deleteDtr } from "../_services/actions";
-import { useActionState } from "react";
+import { deleteDtr } from "../_services/student-actions";
+import { useTransition } from "react";
 import { toastAndAction } from "../_services/helpers";
 import DeleteForm from "./DeleteForm";
 
 function DtrDeleteForm({ dtrId }) {
-  const [state, formAction, isPending] = useActionState(deleteDtr, null);
+  const [isPending, startTransition] = useTransition();
 
-  async function handleAction(formData) {
-    const handlers = {
-      loadingLabel: "Deleting record...",
-      successLabel: "Record deleted.",
-      errorLabel: "Failed to delete.",
-      action: deleteDtr,
-      formData,
-    };
-
-    await toastAndAction(handlers);
+  function handleAction(formData) {
+    startTransition(
+      async () =>
+        await toastAndAction({
+          loadingLabel: "Deleting record...",
+          successLabel: "Record deleted.",
+          errorLabel: "Failed to delete.",
+          action: deleteDtr,
+          formData,
+        }),
+    );
   }
 
   return (

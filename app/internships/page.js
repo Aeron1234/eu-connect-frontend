@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/app/_services/auth";
+import { getUserSession } from "../_services/services";
 
 async function InternshipPage() {
-  const session = await auth();
+  const session = await getUserSession();
   if (!session?.user) redirect("/login");
 
   return <div>Internships</div>;

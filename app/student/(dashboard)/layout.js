@@ -1,31 +1,23 @@
 import PageContainer from "@/app/_components/PageContainer";
-import { auth } from "@/app/_services/auth";
 import { Spinner } from "@/components/ui/spinner";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-async function layout({ children, narratives, dtr, calendar, doughnut }) {
-  const session = await auth();
-  if (!session?.user) return notFound();
-
-  const role = session.user.role;
-  if (role !== "student") return notFound();
-
+function layout({ children, narratives, dtr, calendar, doughnut }) {
   return (
     <PageContainer>
-      <Suspense
-        fallback={
-          <div className="self-center justify-self-center p-5">
-            <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
-          </div>
-        }
-      >
-        {children}
-      </Suspense>
-
-      <div className="flex gap-4 h-full">
+      <div className="flex gap-4 h-full max-lg:flex-col">
         <div className="flex-1 gap-4 flex flex-col h-full">
-          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 flex-1">
+          <Suspense
+            fallback={
+              <div className="self-center justify-self-center p-5">
+                <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+
+          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 flex-2">
             <Suspense
               fallback={
                 <div className="self-center justify-self-center p-5">
@@ -37,7 +29,7 @@ async function layout({ children, narratives, dtr, calendar, doughnut }) {
             </Suspense>
           </div>
 
-          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 h-full flex-1">
+          <div className="bg-white rounded-md p-4 shadow-sm flex flex-col gap-4 h-full flex-2 col-span-2">
             <Suspense
               fallback={
                 <div className="self-center justify-self-center p-5">
@@ -50,8 +42,8 @@ async function layout({ children, narratives, dtr, calendar, doughnut }) {
           </div>
         </div>
         {/* <div className="hidden xl:flex flex-row xl:flex-col gap-4 h-fit"> */}
-        <div className="flex max-lg:hidden flex-col gap-4 h-fit">
-          <div className="items-center flex">
+        <div className="flex  flex-col gap-4 h-fit max-lg:flex-row max-xs:flex-col">
+          <div className="flex-1 max-lg:flex-none">
             <Suspense
               fallback={
                 <div className="self-center justify-self-center p-5">
@@ -62,7 +54,6 @@ async function layout({ children, narratives, dtr, calendar, doughnut }) {
               {calendar}
             </Suspense>
           </div>
-
           <div className="flex-1">
             <Suspense
               fallback={

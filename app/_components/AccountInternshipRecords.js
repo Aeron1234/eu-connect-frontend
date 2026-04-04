@@ -1,43 +1,74 @@
 "use client";
 
+import { Badge, ChevronDown, Clock } from "lucide-react";
 import Link from "next/link";
 
 function AccountInternshipRecords() {
   return (
-    <div className="text-xs flex flex-col gap-2 rounded-md">
-      <ul className="flex-1 grid grid-cols-4 gap-4 justify-items-start wrap-break-word h-full">
-        <li className="flex w-full font-semibold">
-          <InternshipRecordCard />
-        </li>
-      </ul>
-    </div>
+    <>
+      <li className="flex w-full font-semibold rounded-sm border">
+        <InternshipRecordCard />
+      </li>
+      <li className="flex w-full font-semibold rounded-sm border">
+        <InternshipRecordCard />
+      </li>
+      <li className="flex w-full font-semibold rounded-sm border">
+        <InternshipRecordCard />
+      </li>
+    </>
   );
 }
 
 function InternshipRecordCard() {
   return (
-    <div className="flex flex-col gap-4 bg-white w-full rounded-sm p-4 shadow-sm">
-      <div className="text-center flex-1">
-        <h4 className="text-sm font-extrabold text-primary-500">ABC Company</h4>
-      </div>
+    <button
+      // onClick={() => setExpandedRecord(expandedRecord === record.id ? null : record.id)}
+      className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-muted/50 transition-colors text-left"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div
+          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-red-100 text-primary-500`}
+          // className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0
+          //       ${
+          //         record.status === "ongoing" ? "bg-primary/10 text-primary" : "bg-green-500/10 text-green-600"
+          //       }`}
+        >
+          {/* {record.status === "ongoing" ? (
+                  <Clock className="w-4 h-4" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )} */}
 
-      <div className="flex flex-col gap-2">
-        <Detail label={"Status"} value={"Ongoing"} />
-        <Detail label={"Date Started"} value={"01/01/2026"} />
-        <Detail label={"Hours of Progress"} value={"100 / 200"} />
-        <Detail
-          label={"Company adress"}
-          value={"123 Main Street, Makati City, Manila"}
-        />
+          <Clock className="w-4 h-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground truncate">
+            {/* {record.company} */}
+            ABC Company
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            {/* {record.position} */}
+            Junior Developer
+          </p>
+        </div>
       </div>
+      <div className="flex items-center gap-2 shrink-0 ml-2">
+        <span
+          // variant={record.status === "ongoing" ? "default" : "secondary"}
 
-      <Link
-        href={""}
-        className="w-full text-center transition-colors cursor-pointer text-sm bg-primary-500 rounded-full px-2 py-1 text-white"
-      >
-        See full details
-      </Link>
-    </div>
+          className="text-xs hidden sm:inline-flex bg-primary-500 text-white rounded-full px-3 py-1"
+        >
+          {/* {record.status === "ongoing" ? "Ongoing" : "Completed"} */}
+          Ongoing
+        </span>
+        {/* {expandedRecord === record.id ? (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              )} */}
+        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+      </div>
+    </button>
   );
 }
 

@@ -1,32 +1,42 @@
 "use client";
-import { Plus } from "lucide-react";
+import { NotebookPen, Plus } from "lucide-react";
 import Modal from "./Modal";
 import TriggerButton from "./TriggerButton";
 import DailyNarrativeForm from "./DailyNarrativeForm";
-import { useActionState } from "react";
 import { toastAndAction } from "../_services/helpers";
-import { createNarrative } from "../_services/actions";
+import { createNarrative } from "../_services/student-actions";
+import { useTransition } from "react";
 
 function DailyNarrativePostButton() {
-  const [state, formAction, isPending] = useActionState(createNarrative, null);
+  const [isPending, startTransition] = useTransition();
 
-  async function handleAction(formData) {
-    const handlers = {
-      loadingLabel: "Adding narrative...",
-      successLabel: "Narrative was added.",
-      errorLabel: "Adding narrative failed.",
-      action: createNarrative,
-      formData,
-    };
-
-    await toastAndAction(handlers);
+  function handleAction(formData) {
+    startTransition(() =>
+      toastAndAction({
+        loadingLabel: "Deleting narrative...",
+        successLabel: "Narrative deleted.",
+        errorLabel: "Failed to delete.",
+        action: createNarrative,
+        formData,
+      }),
+    );
   }
+
+  // useEffect(() => {
+  //   if (!state) return;
+
+  //   if (state.success) {
+  //     toast.success(state.message || "Narrative added");
+  //   } else {
+  //     toast.error(state.error || "Failed");
+  //   }
+  // }, [state]);
 
   return (
     <Modal
       trigger={
         <TriggerButton
-          icon={<Plus />}
+          icon={<NotebookPen size={16} />}
           textColor={"text-primary-50 "}
           bgColor={"bg-primary-500"}
           label={"Post"}

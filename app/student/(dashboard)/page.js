@@ -1,16 +1,16 @@
 import InternshipRecordButton from "@/app/_components/InternshipRecordButton";
 import PageTitle from "@/app/_components/PageTitle";
-import { getStudentUserProfile } from "@/app/_services/services";
+import { getUserProfile } from "@/app/_services/services";
 
 export const metadata = {
   title: "Student",
 };
 
 async function DashboardPage() {
-  const { first_name } = await getStudentUserProfile();
+  const userProfile = await getUserProfile();
 
   return (
-    <PageTitle title="Welcome back" name={first_name}>
+    <PageTitle title="Welcome back" name={userProfile?.first_name}>
       <InternshipRecordButton />
     </PageTitle>
   );

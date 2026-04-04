@@ -1,6 +1,6 @@
 "use client";
 
-import { login } from "@/app/_services/actions";
+import { login } from "@/app/_services/student-actions";
 import Logo from "./Logo";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionState } from "react";

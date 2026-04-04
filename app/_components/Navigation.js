@@ -1,8 +1,9 @@
 "use client";
 
-import { CircleUserRound } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useWindowSize } from "../_services/helpers";
 
 const navigationItem = [
   {
@@ -17,11 +18,16 @@ const navigationItem = [
 
 function Navigation() {
   const pathName = usePathname();
+  const { width } = useWindowSize();
 
   const icon = "";
 
+  if (width < 670) {
+    return <Menu className="w-6 h-6" />;
+  }
+
   return (
-    <ul className="flex items-center text-sm font-semibold">
+    <ul className="flex items-center text-sm text-stone-600">
       {navigationItem.map((item) => (
         <li key={item.name}>
           <Button href={item.href} name={item.name} pathName={pathName} />
@@ -31,9 +37,9 @@ function Navigation() {
       <li>
         <Link
           href="/account"
-          className={`${pathName === "/account" ? "text-primary-500 shadow-[0_4px_0_0] shadow-primary-500" : ""} py-2 px-4 hover:text-primary-500 transition-all flex items-center gap-2`}
+          className={`${pathName === "/account" ? "text-primary-500" : ""} py-2 px-4 hover:text-primary-500 transition-all flex items-center gap-2`}
         >
-          {icon ? icon : <CircleUserRound />}
+          {icon ? icon : <User />}
           <span>Account</span>
         </Link>
       </li>
@@ -45,7 +51,7 @@ function Button({ href, name, pathName }) {
   return (
     <Link
       href={href}
-      className={`${pathName === href ? "text-primary-500 shadow-[0_4px_0_0] shadow-primary-500" : ""} py-2 px-5 hover:text-primary-500 transition-all `}
+      className={`${pathName === href ? "text-primary-500" : ""} p-2 hover:text-primary-500 transition-all `}
     >
       {name}
     </Link>
