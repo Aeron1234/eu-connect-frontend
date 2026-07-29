@@ -1,4 +1,4 @@
-import { Clock } from "lucide-react";
+import { Clock, LogIn, LogOut } from "lucide-react";
 import Modal from "./Modal";
 import DtrForm from "./DtrForm";
 import TriggerButton from "./TriggerButton";
@@ -10,29 +10,31 @@ function DtrButton({ internshipData, status }) {
   )
     return null;
 
-  const isOut = status === "clocked-out";
+  const isOut = status === "CLOCKED_OUT";
   const theme = {
-    textColor: "text-white",
-    bgColor: "bg-primary-500 hover:bg-primary-400",
-    label: isOut ? "Clock-in" : "Clock-out",
-    iconColor: "#fff",
+    label: isOut ? "Clock in" : "Clock out",
+    icon: isOut ? (
+      <LogIn className="h-5 w-5" />
+    ) : (
+      <LogOut className="h-5 w-5" />
+    ),
   };
 
   return (
     <Modal
       trigger={
-        <TriggerButton
-          icon={<Clock size={16} />}
-          textColor={theme.textColor}
-          bgColor={theme.bgColor}
-          label={theme.label}
-        />
+        <div
+          className="self-start md:self-auto flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90"
+          title={theme.label}
+        >
+          {theme.icon} {theme.label}
+        </div>
       }
       title={<span className={`text-primary-500`}>{theme.label}?</span>}
       // title={<span className="text-red-600">Clock-out?</span>}
       description={`Record your daily attendance`}
     >
-      <DtrForm status={status} />
+      <DtrForm isOut={isOut} />
     </Modal>
   );
 }

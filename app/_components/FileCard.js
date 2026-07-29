@@ -45,13 +45,13 @@ function FileCard({ item }) {
             rel="noopener noreferrer"
             className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm"
           >
-            <Download size={16} />
+            <Download className="h-5 w-5" />
           </a>
 
           <Modal
             trigger={
               <span className="p-1 block cursor-pointer hover:bg-red-200 transition-colors rounded-sm">
-                <Trash2 size={16} />
+                <Trash2 className="h-5 w-5" />
               </span>
             }
             title={<span className={`text-primary-500`}>Delete File</span>}

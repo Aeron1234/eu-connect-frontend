@@ -17,6 +17,7 @@ function MapWrapper({ activeInternships, params }) {
 
   const filteredBy = params?.filter || "all";
 
+  console.log(activeInternships);
   const { result, coords } = useMemo(() => {
     let result = [...activeInternships];
     let coords = CANDELARIA_COORDS;
@@ -44,7 +45,8 @@ function MapWrapper({ activeInternships, params }) {
           internship.first_name.toLowerCase().includes(query.toLowerCase()) ||
           internship.last_name.toLowerCase().includes(query.toLowerCase()) ||
           internship.course_name.toLowerCase().includes(query.toLowerCase()) ||
-          internship.company_name.toLowerCase().includes(query.toLowerCase()),
+          internship.company_name.toLowerCase().includes(query.toLowerCase()) ||
+          internship.city_or_town.toLowerCase().includes(query.toLowerCase()),
       );
 
       if (result.length > 0) {

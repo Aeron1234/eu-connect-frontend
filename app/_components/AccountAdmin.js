@@ -3,7 +3,7 @@ import PageTitle from "./PageTitle";
 import AccountHeader from "./AccountHeader";
 import AccountPersonalInfo from "./AccountPersonalInfo";
 
-function AccountSuperAdmin() {
+function AccountAdmin() {
   return (
     <PageContainer>
       <PageTitle title={"Account"} />
@@ -49,4 +49,4 @@ function Info({ label, info }) {
   );
 }
 
-export default AccountSuperAdmin;
+export default AccountAdmin;

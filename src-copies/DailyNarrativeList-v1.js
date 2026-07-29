@@ -1,9 +1,9 @@
 "use client";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 import { useState } from "react";
-import { getDailyNarratives } from "../_services/services";
-import DailyNarrativeDropdown from "./DailyNarrativeDropdown";
-import TriggerButton from "./TriggerButton";
+import { getDailyNarratives } from "../app/_services/services";
+import DailyNarrativeDropdown from "../app/_components/DailyNarrativeDropdown";
+import TriggerButton from "../app/_components/TriggerButton";
 
 function DailyNarrativeList({ initialData, totalPages }) {
   const [currentPage, setCurrentPage] = useState(1);

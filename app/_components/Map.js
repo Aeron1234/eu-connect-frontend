@@ -21,7 +21,12 @@ function Map({ result, coords, filteredBy }) {
       center={coords}
       zoom={filteredBy === "all" ? 6 : 11}
       scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%", borderRadius: "4px" }}
+      style={{
+        height: "100%",
+        width: "100%",
+        borderRadius: "4px",
+        zIndex: "0",
+      }}
     >
       <TileLayer
         attribution="© OpenStreetMap contributors"

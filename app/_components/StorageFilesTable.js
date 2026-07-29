@@ -51,8 +51,16 @@ function StorageFilesTable({ filteredFiles = [] }) {
 }
 
 function RowCells({ item }) {
-  const { id, created_at, file_name, company_name, category, url, file_type } =
-    item;
+  const {
+    id,
+    created_at,
+    file_name,
+    company_name,
+    category,
+    url,
+    path,
+    file_type,
+  } = item;
 
   const formattedCategory =
     category[0].toUpperCase() + category.split("").slice(1).join("");
@@ -61,16 +69,16 @@ function RowCells({ item }) {
 
   const renderIcon = () => {
     if (type.includes("pdf"))
-      return <FileText size={16} className="text-red-500" />;
+      return <FileText className="text-red-500 h-5 w-5" />;
     if (
       type.includes("sheet") ||
       type.includes("excel") ||
       type.includes("csv")
     )
-      return <Table size={16} className="text-green-600" />;
+      return <Table className="text-green-600 h-5 w-5" />;
     if (type.includes("word") || type.includes("officedocument"))
-      return <FileBox size={16} className="text-blue-500" />;
-    return <File size={16} className="text-stone-400" />;
+      return <FileBox className="text-blue-500 h-5 w-5" />;
+    return <File className="text-stone-400 h-5 w-5" />;
   };
 
   return (
@@ -94,20 +102,20 @@ function RowCells({ item }) {
             rel="noopener noreferrer"
             className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm"
           >
-            <Download size={16} />
+            <Download className="h-5 w-5" />
           </a>
 
           <Modal
             trigger={
               <span className="p-1 block cursor-pointer hover:bg-red-200 transition-colors rounded-sm">
-                <Trash2 size={16} />
+                <Trash2 className="h-5 w-5" />
               </span>
             }
             title={<span className={`text-primary-500`}>Delete File</span>}
             // title={<span className="text-red-600">Clock-out?</span>}
             description={`Are you sure you want to delete this file?`}
           >
-            <StorageDeleteFile fileId={id} fileUrl={url} />
+            <StorageDeleteFile fileId={id} fileUrl={url} path={path} />
           </Modal>
         </div>
       </TableCell>

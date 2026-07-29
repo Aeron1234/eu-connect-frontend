@@ -1,9 +1,8 @@
 import MapWrapper from "@/app/_components/MapWrapper";
 import PageContainer from "@/app/_components/PageContainer";
 import PageTitle from "@/app/_components/PageTitle";
-import { getActiveInternships, getUserSession } from "@/app/_services/services";
+import { getActiveInternships } from "@/app/_services/services";
 
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 export const metadata = {

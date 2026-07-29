@@ -1,7 +1,7 @@
 import { getOngoingInternshipRecord } from "../_services/services";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 import Modal from "./Modal";
-import StudentInternshipForm from "./StudentInternshipForm";
+import StudentInternshipForm from "./InternshipRecordForm-v1";
 
 async function InternshipRecordButton() {
   const internshipData = await getOngoingInternshipRecord();

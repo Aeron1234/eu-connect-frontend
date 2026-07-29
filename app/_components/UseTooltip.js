@@ -11,7 +11,7 @@ function UseTooltip({ children, side, label, className }) {
       <TooltipTrigger asChild>
         <Button
           variant="outline"
-          className={`p-0 rounded-sm border-0 shadow-none h-fit hover:bg-red-100 ${className}`}
+          className={`p-0 rounded-sm border-0 shadow-none ${className}`}
         >
           {children}
         </Button>

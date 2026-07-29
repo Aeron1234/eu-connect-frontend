@@ -1,13 +1,10 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
 import { useTransition } from "react";
 import { editNarrative } from "../_services/student-actions";
 import { toastAndAction } from "../_services/helpers";
 import DailyNarrativeForm from "./DailyNarrativeForm";
 
-function DailyNarrativeEditForm({ narrative }) {
+function DailyNarrativeEditForm({ narrative, onSuccess }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
@@ -20,7 +17,17 @@ function DailyNarrativeEditForm({ narrative }) {
       id: narrative.id,
     };
 
-    startTransition(async () => await toastAndAction(handlers));
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
+      if (result?.success) {
+        // merge the id + form fields in as a fallback if the API
+        // doesn't echo back the full updated row — adjust to match
+        // whatever `editNarrative` actually returns (see note below)
+        onSuccess?.(
+          result.narrative ?? { ...narrative, ...Object.fromEntries(formData) },
+        );
+      }
+    });
   }
 
   return (

@@ -1,95 +1,45 @@
 "use server";
 
 import { getUserSession } from "./services";
-import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
 import { revalidatePath } from "next/cache";
 
 export async function createUser(prevState, formData) {
-  const connection = await db.getConnection();
-
   try {
     const session = await getUserSession();
     if (!session?.user || session.user.role !== "admin") {
       throw new Error("Unauthorized");
     }
 
+    const userId = session.user.id;
     const userData = Object.fromEntries(formData);
-    const { email, password, first_name, last_name, course, role } = userData;
 
-    // ROLES : 1 = Student, 2 = Employer, 3 = Department Head, 4 = Admin
-    const roleId = Number(role);
-
-    const requiredFields = [
-      "email",
-      "first_name",
-      "last_name",
-      "password",
-      "role",
-    ];
-    for (const field of requiredFields) {
-      if (!userData[field] || userData[field].trim() === "") {
-        throw new Error(`${field.replace(/_/g, " ")} is required.`);
-      }
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      throw new Error("Invalid email format.");
-
-    if (password.length < 8)
-      throw new Error("Password must be at least 8 characters.");
-
-    if (roleId === 1 || roleId === 3) {
-      if (!course) {
-        throw new Error("Course is required for this role.");
-      }
-    }
-
-    await connection.beginTransaction();
-
-    // Check if exists
-    const [userExists] = await connection.execute(
-      `SELECT id FROM users WHERE email = ?`,
-      [email],
-    );
-    if (userExists.length > 0) throw new Error("User already exists.");
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newId = uuidv4();
-
-    await connection.execute(
-      `INSERT INTO users (id, email, password_hash, role_id) VALUES (?, ?, ?, ?)`,
-      [newId, email, hashedPassword, roleId],
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/accounts/new?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(userData),
+      },
     );
 
-    await connection.execute(
-      `INSERT INTO user_profiles (user_id, first_name, last_name) VALUES (?, ?, ?)`,
-      [newId, first_name, last_name],
-    );
-
-    if (roleId === 1 || roleId === 3) {
-      await connection.execute(
-        `INSERT INTO student_academic_info (user_id, course_id) VALUES (?, ?)`,
-        [newId, Number(course)],
-      );
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.error}`);
     }
 
-    await connection.commit();
+    const data = await res.json();
+    if (res.ok) revalidatePath("/admin/accounts");
 
-    revalidatePath("/admin/accounts");
-    return { success: true, message: "Account created successfully!" };
-  } catch (err) {
-    await connection.rollback(); // Undo everything if it fails
-    console.error("Create Account Error: ", err.message);
-    return { success: false, error: err.message };
-  } finally {
-    connection.release();
+    return data;
+  } catch (error) {
+    console.log(error);
+    return { success: false, error: error.message };
   }
 }
 
 export async function deactivateAccount(prevState, formData) {
-  const connection = await db.getConnection();
-
   try {
     const session = await getUserSession();
     if (!session?.user || session.user.role !== "admin") {
@@ -100,36 +50,34 @@ export async function deactivateAccount(prevState, formData) {
       throw new Error("Invalid form submission.");
     }
 
+    const userId = session.user.id;
     const accountId = formData.get("accountId");
-    if (!accountId) throw new Error("Account ID is missing.");
 
-    await connection.beginTransaction();
-
-    const [result] = await connection.execute(
-      `UPDATE users SET status = 'inactive', deleted_at = NOW() WHERE id = ?`,
-      [accountId],
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/accounts/deactivate/${accountId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    if (result.affectedRows === 0) {
-      throw new Error("Deactivation failed. Account not found.");
+    console.log(res);
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.error}`);
     }
 
-    await connection.commit();
-
     revalidatePath("/admin/accounts");
-    return { success: true, message: "Account deactivated." };
+    return await res.json();
   } catch (err) {
-    await connection.rollback(); // Undo everything if it fails
     console.error("Deactivation Account Error: ", err.message);
     return { success: false, error: err.message };
-  } finally {
-    connection.release();
   }
 }
 
 export async function reactivateAccount(prevState, formData) {
-  const connection = await db.getConnection();
-
   try {
     const session = await getUserSession();
     if (!session?.user || session.user.role !== "admin") {
@@ -140,29 +88,31 @@ export async function reactivateAccount(prevState, formData) {
       throw new Error("Invalid form submission.");
     }
 
+    const userId = session.user.id;
     const accountId = formData.get("accountId");
-    if (!accountId) throw new Error("Account ID is missing.");
 
-    await connection.beginTransaction();
-
-    const [result] = await connection.execute(
-      `UPDATE users SET status = 'active', deleted_at = null WHERE id = ?`,
-      [accountId],
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/accounts/reactivate/${accountId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    if (result.affectedRows === 0) {
-      throw new Error("Reactivation failed. Account not found.");
+    console.log(res);
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.error}`);
     }
 
-    await connection.commit();
+    const data = await res.json();
+    if (res.ok) revalidatePath("/admin/accounts");
 
-    revalidatePath("/admin/accounts");
-    return { success: true, message: "Account reactivated." };
+    return data;
   } catch (err) {
-    await connection.rollback(); // Undo everything if it fails
     console.error("Reactivation Account Error: ", err.message);
     return { success: false, error: err.message };
-  } finally {
-    connection.release();
   }
 }

@@ -5,7 +5,7 @@ import { toastAndAction } from "../_services/helpers";
 import DeleteForm from "./DeleteForm";
 import { deleteFile } from "../_services/student-actions";
 
-function StorageDeleteFile({ fileId, fileUrl }) {
+function StorageDeleteFile({ fileId, fileUrl, path }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
@@ -28,6 +28,8 @@ function StorageDeleteFile({ fileId, fileUrl }) {
       id={fileId}
       isPending={isPending}
       name={"fileId"}
+      usage="storage"
+      path={path}
     />
   );
 }

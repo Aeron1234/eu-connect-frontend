@@ -1,60 +1,33 @@
 "use client";
 
-import { Menu, User } from "lucide-react";
+import { CircleUserRound, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useWindowSize } from "../_services/helpers";
 
-const navigationItem = [
-  {
-    name: "Announcements",
-    href: "/announcements",
-  },
-  {
-    name: "Internships",
-    href: "/internships",
-  },
-];
+import NotificationsButton from "./NotificationsButton";
 
-function Navigation() {
+function Navigation({ inboxData }) {
   const pathName = usePathname();
-  const { width } = useWindowSize();
-
   const icon = "";
 
-  if (width < 670) {
-    return <Menu className="w-6 h-6" />;
-  }
-
   return (
-    <ul className="flex items-center text-sm text-stone-600">
-      {navigationItem.map((item) => (
-        <li key={item.name}>
-          <Button href={item.href} name={item.name} pathName={pathName} />
-        </li>
-      ))}
+    <div className="flex-1 h-full flex items-center justify-end gap-4 text-sm text-stone-600 relative py-1">
+      <div className="block min-[670px]:hidden">
+        <Menu className="w-6 h-6 cursor-pointer hover:text-primary-500" />
+      </div>
 
-      <li>
+      <div className="hidden min-[670px]:flex items-center gap-4">
+        <NotificationsButton inboxData={inboxData} />
+
         <Link
           href="/account"
-          className={`${pathName === "/account" ? "text-primary-500" : ""} py-2 px-4 hover:text-primary-500 transition-all flex items-center gap-2`}
+          className={`${pathName === "/account" ? "text-primary-500" : ""} relative hover:text-primary-500 transition-all h-full`}
+          title="Account"
         >
-          {icon ? icon : <User />}
-          <span>Account</span>
+          {icon ? icon : <CircleUserRound className="h-6 w-6" />}
         </Link>
-      </li>
-    </ul>
-  );
-}
-
-function Button({ href, name, pathName }) {
-  return (
-    <Link
-      href={href}
-      className={`${pathName === href ? "text-primary-500" : ""} p-2 hover:text-primary-500 transition-all `}
-    >
-      {name}
-    </Link>
+      </div>
+    </div>
   );
 }
 

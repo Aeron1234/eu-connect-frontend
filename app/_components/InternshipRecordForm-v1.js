@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { useActionState, useState } from "react";
-import CompanyAddressSearchList from "./CompanyAddressSearchList";
+// import CompanyAddressSearchList from "./CompanyAddressSearchList";
 import { toastAndAction } from "../_services/helpers";
 import { createInternshipRecord } from "../_services/student-actions";
 

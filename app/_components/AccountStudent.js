@@ -1,9 +1,6 @@
 import PageContainer from "./PageContainer";
 import PageTitle from "./PageTitle";
 import AccountInternshipRecords from "./AccountInternshipRecords";
-import AccountHeader from "./AccountHeader";
-import AccountPersonalInfo from "./AccountPersonalInfo";
-import { Button } from "@base-ui/react";
 import {
   Briefcase,
   Building,

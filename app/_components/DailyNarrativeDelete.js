@@ -4,19 +4,22 @@ import { deleteNarrative } from "../_services/student-actions";
 import DeleteForm from "./DeleteForm";
 import { toastAndAction } from "../_services/helpers";
 
-function DailyNarrativeDelete({ narrativeId }) {
+function DailyNarrativeDelete({ narrativeId, onSuccess }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
-    startTransition(() =>
-      toastAndAction({
+    startTransition(async () => {
+      const result = await toastAndAction({
         loadingLabel: "Deleting narrative...",
         successLabel: "Narrative deleted.",
         errorLabel: "Failed to delete.",
         action: deleteNarrative,
         formData,
-      }),
-    );
+      });
+      if (result?.success) {
+        onSuccess?.();
+      }
+    });
   }
 
   return (

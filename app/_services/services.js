@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+"use server";
 import { auth } from "./auth";
 import { cache } from "react";
 
@@ -14,16 +14,26 @@ export const getOngoingInternshipRecord = cache(async () => {
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
-    const user = session.user;
+    const userId = session.user.id;
 
-    const [rows] = await db.execute(
-      `SELECT * FROM internship_records
-       WHERE user_id = ? AND status = "ongoing"
-       LIMIT 1`,
-      [user.id],
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/active?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    return rows[0] || null;
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.message || "No ongoing internship found" };
+    }
+
+    const data = await res.json();
+
+    return data || null;
   } catch (err) {
     return null;
   }
@@ -40,17 +50,56 @@ export const getActiveInternships = cache(async () => {
       throw new Error("Unauthorized");
     }
 
-    const [rows] = await db.execute(
-      `SELECT ir.id, ir.user_id, ir.company_name, ir.company_address, ir.lon, ir.lat, ir.state_or_province, up.first_name, up.last_name, c.course_name
-        FROM internship_records AS ir
-       INNER JOIN user_profiles AS up ON ir.user_id = up.user_id
-       INNER JOIN student_academic_info AS sai ON ir.user_id = sai.user_id
-       INNER JOIN courses AS c ON sai.course_id = c.id
-       WHERE ir.status = "ongoing"
-       `,
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/active/all?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    return rows || null;
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.message || "No ongoing internship found" };
+    }
+
+    const data = await res.json();
+
+    return data || [];
+  } catch (err) {
+    return null;
+  }
+});
+
+export const getInternshipRecords = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/all?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.message || "No internship records found." };
+    }
+
+    return await res.json();
   } catch (err) {
     return null;
   }
@@ -64,59 +113,103 @@ export const getUserProfile = cache(async () => {
     }
 
     const userId = session.user.id;
-    const userRole = session.user.role;
-
-    const [rows] = await db.execute(
-      `SELECT up.*, u.email 
-       FROM user_profiles AS up
-       INNER JOIN users AS u on up.user_id = u.id
-       WHERE user_id = ?
-       LIMIT 1`,
-      [userId],
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/account/user?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    return rows[0] || null;
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.message || "User doesn't exist." };
+    }
+
+    const data = await res.json();
+
+    return data || null;
   } catch (err) {
     return null;
   }
 });
 
-// NEW: Optimized for checking status without downloading the whole history
-export async function getTodayDtr() {
+export const getDtrToday = async () => {
   try {
     const session = await getUserSession();
     if (!session?.user || !["student", "admin"].includes(session.user.role)) {
       throw new Error("Unauthorized");
     }
-    const user = session.user;
-
     const internshipData = await getOngoingInternshipRecord();
     if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const [rows] = await db.execute(
-      `SELECT * FROM daily_time_records 
-       WHERE user_id = ? AND DATE(created_at) = CURDATE() AND internship_id = ?
-       LIMIT 1`,
-      [user.id, internshipData.id],
+    const userId = session.user.id;
+    const internshipId = internshipData.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/dtr/today?userId=${userId}&internshipId=${internshipId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
-    return rows[0] || null;
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Record not found or you haven't clock-in yet.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || null;
   } catch (err) {
     return null;
   }
-}
+};
 
-export async function checkDtrStatus() {
-  // Use the new optimized query instead of fetching all DTRs
-  const dtrRecordToday = await getTodayDtr();
+// NEW: Optimized for checking status without downloading the whole history
+export const getLatestDtrStatus = async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["student", "admin"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
 
-  if (!dtrRecordToday) return { status: "clocked-out" };
+    const userId = session.user.id;
+    const internshipId = internshipData.id;
 
-  if (dtrRecordToday.clock_in && !dtrRecordToday.clock_out) {
-    return { status: "clocked-in" };
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/dtr/status?userId=${userId}&internshipId=${internshipId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Record not found or you haven't clock-in yet.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || null;
+  } catch (err) {
+    return null;
   }
-
-  return { status: "clocked-out" };
-}
+};
 
 export const getInternshipFiles = cache(async () => {
   try {
@@ -129,15 +222,179 @@ export const getInternshipFiles = cache(async () => {
     }
     const userId = session.user.id;
 
-    const [rows] = await db.execute(
-      `SELECT * FROM internship_documents
-       WHERE user_id = ?
-       `,
-      [userId],
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/files?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    return rows || null;
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "No Internship related files found or you haven't uploaded any yet.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
   } catch (err) {
+    return null;
+  }
+});
+
+export const getAllAnnouncements = cache(
+  async ({ category = "all", page = 1, search = "" }) => {
+    try {
+      const session = await getUserSession();
+      if (!session?.user) {
+        throw new Error("Unauthorized");
+      }
+
+      const userId = session.user.id;
+
+      const res = await fetch(
+        `${process.env.API_BASE_URL}/api/announcements/history?userId=${userId}&category=${category}&page=${page}&search=${search}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": process.env.BACKEND_SECRET_KEY,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        return {
+          error:
+            error.message || "Failed to get announcements. Please try again.",
+        };
+      }
+
+      const data = await res.json();
+
+      return data || [];
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  },
+);
+
+export const fetchMoreAnnouncements = cache(
+  async ({ category = "all", page = 1, search = "" }) => {
+    try {
+      const session = await getUserSession();
+      if (!session?.user) {
+        throw new Error("Unauthorized");
+      }
+
+      const userId = session.user.id;
+
+      const res = await fetch(
+        `${process.env.API_BASE_URL}/api/announcements/history?userId=${userId}&category=${category}&page=${page}&search=${search}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": process.env.BACKEND_SECRET_KEY,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        return {
+          error:
+            error.message ||
+            "Failed to load more announcements. Please try again.",
+        };
+      }
+
+      const data = await res.json();
+
+      return data || [];
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  },
+);
+
+export const getAnnouncementCategories = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/announcements/categories?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get announcement categories. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
+  } catch (err) {
+    return null;
+  }
+});
+
+export const getAllAccounts = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["admin"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    // ROLES : 1 = Student, 2 = Employer, 3 = Department Head, 4 = Admin
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/accounts?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to get all accounts. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
+  } catch (err) {
+    console.log(err);
     return null;
   }
 });
@@ -149,9 +406,60 @@ export const getRoles = cache(async () => {
       throw new Error("Unauthorized");
     }
 
-    const [rows] = await db.execute(`SELECT * FROM roles`);
+    const userId = session.user.id;
 
-    return rows || null;
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/roles?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to get roles. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
+  } catch (err) {
+    return null;
+  }
+});
+
+export const getRegions = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/regions?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to get regions. Please try again.",
+      };
+    }
+
+    return await res.json();
   } catch (err) {
     return null;
   }
@@ -167,55 +475,496 @@ export const getCourses = cache(async () => {
       throw new Error("Unauthorized");
     }
 
-    const [rows] = await db.execute(`SELECT * FROM courses`);
+    const userId = session.user.id;
 
-    return rows || null;
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/courses?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to get courses. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
   } catch (err) {
     return null;
   }
 });
 
-export const getAllAccounts = cache(async () => {
+export const getDepartments = cache(async () => {
   try {
     const session = await getUserSession();
-    if (!session?.user || !["admin"].includes(session.user.role)) {
+    if (
+      !session?.user ||
+      !["department_head", "student", "admin"].includes(session.user.role)
+    ) {
       throw new Error("Unauthorized");
     }
 
-    // ROLES : 1 = Student, 2 = Employer, 3 = Department Head, 4 = Admin
+    const userId = session.user.id;
 
-    //For students and dep. heads
-    const [school] = await db.execute(
-      `
-      SELECT u.id, u.email, u.created_at, u.status, up.first_name, up.last_name, r.role, c.course_name
-      FROM users AS u
-      INNER JOIN user_profiles AS up ON u.id = up.user_id
-      INNER JOIN roles AS r ON u.role_id = r.id
-      INNER JOIN student_academic_info AS sai ON u.id = sai.user_id
-      INNER JOIN courses AS c ON c.id = sai.course_id
-      WHERE u.role_id IN(1,3)
-      `,
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/departments?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
     );
 
-    //For employers
-    const [employers] = await db.execute(
-      `
-      SELECT u.id, u.email, u.created_at, u.status, up.first_name, up.last_name, r.role
-      FROM users AS u
-      INNER JOIN user_profiles AS up ON u.id = up.user_id
-      INNER JOIN roles AS r ON u.role_id = r.id
-      WHERE u.role_id = 2
-      `,
-    );
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to get courses. Please try again.",
+      };
+    }
 
-    const allUserAccounts = [...school, ...employers]
-      .sort((a, b) => a.last_name.localeCompare(b.last_name))
-      .sort((a, b) => a.status.localeCompare(b.status));
+    const data = await res.json();
 
-    return allUserAccounts || null;
+    return data || [];
   } catch (err) {
     return null;
   }
 });
 
-// Keep this for the History Table, but add a LIMIT or Sort
+export const getInbox = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/notifications?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message || "Failed to get notifications. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    // return await res.json();
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const fetchMoreNotifications = cache(async ({ page = 1 }) => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/notifications?userId=${userId}&page=${page}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get more notifications. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getStudentEvaluationCriterias = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["employer"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/student-evaluation/criteria?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get more notifications. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getStudentPastEvaluations = cache(async (searchedUserId) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["student", "employer", "department_head", "admin"].includes(
+        session.user.role,
+      )
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/student-past-evaluations/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get more notifications. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getStudentDashboardStats = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["student"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/dashboard-stats?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message || "Failed to get dashboard stats. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getSearchedUserProfile = cache(async (searchedUserId) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["student", "employer", "department_head", "admin"].includes(
+        session.user.role,
+      )
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get searched user profile. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getSearchHistory = cache(async ({ type }) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["student", "employer", "department_head", "admin"].includes(
+        session.user.role,
+      )
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/search-history?userId=${userId}&type=${type}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message || "Failed to get search history. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getSearchedStudentDTRs = cache(async (searchedUserId, page) => {
+  const limit = 5;
+
+  const validatedPage = Math.max(1, parseInt(page));
+  const offset = (validatedPage - 1) * limit;
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["employer", "department_head", "admin"].includes(session.user.role)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/dtrs/${searchedUserId}?userId=${userId}&limit=${limit}&offset=${offset}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get searched user's DTR. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getSearchedStudentNarratives = cache(async (searchedUserId) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["employer", "department_head", "admin"].includes(session.user.role)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get searched user's Narratives. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export async function fetchMoreSearchedStudentNarratives({
+  searchedUserId,
+  page,
+}) {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["employer", "department_head", "admin"].includes(session.user.role)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}?userId=${userId}&page=${page}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get more of searched user's Narratives. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+export const getSearchedStudentDtrLocation = cache(async (searchedUserId) => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["employer", "admin"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/set-dtr-location/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get searched user setted location for DTR. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});

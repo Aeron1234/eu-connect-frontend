@@ -52,7 +52,7 @@ function FilterButton({ value, filterParams }) {
   return (
     <Link
       href={value.href}
-      className={`${active ? "bg-red-100 text-primary-500" : "hover:bg-stone-200"} px-4 py-2 rounded-sm transition-colors max-md:p-2`}
+      className={`${active ? "bg-primary-500 text-white" : "hover:bg-stone-200"} px-4 py-2 rounded-sm transition-colors max-md:p-2`}
     >
       {value.text}
     </Link>

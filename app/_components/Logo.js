@@ -1,19 +1,18 @@
 import Image from "next/image";
-import Link from "next/link";
 import logo from "@/public/logo.png";
 
 function Logo() {
   return (
-    <Link href="/" className="rounded-full">
+    <div className="relative w-16 h-16 md:w-20 md:h-20 aspect-square">
       <Image
         src={logo}
-        quality={[100, 70, 70, 70, 70, 70, 75]}
-        height="45"
-        width="45"
-        loading="eager"
-        alt="The Wild Oasis logo"
+        alt="the eu-connect logo"
+        fill
+        sizes="(max-width: 768px) 64px, 80px"
+        className="object-contain"
+        priority
       />
-    </Link>
+    </div>
   );
 }
 

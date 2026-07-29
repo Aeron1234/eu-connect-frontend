@@ -14,18 +14,14 @@ const CalendarWidget = () => {
     currentDate.getFullYear() === todayDate.getFullYear();
 
   const today = todayDate.getDate();
-
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const monthName = currentDate.toLocaleString("default", {
-    month: "long",
-  });
+  const monthName = currentDate.toLocaleString("default", { month: "long" });
 
-  // 🔥 Navigation handlers
   function handlePrevMonth() {
     setCurrentDate(
       (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
@@ -43,52 +39,61 @@ const CalendarWidget = () => {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
-    <div className="card-elevated p-4 bg-white rounded-sm shadow-sm max-sm:flex max-sm:flex-col">
-      <div className="flex items-center justify-between mb-3 ">
-        <button
-          onClick={handlePrevMonth}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-
-        <h3 className="text-sm font-bold text-primary-500">
+    <div className="w-full max-w-sm bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <h3 className="text-sm font-bold text-slate-800 tracking-tight">
           {monthName} {year}
         </h3>
-
-        <button
-          onClick={handleNextMonth}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={handlePrevMonth}
+            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleNextMonth}
+            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-7 text-center text-xs max-sm:h-full max-sm:gap-2">
+      <div className="grid grid-cols-7 mb-2">
         {DAYS.map((d) => (
           <div
             key={d}
-            className="py-1 font-medium text-muted-foreground max-lg:p-1"
+            className="text-[11px] font-semibold text-slate-400 text-center uppercase tracking-wider py-2"
           >
             {d}
           </div>
         ))}
+      </div>
 
-        {cells.map((day, i) => (
-          <div
-            key={i}
-            className={`py-1 rounded-full text-sm cursor-pointer transition-colors max-xs:text-xs
-              ${
-                day && isSameMonth && day === today
-                  ? "bg-primary-500 text-white font-semibold"
-                  : day
-                    ? "text-foreground hover:bg-muted"
-                    : ""
-              }`}
-          >
-            {day || ""}
-          </div>
-        ))}
+      <div className="grid grid-cols-7 gap-y-1">
+        {cells.map((day, i) => {
+          const isToday = day && isSameMonth && day === today;
+
+          return (
+            <div key={i} className="flex items-center justify-center">
+              <div
+                className={`
+                  w-8 h-8 flex items-center justify-center text-sm rounded-full transition-all
+                  ${!day ? "pointer-events-none" : ""}
+                  ${
+                    isToday
+                      ? "bg-primary-500 text-white font-bold"
+                      : "text-slate-600"
+                  }
+                `}
+              >
+                {day || ""}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

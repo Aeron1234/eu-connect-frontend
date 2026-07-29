@@ -23,13 +23,19 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 
-function CreateAccountForm({ roles, courses }) {
+function CreateAccountForm({ roles, courses, departments }) {
   const [isPending, startTransition] = useTransition();
 
   const [isFocused, setIsFocused] = useState(false);
   const [show, setShow] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+
+  const STUDENT = "1";
+  const EMPLOYER = "2";
+  const DEPARTMENT_HEAD = "3";
+  const ADMIN = "4";
 
   function handleAction(formData) {
     startTransition(() =>
@@ -43,9 +49,14 @@ function CreateAccountForm({ roles, courses }) {
     );
   }
 
-  function handleSelect(name) {
+  function handleSelectCourse(name) {
     const course = courses.find((c) => c.course_name === name);
     if (course) setSelectedCourseId(course.id);
+  }
+
+  function handleSelectDepartment(name) {
+    const department = departments.find((d) => d.name === name);
+    if (department) setSelectedDepartmentId(department.id);
   }
 
   function formatRolesForSelect(role) {
@@ -54,8 +65,6 @@ function CreateAccountForm({ roles, courses }) {
     if (role === "student") return "Student";
     if (role === "admin") return "Admin";
   }
-
-  console.log(selectedRole);
 
   return (
     <form className="flex-1 text-sm flex flex-col gap-4 " action={handleAction}>
@@ -121,7 +130,7 @@ function CreateAccountForm({ roles, courses }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-8 max-xl:gap-4 max-md:gap-2 items-center h-fit">
+      <div className="grid grid-cols-3 gap-y-4 gap-x-8 max-xl:gap-x-4 max-md:gap-x-2 items-center h-fit">
         <div className="flex-1">
           <label htmlFor="email">Email *</label>
           <input
@@ -166,8 +175,7 @@ function CreateAccountForm({ roles, courses }) {
           </div>
         </div>
 
-        {/* 1 = Student, 2 = Employer, 3 = Department Head, 4 = Admin */}
-        {selectedRole === "1" || selectedRole === "3" ? (
+        {selectedRole === STUDENT && (
           <div className="flex flex-col flex-1">
             <input
               type="hidden"
@@ -175,8 +183,12 @@ function CreateAccountForm({ roles, courses }) {
               value={selectedCourseId}
               className="pointer-events-none"
             />
-            <label htmlFor="course">Course/Department *</label>
-            <Combobox items={courses} id="course" onValueChange={handleSelect}>
+            <label htmlFor="course">Course *</label>
+            <Combobox
+              items={courses}
+              id="course"
+              onValueChange={handleSelectCourse}
+            >
               <ComboboxInput
                 placeholder="Select a course"
                 className={
@@ -192,6 +204,43 @@ function CreateAccountForm({ roles, courses }) {
                       value={`${course.course_name}`}
                     >
                       {course.course_name}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+          </div>
+        )}
+
+        {selectedRole === STUDENT || selectedRole === DEPARTMENT_HEAD ? (
+          <div className="flex flex-col flex-1">
+            <input
+              type="hidden"
+              name="department"
+              value={selectedDepartmentId}
+              className="pointer-events-none"
+            />
+            <label htmlFor="course">Department *</label>
+            <Combobox
+              items={departments}
+              id="department"
+              onValueChange={handleSelectDepartment}
+            >
+              <ComboboxInput
+                placeholder="Select a department"
+                className={
+                  "rounded-sm border bg-stone-100 border-stone-300 py-2.5 mt-1"
+                }
+              />
+              <ComboboxContent>
+                <ComboboxEmpty>No items found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(department) => (
+                    <ComboboxItem
+                      key={department.id}
+                      value={`${department.name}`}
+                    >
+                      {department.name} ({department.code})
                     </ComboboxItem>
                   )}
                 </ComboboxList>

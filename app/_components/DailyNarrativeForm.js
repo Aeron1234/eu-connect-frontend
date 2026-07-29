@@ -24,6 +24,7 @@ function DailyNarrativeForm({
             className="px-2 py-1 border border-stone-300 rounded-md"
             defaultValue={type === "edit" ? data.day_number : ""}
             disabled={isPending}
+            max={200}
             required
           />
         </label>
@@ -37,6 +38,7 @@ function DailyNarrativeForm({
             className="px-2 py-1 border border-stone-300 rounded-md"
             defaultValue={type === "edit" ? data.title : ""}
             disabled={isPending}
+            max={100}
             required
           />
         </label>
@@ -50,6 +52,7 @@ function DailyNarrativeForm({
           className="px-2 py-1 border border-stone-300 rounded-md min-h-50 overflow-y-auto resize-none"
           defaultValue={type === "edit" ? data.narrative : ""}
           disabled={isPending}
+          max={2000}
           required
         />
       </label>

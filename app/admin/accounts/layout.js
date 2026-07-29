@@ -18,7 +18,7 @@ function AccountLayout({ children }) {
         </div>
       }
     >
-      <div className="w-full max-w-280 mx-auto">{children}</div>
+      <main className="w-full max-w-280 mx-auto">{children}</main>
     </Suspense>
   );
 }

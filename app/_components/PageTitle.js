@@ -6,7 +6,7 @@ async function PageTitle({
   icon = null,
 }) {
   return (
-    <header className="flex items-start justify-between gap-4 mt-4">
+    <header className="flex items-start justify-between gap-4">
       <div>
         <h1
           className={`${icon ? "flex items-center gap-2" : ""} text-xl self-start font-bold text-stone-800 max-md:text-lg max-xs:text-base`}

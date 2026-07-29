@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export async function toastAndAction({
-  loadingLabel,
-  successLabel,
-  errorLabel,
+  loadingLabel = "",
+  successLabel = "",
+  errorLabel = "",
   action,
   formData = {},
   id = null,
@@ -34,8 +34,11 @@ export async function toastAndAction({
       style: { backgroundColor: "#FEE2E2", color: "#991B1B" },
     });
   }
+
+  return result;
 }
 
+//DEBOUNCE
 export function useApiFetch(query, delay = 500) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -98,16 +101,39 @@ export function useGetLocation() {
   const [userLocation, setUserLocation] = useState({
     latitude: null,
     longitude: null,
+    accuracy: null, // Added this so you can see the precision in meters
   });
 
-  if (!navigator.geolocation) return;
+  useEffect(() => {
+    // Next.js Safety Guard: Ensures this only runs on the client side (browser)
+    if (typeof window === "undefined" || !navigator.geolocation) return;
 
-  navigator.geolocation.getCurrentPosition(async (position) => {
-    setUserLocation({
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-    });
-  });
+    // The Secret Sauce for High Accuracy:
+    const options = {
+      enableHighAccuracy: true, // Forces the device to wake up hardware GPS
+      timeout: 15000, // Gives the device up to 15 seconds to lock a signal
+      maximumAge: 0, // Prevents caching; always forces a fresh reading
+    };
+
+    const successCallback = (position) => {
+      setUserLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy, // Precision buffer in meters
+      });
+    };
+
+    const errorCallback = (error) => {
+      console.error("GPS Tracking Error:", error.message);
+    };
+
+    // Trigger the position request
+    navigator.geolocation.getCurrentPosition(
+      successCallback,
+      errorCallback,
+      options,
+    );
+  }, []);
 
   return userLocation;
 }

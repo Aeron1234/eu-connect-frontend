@@ -3,7 +3,7 @@ import Modal from "@/app/_components/Modal";
 import StorageUploadForm from "@/app/_components/StorageUploadForm";
 import StorageFilesList from "@/app/_components/StorageFilesList";
 import { getInternshipFiles } from "@/app/_services/services";
-import { Upload } from "lucide-react";
+import { FolderOpen, Upload } from "lucide-react";
 
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -18,21 +18,22 @@ async function StoragePage({ searchParams }) {
   const internshipFiles = await getInternshipFiles();
 
   return (
-    <PageContainer>
-      <header className="flex items-start justify-between gap-4 mt-4 max-xs:flex-col">
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <h1 className="text-xl self-start font-bold text-stone-800 max-md:text-lg max-xs:text-base">
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-2">
+            <FolderOpen className="w-7 h-7 text-primary-500" />
             Internship Documents Storage
           </h1>
-          <span className="text-stone-600 max-xs:text-xs">
+          <p className="text-sm text-stone-600 mt-1">
             Upload all of your internship-related files here
-          </span>
+          </p>
         </div>
 
         <Modal
           trigger={
-            <div className="bg-primary-500 hover:bg-primary-400 cursor-pointer p-2 rounded-sm transition-colors flex gap-2 items-center justify-center max-xs:w-full">
-              <Upload strokeWidth={3} size={16} color="#fff" />
+            <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition">
+              <Upload className="w-4 h-4" />
               <span className="text-white text-sm font-semibold">
                 Upload File
               </span>
@@ -44,7 +45,7 @@ async function StoragePage({ searchParams }) {
         >
           <StorageUploadForm />
         </Modal>
-      </header>
+      </div>
 
       <div className="flex flex-col gap-2 mt-2">
         <Suspense
@@ -57,7 +58,7 @@ async function StoragePage({ searchParams }) {
           <StorageFilesList params={params} internshipFiles={internshipFiles} />
         </Suspense>
       </div>
-    </PageContainer>
+    </main>
   );
 }
 

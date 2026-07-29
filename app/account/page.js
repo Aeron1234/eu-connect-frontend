@@ -1,11 +1,11 @@
 import AccountStudent from "@/app/_components/AccountStudent";
 import AccountEmployer from "@/app/_components/AccountEmployer";
-import AccountSuperAdmin from "@/app/_components/AccountSuperAdmin";
 import { redirect } from "next/navigation";
 import { getUserProfile, getUserSession } from "../_services/services";
 import AccountDepartmentHead from "@/app/_components/AccountDepartmentHead";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import AccountAdmin from "@/app/_components/AccountAdmin";
 
 export const metadata = {
   title: "Account",
@@ -37,7 +37,7 @@ async function AccountPage() {
 
   if (role === "employer") return <AccountEmployer />;
 
-  if (role === "superAdmin") return <AccountSuperAdmin />;
+  if (role === "admin") return <AccountAdmin />;
 }
 
 export default AccountPage;

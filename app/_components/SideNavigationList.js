@@ -1,12 +1,23 @@
 "use client";
-import { FolderOpen, LayoutDashboard, MapPin, UserPlus } from "lucide-react";
+import {
+  BookOpen,
+  BriefcaseBusiness,
+  FolderOpen,
+  LayoutDashboard,
+  LibraryBig,
+  MapPin,
+  Megaphone,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import SignoutButton from "./SignoutButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import UseTooltip from "./UseTooltip";
 import { useWindowSize } from "../_services/helpers";
+import Logo from "./Logo";
 
-function SideNavigationList({ userRole }) {
+function SideNavigationList({ userRole, firstName = "" }) {
   const pathName = usePathname();
   const { width } = useWindowSize();
 
@@ -15,13 +26,20 @@ function SideNavigationList({ userRole }) {
 
   if (!role) return null;
 
+  const homeHref = `/${userRole}`;
+
   function navigation(userRole) {
     if (userRole === "student") {
       return [
         {
-          name: "Dashboard",
-          href: "/student",
-          icon: <LayoutDashboard className="h-5 w-5" />,
+          name: "Narratives",
+          href: "/student/narratives",
+          icon: <BookOpen className="h-5 w-5" />,
+        },
+        {
+          name: "My Records",
+          href: "/student/internship-record",
+          icon: <LibraryBig className="h-5 w-5" />,
         },
         {
           name: "Storage",
@@ -34,11 +52,6 @@ function SideNavigationList({ userRole }) {
     if (userRole === "department_head") {
       return [
         {
-          name: "Dashboard",
-          href: "/department_head",
-          icon: <LayoutDashboard className="h-5 w-5" />,
-        },
-        {
           name: "Map",
           href: "/department_head/map",
           icon: <MapPin className="h-5 w-5" />,
@@ -49,11 +62,6 @@ function SideNavigationList({ userRole }) {
     if (userRole === "admin") {
       return [
         {
-          name: "Dashboard",
-          href: "/admin",
-          icon: <LayoutDashboard className="h-5 w-5" />,
-        },
-        {
           name: "Accounts",
           href: "/admin/accounts",
           icon: <UserPlus className="h-5 w-5" />,
@@ -62,13 +70,62 @@ function SideNavigationList({ userRole }) {
     }
   }
 
-  const routes = navigation(userRole);
+  const routes = navigation(userRole) || [];
+  const generalRoutes = [
+    {
+      name: "Announcements",
+      href: "/announcements",
+      icon: <Megaphone className="h-5 w-5" />,
+    },
+    {
+      name: "Internships",
+      href: "/internships",
+      icon: <BriefcaseBusiness className="h-5 w-5" />,
+    },
+    {
+      name: "Search Users",
+      href: "/users",
+      icon: <Users className="h-5 w-5" />,
+    },
+  ];
 
   return (
+    // 🌟 1. Added 'flex flex-col' so the container handles structural height calculations properly
     <aside
-      className={`w-full min-w-50 bg-primary-500  text-sm text-white font-semibold py-4 max-xl:min-w-fit max-lg:py-2 max-lg:row-start-3 `}
+      className={`w-full h-full min-w-55 bg-primary-500 text-sm text-white font-semibold py-4 px-4 flex flex-col`}
     >
-      <ul className="flex flex-col max-lg:flex-row gap-1 h-full px-1 justify-between w-full">
+      {/* Logo section */}
+      <Link
+        href={homeHref}
+        scroll={false}
+        className="flex items-center gap-2 flex-col w-full mb-4 group cursor-pointer"
+      >
+        <div className="p-1 bg-white rounded-full group-hover:scale-105 transition-transform">
+          <Logo />
+        </div>
+
+        <h2 className="text-base font-semibold line-clamp-2 max-sm:text-base">
+          EU-Connect
+        </h2>
+      </Link>
+
+      {firstName && (
+        <p className="bg-white/10 px-2 py-1 mb-4 w-full flex flex-col rounded-lg border border-white/10">
+          <span className="text-white/80 font-normal">Welcome back,</span>{" "}
+          <span className="text-lg">{firstName}</span>
+        </p>
+      )}
+
+      {/* 🌟 2. Added 'flex-1' to force the list to scale down and take up all available screen vertical space */}
+      <ul className="flex flex-col gap-1 flex-1 w-full">
+        <Link
+          scroll={false}
+          href={`/${userRole}`}
+          className={`${pathName === `/${userRole}` ? "bg-white text-primary-500" : ""} font-normal w-full flex items-center gap-2 px-5 py-2 max-lg:px-2 hover:text-primary-500 hover:bg-white transition-colors rounded-sm`}
+        >
+          <LayoutDashboard className="h-5 w-5" />
+          Dashboard
+        </Link>
         {routes &&
           routes.map((item) => (
             <li key={item.name}>
@@ -81,39 +138,43 @@ function SideNavigationList({ userRole }) {
             </li>
           ))}
 
-        <li className="mt-auto max-lg:ml-auto">
-          <SignoutButton role={role} screenSize={width} />
-        </li>
+        <div
+          className={`flex flex-col gap-1 w-full ${routes.length > 0 ? "lg:mt-2 lg:pt-2 lg:border-t lg:border-primary-400" : ""}`}
+        >
+          {generalRoutes.map((item) => (
+            <li key={item.name}>
+              <Button
+                item={item}
+                pathName={pathName}
+                role={role}
+                screenSize={width}
+              />
+            </li>
+          ))}
+        </div>
+
+        {/* 🌟 3. Applied 'mt-auto' securely here. The flex wrapper above will now anchor this exactly to the floor! */}
+        <div className="mt-auto pt-2 border-t border-primary-400">
+          <li className="" title="Sign out">
+            <SignoutButton role={role} screenSize={width} />
+          </li>
+        </div>
       </ul>
     </aside>
   );
 }
 
-function Button({ item, pathName, screenSize }) {
-  if (screenSize > 1100)
-    return (
-      <Link
-        href={item.href}
-        className={`${pathName === item.href ? "bg-primary-600" : ""} w-full flex items-center gap-2 px-5 py-2 max-lg:px-2 hover:text-white hover:bg-primary-600 transition-colors rounded-sm`}
-      >
-        {item.icon}
-        {item.name}
-      </Link>
-    );
-
+function Button({ item, pathName }) {
   return (
-    <UseTooltip
-      side={screenSize < 1100 && screenSize >= 1024 ? "right" : "top"}
-      label={item.name}
-      className={"w-full bg-transparent "}
+    <Link
+      scroll={false}
+      href={item.href}
+      title={item.name}
+      className={`${pathName.includes(item.href) ? "bg-white text-primary-500" : ""} font-normal w-full flex items-center gap-2 px-5 py-2 max-lg:px-2 hover:text-primary-500 hover:bg-white transition-colors rounded-sm`}
     >
-      <Link
-        href={item.href}
-        className={`${pathName === item.href ? "bg-primary-600" : ""} w-full flex items-center gap-2 px-5 py-2 max-lg:px-2 hover:text-white hover:bg-primary-600 transition-colors rounded-sm`}
-      >
-        {item.icon}
-      </Link>
-    </UseTooltip>
+      {item.icon}
+      {item.name}
+    </Link>
   );
 }
 

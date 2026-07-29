@@ -35,6 +35,8 @@ const Toaster = ({ ...props }) => {
         "--error-bg": "#FEE2E2",
         "--error-text": "#991B1B",
         "--error-border": "#FCA5A5",
+        "--warning-bg": "#FFFDD0",
+        "--warning-text": "#854D0E",
       }}
       {...props}
     />

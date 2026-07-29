@@ -9,6 +9,7 @@ import {
 import Modal from "./Modal";
 import DeactivateAccount from "./DeactivateAccount";
 import ReactivateAccount from "./ReactivateAccount";
+import { format } from "date-fns";
 
 function ExistingAccountList({ filteredAccounts }) {
   return (
@@ -32,8 +33,16 @@ function ExistingAccountList({ filteredAccounts }) {
 }
 
 function ExistingAccountListItem({ accountDetails }) {
-  const { id, first_name, last_name, role, email, course_name, status } =
-    accountDetails;
+  const {
+    id,
+    first_name,
+    last_name,
+    role,
+    email,
+    course_name,
+    status,
+    created_at,
+  } = accountDetails;
 
   return (
     <div
@@ -55,22 +64,10 @@ function ExistingAccountListItem({ accountDetails }) {
         </p>
       </div>
 
-      <div className="flex flex-col justify-center h-full">
-        {/* <button className="cursor-pointer  p-1 rounded-sm transition-colors hover:bg-red-200 hover:text-red-600">
-          <Trash2 className="h-5 w-5" />
-        </button> */}
-        {/* <Modal
-          title={`Deactivate Account`}
-          description={"Are you sure you want to deactivate this account?"}
-          trigger={
-            <div className="flex items-center gap-1 cursor-pointer p-1 rounded-sm transition-colors hover:bg-red-200 hover:text-red-600">
-              <ShieldMinus className="h-4 w-4" />
-              <span className="text-sm">Deactivate</span>
-            </div>
-          }
-        >
-          <DeactivateAccount id={id} />
-        </Modal> */}
+      <div className="flex items-center gap-2 h-full">
+        <p className="text-stone-500 text-[10px] tracking-wider">
+          Created: {format(new Date(created_at), "MM-dd-yyyy")}
+        </p>
         {status === "active" && <DeactivateAccount id={id} />}
         {status === "inactive" && <ReactivateAccount id={id} />}
       </div>

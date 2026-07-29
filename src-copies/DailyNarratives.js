@@ -1,6 +1,6 @@
-import DailyNarrativePostButton from "./DailyNarrativePostButton";
-import DailyNarrativeList from "./DailyNarrativeList";
-import { getDailyNarratives } from "../_services/services";
+import DailyNarrativePostButton from "../app/_components/DailyNarrativePostButton";
+import DailyNarrativeList from "../app/_components/DailyNarrativeList";
+import { getDailyNarratives } from "../app/_services/services";
 
 function DailyNarratives({ params }) {
   return (

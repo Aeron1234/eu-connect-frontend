@@ -67,7 +67,7 @@ function StorageFilesList({ params, internshipFiles }) {
 
       <h3 className="flex items-center gap-1 text-stone-500 font-semibold">
         <span>
-          <FolderOpen size={14} />
+          <FolderOpen className="h-5 w-5 text-primary-500" />
         </span>
         My Documents
       </h3>
@@ -76,7 +76,6 @@ function StorageFilesList({ params, internshipFiles }) {
         <StorageFilesTiles
           filteredFiles={filteredFiles}
           filteredBy={filteredBy}
-          // companyName={companyName}
         />
       )}
 
@@ -84,7 +83,6 @@ function StorageFilesList({ params, internshipFiles }) {
         <StorageFilesTable
           filteredFiles={filteredFiles}
           filteredBy={filteredBy}
-          // companyName={companyName}
         />
       )}
     </>

@@ -35,12 +35,12 @@ function DailyNarrativePostButton() {
   return (
     <Modal
       trigger={
-        <TriggerButton
-          icon={<NotebookPen size={16} />}
-          textColor={"text-primary-50 "}
-          bgColor={"bg-primary-500"}
-          label={"Post"}
-        />
+        <div
+          // onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition"
+        >
+          <Plus className="w-4 h-4" /> New Narrative
+        </div>
       }
       title={<span>Daily Narrative</span>}
       description={`Post what happened today.`}
