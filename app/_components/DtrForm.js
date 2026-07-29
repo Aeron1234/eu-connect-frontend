@@ -3,10 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { clockIn, clockOut } from "../_services/student-actions";
-import { useEffect, useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { toastAndAction, useGetLocation } from "../_services/helpers";
-import { is } from "date-fns/locale";
 
 function DtrForm({ isOut }) {
   const action = isOut ? clockIn : clockOut;
@@ -14,6 +13,8 @@ function DtrForm({ isOut }) {
   const [isPending, startTransition] = useTransition();
 
   const coords = useGetLocation();
+
+  // const { latitude, longitude } = coords;
 
   function handleAction(formData) {
     const tempLat = 13.9147895;

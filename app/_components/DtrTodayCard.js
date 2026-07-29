@@ -9,10 +9,9 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
   return (
-    <section className="rounded-xl bg-primary-500 text-white p-5 sm:p-6 shadow-sm">
+    <section className="rounded-xl bg-primary-500 text-white p-5 sm:p-6 shadow-sm overflow-hidden">
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-        {/* <div className="grid grid-cols-1 xl:grid-cols-[auto_1fr] gap-4"> */}
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-[11px] uppercase tracking-widest text-primary-foreground/70">
             Today
           </p>
@@ -55,7 +54,7 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
             </p>
           )}
           <p className="flex items-center gap-1.5 mt-4 text-xs text-primary-foreground/75 ">
-            <MapPin className="w-3.5 h-3.5" />{" "}
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{" "}
             <span
               className="truncate w-full"
               title={internshipData?.company_address || ""}
@@ -68,10 +67,12 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
         </div>
 
         {hasOngoingInternship ? (
-          <DtrButton internshipData={internshipData} status={status} />
+          <div className="flex-shrink-0">
+            <DtrButton internshipData={internshipData} status={status} />
+          </div>
         ) : (
           <Link
-            className="self-start md:self-auto flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90"
+            className="self-start md:self-auto flex-shrink-0 flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90"
             href="/student/internship-record"
             title="Create internship record"
           >

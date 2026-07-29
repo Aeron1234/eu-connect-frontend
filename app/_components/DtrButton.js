@@ -24,14 +24,13 @@ function DtrButton({ internshipData, status }) {
     <Modal
       trigger={
         <div
-          className="self-start md:self-auto flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90"
+          className="self-start md:self-auto flex-shrink-0 flex items-center gap-2 px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90 whitespace-nowrap"
           title={theme.label}
         >
           {theme.icon} {theme.label}
         </div>
       }
       title={<span className={`text-primary-500`}>{theme.label}?</span>}
-      // title={<span className="text-red-600">Clock-out?</span>}
       description={`Record your daily attendance`}
     >
       <DtrForm isOut={isOut} />
