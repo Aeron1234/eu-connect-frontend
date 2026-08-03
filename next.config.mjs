@@ -15,6 +15,15 @@ const nextConfig = {
     },
   },
 
+  async rewrites() {
+    return [
+      {
+        source: "/eu-connect/api/:path*",
+        destination: "https://your-app-name.onrender.com/eu-connect/api/:path*",
+      },
+    ];
+  },
+
   reactCompiler: true,
 };
 
