@@ -20,8 +20,8 @@ function DtrForm({ isOut }) {
     // const tempLat = 13.9147895;
     // const tempLon = 121.4328423;
 
-    formData.append(isOut ? "lat_in" : "lat_out", tempLat);
-    formData.append(isOut ? "lon_in" : "lon_out", tempLon);
+    formData.append(isOut ? "lat_in" : "lat_out", latitude);
+    formData.append(isOut ? "lon_in" : "lon_out", longitude);
 
     const handler = {
       loadingLabel: isOut ? "Clocking in..." : "Clocking out...",
