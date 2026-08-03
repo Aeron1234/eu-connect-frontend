@@ -5,6 +5,8 @@ import { useEffect } from "react";
 // 1. Create the single instance
 export const socket = io("http://localhost:7000", {
   autoConnect: false,
+  withCredentials: true,
+  transports: ["websocket", "polling"],
 });
 
 export default function SocketProvider({ children, userId }) {
