@@ -2,7 +2,10 @@ import PageContainer from "app/_components/PageContainer";
 import Modal from "@/app/_components/Modal";
 import StorageUploadForm from "@/app/_components/StorageUploadForm";
 import StorageFilesList from "@/app/_components/StorageFilesList";
-import { getInternshipFiles } from "@/app/_services/services";
+import {
+  getFileRequirementTypes,
+  getInternshipFiles,
+} from "@/app/_services/services";
 import { FolderOpen, Upload } from "lucide-react";
 
 import { Suspense } from "react";
@@ -15,8 +18,12 @@ export const metadata = {
 async function StoragePage({ searchParams }) {
   const params = await searchParams;
 
-  const internshipFiles = await getInternshipFiles();
+  const [internshipFiles, fileRequirementTypes] = await Promise.all([
+    getInternshipFiles(),
+    getFileRequirementTypes(),
+  ]);
 
+  console.log(fileRequirementTypes);
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -43,7 +50,7 @@ async function StoragePage({ searchParams }) {
           triggerStyles="max-xs:w-full"
           title={"Upload file"}
         >
-          <StorageUploadForm />
+          <StorageUploadForm fileRequirementTypes={fileRequirementTypes} />
         </Modal>
       </div>
 

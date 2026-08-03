@@ -14,11 +14,7 @@ function DeleteForm({
 
   return (
     <form action={handleAction}>
-      <input type="hidden" name={name} defaultValue={id} />
-
-      {usage === "storage" && (
-        <input type="hidden" name="filePath" value={path} />
-      )}
+      <input type="hidden" name={name} value={id} />
 
       <DialogFooter>
         <div className="flex gap-2 font-semibold w-full justify-end">

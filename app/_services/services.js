@@ -211,6 +211,44 @@ export const getLatestDtrStatus = async () => {
   }
 };
 
+export const getFileRequirementTypes = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["student", "employer", "department_head", "admin"].includes(
+        session.user.role,
+      )
+    ) {
+      throw new Error("Unauthorized");
+    }
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/files/requirements?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to get the file requirement types.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || [];
+  } catch (err) {
+    return null;
+  }
+});
+
 export const getInternshipFiles = cache(async () => {
   try {
     const session = await getUserSession();
@@ -248,6 +286,48 @@ export const getInternshipFiles = cache(async () => {
     return null;
   }
 });
+
+export async function downloadInternshipFile(prevState, formData) {
+  try {
+    const fileId = formData.fileId; // formData is your plain object {fileId: id} here, not a real FormData
+
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["student", "department_head", "admin"].includes(session.user.role)
+    ) {
+      return { success: false, error: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/files/${fileId}/download?userId=${userId}`,
+      {
+        method: "GET",
+        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        success: false,
+        error: error.error || "Download failed. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      url: data.url,
+      fileName: data.fileName,
+      message: "File was opened / downloaded.",
+    };
+  } catch (err) {
+    console.error("Download error:", err);
+    return { success: false, error: "Download failed. Please try again." };
+  }
+}
 
 export const getAllAnnouncements = cache(
   async ({ category = "all", page = 1, search = "" }) => {
@@ -957,6 +1037,130 @@ export const getSearchedStudentDtrLocation = cache(async (searchedUserId) => {
         error:
           error.message ||
           "Failed to get searched user setted location for DTR. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getSearchedStudentFiles = cache(async (searchedUserId) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["department_head", "admin"].includes(session.user.role)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/files/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get searched user's files. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const downloadSearchedStudentFiles = async (prevState, formData) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["employer", "department_head", "admin"].includes(session.user.role)
+    ) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const userId = session.user.id;
+
+    const { searchedUserId, fileId } = formData;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/files/${fileId}/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        success: false,
+        error:
+          error.error || "Failed to open / download file. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      url: data.url,
+      fileName: data.fileName,
+      message: "File opened / downloaded successfully.",
+    };
+  } catch (err) {
+    console.error("Download searched student file error:", err);
+    return {
+      success: false,
+      error: "Failed to open / download file. Please try again.",
+    };
+  }
+};
+
+export const getEmployerUploadedFiles = cache(async (searchedUserId) => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["employer", "admin"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/employer-uploaded-files/${searchedUserId}?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get searched user's files. Please try again.",
       };
     }
 

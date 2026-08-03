@@ -110,10 +110,10 @@ function SideNavigationList({ userRole, firstName = "" }) {
       </Link>
 
       {firstName && (
-        <p className="bg-white/10 px-2 py-1 mb-4 w-full flex flex-col rounded-lg border border-white/10">
+        <div className="bg-white/10 px-5 py-1 mb-4 w-full flex flex-col rounded-lg border border-white/10">
           <span className="text-white/80 font-normal">Welcome back,</span>{" "}
           <span className="text-lg">{firstName}</span>
-        </p>
+        </div>
       )}
 
       {/* 🌟 2. Added 'flex-1' to force the list to scale down and take up all available screen vertical space */}

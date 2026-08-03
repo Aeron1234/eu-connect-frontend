@@ -2,12 +2,12 @@ import { notFound } from "next/navigation";
 import {
   getSearchedStudentDtrLocation,
   getSearchedStudentDTRs,
+  getSearchedStudentFiles,
   getSearchedStudentNarratives,
   getStudentEvaluationCriterias,
   getStudentPastEvaluations,
-  // getStudentDtrRecords,      <-- Import your specific fetchers here
-  // getStudentNarrativeRecords,
-  // getStudentDocuments,
+  getFileRequirementTypes,
+  getEmployerUploadedFiles,
 } from "../_services/services";
 
 import DtrTable from "./DtrTable";
@@ -17,6 +17,8 @@ import StudentNarratives from "./StudentNarratives";
 import StudentEvaluationList from "./StudentEvaluationList";
 import StudentEvaluationCriteria from "./StudentEvaluationCriteria";
 import SetDtrLocation from "./SetDtrLocation";
+import { FolderOpen } from "lucide-react";
+import EmployerCertificateUploads from "./EmployerCertificateUploads";
 
 export default async function SearchedUserRecords({
   filter,
@@ -73,8 +75,19 @@ export default async function SearchedUserRecords({
     case "documents":
       // Only internal academic administrators manage legal/compliance folders
       if (!["department_head", "admin"].includes(userRole)) return notFound();
-      return <DocumentsTab searchedUserId={searchedUserId} />;
+      return (
+        <DocumentsTab searchedUserId={searchedUserId} userRole={userRole} />
+      );
 
+    case "certificates":
+      if (!["employer", "admin"].includes(userRole)) return notFound();
+      return (
+        <EmployerCertificateTab
+          searchedUserId={searchedUserId}
+          userRole={userRole}
+          userId={userId}
+        />
+      );
     case "info":
       return <InfoTab searchedUserId={searchedUserId} />;
 
@@ -171,11 +184,52 @@ async function EvaluationsTab({ searchedUserId, userRole, userId }) {
   );
 }
 
-async function DocumentsTab({ searchedUserId }) {
-  // const docs = await getStudentDocuments(searchedUserId);
+async function DocumentsTab({ searchedUserId, userRole }) {
+  const [fileData, requirementTypes] = await Promise.all([
+    getSearchedStudentFiles(searchedUserId),
+    getFileRequirementTypes(),
+  ]);
+  console.log("DocumentsTab file data:", fileData);
+  console.log("DocumentsTab requirement types:", requirementTypes);
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
-      <StudentDocuments /* data={docs} */ />
+      {fileData.length > 0 ? (
+        fileData.map((data) => (
+          <StudentDocuments
+            searchedUserId={searchedUserId}
+            fileData={data}
+            requirementTypes={requirementTypes}
+            key={data.id}
+          />
+        ))
+      ) : (
+        <div className="p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+            <FolderOpen className="w-7 h-7 text-muted-foreground/50" />
+          </div>
+          <p className="text-sm font-medium text-foreground">
+            No documents yet
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Internship documents will appear here once uploaded.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function EmployerCertificateTab({ searchedUserId, userRole, userId }) {
+  const uploadedFiles = await getEmployerUploadedFiles(searchedUserId);
+
+  console.log("EmployerCertificateTab uploaded files:", uploadedFiles);
+
+  return (
+    <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
+      <EmployerCertificateUploads
+        searchedUserId={searchedUserId}
+        uploadedFiles={uploadedFiles}
+      />
     </div>
   );
 }

@@ -544,14 +544,14 @@ export async function deleteFile(prevState, formData) {
 
     const userId = session.user.id;
     const fileId = Number(formData.get("fileId"));
-    const filePath = formData.get("filePath");
+    // const filePath = formData.get("filePath");
 
-    if (!fileId || !filePath) throw new Error("Missing file information.");
+    // if (!fileId || !filePath) throw new Error("Missing file information.");
 
-    const encodedPath = encodeURIComponent(filePath);
+    // const encodedPath = encodeURIComponent(filePath);
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/file/${fileId}?userId=${userId}&filePath=${encodedPath}`,
+      `${process.env.API_BASE_URL}/api/file/${fileId}?userId=${userId}`,
       {
         method: "DELETE",
         headers: {

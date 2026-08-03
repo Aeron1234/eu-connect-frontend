@@ -10,18 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "date-fns";
-import {
-  Download,
-  File,
-  FileBox,
-  FileIcon,
-  FileText,
-  FileTextIcon,
-  TableIcon,
-  Trash2,
-} from "lucide-react";
+import { Download, File, FileBox, FileText, Trash2 } from "lucide-react";
 import Modal from "./Modal";
 import StorageDeleteFile from "./StorageDeleteFile";
+import { useTransition } from "react";
+import { toastAndAction } from "../_services/helpers";
+import { Spinner } from "@/components/ui/spinner";
+import { downloadInternshipFile } from "../_services/services";
 
 function StorageFilesTable({ filteredFiles = [] }) {
   return (
@@ -61,7 +56,7 @@ function RowCells({ item }) {
     path,
     file_type,
   } = item;
-
+  const [isPending, startTransition] = useTransition();
   const formattedCategory =
     category[0].toUpperCase() + category.split("").slice(1).join("");
 
@@ -81,6 +76,25 @@ function RowCells({ item }) {
     return <File className="text-stone-400 h-5 w-5" />;
   };
 
+  function handleDownload() {
+    const formData = { fileId: id };
+    const handlers = {
+      loadingLabel: "Opening / downloading file...",
+      successLabel: "File was opened / downloaded.",
+      errorLabel: "Failed to open / download file.",
+      action: downloadInternshipFile,
+      formData,
+    };
+
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
+
+      if (!result?.success) return; // toastAndAction already showed the error toast
+
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    });
+  }
+
   return (
     <>
       <TableCell className={"flex gap-1 items-center"}>
@@ -96,14 +110,19 @@ function RowCells({ item }) {
       </TableCell>
       <TableCell>
         <div className="text-stone-600 flex items-center gap-1 justify-end text-right">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm"
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={isPending}
+            className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm disabled:opacity-50"
+            aria-label="Download file"
           >
-            <Download className="h-5 w-5" />
-          </a>
+            {isPending ? (
+              <Spinner className="h-5 w-5 stroke-3" />
+            ) : (
+              <Download className="h-5 w-5" />
+            )}
+          </button>
 
           <Modal
             trigger={

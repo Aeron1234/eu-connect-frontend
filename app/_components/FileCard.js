@@ -1,10 +1,16 @@
+"use client";
+
+import { useTransition } from "react";
 import { Download, File, FileBox, FileText, Table, Trash2 } from "lucide-react";
 import Modal from "./Modal";
 import StorageDeleteFile from "./StorageDeleteFile";
+import { downloadInternshipFile } from "../_services/services";
+import { toastAndAction } from "../_services/helpers"; // or wherever it lives
+import { Spinner } from "@/components/ui/spinner";
 
 function FileCard({ item }) {
-  const { id, created_at, file_name, company_name, category, url, file_type } =
-    item;
+  const { id, file_name, company_name, file_type } = item;
+  const [isPending, startTransition] = useTransition();
 
   const type = file_type?.toLowerCase() || "";
 
@@ -21,6 +27,25 @@ function FileCard({ item }) {
       return <FileBox size={24} className="text-blue-500" />;
     return <File size={24} className="text-stone-400" />;
   };
+
+  function handleDownload() {
+    const formData = { fileId: id };
+    const handlers = {
+      loadingLabel: "Opening / downloading file...",
+      successLabel: "File was opened / downloaded.",
+      errorLabel: "Failed to open / download file.",
+      action: downloadInternshipFile,
+      formData,
+    };
+
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
+
+      if (!result?.success) return; // toastAndAction already showed the error toast
+
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    });
+  }
 
   return (
     <>
@@ -39,14 +64,19 @@ function FileCard({ item }) {
         </div>
 
         <div className="w-full text-stone-600 flex items-center gap-1 justify-center text-right mt-2">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm"
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={isPending}
+            className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm disabled:opacity-50"
+            aria-label="Download file"
           >
-            <Download className="h-5 w-5" />
-          </a>
+            {isPending ? (
+              <Spinner className="h-5 w-5 stroke-3" />
+            ) : (
+              <Download className="h-5 w-5" />
+            )}
+          </button>
 
           <Modal
             trigger={
@@ -54,9 +84,8 @@ function FileCard({ item }) {
                 <Trash2 className="h-5 w-5" />
               </span>
             }
-            title={<span className={`text-primary-500`}>Delete File</span>}
-            // title={<span className="text-red-600">Clock-out?</span>}
-            description={`Are you sure you want to delete this file?`}
+            title={<span className="text-primary-500">Delete File</span>}
+            description="Are you sure you want to delete this file?"
           >
             <StorageDeleteFile fileId={id} />
           </Modal>

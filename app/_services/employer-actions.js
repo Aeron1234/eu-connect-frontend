@@ -115,3 +115,72 @@ export async function setSearchedStudentDtrLocation(prevState, formData) {
     return { success: false, error: err.message };
   }
 }
+
+export async function uploadCertificateOfCompletion(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["employer"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const searchedUserId = formData.get("searchedUserId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/files/${searchedUserId}?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          // no Content-Type — fetch sets multipart/form-data with the
+          // correct boundary automatically when body is a FormData instance
+        },
+        body: formData,
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/users");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Upload certificate error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function deleteEmployerCertificate(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["employer", "admin"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const searchedUserId = formData.get("searchedUserId");
+    const fileId = formData.get("fileId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/searched-user/files/${fileId}/${searchedUserId}?userId=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/users");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Delete pending student evaluation error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}

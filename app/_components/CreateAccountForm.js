@@ -181,12 +181,14 @@ function CreateAccountForm({ roles, courses, departments }) {
               type="hidden"
               name="course"
               value={selectedCourseId}
+              disabled={isPending}
               className="pointer-events-none"
             />
             <label htmlFor="course">Course *</label>
             <Combobox
               items={courses}
               id="course"
+              disabled={isPending}
               onValueChange={handleSelectCourse}
             >
               <ComboboxInput

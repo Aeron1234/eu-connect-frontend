@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Header from "../_components/Header";
 import SideNavigation from "../_components/SideNavigation";
 import { getUserSession } from "../_services/services";
@@ -7,7 +7,7 @@ import Alert from "../_components/Alert";
 
 async function UsersLayout({ children }) {
   const session = await getUserSession();
-  if (!session?.user) return notFound();
+  if (!session?.user) return redirect("/login");
 
   return (
     <SocketProvider userId={session.user.id}>

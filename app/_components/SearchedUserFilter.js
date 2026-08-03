@@ -1,4 +1,11 @@
-import { Clock, FileText, FolderOpen, Star, User } from "lucide-react";
+import {
+  Clock,
+  FileCheck,
+  FileText,
+  FolderOpen,
+  Star,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 
 function filterTabs({ userRole, searchedUserId, searchedUserRole = "" }) {
@@ -34,6 +41,12 @@ function filterTabs({ userRole, searchedUserId, searchedUserRole = "" }) {
         value: "evaluations",
         text: "Evaluations",
         icon: <Star className="w-4 h-4" />,
+      },
+      {
+        href: `/users/${searchedUserId}?filter=certificates`,
+        value: "certificates",
+        text: "Certificates",
+        icon: <FileCheck className="w-4 h-4" />,
       },
       {
         href: `/users/${searchedUserId}?filter=info`,
@@ -110,7 +123,7 @@ function SearchedUserFilter({
 
   return (
     <div className="w-full mt-2">
-      <ul className="flex gap-1 bg-white border border-stone-200 shadow-sm rounded-lg p-1 overflow-x-auto">
+      <ul className="flex gap-1 bg-white border border-stone-200 shadow-sm rounded-lg py-2 px-4 overflow-x-auto">
         {filters.map((f) => (
           <li key={f.value}>
             <Link

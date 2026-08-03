@@ -72,9 +72,10 @@ const progressBars = [
 
 async function layout({ dtr, stats }) {
   const session = await getUserSession();
-  const userRole = session?.user?.role;
+  const user = session?.user;
+  const role = session?.user?.role;
 
-  if (!userRole) return notFound();
+  if (!user || role !== "student") return null;
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
