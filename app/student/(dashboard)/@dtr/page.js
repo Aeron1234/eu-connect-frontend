@@ -7,44 +7,6 @@ import {
 } from "@/app/_services/services";
 import { getDtrs } from "@/app/_services/student-actions";
 
-const timeRecords = [
-  {
-    date: "Jul 6, 2026",
-    timeIn: "8:02 AM",
-    timeOut: "5:08 PM",
-    hours: "9.1h",
-    status: "Present",
-  },
-  {
-    date: "Jul 5, 2026",
-    timeIn: "7:58 AM",
-    timeOut: "5:00 PM",
-    hours: "9h",
-    status: "Present",
-  },
-  {
-    date: "Jul 4, 2026",
-    timeIn: "8:05 AM",
-    timeOut: "12:00 PM",
-    hours: "3.9h",
-    status: "Half Day",
-  },
-  {
-    date: "Jul 3, 2026",
-    timeIn: "—",
-    timeOut: "—",
-    hours: "—",
-    status: "Absent",
-  },
-  {
-    date: "Jul 2, 2026",
-    timeIn: "8:00 AM",
-    timeOut: "5:15 PM",
-    hours: "9.3h",
-    status: "Present",
-  },
-];
-
 async function DtrPage({ searchParams }) {
   const params = await searchParams;
   const currentDtrPage = Number(params.d_page) || 1;

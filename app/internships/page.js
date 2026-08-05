@@ -7,6 +7,8 @@ import {
 
 import InternshipPosts from "../_components/InternshipPosts";
 import { Briefcase, Plus } from "lucide-react";
+import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 async function InternshipPage({ searchParams }) {
   const session = await getUserSession();
@@ -23,6 +25,8 @@ async function InternshipPage({ searchParams }) {
     getCourses(),
     getInternshipPosts({}),
   ]);
+
+  console.log(internshipPosts);
 
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
@@ -44,15 +48,24 @@ async function InternshipPage({ searchParams }) {
           </div>
         </div>
 
-        <InternshipPosts
-          courseFilter={courseFilter}
-          workTypeFilter={workTypeFilter}
-          scopeFilter={scopeFilter}
-          internshipPosts={internshipPosts?.data || []}
-          pagination={internshipPosts?.pagination || {}}
-          userRole={userRole}
-          courses={courses || []}
-        />
+        <Suspense
+          fallback={
+            <div className="self-center justify-self-center p-5">
+              <span className="sr-only">Loading profile records...</span>
+              <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
+            </div>
+          }
+        >
+          <InternshipPosts
+            courseFilter={courseFilter}
+            workTypeFilter={workTypeFilter}
+            scopeFilter={scopeFilter}
+            internshipPosts={internshipPosts?.data || []}
+            pagination={internshipPosts?.pagination || {}}
+            userRole={userRole}
+            courses={courses || []}
+          />
+        </Suspense>
       </div>
     </main>
   );

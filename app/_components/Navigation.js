@@ -17,7 +17,7 @@ function Navigation({ inboxData }) {
       </div>
 
       <div className="hidden min-[670px]:flex items-center gap-4">
-        <NotificationsButton inboxData={inboxData} />
+        <NotificationsButton inboxData={inboxData || {}} />
 
         <Link
           href="/account"

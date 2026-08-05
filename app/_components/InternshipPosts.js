@@ -67,9 +67,6 @@ function InternshipPosts({
       : initials.slice(0, 3).toLocaleUpperCase();
   }
 
-  console.log(internshipPosts);
-  // console.log(companyNameInitials());
-
   return (
     <>
       {/* Filters */}
