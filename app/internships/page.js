@@ -48,8 +48,8 @@ async function InternshipPage({ searchParams }) {
           courseFilter={courseFilter}
           workTypeFilter={workTypeFilter}
           scopeFilter={scopeFilter}
-          internshipPosts={internshipPosts.data || []}
-          pagination={internshipPosts.pagination || {}}
+          internshipPosts={internshipPosts?.data || []}
+          pagination={internshipPosts?.pagination || {}}
           userRole={userRole}
           courses={courses || []}
         />
