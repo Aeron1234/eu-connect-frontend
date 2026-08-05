@@ -23,7 +23,7 @@ async function InternshipPage({ searchParams }) {
 
   const [courses, internshipPosts] = await Promise.all([
     getCourses(),
-    getInternshipPosts({}),
+    getInternshipPosts(),
   ]);
 
   console.log(internshipPosts);
