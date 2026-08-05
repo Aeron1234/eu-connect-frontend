@@ -550,7 +550,9 @@ export const getCourses = cache(async () => {
     const session = await getUserSession();
     if (
       !session?.user ||
-      !["department_head", "student", "admin"].includes(session.user.role)
+      !["student", "employer", "department_head", "admin"].includes(
+        session.user.role,
+      )
     ) {
       throw new Error("Unauthorized");
     }
@@ -1166,6 +1168,47 @@ export const getEmployerUploadedFiles = cache(async (searchedUserId) => {
 
     const data = await res.json();
 
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getInternshipPosts = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    // const base = `${process.env.API_BASE_URL}/api/internship-postings`;
+    // const query = `userId=${userId}&workType=${workType}&courseId=${courseId}&search=${search}&mine=${mine}&page=${page}&limit=${limit}`;
+    // const apiUrl = `${base}?${query}`;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-postings?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message || "Failed to get internship posts. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    // return await res.json();
     return data;
   } catch (err) {
     console.log(err);

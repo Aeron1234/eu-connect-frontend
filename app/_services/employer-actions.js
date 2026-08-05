@@ -184,3 +184,133 @@ export async function deleteEmployerCertificate(prevState, formData) {
     return { success: false, error: err.message };
   }
 }
+
+export async function createInternshipPosting(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["employer"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-postings?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(formData),
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/internships");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Post internship error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function updateInternshipPosting(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["employer"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+    const postingId = formData.get("postingId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-postings/${postingId}?userId=${userId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(formData),
+      },
+    );
+
+    if (res.ok) revalidatePath("/internships");
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function deleteInternshipPosting(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["employer", "admin"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const postingId = formData.get("postingId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-postings/${postingId}?userId=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/users");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Delete pending student evaluation error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function toggleInternshipFavorite(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["employer"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const postingId = formData.get("postingId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-postings/apply/${postingId}?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(formData),
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/internships");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Post internship error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
