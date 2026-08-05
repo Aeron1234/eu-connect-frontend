@@ -1206,10 +1206,9 @@ export const getInternshipPosts = cache(async () => {
       };
     }
 
-    const data = await res.json();
+    // const data = await res.json();
 
-    // return await res.json();
-    return data;
+    return await res.json();
   } catch (err) {
     console.log(err);
     return null;
