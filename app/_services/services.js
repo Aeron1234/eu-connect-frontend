@@ -1206,9 +1206,11 @@ export const getInternshipPosts = cache(async () => {
       };
     }
 
-    // const data = await res.json();
+    const data = await res.json();
 
-    return await res.json();
+    console.log(data);
+    // return await res.json();
+    return data;
   } catch (err) {
     console.log(err);
     return null;
