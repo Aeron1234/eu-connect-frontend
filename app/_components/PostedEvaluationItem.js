@@ -1,24 +1,34 @@
 "use client";
 import {
   Calendar,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  CircleX,
+  EyeOff,
+  RotateCcw,
   Star,
   Trash2,
   User,
 } from "lucide-react";
-import { useState } from "react";
-// import DtrDeleteForm from "./DtrDeleteForm";
+import { startTransition, useState } from "react";
 import Modal from "./Modal";
 import StudentEvaluationDeleteForm from "./StudentEvaluationDeleteForm";
+import {
+  respondToStudentEvaluation,
+  restoreDisputedEvaluation,
+} from "../_services/student-actions";
+import { toastAndAction } from "../_services/helpers";
 
-function StudentEvaluationItem({ ev, defaultOpen, userId }) {
+function PostedEvaluationItem({
+  ev,
+  defaultOpen,
+  userId = "",
+  type = "default",
+}) {
   const [open, setOpen] = useState(!!defaultOpen);
+
   const total = ev.breakdown.reduce((a, b) => a + b.score, 0);
   const totalMax = ev.breakdown.reduce((a, b) => a + b.max, 0);
-
-  console.log("StudentEvaluationItem ev:", ev);
 
   const statusClass = (status) =>
     status === "Completed"
@@ -27,9 +37,48 @@ function StudentEvaluationItem({ ev, defaultOpen, userId }) {
         ? "bg-amber-100 text-amber-700"
         : "bg-blue-100 text-blue-700";
 
+  function handleResponse(res) {
+    if (type !== "confirmation" || !["completed", "disputed"].includes(res))
+      return;
+
+    const formData = new FormData();
+    formData.append("evaluationId", ev.id);
+    formData.append("decision", res);
+
+    const isAccepted = res === "completed";
+
+    startTransition(
+      async () =>
+        await toastAndAction({
+          loadingLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation...`,
+          successLabel: `Student evaluation was ${isAccepted ? "Accepted!" : "Disputed!"}`,
+          errorLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation failed.`,
+          action: respondToStudentEvaluation,
+          formData,
+        }),
+    );
+  }
+
+  function handleRestore() {
+    if (type !== "disputed") return;
+
+    const formData = new FormData();
+    formData.append("evaluationId", ev.id);
+    startTransition(
+      async () =>
+        await toastAndAction({
+          loadingLabel: `Restoring student evaluation...`,
+          successLabel: `Student evaluation was restored!`,
+          errorLabel: `Restoring student evaluation failed.`,
+          action: restoreDisputedEvaluation,
+          formData,
+        }),
+    );
+  }
+
   return (
     <div
-      className={`border border-stone-300 rounded-xl bg-white overflow-hidden mb-3 ${ev.status === "Pending" ? "opacity-70" : ""}`}
+      className={`border border-stone-300 rounded-xl bg-white overflow-hidden mb-3`}
     >
       <div className="w-full flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
         <button
@@ -139,6 +188,40 @@ function StudentEvaluationItem({ ev, defaultOpen, userId }) {
           )}
         </div>
       )}
+      {type === "confirmation" && ev.status === "Pending" && (
+        <div className="bg-white px-5 py-4 border-t border-stone-200">
+          <div className="flex w-full justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => handleResponse("disputed")}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-accent"
+            >
+              Dispute
+            </button>
+            <button
+              type="button"
+              onClick={() => handleResponse("completed")}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
+            >
+              <CheckCircle2 className="h-4 w-4" /> Accept &amp; Confirm
+            </button>
+          </div>
+        </div>
+      )}
+
+      {type === "disputed" && ev.status === "Disputed" && (
+        <div className="bg-white px-5 py-4 border-t border-stone-200">
+          <div className="flex w-full justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleRestore}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
+            >
+              <RotateCcw className="h-4 w-4" /> Restore
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -176,4 +259,4 @@ const CircularScore = ({ score, max }) => {
   );
 };
 
-export default StudentEvaluationItem;
+export default PostedEvaluationItem;

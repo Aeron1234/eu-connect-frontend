@@ -569,3 +569,214 @@ export async function deleteFile(prevState, formData) {
     return { success: false, error: err.message };
   }
 }
+
+export async function toggleInternshipFavorite(postingId) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["student"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-postings/toggle-favorite/${postingId}?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/internships");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Post internship error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function requestSupervisor(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    if (!["student"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const userId = session.user.id;
+    const employerId = formData.get("employerId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/supervisor-requests?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify({ employerId }),
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        success: false,
+        error: error.error || "Failed to send request.",
+      };
+    }
+
+    return await res.json(); // { success, message, id }
+  } catch (err) {
+    console.error("Request supervisor error:", err);
+    return { success: false, error: "Failed to send request." };
+  }
+}
+
+export async function cancelSupervisorRequest(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    if (!["student"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const userId = session.user.id;
+    const requestId = formData.get("requestId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/supervisor-requests/${requestId}?userId=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        success: false,
+        error: error.error || "Failed to cancel request.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Cancel supervisor request error:", err);
+    return { success: false, error: "Failed to cancel request." };
+  }
+}
+
+export async function postEmployerEvaluation(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["student"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const { scores, other_remarks } = formData;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluations/employer?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify({
+          scores,
+          other_remarks,
+        }),
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/student/evaluations");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Post evaluation evaluation error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function respondToStudentEvaluation(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["student"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const evaluationId = formData.get("evaluationId");
+    const decision = formData.get("decision");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluations/respond/${evaluationId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify({
+          decision,
+        }),
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/student/evaluations");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Updating evaluation status error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function restoreDisputedEvaluation(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["student"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const evaluationId = formData.get("evaluationId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluations/restore/${evaluationId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/student/evaluations");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Restoring evaluation error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}

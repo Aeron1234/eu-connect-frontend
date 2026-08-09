@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export async function toastAndAction({
@@ -95,6 +95,66 @@ export function useApiFetch(query, delay = 500) {
   }, [query, delay]);
 
   return { data, loading, error, setData };
+}
+
+export function useFavoriteToggle(postingId, initialFavorited, toggleAction) {
+  const DEBOUNCE_MS = 300;
+
+  const [isFavorited, setIsFavorited] = useState(initialFavorited);
+  const confirmedRef = useRef(initialFavorited); // last state the server actually confirmed
+  const desiredRef = useRef(initialFavorited); // where the user's clicks currently want it
+  const timeoutRef = useRef(null);
+
+  // If the parent re-fetches and hands us fresh server data, resync
+  useEffect(() => {
+    confirmedRef.current = initialFavorited;
+    desiredRef.current = initialFavorited;
+    setIsFavorited(initialFavorited);
+  }, [initialFavorited]);
+
+  const syncWithServer = useCallback(async () => {
+    const desired = desiredRef.current;
+
+    // Net effect of all the clicking cancels out — no request needed at all
+    if (desired === confirmedRef.current) return;
+
+    try {
+      const result = await toggleAction(postingId);
+
+      if (result?.success) {
+        confirmedRef.current = result.isFavorited;
+        setIsFavorited(result.isFavorited);
+
+        // User kept clicking while the request was in flight — resync once more
+        if (desiredRef.current !== confirmedRef.current) {
+          syncWithServer();
+        }
+      } else {
+        // Revert to last known-good state on failure
+        desiredRef.current = confirmedRef.current;
+        setIsFavorited(confirmedRef.current);
+      }
+    } catch {
+      desiredRef.current = confirmedRef.current;
+      setIsFavorited(confirmedRef.current);
+    }
+  }, [postingId, toggleAction]);
+
+  const toggle = useCallback(() => {
+    desiredRef.current = !desiredRef.current;
+    setIsFavorited(desiredRef.current); // instant optimistic feedback
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(syncWithServer, DEBOUNCE_MS);
+  }, [syncWithServer]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return { isFavorited, toggle };
 }
 
 export function useGetLocation() {

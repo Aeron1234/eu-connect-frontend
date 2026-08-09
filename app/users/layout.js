@@ -21,7 +21,7 @@ async function UsersLayout({ children }) {
           </div>
 
           <div className="py-4 px-8 max-lg:px-4 flex-1 overflow-y-auto ">
-            <div className="max-w-7xl mx-auto space-y-6">{children}</div>
+            {children}
           </div>
         </main>
       </div>

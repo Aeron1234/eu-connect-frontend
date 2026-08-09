@@ -29,7 +29,10 @@ function Modal({
       >
         {trigger}
       </DialogTrigger>
-      <DialogContent showCloseButton={true} className={"flex flex-col"}>
+      <DialogContent
+        showCloseButton={true}
+        className={"flex flex-col max-h-150 overflow-auto"}
+      >
         <DialogHeader>
           <DialogTitle className={`text-base ${titleStyles}`}>
             {titleIcon && titleIcon} {title}

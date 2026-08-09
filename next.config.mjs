@@ -13,13 +13,19 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "50mb",
     },
+    staleTimes: {
+      dynamic: 60, // seconds dynamic routes stay fresh in Router Cache
+      static: 180,
+    },
   },
 
   async rewrites() {
+    const SOCKET_URL =
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:7000";
     return [
       {
         source: "/eu-connect/api/:path*",
-        destination: "https://your-app-name.onrender.com/eu-connect/api/:path*",
+        destination: `${SOCKET_URL}/eu-connect/api/:path*`,
       },
     ];
   },

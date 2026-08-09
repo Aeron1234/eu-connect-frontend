@@ -14,14 +14,14 @@ function DtrForm({ isOut }) {
 
   const coords = useGetLocation();
 
-  const { latitude, longitude } = coords;
+  // const { latitude, longitude } = coords;
 
   function handleAction(formData) {
-    // const tempLat = 13.9147895;
-    // const tempLon = 121.4328423;
+    const tempLat = 13.922662984858786;
+    const tempLon = 121.43409490585329;
 
-    formData.append(isOut ? "lat_in" : "lat_out", latitude);
-    formData.append(isOut ? "lon_in" : "lon_out", longitude);
+    formData.append(isOut ? "lat_in" : "lat_out", tempLat);
+    formData.append(isOut ? "lon_in" : "lon_out", tempLon);
 
     const handler = {
       loadingLabel: isOut ? "Clocking in..." : "Clocking out...",

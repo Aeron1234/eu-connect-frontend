@@ -1,14 +1,18 @@
-import PageTitle from "../_components/PageTitle";
-import PageContainer from "../_components/PageContainer";
 import SearchUsers from "../_components/SearchUsers";
-import { getSearchHistory } from "../_services/services";
+import { getSearchHistory, getUserSession } from "../_services/services";
 
 export const metadata = {
   title: "Users",
 };
 
 async function UsersPage() {
-  const searchedUserHistory = await getSearchHistory({ type: "user" });
+  const [session, searchedUserHistory] = await Promise.all([
+    getUserSession(),
+    getSearchHistory({ type: "user" }),
+  ]);
+
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
   console.log(searchedUserHistory?.history);
 
@@ -24,7 +28,11 @@ async function UsersPage() {
         </p>
       </div>
 
-      <SearchUsers historyData={searchedUserHistory?.history || []} />
+      <SearchUsers
+        historyData={searchedUserHistory?.history || []}
+        userId={userId}
+        userRole={userRole}
+      />
     </main>
   );
 }

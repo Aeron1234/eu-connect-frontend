@@ -1,13 +1,17 @@
 import SearchedUserItem from "./SearchedUserItem";
 
-function SearchedUserList({ searchedUsers = [] }) {
+function SearchedUserList({ searchedUsers = [], userId, userRole }) {
   return (
     <div className="w-full">
       {searchedUsers.length > 0 && (
         <ul className="w-full flex flex-col gap-2">
-          {searchedUsers.map((user) => (
-            <li className="w-full" key={user.user_id}>
-              <SearchedUserItem user={user} />
+          {searchedUsers.map((searchedUser) => (
+            <li className="w-full" key={searchedUser.user_id}>
+              <SearchedUserItem
+                searchedUser={searchedUser}
+                userId={userId}
+                userRole={userRole}
+              />
             </li>
           ))}
         </ul>

@@ -1,30 +1,20 @@
 import MapWrapper from "@/app/_components/MapWrapper";
-import PageContainer from "@/app/_components/PageContainer";
-import PageTitle from "@/app/_components/PageTitle";
-import { getActiveInternships } from "@/app/_services/services";
-
-import { Suspense } from "react";
+import { getMapLocations } from "@/app/_services/dept-head-actions";
 
 export const metadata = {
   title: "Map",
 };
 
-async function MapPage({ searchParams }) {
-  const params = await searchParams;
+async function MapPage() {
+  const studentLocationsData = await getMapLocations();
 
-  const activeInternships = await getActiveInternships();
+  console.log(studentLocationsData);
 
   return (
-    <PageContainer>
-      <PageTitle
-        title={"Map"}
-        description="Showing the location of ongoing internships"
-      />
-
-      <Suspense fallback={<div>Loading...</div>}>
-        <MapWrapper activeInternships={activeInternships} params={params} />
-      </Suspense>
-    </PageContainer>
+    <MapWrapper
+      initialData={studentLocationsData?.companies || []}
+      regions={studentLocationsData?.availableRegions || []}
+    />
   );
 }
 

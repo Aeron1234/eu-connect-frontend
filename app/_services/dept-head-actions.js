@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getUserSession } from "./services";
+import { cache } from "react";
 
 export async function approveInternshipRecord(prevState, formData) {
   try {
@@ -176,3 +177,43 @@ export async function deleteAnnouncement(prevState, formData) {
     return { success: false, error: err.message };
   }
 }
+
+export const getMapLocations = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["department_head", "admin"].includes(session.user.role)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/student-map?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get the locations of students in the map. Please try again.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});

@@ -717,7 +717,42 @@ export const getStudentEvaluationCriterias = cache(async () => {
       return {
         error:
           error.message ||
-          "Failed to get more notifications. Please try again.",
+          "Failed to get evaluation criterias. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getEmployerEvaluationCriterias = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluation-criterias?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get evaluation criterias. Please try again.",
       };
     }
 
@@ -758,6 +793,113 @@ export const getStudentPastEvaluations = cache(async (searchedUserId) => {
         error:
           error.message ||
           "Failed to get more notifications. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getStudentPendingEvaluations = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["student", "department_head", "admin"].includes(session.user.role)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluations/pending?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get pending evaluations. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getAllEvaluations = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["student"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluations/all?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message || "Failed to get all evaluations. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+});
+
+export const getDisputedEvaluations = cache(async () => {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || !["student"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/evaluations/disputed?userId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.message ||
+          "Failed to get disputed evaluations. Please try again.",
       };
     }
 
@@ -1175,21 +1317,72 @@ export const getEmployerUploadedFiles = cache(async (searchedUserId) => {
   }
 });
 
-export const getInternshipPosts = cache(async () => {
+export const getInternshipPosts = cache(
+  async ({
+    workType = "",
+    courseId = "",
+    search = "",
+    mine = "",
+    page = 1,
+  }) => {
+    try {
+      const session = await getUserSession();
+      if (!session?.user) {
+        throw new Error("Unauthorized");
+      }
+
+      const userId = session.user.id;
+
+      const params = new URLSearchParams({
+        userId,
+        workType,
+        courseId,
+        search,
+        mine,
+        page,
+      });
+
+      const res = await fetch(
+        `${process.env.API_BASE_URL}/api/internship-postings?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": process.env.BACKEND_SECRET_KEY,
+          },
+          cache: "no-store",
+        },
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        return {
+          error:
+            error.message ||
+            "Failed to get internship posts. Please try again.",
+        };
+      }
+
+      const data = await res.json();
+
+      return data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  },
+);
+
+export const getSupervisorStatus = async (employerId = "") => {
   try {
     const session = await getUserSession();
     if (!session?.user) {
-      throw new Error("Unauthorized");
+      return { error: "Unauthorized" };
     }
 
     const userId = session.user.id;
 
-    // const base = `${process.env.API_BASE_URL}/api/internship-postings`;
-    // const query = `userId=${userId}&workType=${workType}&courseId=${courseId}&search=${search}&mine=${mine}&page=${page}&limit=${limit}`;
-    // const apiUrl = `${base}?${query}`;
-
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-postings?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/supervisor-status/${employerId}?userId=${userId}`,
       {
         method: "GET",
         headers: {
@@ -1202,17 +1395,13 @@ export const getInternshipPosts = cache(async () => {
       const error = await res.json();
       return {
         error:
-          error.message || "Failed to get internship posts. Please try again.",
+          error.error || "Failed to get supervisor status. Please try again.",
       };
     }
 
-    const data = await res.json();
-
-    console.log(data);
-    // return await res.json();
-    return data;
+    return await res.json();
   } catch (err) {
-    console.log(err);
-    return null;
+    console.error("Get supervisor status error:", err);
+    return { error: "Failed to get supervisor status. Please try again." };
   }
-});
+};

@@ -2,6 +2,7 @@
 import {
   BookOpen,
   BriefcaseBusiness,
+  ClipboardCheck,
   FolderOpen,
   LayoutDashboard,
   LibraryBig,
@@ -13,7 +14,6 @@ import {
 import SignoutButton from "./SignoutButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import UseTooltip from "./UseTooltip";
 import { useWindowSize } from "../_services/helpers";
 import Logo from "./Logo";
 
@@ -45,6 +45,11 @@ function SideNavigationList({ userRole, firstName = "" }) {
           name: "Storage",
           href: "/student/storage",
           icon: <FolderOpen className="h-5 w-5" />,
+        },
+        {
+          name: "Evaluations",
+          href: "/student/evaluations",
+          icon: <ClipboardCheck className="h-5 w-5" />,
         },
       ];
     }
