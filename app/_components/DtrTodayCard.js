@@ -2,9 +2,14 @@ import { FileText, MapPin } from "lucide-react";
 import DtrButton from "./DtrButton";
 import { format } from "date-fns";
 import Link from "next/link";
+import Modal from "./Modal";
+import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 
 function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
   const hasOngoingInternship = internshipData?.status === "ongoing";
+
+  const canFinish =
+    internshipData?.accumulated_hours >= internshipData?.total_hours;
 
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
@@ -67,9 +72,32 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
         </div>
 
         {hasOngoingInternship ? (
-          <div className="flex-shrink-0">
-            <DtrButton internshipData={internshipData} status={status} />
-          </div>
+          canFinish ? (
+            <Modal
+              trigger={
+                <div
+                  className="self-start md:self-auto flex-shrink-0 flex items-center gap-2 px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90 whitespace-nowrap"
+                  title={"Finish this internship record."}
+                >
+                  Finish Internship Record
+                </div>
+              }
+              title={
+                <span className={`text-primary-500`}>
+                  Finish this internship record?
+                </span>
+              }
+              description={`You have now completed the required hours.`}
+            >
+              <InternshipRecordFinishForm
+                internshipId={internshipData?.id || ""}
+              />
+            </Modal>
+          ) : (
+            <div className="flex-shrink-0">
+              <DtrButton internshipData={internshipData} status={status} />
+            </div>
+          )
         ) : (
           <Link
             className="self-start md:self-auto flex-shrink-0 flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90"

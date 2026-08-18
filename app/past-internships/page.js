@@ -37,6 +37,7 @@ async function PastInternshipsPage({ searchParams }) {
         academicYears={pastInternshipsData?.academicYears || []}
         pagination={pastInternshipsData?.pagination || {}}
         yearFilter={yearFilter}
+        courses={courses || []}
       />
     </main>
   );

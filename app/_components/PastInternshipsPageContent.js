@@ -15,6 +15,7 @@ function keyOf(company) {
 function PastInternshipsPageContent({
   initialData = [],
   academicYears = [],
+  courses = [],
   yearFilter = "all",
   pagination: {
     page: initialPage = 1,
@@ -154,6 +155,7 @@ function PastInternshipsPageContent({
                 key={keyOf(c)}
                 handleItemDelete={handleItemDelete}
                 handleItemUpdate={handleItemUpdate}
+                courses={courses}
               />
             ))}
           </div>

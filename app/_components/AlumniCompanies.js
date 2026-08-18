@@ -2,7 +2,15 @@
 
 import { cx } from "@/lib/utils";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toastAndAction } from "../_services/helpers";
+import {
+  deleteAlumniRecord,
+  updateAlumniRecord,
+} from "../_services/dept-head-actions";
+import Modal from "./Modal";
+import DeleteForm from "./DeleteForm";
+import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
 
 function initialsOf(name) {
   return name
@@ -18,6 +26,7 @@ function AlumniCompanies({
   company,
   handleItemDelete = null,
   handleItemUpdate = null,
+  courses = [],
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -61,6 +70,10 @@ function AlumniCompanies({
               batch={a.academic_year.split("-")[1]}
               onUpdate={handleItemUpdate}
               onDelete={handleItemDelete}
+              courses={courses}
+              companyName={company.company_name}
+              companyAddress={company.company_address}
+              industry={company.industry}
             />
           ))}
         </div>
@@ -69,8 +82,53 @@ function AlumniCompanies({
   );
 }
 
-function AlumniRow({ alumni, batch, handleItemDelete, handleItemUpdate }) {
+function AlumniRow({
+  alumni,
+  batch,
+  onDelete,
+  onUpdate,
+  courses = [],
+  companyName,
+  companyAddress,
+  industry,
+}) {
+  const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+
+  function handleDelete(formData) {
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Deleting record...",
+        successLabel: "Record deleted.",
+        errorLabel: "Failed to delete record.",
+        action: deleteAlumniRecord,
+        formData,
+      });
+      if (result?.success) {
+        onDelete?.(alumni.id);
+      }
+    });
+  }
+
+  function handleUpdate(formData) {
+    formData.append("id", alumni.id);
+
+    const handlers = {
+      loadingLabel: "Updating record...",
+      successLabel: "Record was updated.",
+      errorLabel: "Updating record failed.",
+      action: updateAlumniRecord,
+      formData,
+    };
+
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
+      if (result?.success && result.record) {
+        onUpdate?.(result.record);
+      }
+    });
+  }
+
   const pct = alumni.total_hours
     ? Math.min(
         100,
@@ -108,21 +166,53 @@ function AlumniRow({ alumni, batch, handleItemDelete, handleItemUpdate }) {
         </button>
 
         <div className="flex gap-3">
-          <div
-            aria-label={`Edit record`}
-            title="Edit record"
-            className="text-muted-foreground hover:text-primary-500"
+          <Modal
+            title={<span className="text-red-600">Update Record</span>}
+            trigger={
+              <div
+                aria-label={`Edit record`}
+                title="Edit record"
+                className="text-muted-foreground hover:text-primary-500"
+              >
+                <Pencil className="h-4 w-4" />
+              </div>
+            }
+            description={"Do you want to change something?"}
           >
-            <Pencil className="h-4 w-4" />
-          </div>
+            <PastInternshipPostEditForm
+              data={{
+                ...alumni,
+                company_name: companyName,
+                company_address: companyAddress,
+                industry,
+              }}
+              isPending={isPending}
+              courses={courses}
+              handleAction={handleUpdate}
+              type="edit"
+            />
+          </Modal>
 
-          <div
-            title="Delete record"
-            aria-label={`Delete record`}
-            className="text-muted-foreground hover:text-destructive"
+          <Modal
+            title={<span className="text-red-600">Delete Record</span>}
+            trigger={
+              <div
+                title="Delete record"
+                aria-label={`Delete record`}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </div>
+            }
+            description={"Are you sure you want to delete this record?"}
           >
-            <Trash2 className="h-4 w-4" />
-          </div>
+            <DeleteForm
+              isPending={isPending}
+              id={alumni.id}
+              name={"recordId"}
+              handleAction={handleDelete}
+            />
+          </Modal>
         </div>
       </div>
 

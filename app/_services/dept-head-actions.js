@@ -757,6 +757,41 @@ export async function deleteAlumniRecord(prevState, formData) {
   }
 }
 
+export async function updateAlumniRecord(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["department_head", "admin"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const recordData = Object.fromEntries(formData);
+    const recordId = recordData.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/alumni-internships/${recordId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(recordData),
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath("/announcements");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Pin Announcement Error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 /////////////////////////
 //FOR REGISTRAR
 /////////////////////////
