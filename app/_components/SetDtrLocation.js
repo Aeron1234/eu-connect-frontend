@@ -19,7 +19,7 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
   );
   const [isPending, startTransition] = useTransition();
 
-  // console.log(loc.internshipId);
+  console.log(dataLocation);
 
   function handleSetLocation() {
     const formData = {
@@ -28,7 +28,7 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
       lat: loc.lat,
       lon: loc.lon,
       label: loc.label,
-      radius_meters: radius,
+      radius_meter: radius,
     };
 
     console.log(formData);
@@ -71,8 +71,6 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
 
   const defaultCoords = useMemo(() => [loc.lat, loc.lon], [loc.lat, loc.lon]);
 
-  // console.log(loc);
-
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6 mt-4 space-y-4">
       <div className="flex items-start gap-3">
@@ -97,6 +95,7 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
           formType={"setDtrLocation"}
           defaultCoords={defaultCoords}
           radius={radius}
+          setRadius={setRadius}
         />
       </div>
 

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useApiFetch } from "../_services/helpers";
 import SearchedUserList from "./SearchedUserList";
 
-function SearchUsers({ historyData = [], userId, userRole }) {
+function SearchUsers({ historyData = [] }) {
   const [inputValue, setInputValue] = useState("");
 
   const apiEndpoint =
@@ -35,18 +35,11 @@ function SearchUsers({ historyData = [], userId, userRole }) {
       {!isEmpty || !isHistoryEmpty ? null : <HistoryLoadingCard />}
 
       {inputValue.trim().length > 2 && !isEmpty && (
-        <SearchedUserList
-          searchedUsers={searchedUsers}
-          userId={userId}
-          userRole={userRole}
-        />
+        <SearchedUserList searchedUsers={searchedUsers} />
       )}
 
       {inputValue.trim().length > 2 || isHistoryEmpty || loading ? null : (
-        <SearchedUsersHistoryList
-          historyData={historyData}
-          userRole={userRole}
-        />
+        <SearchedUsersHistoryList historyData={historyData} />
       )}
 
       {/* <SearchedUsersHistoryList historyData={historyData} /> */}

@@ -8,8 +8,6 @@ export const metadata = {
 async function MapPage() {
   const studentLocationsData = await getMapLocations();
 
-  console.log(studentLocationsData);
-
   return (
     <MapWrapper
       initialData={studentLocationsData?.companies || []}

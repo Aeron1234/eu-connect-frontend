@@ -4,7 +4,8 @@ import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import InternshipPostsList from "./InternshipPostsList";
 import { getInternshipPosts } from "../_services/services";
-
+import { useUser } from "@/contexts/UserContext";
+import SearchBar from "./SearchBar";
 const scopeTabs = [
   { label: "All Companies", value: "" },
   { label: "My Posts", value: "myposts" },
@@ -18,8 +19,6 @@ const workTypeTabs = [
 ];
 
 function InternshipPosts({
-  userRole,
-  userId,
   internshipPosts: initialData = [],
   pagination: {
     page: initialPage = 1,
@@ -38,6 +37,10 @@ function InternshipPosts({
   const [query, setQuery] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
+
+  const { user } = useUser();
+  const userId = user.id;
+  const userRole = user.role;
 
   // Tracks which request is the most recent one, so a slow-resolving
   // stale request can never overwrite a newer one's result
@@ -217,16 +220,11 @@ function InternshipPosts({
           ))}
         </div>
 
-        <div className="relative flex-1 md:flex-none ml-auto">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search company or position..."
-            className="h-10 w-full md:w-64 pl-9 pr-4 rounded-md bg-white border border-stone-200 focus:border-primary-500/40 focus:outline-none text-sm placeholder:text-stone-400"
-          />
-        </div>
+        <SearchBar
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search company or position..."
+        />
       </div>
 
       <p className="text-xs text-muted-foreground">

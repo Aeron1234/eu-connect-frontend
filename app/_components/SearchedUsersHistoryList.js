@@ -14,8 +14,12 @@ import {
   requestSupervisor,
 } from "../_services/student-actions";
 import { Spinner } from "@/components/ui/spinner";
+import { useUser } from "@/contexts/UserContext";
 
-function SearchedUsersHistoryList({ historyData = [], userRole }) {
+function SearchedUsersHistoryList({ historyData = [] }) {
+  const { user } = useUser();
+  const userRole = user.role;
+
   async function handleClearHistory() {
     try {
       await clearSearchHistory({ type: "user" });

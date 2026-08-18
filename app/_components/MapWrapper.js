@@ -123,7 +123,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
       </div>
       <div className="space-y-6">
         {/* Search + location filter */}
-        <div className="space-y-4 rounded-xl border border-border bg-background p-4">
+        <div className="space-y-4 rounded-xl">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -131,9 +131,10 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search student, company, course..."
               aria-label="Search student, company, course"
-              className="w-full rounded-lg border border-border bg-secondary/50 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-maroon sm:max-w-md"
+              className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
             />
           </div>
+
           <div className="space-y-2">
             <span className="text-sm font-semibold text-muted-foreground">
               Locations

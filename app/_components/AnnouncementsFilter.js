@@ -12,7 +12,7 @@ function AnnouncementsFilter({ categories, filteredByCategory, search }) {
       <li>
         <Link
           href={`/announcements?category=all${isSearchEmpty}`}
-          className={`px-3 py-1 rounded-full  transition-colors ${filteredByCategory === "all" ? "text-white bg-primary-500" : "hover:bg-stone-200"}`}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredByCategory === "all" ? "text-white bg-primary-500" : "hover:bg-stone-200"}`}
         >
           All
         </Link>
@@ -35,7 +35,7 @@ function FilterButton({ href, label, filteredByCategory, search }) {
   return (
     <Link
       href={`/announcements?category=${href}${search}`}
-      className={`px-3 py-1 rounded-full  transition-colors ${filteredByCategory === href ? "text-white bg-primary-500" : "hover:bg-red-100"}`}
+      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredByCategory === href ? "text-white bg-primary-500" : "hover:bg-red-100"}`}
     >
       {label}
     </Link>

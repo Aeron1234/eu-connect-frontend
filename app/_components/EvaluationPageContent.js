@@ -35,7 +35,7 @@ async function EvaluateSuperVisorTab() {
   );
 }
 
-async function PendingEvaluationsTab({ userRole }) {
+async function PendingEvaluationsTab() {
   const evaluationData = await getStudentPendingEvaluations();
 
   return (

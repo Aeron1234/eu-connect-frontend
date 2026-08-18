@@ -11,7 +11,6 @@ import { fetchMoreAnnouncements } from "../_services/services";
 function AnnouncementList({
   filteredByCategory,
   announcementData: initialData,
-  user,
   categories,
   search,
 }) {
@@ -92,7 +91,6 @@ function AnnouncementList({
                 >
                   <AnnouncementCard
                     announcement={announcement}
-                    user={user.user}
                     categories={categories}
                   />
                 </li>
@@ -113,7 +111,6 @@ function AnnouncementList({
               >
                 <AnnouncementCard
                   announcement={announcement}
-                  user={user.user}
                   categories={categories}
                 />
               </li>

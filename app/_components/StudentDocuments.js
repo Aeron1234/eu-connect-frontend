@@ -9,45 +9,7 @@ import {
 } from "lucide-react";
 import InternshipRequirementsType from "./InternshipRequirementsType";
 import SearchedStudentFiles from "./SearchedStudentFiles";
-
-const TYPE_TONES = {
-  PDF: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-  DOC: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  DOCX: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  XLS: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  XLSX: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  CSV: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  TXT: "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300",
-  JPG: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  PNG: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  WEBP: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-};
-
-const FILE_TYPE_LABELS = {
-  "application/pdf": "PDF",
-  "text/plain": "TXT",
-  "application/msword": "DOC",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    "DOCX",
-  "application/vnd.ms-excel": "XLS",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "XLSX",
-  "text/csv": "CSV",
-  "image/jpeg": "JPG",
-  "image/png": "PNG",
-  "image/webp": "WEBP",
-};
-
-const typeTone = (label) =>
-  TYPE_TONES[label] ||
-  "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300";
-
-function getFileTypeLabel(mimeType = "") {
-  return (
-    FILE_TYPE_LABELS[mimeType] ||
-    mimeType.split("/")[1]?.toUpperCase() ||
-    "FILE"
-  );
-}
+import { getFileTypeLabel, typeTone } from "@/lib/utils";
 
 function StudentDocuments({
   searchedUserId,

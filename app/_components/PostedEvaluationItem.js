@@ -4,7 +4,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  EyeOff,
+  MessageSquareQuote,
   RotateCcw,
   Star,
   Trash2,
@@ -18,24 +18,31 @@ import {
   restoreDisputedEvaluation,
 } from "../_services/student-actions";
 import { toastAndAction } from "../_services/helpers";
+import { reviewDisputedEvaluation } from "../_services/dept-head-actions";
+import { useUser } from "@/contexts/UserContext";
 
-function PostedEvaluationItem({
-  ev,
-  defaultOpen,
-  userId = "",
-  type = "default",
-}) {
+function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
   const [open, setOpen] = useState(!!defaultOpen);
+
+  const { user } = useUser();
+  const userId = user.id || "";
+  const userRole = user.role || "";
 
   const total = ev.breakdown.reduce((a, b) => a + b.score, 0);
   const totalMax = ev.breakdown.reduce((a, b) => a + b.max, 0);
+
+  const isStaff = userRole === "department_head" || userRole === "admin";
+
+  console.log(ev);
 
   const statusClass = (status) =>
     status === "Completed"
       ? "bg-emerald-100 text-emerald-700"
       : status === "Pending"
         ? "bg-amber-100 text-amber-700"
-        : "bg-blue-100 text-blue-700";
+        : status === "Disputed"
+          ? "bg-stone-100 text-stone-700"
+          : "bg-blue-100 text-blue-700";
 
   function handleResponse(res) {
     if (type !== "confirmation" || !["completed", "disputed"].includes(res))
@@ -71,6 +78,22 @@ function PostedEvaluationItem({
           successLabel: `Student evaluation was restored!`,
           errorLabel: `Restoring student evaluation failed.`,
           action: restoreDisputedEvaluation,
+          formData,
+        }),
+    );
+  }
+
+  function handleStaffReview(formData) {
+    if (!isStaff) return;
+
+    formData.append("evaluationId", ev.id);
+    startTransition(
+      async () =>
+        await toastAndAction({
+          loadingLabel: `Restoring student evaluation...`,
+          successLabel: `Student evaluation was restored!`,
+          errorLabel: `Restoring student evaluation failed.`,
+          action: reviewDisputedEvaluation,
           formData,
         }),
     );
@@ -186,8 +209,24 @@ function PostedEvaluationItem({
               </p>
             </div>
           )}
+
+          {ev.status === "Disputed" && ev?.review_notes && (
+            <div className="rounded-lg bg-white border border-stone-200 p-4 ">
+              <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-stone-800">
+                <MessageSquareQuote className="w-4 h-4 text-primary-500" />
+                Review notes
+              </div>
+              <p className="text-sm text-stone-600 italic leading-relaxed">
+                &quot;{ev?.review_notes}&quot;
+              </p>
+              <p className="text-xs text-stone-400 mt-2">
+                — {ev?.reviewer_name}
+              </p>
+            </div>
+          )}
         </div>
       )}
+
       {type === "confirmation" && ev.status === "Pending" && (
         <div className="bg-white px-5 py-4 border-t border-stone-200">
           <div className="flex w-full justify-end gap-2">
@@ -220,6 +259,28 @@ function PostedEvaluationItem({
               <RotateCcw className="h-4 w-4" /> Restore
             </button>
           </div>
+        </div>
+      )}
+
+      {isStaff && ev.status === "Disputed" && (
+        <div className="bg-white px-5 py-4 border-t border-stone-200">
+          <form
+            className="flex w-full justify-end gap-2"
+            action={handleStaffReview}
+          >
+            <textarea
+              className="text-sm text-stone-600 italic leading-relaxed border border-border rounded-lg w-full outline-none bg-stone-100 px-4 max-w-100 resize-none focus:border-primary-500"
+              name="review_notes"
+              defaultValue={ev?.review_notes || ""}
+            />
+
+            <button
+              type="submitt"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
+            >
+              <MessageSquareQuote className="h-4 w-4" /> Submitt Review
+            </button>
+          </form>
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 import PostedEvaluationItem from "./PostedEvaluationItem";
 
-function EvaluationCard({ evaluations = [], userId = "", type = "default" }) {
+function EvaluationCard({ evaluations = [], type = "default" }) {
   if (evaluations.length === 0) {
     if (type === "confirmation")
       return (
@@ -43,7 +43,6 @@ function EvaluationCard({ evaluations = [], userId = "", type = "default" }) {
             key={ev.id}
             ev={ev}
             defaultOpen={i === 0}
-            userId={userId}
             type={type}
           />
         ))}

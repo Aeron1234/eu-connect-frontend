@@ -54,7 +54,17 @@ function hasValidCoords(coords) {
   );
 }
 
-function MapForm({ setData, data, formType, defaultCoords, radius }) {
+const MIN_RADIUS = 10;
+const MAX_RADIUS = 500;
+
+function MapForm({
+  setData,
+  data,
+  formType,
+  defaultCoords,
+  radius = null,
+  setRadius = null,
+}) {
   const [selectedPosition, setSelectedPosition] = useState(() =>
     hasValidCoords(defaultCoords) ? defaultCoords : null,
   );
@@ -82,58 +92,123 @@ function MapForm({ setData, data, formType, defaultCoords, radius }) {
         ...prev,
         lat: location.y,
         lon: location.x,
+        radius,
       }));
     }
   };
 
+  const handleRadiusChange = (value) => {
+    if (!setRadius) return;
+    setRadius(value);
+
+    if (formType === "setDtrLocation") {
+      setData((prev) => ({
+        ...prev,
+        radius: value,
+      }));
+    }
+  };
+
+  const showRadiusControl = formType === "setDtrLocation" && setRadius !== null;
+
   return (
-    <MapContainer
-      center={hasValidCoords(defaultCoords) ? defaultCoords : [13.931, 121.423]}
-      zoom={14}
-      scrollWheelZoom={true}
-      style={{
-        height: "100%",
-        width: "100%",
-        borderRadius: "4px",
-      }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      <SearchField onLocationSelect={handleLocationSelect} />
-
-      {formType !== "internshipRecord" && (
-        <ClickMarker
-          formType={formType}
-          onLocationSelect={handleLocationSelect}
-          defaultCoords={defaultCoords}
+    <div style={{ position: "relative", height: "100%", width: "100%" }}>
+      <MapContainer
+        center={
+          hasValidCoords(defaultCoords) ? defaultCoords : [13.931, 121.423]
+        }
+        zoom={14}
+        scrollWheelZoom={true}
+        style={{
+          height: "100%",
+          width: "100%",
+          borderRadius: "4px",
+        }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      )}
 
-      {selectedPosition && (
-        <>
-          <Marker
-            key={`${selectedPosition[0]}-${selectedPosition[1]}`}
-            position={selectedPosition}
-            icon={maroonIcon}
+        <SearchField onLocationSelect={handleLocationSelect} />
+
+        {formType !== "internshipRecord" && (
+          <ClickMarker
+            formType={formType}
+            onLocationSelect={handleLocationSelect}
+            defaultCoords={defaultCoords}
           />
-          {formType === "setDtrLocation" && radius > 0 && (
-            <Circle
-              center={selectedPosition}
-              radius={Number(radius)}
-              pathOptions={{
-                color: "#800000",
-                fillColor: "#800000",
-                fillOpacity: 0.15,
-                weight: 2,
-              }}
+        )}
+
+        {selectedPosition && (
+          <>
+            <Marker
+              key={`${selectedPosition[0]}-${selectedPosition[1]}`}
+              position={selectedPosition}
+              icon={maroonIcon}
             />
-          )}
-        </>
+            {formType === "setDtrLocation" && radius > 0 && (
+              <Circle
+                center={selectedPosition}
+                radius={Number(radius)}
+                pathOptions={{
+                  color: "#800000",
+                  fillColor: "#800000",
+                  fillOpacity: 0.15,
+                  weight: 2,
+                }}
+              />
+            )}
+          </>
+        )}
+      </MapContainer>
+
+      {showRadiusControl && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 12,
+            left: 12,
+            right: 12,
+            zIndex: 1000,
+            background: "rgba(255, 255, 255, 0.95)",
+            borderRadius: 6,
+            padding: "8px 12px",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+            display: "none",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <span style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>
+            Radius: {radius ?? 0}m
+          </span>
+          <input
+            type="range"
+            min={MIN_RADIUS}
+            max={MAX_RADIUS}
+            step={5}
+            value={radius ?? MIN_RADIUS}
+            onChange={(e) => handleRadiusChange(Number(e.target.value))}
+            style={{ flex: 1, accentColor: "#800000" }}
+          />
+          <input
+            type="number"
+            min={MIN_RADIUS}
+            max={MAX_RADIUS}
+            value={radius ?? MIN_RADIUS}
+            onChange={(e) => handleRadiusChange(Number(e.target.value))}
+            style={{
+              width: 60,
+              fontSize: 12,
+              padding: "2px 4px",
+              border: "1px solid #ccc",
+              borderRadius: 4,
+            }}
+          />
+        </div>
       )}
-    </MapContainer>
+    </div>
   );
 }
 

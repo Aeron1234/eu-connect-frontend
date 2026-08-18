@@ -9,15 +9,13 @@ import InternshipPosts from "../_components/InternshipPosts";
 import { Briefcase, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import Modal from "../_components/Modal";
-import InternshipPostButton from "../_components/InternshipPostButton";
+import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";
+
+export const metadata = {
+  title: "Internships",
+};
 
 async function InternshipPage({ searchParams }) {
-  const session = await getUserSession();
-  if (!session?.user) redirect("/login");
-  const userRole = session.user.role;
-  const userId = session.user.id;
-
   const [courses, internshipPosts] = await Promise.all([
     getCourses(),
     getInternshipPosts({}),
@@ -36,22 +34,7 @@ async function InternshipPage({ searchParams }) {
           </p>
         </div>
 
-        {userRole === "employer" && (
-          <Modal
-            trigger={
-              <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition cursor-pointer shrink-0">
-                <Plus className="w-4 h-4" />
-                <span className="text-white text-sm font-semibold">
-                  Post Job
-                </span>
-              </div>
-            }
-            title={<span className={`text-primary-500`}>Post Internship</span>}
-            description={`Do you need an intern? Post the job here.`}
-          >
-            <InternshipPostButton courses={courses || []} />
-          </Modal>
-        )}
+        <InternshipPostButtonWrapper courses={courses || []} />
       </div>
 
       <Suspense
@@ -65,8 +48,6 @@ async function InternshipPage({ searchParams }) {
         <InternshipPosts
           internshipPosts={internshipPosts?.data || []}
           pagination={internshipPosts?.pagination || {}}
-          userRole={userRole}
-          userId={userId}
           courses={courses || []}
         />
       </Suspense>

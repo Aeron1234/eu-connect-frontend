@@ -2,7 +2,9 @@
 import {
   BookOpen,
   BriefcaseBusiness,
+  Building2,
   ClipboardCheck,
+  FileText,
   FolderOpen,
   LayoutDashboard,
   LibraryBig,
@@ -16,10 +18,126 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useWindowSize } from "../_services/helpers";
 import Logo from "./Logo";
+import { useUser } from "@/contexts/UserContext";
 
-function SideNavigationList({ userRole, firstName = "" }) {
+function navigation(userRole, userDepartment) {
+  let routes;
+  if (userRole === "student") {
+    routes = [
+      {
+        name: "Narratives",
+        href: "/student/narratives",
+        icon: <BookOpen className="h-5 w-5" />,
+      },
+      {
+        name: "My Records",
+        href: "/student/internship-record",
+        icon: <LibraryBig className="h-5 w-5" />,
+      },
+      {
+        name: "Storage",
+        href: "/student/storage",
+        icon: <FolderOpen className="h-5 w-5" />,
+      },
+      {
+        name: "Evaluations",
+        href: "/student/evaluations",
+        icon: <ClipboardCheck className="h-5 w-5" />,
+      },
+      {
+        name: "Past Internships",
+        href: "/past-internships",
+        icon: <Building2 className="h-5 w-5" />,
+      },
+    ];
+  }
+
+  if (userRole === "department_head") {
+    routes = [
+      {
+        name: "Map",
+        href: "/map",
+        icon: <MapPin className="h-5 w-5" />,
+      },
+
+      {
+        name: "SIPP Reports",
+        href: "/sipp-reports",
+        icon: <FileText className="h-5 w-5" />,
+      },
+      {
+        name: "Past Internships",
+        href: "/past-internships",
+        icon: <Building2 className="h-5 w-5" />,
+      },
+    ];
+
+    if (userRole === "department_head" && userDepartment !== "REG")
+      routes.push({
+        name: "Records",
+        href: "/internship-records",
+        icon: <LibraryBig className="h-5 w-5" />,
+      });
+  }
+
+  if (userRole === "admin") {
+    routes = [
+      {
+        name: "Map",
+        href: "/map",
+        icon: <MapPin className="h-5 w-5" />,
+      },
+      {
+        name: "Accounts",
+        href: "/admin/accounts",
+        icon: <UserPlus className="h-5 w-5" />,
+      },
+      {
+        name: "Records",
+        href: "/internship-records",
+        icon: <LibraryBig className="h-5 w-5" />,
+      },
+      {
+        name: "SIPP Reports",
+        href: "/sipp-reports",
+        icon: <FileText className="h-5 w-5" />,
+      },
+      {
+        name: "Past Internships",
+        href: "/past-internships",
+        icon: <Building2 className="h-5 w-5" />,
+      },
+    ];
+  }
+
+  return routes;
+}
+
+const generalRoutes = [
+  {
+    name: "Announcements",
+    href: "/announcements",
+    icon: <Megaphone className="h-5 w-5" />,
+  },
+  {
+    name: "Internships",
+    href: "/internships",
+    icon: <BriefcaseBusiness className="h-5 w-5" />,
+  },
+  {
+    name: "Search Users",
+    href: "/users",
+    icon: <Users className="h-5 w-5" />,
+  },
+];
+
+function SideNavigationList({ firstName = "" }) {
   const pathName = usePathname();
+  const { user } = useUser();
   const { width } = useWindowSize();
+
+  const userRole = user.role;
+  const userDepartment = user.department_code;
 
   const roles = ["student", "employer", "department_head", "admin"];
   const role = roles.includes(userRole);
@@ -28,71 +146,7 @@ function SideNavigationList({ userRole, firstName = "" }) {
 
   const homeHref = `/${userRole}`;
 
-  function navigation(userRole) {
-    if (userRole === "student") {
-      return [
-        {
-          name: "Narratives",
-          href: "/student/narratives",
-          icon: <BookOpen className="h-5 w-5" />,
-        },
-        {
-          name: "My Records",
-          href: "/student/internship-record",
-          icon: <LibraryBig className="h-5 w-5" />,
-        },
-        {
-          name: "Storage",
-          href: "/student/storage",
-          icon: <FolderOpen className="h-5 w-5" />,
-        },
-        {
-          name: "Evaluations",
-          href: "/student/evaluations",
-          icon: <ClipboardCheck className="h-5 w-5" />,
-        },
-      ];
-    }
-
-    if (userRole === "department_head") {
-      return [
-        {
-          name: "Map",
-          href: "/department_head/map",
-          icon: <MapPin className="h-5 w-5" />,
-        },
-      ];
-    }
-
-    if (userRole === "admin") {
-      return [
-        {
-          name: "Accounts",
-          href: "/admin/accounts",
-          icon: <UserPlus className="h-5 w-5" />,
-        },
-      ];
-    }
-  }
-
-  const routes = navigation(userRole) || [];
-  const generalRoutes = [
-    {
-      name: "Announcements",
-      href: "/announcements",
-      icon: <Megaphone className="h-5 w-5" />,
-    },
-    {
-      name: "Internships",
-      href: "/internships",
-      icon: <BriefcaseBusiness className="h-5 w-5" />,
-    },
-    {
-      name: "Search Users",
-      href: "/users",
-      icon: <Users className="h-5 w-5" />,
-    },
-  ];
+  const routes = navigation(userRole, userDepartment) || [];
 
   return (
     // 🌟 1. Added 'flex flex-col' so the container handles structural height calculations properly

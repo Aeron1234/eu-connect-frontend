@@ -13,11 +13,9 @@ async function NarrativesPage({ searchParams }) {
   const currentNarrativePage = Number(params?.page) || 1;
   const narrativesData = await getDailyNarratives();
 
-  console.log(narrativesData);
-
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>

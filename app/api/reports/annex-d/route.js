@@ -1,0 +1,41 @@
+import { generateAnnexDPdf } from "@/app/_services/pdfReports";
+import { getUserSession } from "@/src-copies/services";
+import { NextResponse } from "next/server";
+
+// import { getSessionUserId } from "@/app/lib/session"; // however you currently get the logged-in user
+
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const companyKey = searchParams.get("companyKey");
+  const academicYear = searchParams.get("academicYear");
+
+  if (!companyKey || !academicYear) {
+    return NextResponse.json(
+      { error: "companyKey and academicYear are required." },
+      { status: 400 },
+    );
+  }
+
+  const session = await getUserSession();
+  const userId = session?.user?.id; // the registrar/admin's own id, from Next.js session
+  if (!userId) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+
+  try {
+    const pdfBuffer = await generateAnnexDPdf(companyKey, academicYear, userId);
+    if (!pdfBuffer) {
+      return NextResponse.json({ error: "No records found." }, { status: 404 });
+    }
+
+    return new NextResponse(pdfBuffer, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="annex-d-${academicYear}-${companyKey}.pdf"`,
+      },
+    });
+  } catch (err) {
+    const status = err.message.includes("authorized") ? 403 : 500;
+    return NextResponse.json({ error: err.message }, { status });
+  }
+}

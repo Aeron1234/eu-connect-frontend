@@ -37,6 +37,14 @@ function CreateAccountForm({ roles, courses, departments }) {
   const DEPARTMENT_HEAD = "3";
   const ADMIN = "4";
 
+  /////////////////////////////////////////////////////////////
+  // REMINDER
+  //
+  // NEED TO ADD GENDER FOR USER PROFILE
+  //
+  // NO INPUT YET SO NEED TO ADD THAT TOO
+  /////////////////////////////////////////////////////////////
+
   function handleAction(formData) {
     startTransition(() =>
       toastAndAction({

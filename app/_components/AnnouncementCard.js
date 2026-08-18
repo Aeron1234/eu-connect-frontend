@@ -1,9 +1,11 @@
+"use client";
 import { format } from "date-fns";
 import { Calendar, Ellipsis, Pin } from "lucide-react";
 import AnnouncementDropdownMenu from "./AnnouncementDropdownMenu";
 import TriggerButton from "./TriggerButton";
+import { useUser } from "@/contexts/UserContext";
 
-function AnnouncementCard({ announcement, user, categories = null }) {
+function AnnouncementCard({ announcement, categories = null }) {
   const {
     id: announcementId,
     author_id,
@@ -20,6 +22,7 @@ function AnnouncementCard({ announcement, user, categories = null }) {
     last_name,
   } = announcement;
 
+  const { user } = useUser();
   const userId = user.id;
   const userRole = user.role;
 

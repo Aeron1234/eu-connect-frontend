@@ -13,6 +13,7 @@ function MapFormContainer({
   mapStyle,
   defaultCoords = [],
   radius = null,
+  setRadius = null,
 }) {
   return (
     <div className="rounded-sm" style={mapStyle}>
@@ -22,6 +23,7 @@ function MapFormContainer({
         formType={formType}
         defaultCoords={defaultCoords}
         radius={radius}
+        setRadius={setRadius}
       />
     </div>
   );

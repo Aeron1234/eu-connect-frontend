@@ -90,7 +90,7 @@ export async function setSearchedStudentDtrLocation(prevState, formData) {
       lat: formData.lat,
       lon: formData.lon,
       label: formData.label,
-      radius_meters: formData.radius,
+      radius_meter: formData.radius_meter,
     };
 
     const res = await fetch(

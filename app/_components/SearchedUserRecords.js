@@ -131,8 +131,6 @@ async function SetLocationForm({ searchedUserId, userRole }) {
     },
   };
 
-  console.log(dataLocation);
-
   return (
     <SetDtrLocation
       searchedUserId={searchedUserId}
@@ -177,7 +175,6 @@ async function EvaluationsTab({ searchedUserId, userRole, userId }) {
         <StudentEvaluationList
           studentId={searchedUserId}
           pastEvaluations={pastEvaluations?.data || []}
-          userId={userId}
         />
       </div>
     </>
@@ -185,44 +182,44 @@ async function EvaluationsTab({ searchedUserId, userRole, userId }) {
 }
 
 async function DocumentsTab({ searchedUserId, userRole }) {
-  const [fileData, requirementTypes] = await Promise.all([
-    getSearchedStudentFiles(searchedUserId),
-    getFileRequirementTypes(),
-  ]);
-  console.log("DocumentsTab file data:", fileData);
-  console.log("DocumentsTab requirement types:", requirementTypes);
-  return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
-      {fileData.length > 0 ? (
-        fileData.map((data) => (
-          <StudentDocuments
-            searchedUserId={searchedUserId}
-            fileData={data}
-            requirementTypes={requirementTypes}
-            key={data.id}
-          />
-        ))
-      ) : (
-        <div className="p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
-            <FolderOpen className="w-7 h-7 text-muted-foreground/50" />
-          </div>
-          <p className="text-sm font-medium text-foreground">
-            No documents yet
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Internship documents will appear here once uploaded.
-          </p>
-        </div>
-      )}
-    </div>
-  );
+  // const [fileData, requirementTypes] = await Promise.all([
+  //   getSearchedStudentFiles(searchedUserId),
+  //   getFileRequirementTypes(),
+  // ]);
+  // console.log("DocumentsTab file data:", fileData);
+  // console.log("DocumentsTab requirement types:", requirementTypes);
+  // return (
+  //   <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
+  //     {fileData.length > 0 ? (
+  //       fileData.map((data) => (
+  //         <StudentDocuments
+  //           searchedUserId={searchedUserId}
+  //           fileData={data}
+  //           requirementTypes={requirementTypes}
+  //           key={data.id}
+  //         />
+  //       ))
+  //     ) : (
+  //       <div className="p-12 text-center">
+  //         <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+  //           <FolderOpen className="w-7 h-7 text-muted-foreground/50" />
+  //         </div>
+  //         <p className="text-sm font-medium text-foreground">
+  //           No documents yet
+  //         </p>
+  //         <p className="text-xs text-muted-foreground mt-1">
+  //           Internship documents will appear here once uploaded.
+  //         </p>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
+
+  return null;
 }
 
 async function EmployerCertificateTab({ searchedUserId, userRole, userId }) {
   const uploadedFiles = await getEmployerUploadedFiles(searchedUserId);
-
-  console.log("EmployerCertificateTab uploaded files:", uploadedFiles);
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">

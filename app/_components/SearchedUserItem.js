@@ -11,11 +11,15 @@ import {
   requestSupervisor,
 } from "../_services/student-actions";
 import { Spinner } from "@/components/ui/spinner";
+import { useUser } from "@/contexts/UserContext";
 
-function SearchedUserItem({ searchedUser, userId, userRole }) {
+function SearchedUserItem({ searchedUser }) {
   const [supervisorStatus, setSupervisorStatus] = useState(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const { user } = useUser();
+  const userRole = user.role;
 
   const showSupervisorButton =
     searchedUser.role === "employer" && userRole === "student";

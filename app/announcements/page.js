@@ -1,10 +1,5 @@
 import { Megaphone } from "lucide-react";
-import PageContainer from "../_components/PageContainer";
-import PageTitle from "../_components/PageTitle";
-import {
-  getAnnouncementCategories,
-  getUserSession,
-} from "../_services/services";
+import { getAnnouncementCategories } from "../_services/services";
 
 import { Suspense } from "react";
 import SpinnerBig from "../_components/SpinnerBig";
@@ -18,10 +13,7 @@ export const metadata = {
 async function AnnouncementPage({ searchParams }) {
   const params = await searchParams;
 
-  const [user, categories] = await Promise.all([
-    getUserSession(),
-    getAnnouncementCategories(),
-  ]);
+  const categories = await getAnnouncementCategories();
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
@@ -37,26 +29,13 @@ async function AnnouncementPage({ searchParams }) {
         </div>
 
         <Suspense fallback={<SpinnerBig />}>
-          <PostAnnouncementButton
-            user={user || {}}
-            categories={categories || []}
-          />
+          <PostAnnouncementButton categories={categories || []} />
         </Suspense>
       </div>
 
       <div className="flex-1 flex flex-col gap-4">
         <Suspense fallback={<SpinnerBig />}>
-          {/* <AnnouncementList
-            params={params}
-            announcementData={announcementData}
-            user={user}
-            categories={categories}
-          /> */}
-          <AnnouncementWrapper
-            params={params}
-            user={user}
-            categories={categories}
-          />
+          <AnnouncementWrapper params={params} categories={categories} />
         </Suspense>
       </div>
     </main>

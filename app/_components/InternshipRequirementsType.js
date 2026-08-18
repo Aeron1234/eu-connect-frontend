@@ -6,7 +6,7 @@ const CATEGORIES = [
 
 function InternshipRequirementsType({ requirementTypes, docs }) {
   return (
-    <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
       {CATEGORIES.map(({ key }) => (
         <div key={key}>
           <p className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground mb-3">
@@ -16,9 +16,9 @@ function InternshipRequirementsType({ requirementTypes, docs }) {
             {requirementTypes
               .filter((r) => r.category === key)
               .map((r) => {
-                const done = docs.files.some(
-                  (file) => file.requirement_type_id === r.id,
-                );
+                const done = docs.files
+                  ? docs.files.some((file) => file.requirement_type_id === r.id)
+                  : docs.some((file) => file.requirement_type_id === r.id);
                 return (
                   <li key={r.id} className="flex items-start gap-2.5">
                     {done ? (

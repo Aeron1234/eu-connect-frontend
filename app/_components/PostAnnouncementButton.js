@@ -7,16 +7,19 @@ import { useTransition } from "react";
 import { createAnnouncement } from "../_services/dept-head-actions";
 import { toastAndAction } from "../_services/helpers";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useUser } from "@/contexts/UserContext";
 
-function PostAnnouncementButton({ user, categories }) {
+function PostAnnouncementButton({ categories }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter(); // Initialize router
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const role = user?.user.role;
+  const { user } = useUser();
 
-  if (!["department_head", "admin"].includes(role)) return null;
+  const userRole = user.role;
+
+  if (!["department_head", "admin"].includes(userRole)) return null;
 
   function handleAction(formData) {
     const handlers = {

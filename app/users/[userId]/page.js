@@ -1,4 +1,3 @@
-import PageContainer from "@/app/_components/PageContainer";
 import SearchedUserFilter from "@/app/_components/SearchedUserFilter";
 import SearchedUserHeader from "@/app/_components/SearchedUserHeader";
 import SearchedUserRecords from "@/app/_components/SearchedUserRecords";

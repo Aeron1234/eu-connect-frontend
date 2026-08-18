@@ -3,7 +3,7 @@ import { getAllAnnouncements } from "../_services/services";
 import AnnouncementList from "./AnnouncementList";
 import SpinnerBig from "./SpinnerBig";
 
-async function AnnouncementWrapper({ params, user, categories }) {
+async function AnnouncementWrapper({ params, categories }) {
   const filteredByCategory = params.category || "all";
   const searchValue = params.search || "";
 
@@ -16,7 +16,6 @@ async function AnnouncementWrapper({ params, user, categories }) {
     <Suspense fallback={<SpinnerBig />}>
       <AnnouncementList
         announcementData={announcementData}
-        user={user}
         categories={categories}
         filteredByCategory={filteredByCategory}
         search={searchValue}

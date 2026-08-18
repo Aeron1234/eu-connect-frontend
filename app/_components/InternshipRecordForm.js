@@ -21,6 +21,14 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
   const status = recordStatus === "pending" || recordStatus === "ongoing";
   console.log(recordStatus);
 
+  /////////////////////////////////////////////////////////////
+  // REMINDER
+  //
+  // NEED TO ADD DATE_ENDED and SEMESTER (first, second, summer)
+  //
+  // NO INPUT YET SO NEED TO ADD THAT TOO
+  /////////////////////////////////////////////////////////////
+
   const [showForm, setShowForm] = useState(!status);
   const [internshipForm, setInternshipForm] = useState({
     company_name: "",
@@ -50,10 +58,23 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
       formData,
     };
 
-    startTransition(async () => await toastAndAction(handlers));
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
 
-    const obj = Object.fromEntries(formData);
-    console.log(obj);
+      if (result.success) {
+        setInternshipForm({
+          company_name: "",
+          company_address: "",
+          internship_position: "",
+          company_website: "",
+          description: "",
+          date_started: "",
+          total_hours: "",
+          lat: "",
+          lon: "",
+        });
+      }
+    });
   }
 
   return (

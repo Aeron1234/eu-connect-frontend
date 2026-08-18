@@ -1,0 +1,54 @@
+"use client";
+
+import { Spinner } from "@/components/ui/spinner";
+import { Printer } from "lucide-react";
+import { useState } from "react";
+
+export default function ExportPdfButton({
+  companyKey,
+  academicYear,
+  label = "Print / Export",
+}) {
+  const [isPending, setIsPending] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      setIsPending(true);
+      const res = await fetch(
+        `/api/reports/annex-d?companyKey=${encodeURIComponent(companyKey)}&academicYear=${encodeURIComponent(academicYear)}`,
+      );
+      if (!res.ok) {
+        const { error } = await res
+          .json()
+          .catch(() => ({ error: "Failed to generate PDF" }));
+        throw new Error(error);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Something went wrong generating the PDF.");
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleExport}
+      disabled={isPending}
+      className="inline-flex items-center gap-1 bg-red-900 text-white px-3 py-1.5 rounded-md text-sm"
+    >
+      {isPending ? (
+        <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
+      ) : (
+        <>
+          <Printer className="h-4 w-4" />
+          {label}
+        </>
+      )}
+    </button>
+  );
+}

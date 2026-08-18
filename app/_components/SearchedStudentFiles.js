@@ -3,8 +3,8 @@
 import { format } from "date-fns";
 import { Download, Trash2, Upload } from "lucide-react";
 import { useTransition } from "react";
-import { downloadSearchedStudentFiles } from "../_services/services";
 import { toastAndAction } from "../_services/helpers";
+import { downloadInternshipRecordDocuments } from "../_services/dept-head-actions";
 
 function SearchedStudentFiles({
   filtered,
@@ -12,18 +12,18 @@ function SearchedStudentFiles({
   typeTone,
   getFileTypeLabel,
   userRole = "",
-  searchedUserId = "",
+  internshipId = "",
 }) {
   const [isPending, startTransition] = useTransition();
 
   function handleDownload(id) {
-    const formData = { fileId: id, searchedUserId };
+    const formData = { fileId: id, internshipId };
 
     const handlers = {
       loadingLabel: "Opening / downloading file...",
       successLabel: "File was opened / downloaded.",
       errorLabel: "Failed to open / download file.",
-      action: downloadSearchedStudentFiles,
+      action: downloadInternshipRecordDocuments,
       formData,
     };
 
@@ -81,7 +81,7 @@ function GridView({
   item,
   typeTone,
   getFileTypeLabel,
-  userRole,
+  userRole = "",
   handleDownload,
   isPending,
 }) {
@@ -135,14 +135,14 @@ function ListView({
   item,
   typeTone,
   getFileTypeLabel,
-  userRole,
+  userRole = "",
   handleDownload,
   isPending,
 }) {
   const typeLabel = getFileTypeLabel(item.file_type);
 
   return (
-    <div className="flex items-center gap-3 p-3 hover:bg-muted/40 transition-colors">
+    <div className="flex items-center gap-3 p-3 bg-white hover:bg-stone-50 transition-colors">
       <div
         className={`w-9 h-9 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 ${typeTone(typeLabel)}`}
       >
