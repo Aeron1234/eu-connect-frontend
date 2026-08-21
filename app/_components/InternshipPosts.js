@@ -1,11 +1,12 @@
 "use client";
 
-import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import InternshipPostsList from "./InternshipPostsList";
 import { getInternshipPosts } from "../_services/services";
 import { useUser } from "@/contexts/UserContext";
 import SearchBar from "./SearchBar";
+
 const scopeTabs = [
   { label: "All Companies", value: "" },
   { label: "My Posts", value: "myposts" },
@@ -18,6 +19,19 @@ const workTypeTabs = [
   { label: "Remote", workType: "remote" },
 ];
 
+function buildHref({ scope, workType, courseId }) {
+  const params = new URLSearchParams();
+  if (scope) params.set("scope", scope);
+  if (workType) params.set("workType", workType);
+  if (courseId) params.set("courseId", courseId);
+  const qs = params.toString();
+  return `/internships${qs ? `?${qs}` : ""}`;
+}
+
+function keyOf(post) {
+  return post.id;
+}
+
 function InternshipPosts({
   internshipPosts: initialData = [],
   pagination: {
@@ -26,14 +40,14 @@ function InternshipPosts({
     totalPages: initialTotalPages = 1,
   },
   courses = [],
+  workType = "",
+  courseId = "",
+  scope = "",
 }) {
   const [internshipPosts, setInternshipPosts] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [total, setTotal] = useState(initialTotal);
-  const [scope, setScope] = useState("");
-  const [courseId, setCourseId] = useState(null);
-  const [workType, setWorkType] = useState("");
   const [query, setQuery] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
@@ -42,14 +56,56 @@ function InternshipPosts({
   const userId = user.id;
   const userRole = user.role;
 
-  // Tracks which request is the most recent one, so a slow-resolving
-  // stale request can never overwrite a newer one's result
   const requestIdRef = useRef(0);
+  const isFirstRun = useRef(true);
+  // Which post ids were on page 1 as of the last time server-driven
+  // filters (or a revalidation from create/update/delete) refreshed initialData
+  const prevPage1KeysRef = useRef(new Set((initialData || []).map(keyOf)));
 
-  // Debounce ALL filter changes (buttons + search) behind one timer.
-  // Any change — clicking a button or typing — resets the same timer,
-  // so rapid clicking/typing only results in one fetch after things settle.
+  // Runs whenever initialData changes — either because the user clicked a
+  // filter Link (new searchParams -> new server render), or because some
+  // other action (posting, editing) called revalidatePath and Next.js
+  // refreshed this route's RSC payload in place. Merges the fresh page 1
+  // into state without discarding pages already loaded via "See more",
+  // unless those items no longer belong on the (possibly new) page 1.
   useEffect(() => {
+    const freshMap = new Map((initialData || []).map((p) => [keyOf(p), p]));
+    const prevPage1Keys = prevPage1KeysRef.current;
+
+    setInternshipPosts((prev) => {
+      if (prev.length === 0) return initialData;
+
+      const updatedList = prev
+        .map((p) => freshMap.get(keyOf(p)) || p)
+        .filter((p) => {
+          const wasOnPage1Before = prevPage1Keys.has(keyOf(p));
+          const isStillFresh = freshMap.has(keyOf(p));
+          return !wasOnPage1Before || isStillFresh;
+        });
+
+      const existingKeys = new Set(updatedList.map(keyOf));
+      const brandNew = (initialData || []).filter(
+        (p) => !existingKeys.has(keyOf(p)),
+      );
+
+      return [...brandNew, ...updatedList];
+    });
+
+    setCurrentPage(initialPage);
+    setTotalPages(initialTotalPages || 1);
+    setTotal(initialTotal || 0);
+
+    prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
+  }, [initialData, initialPage, initialTotalPages, initialTotal]);
+
+  // Search stays client-driven and debounced — workType/courseId/scope no
+  // longer belong here, they're URL params now and flow in via the effect above.
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
     const thisRequestId = ++requestIdRef.current;
 
     const timeout = setTimeout(async () => {
@@ -63,8 +119,6 @@ function InternshipPosts({
           page: 1,
         });
 
-        // If a newer request has started since this one was scheduled,
-        // ignore this result — it's stale
         if (thisRequestId !== requestIdRef.current) return;
 
         if (newData?.error) {
@@ -90,10 +144,10 @@ function InternshipPosts({
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
       }
-    }, 500); // 400ms debounce window — adjust to taste
+    }, 500);
 
     return () => clearTimeout(timeout);
-  }, [workType, courseId, scope, query]);
+  }, [query, workType, courseId, scope]);
 
   async function handleSeeMore() {
     if (isPending || currentPage >= totalPages) return;
@@ -110,7 +164,7 @@ function InternshipPosts({
         page: nextPage,
       });
 
-      if (thisRequestId !== requestIdRef.current) return; // stale, ignore
+      if (thisRequestId !== requestIdRef.current) return;
 
       if (newData?.error) {
         console.error("Error loading more internship posts:", newData.error);
@@ -120,8 +174,8 @@ function InternshipPosts({
       const incoming = newData?.data || [];
 
       setInternshipPosts((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const filteredNew = incoming.filter((p) => !existingIds.has(p.id));
+        const existingIds = new Set(prev.map(keyOf));
+        const filteredNew = incoming.filter((p) => !existingIds.has(keyOf(p)));
         return [...prev, ...filteredNew];
       });
 
@@ -158,9 +212,9 @@ function InternshipPosts({
         <div className="flex flex-1 flex-wrap items-center gap-3">
           <div className="flex rounded-lg bg-stone-200 p-1">
             {scopeTabs.map((s) => (
-              <button
+              <Link
                 key={s.value}
-                onClick={() => setScope(s.value)}
+                href={buildHref({ scope: s.value, workType, courseId })}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   scope === s.value
                     ? "bg-primary-500 text-primary-foreground"
@@ -168,7 +222,7 @@ function InternshipPosts({
                 }`}
               >
                 {s.label}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -176,9 +230,8 @@ function InternshipPosts({
 
       {courses.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
-          {/* All button in courses*/}
-          <button
-            onClick={() => setCourseId(null)}
+          <Link
+            href={buildHref({ scope, workType, courseId: null })}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               !courseId
                 ? "bg-primary-500 text-primary-foreground"
@@ -186,19 +239,19 @@ function InternshipPosts({
             }`}
           >
             All
-          </button>
+          </Link>
           {courses.map((c) => (
-            <button
+            <Link
               key={c.id}
-              onClick={() => setCourseId(c.id)}
+              href={buildHref({ scope, workType, courseId: c.id })}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                courseId === c.id
+                String(courseId) === String(c.id)
                   ? "bg-primary-500 text-primary-foreground"
                   : "bg-stone-200 text-muted-foreground hover:text-primary-500"
               }`}
             >
               {c.short_name}
-            </button>
+            </Link>
           ))}
         </div>
       ) : null}
@@ -206,9 +259,9 @@ function InternshipPosts({
       <div className="flex flex-1 flex-wrap items-center gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {workTypeTabs.map((wt) => (
-            <button
+            <Link
               key={wt.label}
-              onClick={() => setWorkType(wt.workType)}
+              href={buildHref({ scope, workType: wt.workType, courseId })}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 workType === wt.workType
                   ? "bg-primary-500 text-primary-foreground"
@@ -216,7 +269,7 @@ function InternshipPosts({
               }`}
             >
               {wt.label}
-            </button>
+            </Link>
           ))}
         </div>
 
@@ -232,7 +285,8 @@ function InternshipPosts({
       </p>
 
       {/* Listings */}
-      <div className="space-y-5">
+      <div className="grid xl:grid-cols-2 gap-5">
+        {/* <div className="space-y-5"> */}
         {internshipPosts.map((item) => {
           const isFavorited = favoriteIds.has(item.id);
           return (
@@ -258,15 +312,16 @@ function InternshipPosts({
       </div>
 
       {currentPage < totalPages && (
-        <li className="w-full">
+        <div className="w-full">
           <button
             onClick={handleSeeMore}
             disabled={isPending}
-            className="w-full pl-12 md:pl-16 text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="w-full text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            // className="w-full pl-12 md:pl-16 text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
           >
             {isPending ? "Loading..." : "See more"}
           </button>
-        </li>
+        </div>
       )}
     </>
   );

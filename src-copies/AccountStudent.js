@@ -1,6 +1,6 @@
-import PageContainer from "./PageContainer";
-import PageTitle from "./PageTitle";
-import AccountInternshipRecords from "./AccountInternshipRecords";
+import PageContainer from "../app/_components/PageContainer";
+import PageTitle from "../app/_components/PageTitle";
+import AccountInternshipRecords from "../app/_components/AccountInternshipRecords";
 import {
   Briefcase,
   Building,
@@ -11,7 +11,7 @@ import {
   Phone,
   User,
 } from "lucide-react";
-import TriggerButton from "./TriggerButton";
+import TriggerButton from "../app/_components/TriggerButton";
 
 function AccountStudent({ userProfile }) {
   return (

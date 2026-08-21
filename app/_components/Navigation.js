@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import NotificationsButton from "./NotificationsButton";
+import { useUser } from "@/contexts/UserContext";
 
 function Navigation({ inboxData }) {
   const pathName = usePathname();
+  const { user } = useUser();
   const icon = "";
 
   return (
@@ -20,8 +22,8 @@ function Navigation({ inboxData }) {
         <NotificationsButton inboxData={inboxData || {}} />
 
         <Link
-          href="/account"
-          className={`${pathName === "/account" ? "text-primary-500" : ""} relative hover:text-primary-500 transition-all h-full`}
+          href={`/${user.role}/account`}
+          className={`${pathName === `/${user.role}/account` ? "text-primary-500" : ""} relative hover:text-primary-500 transition-all h-full`}
           title="Account"
         >
           {icon ? icon : <CircleUserRound className="h-6 w-6" />}

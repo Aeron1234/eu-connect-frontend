@@ -1,16 +1,16 @@
-import PageContainer from "./PageContainer";
-import PageTitle from "./PageTitle";
+import PageContainer from "../app/_components/PageContainer";
+import PageTitle from "../app/_components/PageTitle";
 import AccountHeader from "./AccountHeader";
 import AccountPersonalInfo from "./AccountPersonalInfo";
 
-function AccountEmployer() {
+function AccountDepartmentHead() {
   return (
     <PageContainer>
       <PageTitle title={"Account"} />
 
       <AccountHeader
         fullName={"Roronoa Zoro"}
-        company="ABC Company"
+        department={"Computer Science"}
         email={"roronoazoro@email.com"}
       />
 
@@ -21,8 +21,8 @@ function AccountEmployer() {
             <Info label="Last Name" info="Zoro" />
           </div>
           <div className="flex flex-col gap-2">
-            <Info label="Company" info="ABC Company" />
-            <Info label="User Role" info="Employer" />
+            <Info label="Department" info="Computer Science" />
+            <Info label="User Role" info="Admin" />
           </div>
           <div className="flex flex-col gap-2">
             <Info label="Email" info="roronoazoro@email.com" />
@@ -39,8 +39,6 @@ function AccountEmployer() {
 }
 
 function Info({ label, info }) {
-  if (!label || !info) return null;
-
   return (
     <div className="flex flex-col">
       <span className="text-stone-500 text-xs">{label}</span>
@@ -49,4 +47,4 @@ function Info({ label, info }) {
   );
 }
 
-export default AccountEmployer;
+export default AccountDepartmentHead;

@@ -89,7 +89,7 @@ function navigation(userRole, userDepartment) {
       },
       {
         name: "Accounts",
-        href: "/admin/accounts",
+        href: "/admin/create-account",
         icon: <UserPlus className="h-5 w-5" />,
       },
       {

@@ -128,9 +128,7 @@ export const getUserProfile = cache(async () => {
       return { error: error.message || "User doesn't exist." };
     }
 
-    const data = await res.json();
-
-    return data || null;
+    return await res.json();
   } catch (err) {
     return null;
   }

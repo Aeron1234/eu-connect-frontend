@@ -11,6 +11,7 @@ import {
 import Modal from "./Modal";
 import DeleteForm from "./DeleteForm";
 import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
+import { useUser } from "@/contexts/UserContext";
 
 function initialsOf(name) {
   return name
@@ -94,6 +95,10 @@ function AlumniRow({
 }) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const { user } = useUser();
+
+  const isAuthorizedStaff =
+    user.role === "department_head" || user.role === "admin";
 
   function handleDelete(formData) {
     startTransition(async () => {
@@ -165,55 +170,58 @@ function AlumniRow({
           />
         </button>
 
-        <div className="flex gap-3">
-          <Modal
-            title={<span className="text-red-600">Update Record</span>}
-            trigger={
-              <div
-                aria-label={`Edit record`}
-                title="Edit record"
-                className="text-muted-foreground hover:text-primary-500"
-              >
-                <Pencil className="h-4 w-4" />
-              </div>
-            }
-            description={"Do you want to change something?"}
-          >
-            <PastInternshipPostEditForm
-              data={{
-                ...alumni,
-                company_name: companyName,
-                company_address: companyAddress,
-                industry,
-              }}
-              isPending={isPending}
-              courses={courses}
-              handleAction={handleUpdate}
-              type="edit"
-            />
-          </Modal>
+        {user.department_code === alumni.department_code &&
+        isAuthorizedStaff ? (
+          <div className="flex gap-3">
+            <Modal
+              title={<span className="text-red-600">Update Record</span>}
+              trigger={
+                <div
+                  aria-label={`Edit record`}
+                  title="Edit record"
+                  className="text-muted-foreground hover:text-primary-500"
+                >
+                  <Pencil className="h-4 w-4" />
+                </div>
+              }
+              description={"Do you want to change something?"}
+            >
+              <PastInternshipPostEditForm
+                data={{
+                  ...alumni,
+                  company_name: companyName,
+                  company_address: companyAddress,
+                  industry,
+                }}
+                isPending={isPending}
+                courses={courses}
+                handleAction={handleUpdate}
+                type="edit"
+              />
+            </Modal>
 
-          <Modal
-            title={<span className="text-red-600">Delete Record</span>}
-            trigger={
-              <div
-                title="Delete record"
-                aria-label={`Delete record`}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </div>
-            }
-            description={"Are you sure you want to delete this record?"}
-          >
-            <DeleteForm
-              isPending={isPending}
-              id={alumni.id}
-              name={"recordId"}
-              handleAction={handleDelete}
-            />
-          </Modal>
-        </div>
+            <Modal
+              title={<span className="text-red-600">Delete Record</span>}
+              trigger={
+                <div
+                  title="Delete record"
+                  aria-label={`Delete record`}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </div>
+              }
+              description={"Are you sure you want to delete this record?"}
+            >
+              <DeleteForm
+                isPending={isPending}
+                id={alumni.id}
+                name={"recordId"}
+                handleAction={handleDelete}
+              />
+            </Modal>
+          </div>
+        ) : null}
       </div>
 
       {open && (

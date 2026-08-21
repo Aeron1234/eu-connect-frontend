@@ -29,6 +29,8 @@ function PastInternshipsPageContent({
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [isPending, setIsPending] = useState(false);
 
+  console.log(initialData);
+
   // Remembers which company keys were on page 1 as of the LAST time this effect ran
   const prevPage1KeysRef = useRef(new Set((initialData || []).map(keyOf)));
 

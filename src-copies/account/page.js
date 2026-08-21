@@ -1,11 +1,11 @@
-import AccountStudent from "@/app/_components/AccountStudent";
-import AccountEmployer from "@/app/_components/AccountEmployer";
+import AccountStudent from "@/src-copies/AccountStudent";
+import AccountEmployer from "@/src-copies/AccountEmployer";
 import { redirect } from "next/navigation";
 import { getUserProfile, getUserSession } from "../_services/services";
-import AccountDepartmentHead from "@/app/_components/AccountDepartmentHead";
+import AccountDepartmentHead from "@/src-copies/AccountDepartmentHead";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import AccountAdmin from "@/app/_components/AccountAdmin";
+import AccountAdmin from "@/src-copies/AccountAdmin";
 
 export const metadata = {
   title: "Account",

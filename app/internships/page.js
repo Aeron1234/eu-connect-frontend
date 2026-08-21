@@ -1,12 +1,7 @@
-import { redirect } from "next/navigation";
-import {
-  getCourses,
-  getInternshipPosts,
-  getUserSession,
-} from "../_services/services";
+import { getCourses, getInternshipPosts } from "../_services/services";
 
 import InternshipPosts from "../_components/InternshipPosts";
-import { Briefcase, Plus } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";
@@ -16,9 +11,18 @@ export const metadata = {
 };
 
 async function InternshipPage({ searchParams }) {
+  const sParams = await searchParams;
+  const workType = sParams.workType || "";
+  const courseId = sParams.courseId || "";
+  const scope = sParams.scope || "";
+
   const [courses, internshipPosts] = await Promise.all([
     getCourses(),
-    getInternshipPosts({}),
+    getInternshipPosts({
+      workType,
+      courseId,
+      mine: scope === "myposts" ? "true" : "",
+    }),
   ]);
 
   return (
@@ -49,6 +53,9 @@ async function InternshipPage({ searchParams }) {
           internshipPosts={internshipPosts?.data || []}
           pagination={internshipPosts?.pagination || {}}
           courses={courses || []}
+          workType={workType}
+          courseId={courseId}
+          scope={scope}
         />
       </Suspense>
     </main>

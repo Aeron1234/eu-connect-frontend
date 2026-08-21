@@ -16,16 +16,16 @@ import { AuthError } from "next-auth";
 ////////////////////////////////////////////////////
 
 export async function login(prevState, formData) {
-  const email = formData.get("email");
+  const username = formData.get("username");
 
   //Validate email safely
-  if (!email || typeof email !== "string") {
-    return { error: "Email is required." };
+  if (!username || typeof username !== "string") {
+    return { error: "Username is required." };
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return { error: "Invalid email format." };
+  const usernameRegex = /^\S+$/;
+  if (!usernameRegex.test(username)) {
+    return { error: "Invalid username format." };
   }
 
   try {
@@ -45,7 +45,7 @@ export async function login(prevState, formData) {
       }
 
       if (error.type === "CredentialsSignin") {
-        return { error: "Invalid email or password." };
+        return { error: "Invalid username or password." };
       }
 
       return { error: "Something went wrong during sign in." };

@@ -1,7 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
 
-function StorageLayout({ children }) {
+function EvaluationsLayout({ children }) {
   return (
     <Suspense
       fallback={
@@ -15,4 +15,4 @@ function StorageLayout({ children }) {
   );
 }
 
-export default StorageLayout;
+export default EvaluationsLayout;

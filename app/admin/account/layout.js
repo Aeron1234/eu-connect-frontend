@@ -1,15 +1,7 @@
-import { getUserSession } from "@/app/_services/services";
 import { Spinner } from "@/components/ui/spinner";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 function AccountLayout({ children }) {
-  // const session = await getUserSession();
-  // if (!session?.user) return notFound();
-
-  // const role = session.user.role;
-  // if (role !== "student") return notFound();
-
   return (
     <Suspense
       fallback={

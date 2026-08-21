@@ -8,9 +8,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: {
-          type: "email",
-          name: "email",
+        username: {
+          type: "username",
+          name: "username",
         },
         password: {
           type: "password",
@@ -18,21 +18,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       },
       authorize: async (credentials) => {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.username || !credentials?.password) return null;
 
         const [rows] = await db.execute(
           `
           SELECT 
-          u.id AS user_uuid, u.email, u.password_hash, u.status, u.account_locked_until, u.failed_login_attempts,
+          u.id AS user_uuid, u.username, u.password_hash, u.status, u.account_locked_until, u.failed_login_attempts,
           r.role
           FROM users AS u
           INNER JOIN roles AS r ON u.role_id = r.id
-          WHERE u.email = ?
+          WHERE u.username = ?
         `,
-          [credentials.email],
+          [credentials.username],
         );
 
-        // If that email doesn't exist return null
+        // If that username doesn't exist return null
         if (rows.length === 0) return null;
 
         const user = rows[0];
@@ -109,27 +109,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (newAttempts >= 5) {
             // Lock the account for 15 minutes
             await db.execute(
-              `UPDATE users SET failed_login_attempts = ?, account_locked_until = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE email = ?`,
-              [newAttempts, credentials.email],
+              `UPDATE users SET failed_login_attempts = ?, account_locked_until = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE username = ?`,
+              [newAttempts, credentials.username],
             );
           } else {
             // Just increment the count
             await db.execute(
-              `UPDATE users SET failed_login_attempts = ? WHERE email = ?`,
-              [newAttempts, credentials.email],
+              `UPDATE users SET failed_login_attempts = ? WHERE username = ?`,
+              [newAttempts, credentials.username],
             );
           }
           return null;
         }
 
         await db.execute(
-          `UPDATE users SET failed_login_attempts = 0, account_locked_until = NULL WHERE email = ?`,
-          [credentials.email],
+          `UPDATE users SET failed_login_attempts = 0, account_locked_until = NULL WHERE username = ?`,
+          [credentials.username],
         );
 
         return {
           id: user.user_uuid,
-          email: user.email,
+          username: user.username,
           role: user.role,
           course_name: user.course_name ? user.course_name : null,
           department_code: user.department_code ? user.department_code : null,
@@ -142,7 +142,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role;
         token.id = user.id;
-        token.email = user.email;
+        token.username = user.username;
         token.course_name = user.course_name;
         token.department_code = user.department_code;
       }
@@ -151,7 +151,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       session.user.role = token.role;
       session.user.id = token.id;
-      session.user.email = token.email;
+      session.user.username = token.username;
       session.user.course_name = token.course_name;
       session.user.department_code = token.department_code;
       return session;

@@ -12,7 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { UserPlus, Users } from "lucide-react";
 import { Suspense } from "react";
 
-async function AccountsPage({ searchParams }) {
+async function CreateAccountPage({ searchParams }) {
   const [roles, courses, departments, allUserAccounts] = await Promise.all([
     getRoles(),
     getCourses(),
@@ -76,4 +76,4 @@ async function AccountsPage({ searchParams }) {
   );
 }
 
-export default AccountsPage;
+export default CreateAccountPage;
