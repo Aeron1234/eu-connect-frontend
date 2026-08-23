@@ -10,13 +10,7 @@ export const metadata = {
 async function AdminAccountPage() {
   const userData = await getUserProfile();
 
-  return (
-    <AccountProfile
-      role="admin"
-      roleLabel="Administrator"
-      userData={userData || {}}
-    />
-  );
+  return <AccountProfile roleLabel="Administrator" userData={userData || {}} />;
 }
 
 export default AdminAccountPage;

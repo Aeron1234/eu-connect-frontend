@@ -17,17 +17,18 @@ import {
 import { createInternshipRecord } from "../_services/student-actions";
 import { toastAndAction } from "../_services/helpers";
 
+const labelClass = "text-sm font-medium text-foreground";
+const inputClass =
+  "mt-1 flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+// shadcn's SelectTrigger ships its own h-9 + shadow-xs defaults — h-10 and
+// shadow-none here override those so it renders at the exact same size as inputClass.
+const selectTriggerClass =
+  "flex h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm shadow-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed";
+const textareaClass =
+  "mt-1 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+
 function InternshipRecordForm({ regions = [], recordStatus = "" }) {
   const status = recordStatus === "pending" || recordStatus === "ongoing";
-  console.log(recordStatus);
-
-  /////////////////////////////////////////////////////////////
-  // REMINDER
-  //
-  // NEED TO ADD DATE_ENDED and SEMESTER (first, second, summer)
-  //
-  // NO INPUT YET SO NEED TO ADD THAT TOO
-  /////////////////////////////////////////////////////////////
 
   const [showForm, setShowForm] = useState(!status);
   const [internshipForm, setInternshipForm] = useState({
@@ -37,7 +38,9 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
     company_website: "",
     description: "",
     date_started: "",
+    date_ended: "",
     total_hours: "",
+    semester: "",
     lat: "",
     lon: "",
   });
@@ -45,7 +48,6 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
-    // formData.append("region_id", selectedRegion);
     formData.append("company_address", internshipForm.company_address);
     formData.append("lat", internshipForm.lat);
     formData.append("lon", internshipForm.lon);
@@ -61,7 +63,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
     startTransition(async () => {
       const result = await toastAndAction(handlers);
 
-      if (result.success) {
+      if (result?.success) {
         setInternshipForm({
           company_name: "",
           company_address: "",
@@ -69,7 +71,9 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
           company_website: "",
           description: "",
           date_started: "",
+          date_ended: "",
           total_hours: "",
+          semester: "",
           lat: "",
           lon: "",
         });
@@ -85,7 +89,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
       />
 
       {status && (
-        <p className="flex items-center gap-1 px-4 py-2 bg-stone-200 border border-stone-300 rounded-sm">
+        <p className="flex items-center gap-2 rounded-md border border-border bg-secondary/70 px-4 py-3 text-sm text-muted-foreground">
           <span className="text-primary-500">
             <CircleAlert className="h-5 w-5" />
           </span>
@@ -96,10 +100,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
 
       {showForm && (
         <form
-          className={`flex flex-col gap-4 ${status ? "opacity-50 pointer-events-none" : ""} z-10`}
+          className={`flex flex-col gap-6 ${status ? "opacity-50 pointer-events-none" : ""} z-10`}
           action={handleAction}
         >
-          <div className="flex items-center gap-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
             <Input
               name={"company_name"}
               label={"Name of company *"}
@@ -115,25 +119,23 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
               disabled={isPending || status}
             />
 
-            <div className="flex-1">
-              <label htmlFor="region_id">Region *</label>
+            <div>
+              <label htmlFor="region_id" className={labelClass}>
+                Region *
+              </label>
 
               <input
                 type="hidden"
                 name="region_id"
-                value={selectedRegion}
+                value={selectedRegion || ""}
                 disabled={isPending || status}
               />
               <Select
-                className="w-full h-full"
                 name="region_id"
                 onValueChange={setSelectedRegion}
                 disabled={isPending || status}
               >
-                <SelectTrigger
-                  id="region_id"
-                  className="h-10 px-3 text-sm w-full mt-1 bg-stone-100  rounded-sm border border-stone-300 focus:ring-2 focus:ring-stone-300 focus:border-transparent"
-                >
+                <SelectTrigger id="region_id" className={selectTriggerClass}>
                   <SelectValue placeholder="Select Region" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,10 +153,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
             <Input
               name={"internship_position"}
-              label={"Postion *"}
+              label={"Position *"}
               type={"text"}
               value={internshipForm.internship_position}
               placeholder={"E.g., Software developer intern"}
@@ -184,7 +186,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
             />
           </div>
 
-          <div className="flex items-center gap-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
             <Input
               name={"date_started"}
               label={"Start date *"}
@@ -198,6 +200,61 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
               }
               disabled={isPending || status}
             />
+
+            <Input
+              name={"date_ended"}
+              label={"Date end (estimated) *"}
+              type={"date"}
+              value={internshipForm.date_ended}
+              onChange={(e) =>
+                setInternshipForm({
+                  ...internshipForm,
+                  date_ended: e.target.value,
+                })
+              }
+              disabled={isPending || status}
+            />
+          </div>
+
+          {/* Total Hours and Semester */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+            <div>
+              <label htmlFor="semester" className={labelClass}>
+                Semester *
+              </label>
+
+              <input
+                type="hidden"
+                name="semester"
+                value={internshipForm.semester || ""}
+                disabled={isPending || status}
+              />
+              <Select
+                name="semester"
+                onValueChange={(value) =>
+                  setInternshipForm((prev) => ({ ...prev, semester: value }))
+                }
+                disabled={isPending || status}
+              >
+                <SelectTrigger id="semester" className={selectTriggerClass}>
+                  <SelectValue placeholder="Select Semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Semester</SelectLabel>
+                    {[
+                      { label: "First", value: "1st" },
+                      { label: "Second", value: "2nd" },
+                      { label: "Summer", value: "summer" },
+                    ].map((sem) => (
+                      <SelectItem key={sem.value} value={sem.value}>
+                        {sem.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
 
             <Input
               name={"total_hours"}
@@ -215,13 +272,16 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="description">Description *</label>
+          <div className="flex flex-col">
+            <label htmlFor="description" className={labelClass}>
+              Description *
+            </label>
             <textarea
               name="description"
               placeholder="Assisting developers on front-end development..."
               id="description"
-              className="px-2 py-1 border border-stone-300 rounded-md min-h-10 overflow-y-auto resize-none bg-stone-100"
+              rows={3}
+              className={textareaClass}
               defaultValue={internshipForm.description}
               onChange={(e) =>
                 setInternshipForm({
@@ -236,12 +296,12 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
 
           <div className="flex flex-col gap-2">
             <p className="flex flex-col gap-1">
-              <span className="flex items-center gap-1">
+              <span className={`flex items-center gap-1.5 ${labelClass}`}>
                 <MapPin className="h-4 w-4" /> Company Location *
               </span>
-              <span className="text-xs text-stone-500">
-                Use the search bar inside the map to find your company.
-                Selecting a result will pin it.
+              <span className="text-xs text-muted-foreground">
+                Use the search bar inside the map to find your company, or click
+                directly on the map to drop a pin.
               </span>
             </p>
 
@@ -252,16 +312,29 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
               mapStyle={{ height: "400px", width: "100%" }}
             />
 
-            {internshipForm.company_address && (
-              <p className="bg-stone-100 p-2 rounded-sm border border-stone-300">
-                <span className="font-semibold">Selected:</span>{" "}
-                {internshipForm.company_address}
-              </p>
-            )}
+            <div className="flex flex-col">
+              <label htmlFor="company_address_display" className={labelClass}>
+                Selected Address
+              </label>
+              <textarea
+                id="company_address_display"
+                rows={2}
+                value={internshipForm.company_address}
+                onChange={(e) =>
+                  setInternshipForm((prev) => ({
+                    ...prev,
+                    company_address: e.target.value,
+                  }))
+                }
+                placeholder="Selecting a location on the map fills this in — you can also edit it manually."
+                className={textareaClass}
+                disabled={isPending || status}
+              />
+            </div>
           </div>
 
           <button
-            className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-sm font-semibold self-end cursor-pointer transition-colors hover:bg-primary-400"
+            className="mt-2 inline-flex items-center justify-center gap-2 self-end rounded-md bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             disabled={isPending || status}
           >
             {isPending ? (
@@ -289,14 +362,16 @@ function Input({
   required = true,
 }) {
   return (
-    <div className="flex-1 flex flex-col gap-1">
-      <label htmlFor={name}>{label}</label>
+    <div className="flex flex-col">
+      <label htmlFor={name} className={labelClass}>
+        {label}
+      </label>
       <input
         type={type}
         name={name}
         id={name}
         placeholder={placeholder}
-        className="p-2 flex-1 rounded-sm border border-stone-300 bg-stone-100"
+        className={inputClass}
         value={value}
         onChange={onChange}
         disabled={disabled}

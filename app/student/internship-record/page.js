@@ -10,7 +10,7 @@ import { Briefcase } from "lucide-react";
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Student's Storage",
+  title: "Internship Records",
 };
 
 async function InternshipRecordPage({ searchParams }) {

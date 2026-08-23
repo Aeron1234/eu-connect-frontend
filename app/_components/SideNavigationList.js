@@ -10,6 +10,7 @@ import {
   LibraryBig,
   MapPin,
   Megaphone,
+  SlidersHorizontal,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -96,6 +97,11 @@ function navigation(userRole, userDepartment) {
         name: "Records",
         href: "/internship-records",
         icon: <LibraryBig className="h-5 w-5" />,
+      },
+      {
+        name: "Evaluation Criteria",
+        href: "/admin/evaluation-criteria",
+        icon: <SlidersHorizontal className="h-5 w-5" />,
       },
       {
         name: "SIPP Reports",

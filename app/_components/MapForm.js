@@ -132,13 +132,11 @@ function MapForm({
 
         <SearchField onLocationSelect={handleLocationSelect} />
 
-        {formType !== "internshipRecord" && (
-          <ClickMarker
-            formType={formType}
-            onLocationSelect={handleLocationSelect}
-            defaultCoords={defaultCoords}
-          />
-        )}
+        <ClickMarker
+          formType={formType}
+          onLocationSelect={handleLocationSelect}
+          defaultCoords={defaultCoords}
+        />
 
         {selectedPosition && (
           <>
@@ -267,7 +265,7 @@ function ClickMarker({ onLocationSelect, formType, defaultCoords }) {
 
   useMapEvents({
     async click(e) {
-      if (formType === "internshipRecord") return;
+      // if (formType === "internshipRecord") return;
 
       const { lat, lng } = e.latlng;
 

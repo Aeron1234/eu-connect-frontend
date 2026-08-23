@@ -168,3 +168,69 @@ export async function deleteSearchHistoryItem({ historyId, type }) {
     return { success: false, error: err.message };
   }
 }
+
+export async function updateUserInfo(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("You must be logged in.");
+    }
+
+    const userId = session.user.id;
+    const userRole = session.user.role;
+    const userInfo = Object.fromEntries(formData);
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/account/update?userId=${userId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(userInfo),
+      },
+    );
+
+    const data = await res.json();
+    if (res.ok) revalidatePath(`/${userRole}/account`);
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function updatePassword(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) {
+      throw new Error("You must be logged in.");
+    }
+
+    const userId = session.user.id;
+    const userRole = session.user.role;
+    const newPassword = Object.fromEntries(formData);
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/account/update-password?userId=${userId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(newPassword),
+      },
+    );
+
+    const data = await res.json();
+    if (res.ok) revalidatePath(`/${userRole}/account`);
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: err.message };
+  }
+}
