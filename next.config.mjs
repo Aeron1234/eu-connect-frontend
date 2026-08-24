@@ -30,6 +30,12 @@ const nextConfig = {
     ];
   },
 
+  serverExternalPackages: ["@sparticuz/chromium"],
+
+  outputFileTracingIncludes: {
+    "/api/reports/annex-d": ["./node_modules/@sparticuz/chromium/**"],
+  },
+
   reactCompiler: true,
 };
 
