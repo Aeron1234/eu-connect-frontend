@@ -15,15 +15,9 @@ function PastInternshipPostButton({ courses = [] }) {
   const userRole = user.role;
   const userDepartment = user.department_code;
 
-  const isRegistrar =
-    userRole === "department_head" && userDepartment === "REG";
-
-  if (userRole !== "department_head" && isRegistrar) return null;
+  if (userRole !== "department_head" || userDepartment === "REG") return null;
 
   function handleAction(formData) {
-    const x = Object.fromEntries(formData);
-    console.log(x);
-
     startTransition(() =>
       toastAndAction({
         loadingLabel: "Posting a record...",

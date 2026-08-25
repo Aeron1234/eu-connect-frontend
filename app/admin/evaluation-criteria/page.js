@@ -1,4 +1,5 @@
 import EvaluationCriteriaPageContent from "@/app/_components/EvaluationCriteriaPageContent";
+import { getAllEvaluationCriteria } from "@/app/_services/admin-actions";
 import { SlidersHorizontal } from "lucide-react";
 
 export const metadata = {
@@ -6,6 +7,15 @@ export const metadata = {
 };
 
 async function EvaluationCriteriaPage({ searchParams }) {
+  const sParams = await searchParams;
+
+  const formType = sParams.form_type || "student";
+  const filter = sParams.filter || "all";
+
+  const criteria = await getAllEvaluationCriteria({ type: formType });
+
+  console.log(criteria);
+
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-4">
       <div>
@@ -19,7 +29,11 @@ async function EvaluationCriteriaPage({ searchParams }) {
         </p>
       </div>
 
-      <EvaluationCriteriaPageContent />
+      <EvaluationCriteriaPageContent
+        criteria={criteria || []}
+        formType={formType}
+        filter={filter}
+      />
     </main>
   );
 }

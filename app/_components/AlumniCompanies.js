@@ -97,8 +97,13 @@ function AlumniRow({
   const [open, setOpen] = useState(false);
   const { user } = useUser();
 
+  const userRole = user.role;
+  const userDepartment = user.department_code;
+
   const isAuthorizedStaff =
-    user.role === "department_head" || user.role === "admin";
+    (userRole === "department_head" &&
+      alumni.department_code === userDepartment) ||
+    userRole === "admin";
 
   function handleDelete(formData) {
     startTransition(async () => {
@@ -170,8 +175,7 @@ function AlumniRow({
           />
         </button>
 
-        {user.department_code === alumni.department_code &&
-        isAuthorizedStaff ? (
+        {isAuthorizedStaff ? (
           <div className="flex gap-3">
             <Modal
               title={<span className="text-red-600">Update Record</span>}
