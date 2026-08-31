@@ -61,6 +61,34 @@ export async function markAllAsRead(formData = null) {
   }
 }
 
+export async function deleteNotification(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    const notificationId = formData.get("notificationId");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/notifications/${notificationId}?userId=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    const data = await res.json();
+    if (res.ok) revalidatePath("/notifications");
+
+    return data;
+  } catch (err) {
+    console.error("Delete notification error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function saveSearchHistory({
   searchedId = "",
   searchedUUID = "",

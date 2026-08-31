@@ -54,7 +54,7 @@ async function InternshipRecordsDetailsPage({ params, searchParams }) {
         <ChevronLeft className="h-4 w-4" /> Back to records
       </Link>
 
-      <RecordsHeader record={overviewData || {}} />
+      <RecordsHeader record={overviewData || {}} internshipId={internshipId} />
 
       <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-200 bg-background p-1.5">
         {detailTabs.map((t) => (

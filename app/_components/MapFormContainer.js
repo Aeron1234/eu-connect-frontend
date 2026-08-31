@@ -16,7 +16,7 @@ function MapFormContainer({
   setRadius = null,
 }) {
   return (
-    <div className="overflow-hidden rounded-lg" style={mapStyle}>
+    <div className="overflow-hidden rounded-lg  z-0" style={mapStyle}>
       <MapForm
         data={data}
         setData={setData}

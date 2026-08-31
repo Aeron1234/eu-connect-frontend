@@ -619,7 +619,11 @@ export const getDepartments = cache(async () => {
   }
 });
 
-export const getInbox = cache(async () => {
+export const getInbox = async ({
+  scope = "all",
+  page = 1,
+  limit = 10,
+} = {}) => {
   try {
     const session = await getUserSession();
     if (!session?.user) {
@@ -628,33 +632,37 @@ export const getInbox = cache(async () => {
 
     const userId = session.user.id;
 
+    const params = new URLSearchParams({
+      userId,
+      scope,
+      page: String(page),
+      limit: String(limit),
+    });
+
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/notifications?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/notifications?${params.toString()}`,
       {
         method: "GET",
         headers: {
           "x-api-key": process.env.BACKEND_SECRET_KEY,
         },
+        cache: "no-store",
       },
     );
 
     if (!res.ok) {
       const error = await res.json();
       return {
-        error:
-          error.message || "Failed to get notifications. Please try again.",
+        error: error.message || "Failed to load notifications.",
       };
     }
 
-    const data = await res.json();
-
-    // return await res.json();
-    return data;
+    return await res.json();
   } catch (err) {
     console.log(err);
     return null;
   }
-});
+};
 
 export const fetchMoreNotifications = cache(async ({ page = 1 }) => {
   try {

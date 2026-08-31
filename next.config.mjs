@@ -33,6 +33,7 @@ const nextConfig = {
   serverExternalPackages: ["@sparticuz/chromium"],
 
   outputFileTracingIncludes: {
+    "/api/reports/annex-c": ["./node_modules/@sparticuz/chromium/**"],
     "/api/reports/annex-d": ["./node_modules/@sparticuz/chromium/**"],
   },
 

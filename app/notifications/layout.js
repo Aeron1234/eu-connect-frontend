@@ -17,13 +17,13 @@ async function NotificationsLayout({ children }) {
           <SideNavigation />
 
           <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-stone-100">
-            <div className="px-6 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 h-16 border-b border-stone-300">
+            <div className="px-6 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 h-16 border-b border-stone-300 z-100">
               <Header />
               <Alert />
             </div>
 
             <div className="py-4 px-8 max-lg:px-4 flex-1 overflow-y-auto ">
-              <div className="max-w-7xl mx-auto">{children}</div>
+              {children}
             </div>
           </main>
         </div>

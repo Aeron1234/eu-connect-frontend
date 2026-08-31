@@ -4,13 +4,14 @@ import { useMemo, useState, useTransition } from "react";
 import { MapPin, Save, Trash2, Crosshair } from "lucide-react";
 import MapFormContainer from "./MapFormContainer";
 import { toastAndAction } from "../_services/helpers";
-import { setSearchedStudentDtrLocation } from "../_services/employer-actions";
+import { setStudentDtrLocation } from "../_services/employer-actions";
 
-const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
+const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
   const [loc, setLoc] = useState({
     lat: dataLocation.location.lat || "",
     lon: dataLocation.location.lon || "",
     label: dataLocation.location.label || "",
+    address: dataLocation.location.address || "",
     internshipId: dataLocation.internship_id || "",
     updatedAt: dataLocation.location.updated_at || null,
   });
@@ -19,25 +20,22 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
   );
   const [isPending, startTransition] = useTransition();
 
-  console.log(dataLocation);
-
   function handleSetLocation() {
     const formData = {
-      searchedUserId,
+      studentId,
       internshipId: loc.internshipId,
       lat: loc.lat,
       lon: loc.lon,
       label: loc.label,
+      address: loc.address,
       radius_meter: radius,
     };
-
-    console.log(formData);
 
     const handlers = {
       loadingLabel: "Setting DTR location...",
       successLabel: "DTR location setted!",
       errorLabel: "Setting DTR location failed.",
-      action: setSearchedStudentDtrLocation,
+      action: setStudentDtrLocation,
       formData,
     };
 
@@ -50,6 +48,7 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
           lat: saved.lat ?? "",
           lon: saved.lon ?? "",
           label: saved.label ?? "",
+          address: saved.address ?? "",
           internshipId: saved.internship_id ?? "",
           updatedAt: saved.updated_at ?? new Date().toISOString(),
         });
@@ -64,6 +63,7 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
       lat: "",
       lon: "",
       label: "",
+      address: "",
       updatedAt: "",
     }));
     setRadius(0);
@@ -97,6 +97,13 @@ const SetDtrLocation = ({ searchedUserId, dataLocation = {} }) => {
           radius={radius}
           setRadius={setRadius}
         />
+      </div>
+
+      <div className="bg-stone-100 rounded-xl p-3">
+        <p className="text-xs text-stone-600">Address</p>
+        <p className="mt-0.5 text-sm font-medium text-stone-800">
+          {loc.address ? loc.address : "—"}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

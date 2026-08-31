@@ -125,6 +125,7 @@ async function SetLocationForm({ searchedUserId, userRole }) {
       lon: searchedStudentDtrLocation?.location?.lon,
       radius_meters: searchedStudentDtrLocation?.location?.radius_meters,
       label: searchedStudentDtrLocation?.location?.label,
+      address: searchedStudentDtrLocation?.location?.address || null,
       set_by: searchedStudentDtrLocation?.location?.set_by || null,
       created_at: searchedStudentDtrLocation?.location?.created_at || null,
       updated_at: searchedStudentDtrLocation?.location?.updated_at || null,
@@ -132,10 +133,7 @@ async function SetLocationForm({ searchedUserId, userRole }) {
   };
 
   return (
-    <SetDtrLocation
-      searchedUserId={searchedUserId}
-      dataLocation={dataLocation}
-    />
+    <SetDtrLocation studentId={searchedUserId} dataLocation={dataLocation} />
   );
 }
 

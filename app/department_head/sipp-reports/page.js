@@ -1,17 +1,21 @@
-import { redirect } from "next/navigation";
-import { getUserSession } from "../_services/services";
+import { getUserSession } from "../../_services/services";
 
 import { FileText } from "lucide-react";
-import SIPPReportsPageContent from "../_components/SIPPReportsPageContent";
-import SIPPPageFilter from "../_components/SIPPPageFilter";
+import SIPPReportsPageContent from "../../_components/SIPPReportsPageContent";
+import SIPPPageFilter from "../../_components/SIPPPageFilter";
+import { notFound } from "next/navigation";
 
 async function SIPPReportsPage({ searchParams }) {
   const session = await getUserSession();
-  const userId = session.user.id;
-  const userRole = session.user.role;
-  const userDepartment = session.user.department_code;
-
   const sParams = await searchParams;
+
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
+  const userDepartment = session?.user?.department_code;
+
+  const isRegistrar = userRole == "department_head" && userDepartment === "REG";
+
+  if (!isRegistrar) return notFound();
 
   const filter = sParams.filter || "annex-c";
 
@@ -30,8 +34,7 @@ async function SIPPReportsPage({ searchParams }) {
         </div>
       </div>
 
-      {userRole === "admin" ||
-        (userDepartment === "REG" && <SIPPPageFilter filter={filter} />)}
+      {isRegistrar && <SIPPPageFilter filter={filter} />}
 
       <div className="space-y-6">
         <SIPPReportsPageContent

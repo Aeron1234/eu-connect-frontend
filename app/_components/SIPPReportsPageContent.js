@@ -1,50 +1,47 @@
 import {
   getAvailableAcademicYears,
   getHteCompanyList,
+  getAnnexCReports,
 } from "../_services/dept-head-actions";
-import AnnexC from "./AnnexC";
+import AnnexCManager from "./AnnexCManager";
 import { AnnexDHteList } from "./AnnexDHteList";
 
-function SIPPReportsPageContent({
+async function SIPPReportsPageContent({
   userDepartment,
   userRole,
   userId,
   filter = "annex-c",
 }) {
-  if (userDepartment === "REG" || userRole === "admin")
+  if (filter === "annex-c") {
+    const [availableAcadYear, annexCReports] = await Promise.all([
+      getAvailableAcademicYears(),
+      getAnnexCReports({}),
+    ]);
+
     return (
-      <RegistrarUser
-        userDepartment={userDepartment}
-        userRole={userRole}
-        userId={userId}
-        filter={filter}
+      <AnnexCManager
+        hei="Manuel S. Enverga University Foundation-Candelaria, Inc."
+        address="Malabanban Norte, Candelaria, Quezon"
+        availableAcadYear={availableAcadYear || []}
+        initialReports={annexCReports?.reports || []}
+        pagination={annexCReports?.pagination || {}}
+        academicYear={annexCReports?.academicYear || ""}
       />
     );
-
-  return <div>Normal Dept head</div>;
-}
-
-async function RegistrarUser({
-  userDepartment,
-  userRole,
-  userId,
-  filter = "annex-c",
-}) {
-  const [availableAcadYear, hteCompanyList] = await Promise.all([
-    getAvailableAcademicYears(),
-    getHteCompanyList({}),
-  ]);
-
-  console.log(hteCompanyList);
-  if (filter === "annex-c") return <AnnexC />;
+  }
 
   if (filter === "annex-d") {
+    const [availableAcadYear, hteCompanyList] = await Promise.all([
+      getAvailableAcademicYears(),
+      getHteCompanyList({}),
+    ]);
+
     return (
       <AnnexDHteList
         availableAcadYear={availableAcadYear || []}
-        initialData={getHteCompanyList?.companies || []}
-        pagination={getHteCompanyList?.pagination || {}}
-        academicYear={getHteCompanyList?.academicYear || ""}
+        initialData={hteCompanyList?.companies || []}
+        pagination={hteCompanyList?.pagination || {}}
+        academicYear={hteCompanyList?.academicYear || ""}
       />
     );
   }

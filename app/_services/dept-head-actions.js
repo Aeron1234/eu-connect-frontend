@@ -40,6 +40,39 @@ export async function approveInternshipRecord(prevState, formData) {
   }
 }
 
+export async function restoreInternshipRecord(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user) throw new Error("You must be logged in");
+
+    const userId = session.user.id;
+    if (!["department_head", "admin"].includes(session.user.role))
+      throw new Error("Unauthorized role.");
+
+    const internshipId = formData.get("id");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internship-records/restore/${internshipId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+      },
+    );
+
+    if (res.ok) {
+      revalidatePath(`$/internship-record/${internshipId}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Restoring Record Error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function updateInternshipRecordStatus(prevState, formData) {
   try {
     const session = await getUserSession();
@@ -919,3 +952,105 @@ export const getHteCompanyReport = cache(
     }
   },
 );
+
+export const saveAnnexCReport = async (payload) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["department_head", "admin"].includes(session.user.role)
+    ) {
+      return { error: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/reports/annex-c?userId=${userId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.error || "Failed to save Annex C report." };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return { error: "Unexpected error while saving Annex C report." };
+  }
+};
+
+export const getAnnexCReports = async ({
+  academicYear = "",
+  search = "",
+  page = 1,
+} = {}) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["department_head", "admin"].includes(session.user.role)
+    ) {
+      return { error: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const params = new URLSearchParams({ userId, page: String(page) });
+    if (academicYear) params.set("academicYear", academicYear);
+    if (search) params.set("search", search);
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/reports/annex-c?${params.toString()}`,
+      { headers: { "x-api-key": process.env.BACKEND_SECRET_KEY } },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.error || "Failed to load Annex C reports." };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return { error: "Unexpected error while loading Annex C reports." };
+  }
+};
+
+export const deleteAnnexCReport = async (reportId) => {
+  try {
+    const session = await getUserSession();
+    if (
+      !session?.user ||
+      !["department_head", "admin"].includes(session.user.role)
+    ) {
+      return { error: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/reports/annex-c/${reportId}?userId=${userId}`,
+      {
+        method: "DELETE",
+        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.error || "Failed to delete report." };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return { error: "Unexpected error while deleting report." };
+  }
+};

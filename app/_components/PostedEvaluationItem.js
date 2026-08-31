@@ -231,18 +231,17 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
         <div className="bg-white px-5 py-4 border-t border-stone-200">
           <div className="flex w-full justify-end gap-2">
             <button
-              type="button"
               onClick={() => handleResponse("disputed")}
               className="rounded-lg border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-accent"
             >
               Dispute
             </button>
             <button
-              type="button"
               onClick={() => handleResponse("completed")}
               className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
             >
-              <CheckCircle2 className="h-4 w-4" /> Accept &amp; Confirm
+              <CheckCircle2 className="h-4 w-4" />
+              Accept &amp; Confirm
             </button>
           </div>
         </div>
@@ -252,7 +251,6 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
         <div className="bg-white px-5 py-4 border-t border-stone-200">
           <div className="flex w-full justify-end gap-2">
             <button
-              type="button"
               onClick={handleRestore}
               className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
             >

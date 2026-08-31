@@ -21,7 +21,7 @@ import { useWindowSize } from "../_services/helpers";
 import Logo from "./Logo";
 import { useUser } from "@/contexts/UserContext";
 
-function navigation(userRole, userDepartment) {
+function roleRoutes(userRole, userDepartment) {
   let routes;
   if (userRole === "student") {
     routes = [
@@ -60,18 +60,19 @@ function navigation(userRole, userDepartment) {
         href: "/map",
         icon: <MapPin className="h-5 w-5" />,
       },
-
-      {
-        name: "SIPP Reports",
-        href: "/sipp-reports",
-        icon: <FileText className="h-5 w-5" />,
-      },
       {
         name: "Past Internships",
         href: "/past-internships",
         icon: <Building2 className="h-5 w-5" />,
       },
     ];
+
+    if (userRole === "department_head" && userDepartment === "REG")
+      routes.push({
+        name: "SIPP Reports",
+        href: "/department_head/sipp-reports",
+        icon: <FileText className="h-5 w-5" />,
+      });
 
     if (userRole === "department_head" && userDepartment !== "REG")
       routes.push({
@@ -103,11 +104,7 @@ function navigation(userRole, userDepartment) {
         href: "/admin/evaluation-criteria",
         icon: <SlidersHorizontal className="h-5 w-5" />,
       },
-      {
-        name: "SIPP Reports",
-        href: "/sipp-reports",
-        icon: <FileText className="h-5 w-5" />,
-      },
+
       {
         name: "Past Internships",
         href: "/past-internships",
@@ -119,7 +116,7 @@ function navigation(userRole, userDepartment) {
   return routes;
 }
 
-const generalRoutes = [
+const publicRoutes = [
   {
     name: "Announcements",
     href: "/announcements",
@@ -152,7 +149,7 @@ function SideNavigationList({ firstName = "" }) {
 
   const homeHref = `/${userRole}`;
 
-  const routes = navigation(userRole, userDepartment) || [];
+  const routes = roleRoutes(userRole, userDepartment) || [];
 
   return (
     // 🌟 1. Added 'flex flex-col' so the container handles structural height calculations properly
@@ -206,7 +203,7 @@ function SideNavigationList({ firstName = "" }) {
         <div
           className={`flex flex-col gap-1 w-full ${routes.length > 0 ? "lg:mt-2 lg:pt-2 lg:border-t lg:border-primary-400" : ""}`}
         >
-          {generalRoutes.map((item) => (
+          {publicRoutes.map((item) => (
             <li key={item.name}>
               <Button
                 item={item}

@@ -75,26 +75,27 @@ export async function deletePendingStudentEvaluation(prevState, formData) {
   }
 }
 
-export async function setSearchedStudentDtrLocation(prevState, formData) {
+export async function setStudentDtrLocation(prevState, formData) {
   try {
     const session = await getUserSession();
     if (!session?.user) throw new Error("You must be logged in");
 
     const userId = session.user.id;
-    if (!["employer"].includes(session.user.role))
+    if (!["employer", "deparment_head", "admin"].includes(session.user.role))
       throw new Error("Unauthorized role.");
 
-    const searchedUserId = formData.searchedUserId;
+    const studentId = formData.studentId;
     const internshipId = formData.internshipId;
     const data = {
       lat: formData.lat,
       lon: formData.lon,
       label: formData.label,
       radius_meter: formData.radius_meter,
+      address: formData.address,
     };
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/set-dtr-location/${searchedUserId}?userId=${userId}&internshipId=${internshipId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/set-dtr-location/${studentId}?userId=${userId}&internshipId=${internshipId}`,
       {
         method: "PUT",
         headers: {
@@ -282,6 +283,39 @@ export async function deleteInternshipPosting(prevState, formData) {
     return await res.json();
   } catch (err) {
     console.error("Delete pending student evaluation error: ", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function respondToSupervisorRequest(prevState, formData) {
+  try {
+    const session = await getUserSession();
+    if (!session?.user || session?.user?.role !== "employer") {
+      throw new Error("You must be logged in.");
+    }
+
+    const userId = session.user.id;
+    const requestId = formData.get("requestId");
+    const decision = formData.get("decision");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/supervisor-requests/respond/${requestId}?userId=${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BACKEND_SECRET_KEY,
+        },
+        body: JSON.stringify({ decision }),
+      },
+    );
+
+    const data = await res.json();
+    if (res.ok) revalidatePath("/notifications");
+
+    return data;
+  } catch (err) {
+    console.log(err);
     return { success: false, error: err.message };
   }
 }

@@ -285,8 +285,8 @@ function InternshipPosts({
       </p>
 
       {/* Listings */}
-      <div className="grid xl:grid-cols-2 gap-5">
-        {/* <div className="space-y-5"> */}
+      {/* <div className="grid xl:grid-cols-2 gap-5"> */}
+      <div className="space-y-6">
         {internshipPosts.map((item) => {
           const isFavorited = favoriteIds.has(item.id);
           return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, FileText, Filter, Search, Users } from "lucide-react";
+import { Building2, FileText, Search, Users } from "lucide-react";
 
 import ExportPdfButton from "./ExportPdfButton";
 import { getHteCompanyList } from "../_services/dept-head-actions";
@@ -32,10 +32,7 @@ export function AnnexDHteList({
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
 
-  // Debounce year + search changes behind one timer, same as InternshipPosts.
   useEffect(() => {
-    // Skip the very first run — initialData already matches initialYear/no query,
-    // no need to immediately refetch what we just rendered from the server.
     if (isFirstRun.current) {
       isFirstRun.current = false;
       return;
@@ -52,7 +49,7 @@ export function AnnexDHteList({
           page: 1,
         });
 
-        if (thisRequestId !== requestIdRef.current) return; // stale, ignore
+        if (thisRequestId !== requestIdRef.current) return;
 
         if (newData?.error) {
           console.error("Error loading HTE companies:", newData.error);
@@ -126,20 +123,17 @@ export function AnnexDHteList({
 
   return (
     <div>
-      {/* Filter bar */}
+      {/* Filter bar — same pattern as AnnexCManager's Reports tab */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 flex items-center gap-1.5 text-sm font-medium uppercase tracking-wider text-muted-foreground">
-            <Filter className="size-3.5" /> AY
-          </span>
-          {availableAcadYear.map((ay) => (
+          {["All", ...availableAcadYear].map((ay) => (
             <button
               key={ay}
               type="button"
-              onClick={() => setYear(ay)}
+              onClick={() => setYear(ay === "All" ? "" : ay)}
               className={cx(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                year === ay
+                "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                (ay === "All" && !year) || year === ay
                   ? "bg-primary-500 text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:text-foreground",
               )}
@@ -171,7 +165,7 @@ export function AnnexDHteList({
         />
         <StatCard
           icon={<FileText className="size-5 text-muted-foreground" />}
-          value={year || "—"}
+          value={year || "All"}
           label="Academic Year"
         />
       </div>
@@ -214,8 +208,11 @@ export function AnnexDHteList({
                     {c.intern_count === 1 ? "intern" : "interns"}
                   </span>
                   <ExportPdfButton
-                    companyKey={c.company_key}
-                    academicYear={c.academic_year}
+                    endpoint="/api/reports/annex-d"
+                    params={{
+                      companyKey: c.company_key,
+                      academicYear: c.academic_year,
+                    }}
                   />
                 </div>
               </header>

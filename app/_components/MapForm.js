@@ -92,6 +92,7 @@ function MapForm({
         ...prev,
         lat: location.y,
         lon: location.x,
+        address: location.label,
         radius,
       }));
     }
@@ -123,6 +124,7 @@ function MapForm({
           height: "100%",
           width: "100%",
           borderRadius: "4px",
+          zIndex: "0",
         }}
       >
         <TileLayer
@@ -132,6 +134,7 @@ function MapForm({
 
         <SearchField onLocationSelect={handleLocationSelect} />
 
+        {/* Click-to-pin is now enabled for every form type, including internshipRecord */}
         <ClickMarker
           formType={formType}
           onLocationSelect={handleLocationSelect}
@@ -265,8 +268,6 @@ function ClickMarker({ onLocationSelect, formType, defaultCoords }) {
 
   useMapEvents({
     async click(e) {
-      // if (formType === "internshipRecord") return;
-
       const { lat, lng } = e.latlng;
 
       let label = `${lat || defaultCoords[0]}, ${lng || defaultCoords[1]}`;

@@ -44,28 +44,31 @@ export function useApiFetch(query, delay = 500) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Use refs to persist the timer and controller across renders
   const timeoutRef = useRef(null);
   const controllerRef = useRef(null);
 
   useEffect(() => {
-    // 1. Reset states and clear previous logic
-    if (!query) {
-      setData(null);
-      return;
-    }
-
+    // Always clear any pending timer/request first, regardless of branch below.
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (controllerRef.current) controllerRef.current.abort();
 
-    // 2. Setup the Debounce
+    if (!query) {
+      setData(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Flip loading on immediately so it covers the debounce wait too,
+    // not just the network request. Also clear stale data from the
+    // previous query so old results don't linger on screen.
+    setLoading(true);
+    setError(null);
+    setData(null);
+
     timeoutRef.current = setTimeout(async () => {
-      // Create a fresh AbortController for this specific request
       const controller = new AbortController();
       controllerRef.current = controller;
-
-      setLoading(true);
-      setError(null);
 
       try {
         const response = await fetch(query, { signal: controller.signal });
@@ -75,19 +78,16 @@ export function useApiFetch(query, delay = 500) {
         const result = await response.json();
         setData(result);
       } catch (err) {
-        // Only set error if it wasn't an intentional abort
         if (err.name !== "AbortError") {
           setError(err.message);
         }
       } finally {
-        // Only stop loading if this is still the active controller
         if (controllerRef.current === controller) {
           setLoading(false);
         }
       }
     }, delay);
 
-    // 3. Cleanup function: runs if the component unmounts or query changes
     return () => {
       clearTimeout(timeoutRef.current);
       if (controllerRef.current) controllerRef.current.abort();

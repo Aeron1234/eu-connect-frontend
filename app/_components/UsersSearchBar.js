@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 
-function UsersSearchBar({ inputValue, setInputValue, loading = false }) {
+function UsersSearchBar({ inputValue, setInputValue }) {
   return (
     <div className="w-full flex items-center gap-4 mb-6 relative">
       <div className="flex-1 flex items-center gap-2 border border-stone-200 bg-white rounded-lg px-2">
@@ -17,12 +17,6 @@ function UsersSearchBar({ inputValue, setInputValue, loading = false }) {
         // onChange={(e) => setFilterDept(e.target.value)}
         className="px-3 py-2 rounded-sm border bg-card text-sm"
       ></select> */}
-
-      {loading && (
-        <div className="absolute top-full left-0 w-full h-full bg-white border border-stone-200 shadow-lg flex items-center justify-center rounded-lg">
-          <span className="">Searching...</span>
-        </div>
-      )}
     </div>
   );
 }

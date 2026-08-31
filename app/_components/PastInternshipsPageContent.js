@@ -29,8 +29,9 @@ function PastInternshipsPageContent({
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
   const [isPending, setIsPending] = useState(false);
 
-  // Remembers which company keys were on page 1 as of the LAST time this effect ran
   const prevPage1KeysRef = useRef(new Set((initialData || []).map(keyOf)));
+  const requestIdRef = useRef(0);
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
     const freshMap = new Map((initialData || []).map((c) => [keyOf(c), c]));
@@ -40,17 +41,13 @@ function PastInternshipsPageContent({
       if (prev.length === 0) return initialData;
 
       const updatedList = prev
-        // 1. update companies with fresh server data if available
         .map((c) => freshMap.get(keyOf(c)) || c)
-        // 2. drop companies that WERE on page 1 before, but are no longer
-        //    in the fresh page 1 response (i.e. no longer match the filter)
         .filter((c) => {
           const wasOnPage1Before = prevPage1Keys.has(keyOf(c));
           const isStillFresh = freshMap.has(keyOf(c));
           return !wasOnPage1Before || isStillFresh;
         });
 
-      // 3. prepend brand-new companies that appeared at the top of page 1
       const existingKeys = new Set(updatedList.map(keyOf));
       const brandNew = (initialData || []).filter(
         (c) => !existingKeys.has(keyOf(c)),
@@ -62,9 +59,53 @@ function PastInternshipsPageContent({
     setPage(initialPage);
     setTotalPages(initialTotalPages || 1);
 
-    // remember this run's page-1 keys for the NEXT diff
     prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
   }, [initialData, initialPage, initialTotalPages]);
+
+  // Debounced search — the missing piece. Fires whenever `query` changes,
+  // fetches page 1 with the search term, and ignores stale responses if
+  // the user keeps typing before an earlier request resolves.
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
+    const thisRequestId = ++requestIdRef.current;
+
+    const timeout = setTimeout(async () => {
+      setIsPending(true);
+      try {
+        const newData = await getAlumniInternships({
+          academicYear: yearFilter,
+          search: query,
+          page: 1,
+        });
+
+        if (thisRequestId !== requestIdRef.current) return; // stale, ignore
+
+        if (newData?.error) {
+          console.error("Error searching past internships:", newData.error);
+          setCompanies([]);
+          setTotalPages(1);
+          setPage(1);
+          return;
+        }
+
+        setCompanies(newData?.data || []);
+        setPage(1);
+        setTotalPages(newData?.pagination?.totalPages || 1);
+      } catch (error) {
+        if (thisRequestId === requestIdRef.current) {
+          console.error("Error searching past internships:", error);
+        }
+      } finally {
+        if (thisRequestId === requestIdRef.current) setIsPending(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [query, yearFilter]);
 
   const handleItemUpdate = (updatedItem) => {
     setCompanies((prev) =>
@@ -110,7 +151,6 @@ function PastInternshipsPageContent({
 
   return (
     <div className="space-y-6">
-      {/* Filter bar */}
       <div className="flex gap-4 justify-between">
         <div className="flex flex-wrap items-center gap-2">
           {["All", ...academicYears].map((year) => (

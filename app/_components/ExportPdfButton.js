@@ -5,8 +5,8 @@ import { Printer } from "lucide-react";
 import { useState } from "react";
 
 export default function ExportPdfButton({
-  companyKey,
-  academicYear,
+  endpoint, // e.g. "/api/reports/annex-d" or "/api/reports/annex-c"
+  params = {}, // e.g. { companyKey, academicYear } or { reportId }
   label = "Print / Export",
 }) {
   const [isPending, setIsPending] = useState(false);
@@ -14,9 +14,12 @@ export default function ExportPdfButton({
   const handleExport = async () => {
     try {
       setIsPending(true);
-      const res = await fetch(
-        `/api/reports/annex-d?companyKey=${encodeURIComponent(companyKey)}&academicYear=${encodeURIComponent(academicYear)}`,
-      );
+
+      const query = new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== null),
+      ).toString();
+
+      const res = await fetch(`${endpoint}?${query}`);
       if (!res.ok) {
         const { error } = await res
           .json()

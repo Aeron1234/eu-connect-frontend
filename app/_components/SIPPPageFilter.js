@@ -11,7 +11,7 @@ function SIPPPageFilter({ filter }) {
         {scopeTabs.map((s) => (
           <Link
             key={s.value}
-            href={`/sipp-reports?filter=${s.value}`}
+            href={`/department_head/sipp-reports?filter=${s.value}`}
             className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
               filter === s.value
                 ? "bg-primary-500 text-primary-foreground"

@@ -17,7 +17,7 @@ async function UsersLayout({ children }) {
           <SideNavigation />
 
           <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-stone-100">
-            <div className="px-6 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 h-16 border-b border-stone-300 z-50">
+            <div className="px-6 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 h-16 border-b border-stone-300 z-100">
               <Header />
               <Alert />
             </div>

@@ -1,5 +1,5 @@
 import { getBrowser } from "./pdfBrowser";
-import { annexDHtml } from "./pdfTemplates";
+import { annexCHtml, annexDHtml } from "./pdfTemplates";
 
 const HEI_NAME = "Manuel S. Enverga University Foundation-Candelaria, Inc.";
 const HEI_ADDRESS = "Malabanban Norte, Candelaria, Quezon";
@@ -50,6 +50,38 @@ export async function generateAnnexDPdf(companyKey, academicYear, userId) {
     },
     preparedBy: "",
     certifiedBy: "",
+  });
+
+  return renderPdf(html);
+}
+
+export async function generateAnnexCPdf(reportId, userId) {
+  const url = new URL(`${BACKEND_URL}/api/reports/annex-c/${reportId}`);
+  url.searchParams.set("userId", userId);
+
+  const res = await fetch(url, {
+    headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+  });
+
+  if (res.status === 403)
+    throw new Error("Not authorized to export this report.");
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+
+  const data = await res.json();
+
+  const html = annexCHtml({
+    ay: data.academic_year,
+    hei: HEI_NAME,
+    address: HEI_ADDRESS,
+    degreeProgram: data.degree_program,
+    rows: data.entries.map((e) => ({
+      issues: e.issue,
+      solutions: e.solution,
+      recommendations: e.recommendation,
+    })),
+    preparedBy: data.prepared_by || "",
+    certifiedBy: data.certified_by || "",
   });
 
   return renderPdf(html);

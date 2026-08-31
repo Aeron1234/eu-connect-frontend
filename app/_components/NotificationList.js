@@ -1,89 +1,251 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, BellRing, Inbox } from "lucide-react";
 import MarkAllAsReadButton from "./MarkAllAsReadButton";
 import NotificationItem from "./NotificationItem";
-import { fetchMoreNotifications } from "../_services/services";
-import SeeMoreButton from "./SeeMoreButton";
+import { getInbox } from "../_services/services";
+import { useUser } from "@/contexts/UserContext";
+
+const scopeTabs = [
+  { label: "All", value: "all" },
+  { label: "Requests", value: "requests" },
+];
+
+function keyOf(n) {
+  return n.id;
+}
 
 function NotificationList({ inboxData: initialData }) {
+  const { user } = useUser();
+  const userRole = user?.role;
+  const isEmployer = userRole === "employer";
+
   const [notifications, setNotifications] = useState(initialData?.data || []);
-  const [page, setPage] = useState(1);
-  const [isPending, setIsPending] = useState(false);
+  const [page, setPage] = useState(initialData?.currentPage || 1);
   const [totalPages, setTotalPages] = useState(initialData?.totalPages || 1);
-  const [initialId, setInitialId] = useState(
-    initialData?.data?.[0]?.notification_id,
+  const [totalRecords, setTotalRecords] = useState(
+    initialData?.totalRecords || 0,
   );
-  const totalRecords = initialData?.totalRecords || 0;
-  const unreadCount = initialData?.unreadCount || 0;
+  const [unreadCount, setUnreadCount] = useState(initialData?.unreadCount || 0);
+  const [scope, setScope] = useState("all");
+  const [isPending, setIsPending] = useState(false);
 
+  const requestIdRef = useRef(0);
+  const isFirstRun = useRef(true);
+  // Guards the initialData-reconciliation effect below so it doesn't
+  // redundantly re-derive and re-set state (with a new array reference)
+  // on the very first mount, when state is already correctly seeded from
+  // initialData via useState's initializer above. Effects run after every
+  // render including the first one, regardless of the dependency array, so
+  // without this guard the first commit is followed immediately by a
+  // second, functionally-identical commit.
+  const isFirstReconcile = useRef(true);
+  const prevPage1KeysRef = useRef(
+    new Set((initialData?.data || []).map(keyOf)),
+  );
+
+  // Defensive: the Requests tab only exists for employers, so scope should
+  // never be able to sit on "requests" for anyone else. Guards against edge
+  // cases like role resolving asynchronously through context.
   useEffect(() => {
-    const newInitialId = initialData?.data?.[0]?.notification_id;
-
-    // ONLY reset if the very first notification is different
-    // (meaning a brand new list was fetched, not just a status update)
-    if (newInitialId !== initialId) {
-      setNotifications(initialData?.data || []);
-      setPage(1);
-      setTotalPages(initialData?.totalPages || 1);
-      setInitialId(newInitialId);
-    } else {
-      // If it's just a data refresh (like marking as read),
-      // we only update the specific items without resetting the 'page' or 'See More'
-      setNotifications((prev) => {
-        return prev.map((item) => {
-          const freshData = initialData?.data?.find(
-            (d) => d.notification_id === item.notification_id,
-          );
-          return freshData ? { ...item, ...freshData } : item;
-        });
-      });
+    if (!isEmployer && scope !== "all") {
+      setScope("all");
     }
-  }, [initialData]);
+  }, [isEmployer, scope]);
 
-  async function handleLoadMore() {
+  // Reconciles server-revalidated `initialData` (mark-all-as-read, or a
+  // respond-to-request action that calls revalidatePath) back into state
+  // without discarding pages already loaded via "See more" — same merge
+  // pattern used for Past Internships. Only applies on the All tab, since
+  // initialData is always the unfiltered fetch from the server.
+  useEffect(() => {
+    if (scope !== "all") return;
+
+    if (isFirstReconcile.current) {
+      isFirstReconcile.current = false;
+      return;
+    }
+
+    const freshMap = new Map(
+      (initialData?.data || []).map((n) => [keyOf(n), n]),
+    );
+    const prevPage1Keys = prevPage1KeysRef.current;
+
+    setNotifications((prev) => {
+      if (prev.length === 0) return initialData?.data || [];
+
+      const updatedList = prev
+        .map((n) => freshMap.get(keyOf(n)) || n)
+        .filter((n) => {
+          const wasOnPage1Before = prevPage1Keys.has(keyOf(n));
+          const isStillFresh = freshMap.has(keyOf(n));
+          return !wasOnPage1Before || isStillFresh;
+        });
+
+      const existingKeys = new Set(updatedList.map(keyOf));
+      const brandNew = (initialData?.data || []).filter(
+        (n) => !existingKeys.has(keyOf(n)),
+      );
+
+      return [...brandNew, ...updatedList];
+    });
+
+    setPage(initialData?.currentPage || 1);
+    setTotalPages(initialData?.totalPages || 1);
+    setTotalRecords(initialData?.totalRecords || 0);
+    setUnreadCount(initialData?.unreadCount || 0);
+
+    prevPage1KeysRef.current = new Set((initialData?.data || []).map(keyOf));
+  }, [initialData, scope]);
+
+  // Debounced refetch on tab switch — clicking a tab resets the timer, so
+  // rapid switching only fires one request once things settle.
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
+    const thisRequestId = ++requestIdRef.current;
+
+    const timeout = setTimeout(async () => {
+      setIsPending(true);
+      try {
+        const newData = await getInbox({ scope, page: 1 });
+
+        if (thisRequestId !== requestIdRef.current) return;
+
+        if (newData?.error) {
+          console.error("Error loading notifications:", newData.error);
+          setNotifications([]);
+          setTotalPages(1);
+          setTotalRecords(0);
+          setPage(1);
+          return;
+        }
+
+        setNotifications(newData?.data || []);
+        setPage(1);
+        setTotalPages(newData?.totalPages || 1);
+        setTotalRecords(newData?.totalRecords || 0);
+        setUnreadCount(newData?.unreadCount || 0);
+        prevPage1KeysRef.current = new Set((newData?.data || []).map(keyOf));
+      } catch (error) {
+        if (thisRequestId === requestIdRef.current) {
+          console.error("Error loading notifications:", error);
+        }
+      } finally {
+        if (thisRequestId === requestIdRef.current) setIsPending(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [scope]);
+
+  async function handleSeeMore() {
+    if (isPending || page >= totalPages) return;
     setIsPending(true);
     const nextPage = page + 1;
+    const thisRequestId = ++requestIdRef.current;
 
     try {
-      // Call your existing service/API
-      const newData = await fetchMoreNotifications({
-        page: nextPage,
+      const newData = await getInbox({ scope, page: nextPage });
+
+      if (thisRequestId !== requestIdRef.current) return;
+
+      if (newData?.error) {
+        console.error("Error loading more notifications:", newData.error);
+        return;
+      }
+
+      const incoming = newData?.data || [];
+
+      setNotifications((prev) => {
+        const existingKeys = new Set(prev.map(keyOf));
+        const filteredNew = incoming.filter((n) => !existingKeys.has(keyOf(n)));
+        return [...prev, ...filteredNew];
       });
 
-      setNotifications((prev) => [...prev, ...newData.data]);
       setPage(nextPage);
-      setTotalPages(newData.totalPages);
+      if (newData?.totalPages) setTotalPages(newData.totalPages);
     } catch (error) {
-      console.error("Error loading more notifications:", error);
+      if (thisRequestId === requestIdRef.current) {
+        console.error("Error loading more notifications:", error);
+      }
     } finally {
-      setIsPending(false);
+      if (thisRequestId === requestIdRef.current) setIsPending(false);
     }
   }
 
-  console.log(notifications);
   return (
-    <>
-      <div className="w-full flex justify-between">
-        <div className="text-sm text-stone-600 flex flex-col">
-          <h3 className="text-base font-semibold">Inbox</h3>
-          {totalRecords > 0 ? (
-            <span>{totalRecords} notification(s)</span>
-          ) : (
-            <span> </span>
-          )}
-        </div>
+    <div className="space-y-6">
+      {/* Filter bar — same shape as the scope toggle in InternshipPosts */}
+      <div className="flex w-full flex-wrap items-center gap-3">
+        {isEmployer && (
+          <div className="flex rounded-lg bg-stone-200 p-1">
+            {scopeTabs.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setScope(tab.value)}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  scope === tab.value
+                    ? "bg-primary-500 text-primary-foreground"
+                    : "bg-stone-200 text-muted-foreground hover:text-primary-500"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
-        <MarkAllAsReadButton
-          data={notifications}
-          unreadCount={unreadCount}
-          notifications={notifications}
-          setNotifications={setNotifications}
+        <div className="w-fit ml-auto">
+          <MarkAllAsReadButton
+            data={notifications}
+            unreadCount={unreadCount}
+            notifications={notifications}
+            setNotifications={setNotifications}
+          />
+        </div>
+      </div>
+
+      {/* Stat cards — same pattern as AnnexDHteList's StatCard row */}
+      <div className="grid gap-4 grid-cols-2">
+        <StatCard
+          icon={<Bell className="size-5 opacity-80" />}
+          value={String(totalRecords)}
+          label={
+            scope === "requests" ? "Supervisor Requests" : "All Notifications"
+          }
+          highlight
+        />
+        <StatCard
+          icon={<BellRing className="size-5 text-muted-foreground" />}
+          value={String(unreadCount)}
+          label="Unread"
         />
       </div>
-      <ul className="flex flex-col gap-2">
-        {notifications.length > 0 ? (
-          notifications.map((item) => (
+
+      {/* List */}
+      {notifications.length === 0 && !isPending ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background px-6 py-16 text-center">
+          <Inbox className="size-8 text-muted-foreground" />
+          <p className="mt-4 text-sm font-medium text-muted-foreground">
+            {scope === "requests"
+              ? "No supervisor requests right now"
+              : "You're all caught up"}
+          </p>
+          <p className="mt-2 max-w-sm text-xs text-muted-foreground/70">
+            {scope === "requests"
+              ? "New requests from students will show up here."
+              : "New approvals, announcements, and updates will show up here."}
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {notifications.map((item) => (
             <li key={item.ui_key} className="flex-1">
               <NotificationItem
                 item={item}
@@ -91,20 +253,46 @@ function NotificationList({ inboxData: initialData }) {
                 setNotifications={setNotifications}
               />
             </li>
-          ))
-        ) : (
-          <li>Inbox is empty</li>
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
 
-      <SeeMoreButton
-        onClick={handleLoadMore} // Changed from href to onClick
-        isPending={isPending}
-        currentPage={page}
-        totalPages={totalPages}
-        label="notification"
-      />
-    </>
+      {page < totalPages && (
+        <div className="text-center">
+          <button
+            onClick={handleSeeMore}
+            disabled={isPending}
+            className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+          >
+            {isPending ? "Loading..." : "See more"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ icon, value, label, highlight }) {
+  return (
+    <div
+      className={`flex items-center gap-4 rounded-xl border px-5 py-5 shadow-sm ${
+        highlight
+          ? "border-primary-500 bg-primary-500 text-primary-foreground"
+          : "border-border bg-card text-foreground"
+      }`}
+    >
+      {icon}
+      <div>
+        <p className="text-2xl font-bold leading-none">{value}</p>
+        <p
+          className={`mt-1.5 text-xs ${
+            highlight ? "opacity-80" : "text-muted-foreground"
+          }`}
+        >
+          {label}
+        </p>
+      </div>
+    </div>
   );
 }
 

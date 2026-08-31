@@ -39,6 +39,7 @@ export default function Map({ sites, selectedId, onSelect }) {
       zoom={6}
       scrollWheelZoom
       className="h-[540px] w-full rounded-xl"
+      style={{ zIndex: "0" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

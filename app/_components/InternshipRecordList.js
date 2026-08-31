@@ -47,8 +47,6 @@ function Record({ record }) {
     short_name,
   } = record;
 
-  const [showToolTip, setShowToolTip] = useState(false);
-
   return (
     <div className="flex-1 flex gap-4 border border-stone-300 p-4 rounded-lg">
       <div className="flex-1 flex flex-col gap-1 text-stone-500">
@@ -105,11 +103,9 @@ function Record({ record }) {
 
       <div
         className="relative cursor-pointer p-2 self-center hover:bg-red-200 hover:text-primary-500 rounded-sm transition-colors"
-        onMouseEnter={() => setShowToolTip(true)}
-        onMouseLeave={() => setShowToolTip(false)}
+        title="Delete record"
       >
         <Trash2 className="h-5 w-5" />
-        {showToolTip && <CustomToolTip label={"Delete"} />}
       </div>
     </div>
   );
@@ -119,6 +115,17 @@ function Tag({ status }) {
   if (status === "pending") {
     return (
       <div className="text-[10px] flex items-center gap-1 text-yellow-900 bg-yellow-100 w-fit px-2 py-0.5 rounded-full tracking-wider font-bold">
+        <span>
+          <Clock className="h-3 w-3" />
+        </span>
+        {status}
+      </div>
+    );
+  }
+
+  if (status === "rejected") {
+    return (
+      <div className="text-[10px] flex items-center gap-1 text-stone-800 bg-stone-100 w-fit px-2 py-0.5 rounded-full tracking-wider font-bold">
         <span>
           <Clock className="h-3 w-3" />
         </span>

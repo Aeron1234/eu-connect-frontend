@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Building2,
   CheckCircle2,
@@ -5,6 +7,12 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
+import { useTransition } from "react";
+import { toastAndAction } from "../_services/helpers";
+import {
+  restoreInternshipRecord,
+  updateInternshipRecordStatus,
+} from "../_services/dept-head-actions";
 
 const statusMeta = {
   pending: {
@@ -37,7 +45,31 @@ function StatusPill({ status }) {
   );
 }
 
-function RecordsHeader({ record }) {
+function RecordsHeader({ record, internshipId }) {
+  const [isPending, startTransition] = useTransition();
+
+  console.log(record);
+
+  function handleStatus(status) {
+    const formData = new FormData();
+    formData.append("id", internshipId);
+    formData.append("status", status);
+
+    startTransition(
+      async () =>
+        await toastAndAction({
+          loadingLabel: "Updating record...",
+          successLabel: "Record updated.",
+          errorLabel: "Failed to update record.",
+          action:
+            status === "restore"
+              ? restoreInternshipRecord
+              : updateInternshipRecordStatus,
+          formData,
+        }),
+    );
+  }
+
   return (
     <div className="rounded-xl bg-primary-500 p-6 text-primary-foreground">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -60,14 +92,16 @@ function RecordsHeader({ record }) {
             <>
               <button
                 type="button"
-                // onClick={() => onStatus(record.id, "ongoing")}
+                onClick={() => handleStatus("ongoing")}
+                disabled={isPending}
                 className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-500"
               >
                 Approve
               </button>
               <button
                 type="button"
-                // onClick={() => onStatus(record.id, "rejected")}
+                onClick={() => handleStatus("rejected")}
+                disabled={isPending}
                 className="rounded-lg border border-primary-foreground/40 px-4 py-2 text-sm font-semibold"
               >
                 Reject
@@ -77,7 +111,7 @@ function RecordsHeader({ record }) {
           {record.status === "rejected" && (
             <button
               type="button"
-              // onClick={() => onStatus(record.id, "pending")}
+              onClick={() => handleStatus("restore")}
               className="inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-500"
             >
               <RotateCcw className="h-4 w-4" /> Restore

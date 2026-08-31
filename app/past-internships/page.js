@@ -3,6 +3,8 @@ import PastInternshipsPageContent from "../_components/PastInternshipsPageConten
 import PastInternshipPostButton from "../_components/PastInternshipPostButton";
 import { getAlumniInternships } from "../_services/dept-head-actions";
 import { getCourses } from "../_services/services";
+import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 async function PastInternshipsPage({ searchParams }) {
   const sParams = await searchParams;
@@ -32,13 +34,22 @@ async function PastInternshipsPage({ searchParams }) {
         <PastInternshipPostButton courses={courses || []} />
       </div>
 
-      <PastInternshipsPageContent
-        initialData={pastInternshipsData?.data || []}
-        academicYears={pastInternshipsData?.academicYears || []}
-        pagination={pastInternshipsData?.pagination || {}}
-        yearFilter={yearFilter}
-        courses={courses || []}
-      />
+      <Suspense
+        fallback={
+          <div className="self-center justify-self-center p-5">
+            <span className="sr-only">Loading notifications...</span>
+            <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
+          </div>
+        }
+      >
+        <PastInternshipsPageContent
+          initialData={pastInternshipsData?.data || []}
+          academicYears={pastInternshipsData?.academicYears || []}
+          pagination={pastInternshipsData?.pagination || {}}
+          yearFilter={yearFilter}
+          courses={courses || []}
+        />
+      </Suspense>
     </main>
   );
 }

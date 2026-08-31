@@ -6,36 +6,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useActionState, useState } from "react";
 import { ArrowRight, Eye, EyeOff, TriangleAlert } from "lucide-react";
 
-const roles = [
-  {
-    key: "student",
-    label: "Student",
-    placeholder: "student@mseuf.edu.ph",
-    hint: "Use your university student ID email",
-  },
-  {
-    key: "dept",
-    label: "Dept. Head",
-    placeholder: "depthead@mseuf.edu.ph",
-    hint: "Use your department email account",
-  },
-  {
-    key: "employer",
-    label: "Employer",
-    placeholder: "hr@company.com",
-    hint: "Use your registered company email",
-  },
-  {
-    key: "admin",
-    label: "Admin",
-    placeholder: "admin@mseuf.edu.ph",
-    hint: "Administrator access only",
-  },
-];
-
 function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, null);
-  const [role, setRole] = useState(roles[0]);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -47,24 +19,6 @@ function LoginForm() {
         <p className="mt-2 text-sm text-muted-foreground">
           Select your role and enter your credentials
         </p>
-
-        <div className="mt-8 grid grid-cols-4 gap-1 rounded-lg border border-border bg-secondary p-1">
-          {roles.map((r) => (
-            <button
-              key={r.key}
-              type="button"
-              onClick={() => setRole(r)}
-              disabled={isPending}
-              className={`rounded-md px-2 py-2.5 text-sm font-medium transition-colors ${
-                role.key === r.key
-                  ? "bg-background font-semibold text-primary-500 shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
 
         <form className="mt-7 space-y-5" action={formAction}>
           <div>
@@ -83,7 +37,6 @@ function LoginForm() {
               disabled={isPending}
               className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-ring/40"
             />
-            <p className="mt-2 text-xs text-muted-foreground">{role.hint}</p>
           </div>
 
           <div>
