@@ -5,7 +5,7 @@ import AnnouncementForm from "./AnnouncementForm";
 import { toastAndAction } from "../_services/helpers";
 import { deleteAnnouncement } from "../_services/dept-head-actions";
 
-function AnnouncementDelete({ announcementId }) {
+function AnnouncementDelete({ announcementId, onChanged }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
@@ -18,7 +18,8 @@ function AnnouncementDelete({ announcementId }) {
     };
 
     startTransition(async () => {
-      await toastAndAction(handlers);
+      const result = await toastAndAction(handlers);
+      if (result?.success && onChanged) onChanged();
     });
   }
 

@@ -5,6 +5,7 @@ import { getAlumniInternships } from "../_services/dept-head-actions";
 import { getCourses } from "../_services/services";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import PageTitle from "../_components/PageTitle";
 
 async function PastInternshipsPage({ searchParams }) {
   const sParams = await searchParams;
@@ -20,16 +21,13 @@ async function PastInternshipsPage({ searchParams }) {
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-2">
-            <Building2 className="w-7 h-7 text-primary-500" />
-            Past Internships
-          </h1>
-          <p className="text-sm text-stone-600 mt-1">
-            List of past internships and companies that have accepted interns
-            from our school.
-          </p>
-        </div>
+        <PageTitle
+          Icon={Building2}
+          title={"Past Internships"}
+          description={
+            "List of past internships and companies that have accepted interns from our school."
+          }
+        />
 
         <PastInternshipPostButton courses={courses || []} />
       </div>

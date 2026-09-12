@@ -2,28 +2,27 @@ import { ChevronDown, Plus } from "lucide-react";
 
 function InternshipRecordFormHeader({ showForm, setShowForm }) {
   return (
-    <div className="flex justify-between items-center gap-1">
-      <div>
-        <h2 className="text-base font-semibold flex items-center gap-2 mb-1">
-          <span>
-            <Plus className="h-5 w-5" />
-          </span>
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0 flex-1 pr-2">
+        <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold lg:text-base">
+          <Plus className="h-5 w-5 flex-shrink-0" />
           New Internship Record
         </h2>
-        <p className="text-sm text-stone-600">
+        <p className="text-xs text-stone-600 line-clamp-2 lg:text-sm">
           Provide your placement details for review by your department head
         </p>
       </div>
 
       <button
-        className="flex gap-1 items-center py-1 px-2 rounded-sm cursor-pointer hover:text-primary-500 hover:bg-red-100 transition-all font-semibold"
+        type="button"
+        title={showForm ? "Hide" : "Show"}
         onClick={() => setShowForm((val) => !val)}
+        className="flex flex-shrink-0 items-center gap-1 rounded-sm px-2 py-1 text-sm font-semibold transition-all hover:bg-red-100 hover:text-primary-500 lg:text-base"
       >
-        {showForm ? <span>Hide</span> : <span>Show</span>}
-
-        <span className={`transition-all ${showForm ? "rotate-180" : ""}`}>
-          <ChevronDown className="h-5 w-5" />
-        </span>
+        <ChevronDown
+          className={`h-5 w-5 transition-transform ${showForm ? "rotate-180" : ""}`}
+        />
+        <span className="hidden sm:inline">{showForm ? "Hide" : "Show"}</span>
       </button>
     </div>
   );

@@ -48,8 +48,4 @@ async function DtrPage({ searchParams }) {
   );
 }
 
-function Records() {
-  return;
-}
-
 export default DtrPage;

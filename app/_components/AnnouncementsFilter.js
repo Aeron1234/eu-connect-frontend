@@ -1,44 +1,53 @@
 "use client";
 
-import Link from "next/link";
+import { useUser } from "@/contexts/UserContext";
+import { cx } from "@/lib/utils";
 
-function AnnouncementsFilter({ categories, filteredByCategory, search }) {
-  if (categories.length === 0) return null;
+function AnnouncementsFilter({ categories, category, setCategory }) {
+  const { user } = useUser();
 
-  const isSearchEmpty = search.trim() === "" ? `` : `&search=${search}`;
+  const userRole = user.role;
+
+  if (!["student", "department_head", "admin"].includes(userRole)) return null;
+
+  if (!categories || categories.length === 0) return null;
 
   return (
     <ul className="flex items-center gap-1 font-medium">
       <li>
-        <Link
-          href={`/announcements?category=all${isSearchEmpty}`}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredByCategory === "all" ? "text-white bg-primary-500" : "hover:bg-stone-200"}`}
+        <button
+          type="button"
+          onClick={() => setCategory("all")}
+          className={cx(
+            "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+            category === "all"
+              ? "text-white bg-primary-500"
+              : "hover:bg-stone-200",
+          )}
         >
           All
-        </Link>
+        </button>
       </li>
-      {categories.map((category) => (
-        <li key={category.id}>
-          <FilterButton
-            href={category.name.toLowerCase()}
-            label={category.name}
-            filteredByCategory={filteredByCategory}
-            search={isSearchEmpty}
-          />
-        </li>
-      ))}
+      {categories.map((cat) => {
+        const value = cat.name.toLowerCase();
+        return (
+          <li key={cat.id}>
+            <button
+              type="button"
+              onClick={() => setCategory(value)}
+              className={cx(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                category === value
+                  ? "text-white bg-primary-500"
+                  : "hover:bg-stone-200",
+              )}
+            >
+              {cat.name}
+            </button>
+          </li>
+        );
+      })}
     </ul>
-  );
-}
-
-function FilterButton({ href, label, filteredByCategory, search }) {
-  return (
-    <Link
-      href={`/announcements?category=${href}${search}`}
-      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filteredByCategory === href ? "text-white bg-primary-500" : "hover:bg-red-100"}`}
-    >
-      {label}
-    </Link>
   );
 }
 

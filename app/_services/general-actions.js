@@ -1,22 +1,22 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getUserSession } from "./services";
+import { getAccessToken, getUserSession } from "./auth";
+import { cache } from "react";
+// import { getUserSession } from "./services";
 
 export async function markAsRead(notificationId) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/notifications/${notificationId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/notifications/${notificationId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -34,21 +34,16 @@ export async function markAsRead(notificationId) {
 
 export async function markAllAsRead(formData = null) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/notifications?userId=${userId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/notifications`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (res.ok) {
       revalidatePath("/notifications");
@@ -63,18 +58,17 @@ export async function markAllAsRead(formData = null) {
 
 export async function deleteNotification(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
-    const userId = session.user.id;
     const notificationId = formData.get("notificationId");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/notifications/${notificationId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/notifications/${notificationId}`,
       {
         method: "DELETE",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -95,18 +89,16 @@ export async function saveSearchHistory({
   type,
 }) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/save-search-history?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/save-search-history`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           searched_uuid: searchedUUID,
@@ -129,24 +121,15 @@ export async function saveSearchHistory({
 
 export const clearSearchHistory = async ({ type }) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/clear-search-history?userId=${userId}&type=${type}`,
+      `${process.env.API_BASE_URL}/api/clear-search-history?type=${type}`,
       {
         method: "DELETE",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -164,24 +147,15 @@ export const clearSearchHistory = async ({ type }) => {
 
 export async function deleteSearchHistoryItem({ historyId, type }) {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/delete-search-history/${historyId}?userId=${userId}&type=${type}`,
+      `${process.env.API_BASE_URL}/api/delete-search-history/${historyId}?type=${type}`,
       {
         method: "DELETE",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -199,26 +173,23 @@ export async function deleteSearchHistoryItem({ historyId, type }) {
 
 export async function updateUserInfo(prevState, formData) {
   try {
+    const accessToken = await getAccessToken();
     const session = await getUserSession();
-    if (!session?.user) {
+    if (!accessToken || !session?.user) {
       throw new Error("You must be logged in.");
     }
 
-    const userId = session.user.id;
     const userRole = session.user.role;
     const userInfo = Object.fromEntries(formData);
 
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/account/update?userId=${userId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
-        body: JSON.stringify(userInfo),
+    const res = await fetch(`${process.env.API_BASE_URL}/api/account/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+      body: JSON.stringify(userInfo),
+    });
 
     const data = await res.json();
     if (res.ok) revalidatePath(`/${userRole}/account`);
@@ -232,22 +203,22 @@ export async function updateUserInfo(prevState, formData) {
 
 export async function updatePassword(prevState, formData) {
   try {
+    const accessToken = await getAccessToken();
     const session = await getUserSession();
-    if (!session?.user) {
+    if (!accessToken || !session?.user) {
       throw new Error("You must be logged in.");
     }
 
-    const userId = session.user.id;
     const userRole = session.user.role;
     const newPassword = Object.fromEntries(formData);
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/account/update-password?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/account/update-password`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(newPassword),
       },
@@ -262,3 +233,27 @@ export async function updatePassword(prevState, formData) {
     return { success: false, error: err.message };
   }
 }
+
+export const getMyActivityLogs = cache(async ({ page = 1 } = {}) => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "Not signed in." };
+
+    const params = new URLSearchParams({ page: String(page) });
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/activity-logs/mine?${params.toString()}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      return { error: error.error || "Failed to load activity logs." };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return { error: "Unexpected error while loading activity logs." };
+  }
+});

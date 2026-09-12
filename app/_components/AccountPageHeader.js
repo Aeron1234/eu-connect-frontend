@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil, X, Check, User } from "lucide-react";
+import PageTitle from "./PageTitle";
 
 export default function AccountPageHeader({
   isEditing,
@@ -13,16 +14,13 @@ export default function AccountPageHeader({
   return (
     <>
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-2">
-            <User className="w-7 h-7 text-primary-500" />
-            My Account
-          </h1>
-          <p className="text-sm text-stone-600 mt-1">
-            View and manage your profile details, records, and security
-            settings.
-          </p>
-        </div>
+        <PageTitle
+          Icon={User}
+          title={"My Account"}
+          description={
+            "View and manage your profile details, records, and securitysettings."
+          }
+        />
 
         <div className="flex justify-end">
           {!isEditing ? (

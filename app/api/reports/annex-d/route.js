@@ -1,8 +1,6 @@
 import { generateAnnexDPdf } from "@/app/_services/pdfReports";
-import { getUserSession } from "@/src-copies/services";
+import { getAccessToken } from "@/app/_services/auth";
 import { NextResponse } from "next/server";
-
-// import { getSessionUserId } from "@/app/lib/session"; // however you currently get the logged-in user
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -16,14 +14,17 @@ export async function GET(req) {
     );
   }
 
-  const session = await getUserSession();
-  const userId = session?.user?.id; // the registrar/admin's own id, from Next.js session
-  if (!userId) {
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
   try {
-    const pdfBuffer = await generateAnnexDPdf(companyKey, academicYear, userId);
+    const pdfBuffer = await generateAnnexDPdf(
+      companyKey,
+      academicYear,
+      accessToken,
+    );
     if (!pdfBuffer) {
       return NextResponse.json({ error: "No records found." }, { status: 404 });
     }

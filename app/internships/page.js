@@ -1,10 +1,11 @@
 import { getCourses, getInternshipPosts } from "../_services/services";
 
 import InternshipPosts from "../_components/InternshipPosts";
-import { Briefcase } from "lucide-react";
+import { Briefcase, BriefcaseBusiness } from "lucide-react";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";
+import PageTitle from "../_components/PageTitle";
 
 export const metadata = {
   title: "Internships",
@@ -28,15 +29,11 @@ async function InternshipPage({ searchParams }) {
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-2">
-            <Briefcase className="w-7 h-7 text-primary-500" />
-            Internship Documents Storage
-          </h1>
-          <p className="text-sm text-stone-600 mt-1">
-            Upload all of your internship-related files here
-          </p>
-        </div>
+        <PageTitle
+          Icon={BriefcaseBusiness}
+          title={"Internships"}
+          description={"Internship opportunities for students."}
+        />
 
         <InternshipPostButtonWrapper courses={courses || []} />
       </div>
@@ -44,7 +41,7 @@ async function InternshipPage({ searchParams }) {
       <Suspense
         fallback={
           <div className="self-center justify-self-center p-5">
-            <span className="sr-only">Loading profile records...</span>
+            <span className="sr-only">Loading Internship posts...</span>
             <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
           </div>
         }

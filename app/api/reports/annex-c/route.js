@@ -1,5 +1,5 @@
 import { generateAnnexCPdf } from "@/app/_services/pdfReports";
-import { getUserSession } from "@/app/_services/services";
+import { getAccessToken } from "@/app/_services/auth";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
@@ -13,16 +13,15 @@ export async function GET(req) {
     );
   }
 
-  const session = await getUserSession();
-  const userId = session?.user?.id;
-  if (!userId) {
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
   try {
-    const pdfBuffer = await generateAnnexCPdf(reportId, userId);
+    const pdfBuffer = await generateAnnexCPdf(reportId, accessToken);
     if (!pdfBuffer) {
-      return NextResponse.json({ error: "Report not found." }, { status: 404 });
+      return NextResponse.json({ error: "No records found." }, { status: 404 });
     }
 
     return new NextResponse(pdfBuffer, {

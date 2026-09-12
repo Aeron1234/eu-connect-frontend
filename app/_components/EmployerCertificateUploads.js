@@ -309,16 +309,15 @@ const EmployerCertificateUploads = ({
               >
                 <Download className="w-4 h-4" />
               </button>
-              <button
-                onClick={() => {
-                  console.log("Delete button clicked for file ID:", f.id);
-                  handleDelete(f.id);
-                }}
-                disabled={isUploading}
-                className="p-1.5 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {f.verification_status === "pending" && (
+                <button
+                  onClick={() => handleDelete(f.id)}
+                  disabled={isUploading}
+                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ))
         )}

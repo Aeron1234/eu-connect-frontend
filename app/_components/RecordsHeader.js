@@ -86,6 +86,7 @@ function RecordsHeader({ record, internshipId }) {
             {record.company_name}
           </p>
         </div>
+
         <div className="flex flex-wrap items-center gap-2">
           <StatusPill status={record.status} />
           {record.status === "pending" && (

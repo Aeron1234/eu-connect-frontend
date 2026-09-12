@@ -1,11 +1,14 @@
 "use client";
+
 import { format } from "date-fns";
-import { Calendar, Ellipsis, Pin } from "lucide-react";
-import AnnouncementDropdownMenu from "./AnnouncementDropdownMenu";
-import TriggerButton from "./TriggerButton";
+import { Calendar, Pencil, Pin, Trash2 } from "lucide-react";
+import Modal from "./Modal";
+import AnnouncementTogglePin from "./AnnouncementTogglePin";
+import AnnouncementUpdate from "./AnnouncementUpdate";
+import AnnouncementDelete from "./AnnouncementDelete";
 import { useUser } from "@/contexts/UserContext";
 
-function AnnouncementCard({ announcement, categories = null }) {
+function AnnouncementCard({ announcement, categories = null, onChanged }) {
   const {
     id: announcementId,
     author_id,
@@ -14,7 +17,6 @@ function AnnouncementCard({ announcement, categories = null }) {
     content,
     is_pinned,
     created_at,
-    updated_at,
     category,
     color,
     text_color,
@@ -26,65 +28,132 @@ function AnnouncementCard({ announcement, categories = null }) {
   const userId = user.id;
   const userRole = user.role;
 
+  const isAuthor = userId === author_id;
+  const canManage = isAuthor || userRole === "admin";
+  const isPinned = Boolean(is_pinned);
+
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-2 w-full justify-between">
-        <div className="flex gap-2">
-          <h3 className="flex items-center font-bold gap-2 text-sm">
-            {is_pinned ? (
-              <span className="text-primary-500">
-                <Pin className="h-5 w-5" />
+    <div
+      className={`rounded-xl border border-border shadow-sm p-5 ${
+        isPinned ? "bg-[#faf6ec]" : "bg-white"
+      }`}
+      style={!isPinned ? { borderColor: `${color}80` } : undefined}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className={`flex size-9 flex-shrink-0 items-center justify-center rounded-lg ${isPinned ? "bg-primary-500 text-white" : "bg-primary-500/10 text-primary-500/50"}`}
+        >
+          <Pin className="size-4" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base font-bold text-stone-800">{title}</h3>
+            <span
+              className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+              style={{ backgroundColor: color, color: text_color }}
+            >
+              {category}
+            </span>
+          </div>
+
+          <p className="mt-1.5 text-sm leading-relaxed text-stone-600 text-wrap wrap-break-word">
+            {content}
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+            <span>Posted by</span>
+            <span className="font-bold text-primary-500">
+              {first_name} {last_name}
+            </span>
+            {(role === "admin" || role === "department_head") && (
+              <span className="rounded-full bg-primary-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                {role === "admin" ? "Admin" : "Department Head"}
               </span>
-            ) : null}
-            <span className="font-medium text-stone-500">Title: </span>
-            {title}
-          </h3>
-          <span
-            className={`text-xs tracking-wider h-fit px-1.5 py-0.5 rounded-full font-bold`}
-            style={{ backgroundColor: color, color: text_color }}
-          >
-            {category}
-          </span>
+            )}
+            <span className="flex items-center gap-1">
+              <Calendar className="size-3.5" />
+              {format(new Date(created_at), "MMMM dd, yyyy")}
+            </span>
+          </div>
         </div>
 
-        {userId === author_id || userRole === "admin" ? (
-          <AnnouncementDropdownMenu
-            trigger={
-              <TriggerButton
-                icon={<Ellipsis className="h-5 w-5" />}
-                type="mini"
-                className="hover:bg-stone-100 rounded-full transition-colors"
-              />
-            }
-            userId={userId === author_id}
-            announcementId={announcementId}
-            is_pinned={is_pinned}
-            data={announcement}
-            categories={categories}
-          />
-        ) : null}
-      </div>
+        {/* Ribbon and action icons share a vertical column instead of the
+            ribbon being absolutely positioned over the icons — that overlap
+            was what made this cramped/ugly for the author's own pinned post. */}
+        {(isPinned || canManage) && (
+          <div className="flex flex-shrink-0 flex-col items-end gap-2">
+            {isPinned && (
+              <span className="rounded-full bg-primary-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                Pinned
+              </span>
+            )}
 
-      <p className="text-stone-500">{content}</p>
+            {canManage && (
+              <div className="flex items-center gap-2.5 text-stone-400">
+                <Modal
+                  trigger={
+                    <div
+                      title="pin announcement"
+                      className="hover:text-primary-500"
+                    >
+                      <Pin className="h-4 w-4" />
+                    </div>
+                  }
+                  title={`${!isPinned ? "Pin" : "Unpin"} announcement`}
+                  description={`Announcement will be ${!isPinned ? "pinned" : "unpinned"} for all the users.`}
+                >
+                  <AnnouncementTogglePin
+                    announcementId={announcementId}
+                    is_pinned={isPinned}
+                    onChanged={onChanged}
+                  />
+                </Modal>
 
-      <div className="flex flex-col text-stone-500 text-xs gap-2 mt-2">
-        <div className="flex gap-1 items-center">
-          <span>Posted by</span>
-          <span className="text-stone-800 font-bold tracking-wider">
-            {first_name} {last_name}
-          </span>
-          <span className="bg-primary-500 text-white text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded-full">
-            {role === "admin" && "Admin"}
-            {role === "department_head" && "Department Head"}
-          </span>
-        </div>
+                {isAuthor && (
+                  <Modal
+                    trigger={
+                      <div
+                        title="update announcement"
+                        className="hover:text-primary-500"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </div>
+                    }
+                    title="Update announcement"
+                    description="Do you want to change something?"
+                  >
+                    <AnnouncementUpdate
+                      data={announcement}
+                      categories={categories}
+                      onChanged={onChanged}
+                    />
+                  </Modal>
+                )}
 
-        <div className="flex gap-1 items-center ">
-          <span>
-            <Calendar className="h-4 w-4" />
-          </span>
-          {format(new Date(created_at), "MMMM dd, yyyy")}.
-        </div>
+                <Modal
+                  trigger={
+                    <div
+                      title="delete announcement"
+                      className="hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </div>
+                  }
+                  title={
+                    <span className="text-red-600">Delete Announcement</span>
+                  }
+                  description="Are you sure you want to delete this announcement?"
+                >
+                  <AnnouncementDelete
+                    announcementId={announcementId}
+                    onChanged={onChanged}
+                  />
+                </Modal>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,8 +23,6 @@ export function UserProvider({ initialUser, children }) {
     setUser(emptyUser);
   }, []);
 
-  console.log(user);
-
   return (
     <UserContext.Provider value={{ user, setUser, resetUser }}>
       {children}

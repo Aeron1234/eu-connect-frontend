@@ -1,4 +1,4 @@
-import { getUserSession } from "../../_services/services";
+import { getUserSession } from "../../_services/auth";
 
 import { FileText } from "lucide-react";
 import SIPPReportsPageContent from "../../_components/SIPPReportsPageContent";

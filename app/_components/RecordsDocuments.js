@@ -17,6 +17,10 @@ function RecordsDocuments({
   requirementTypes = [],
   internshipId,
   userRole = "",
+  currentUserId = "",
+  canDelete = undefined,
+  canApprove = undefined,
+  downloadAction = null,
 }) {
   const docs = fileData;
   const isOngoing = docs.status === "ongoing";
@@ -41,8 +45,6 @@ function RecordsDocuments({
 
     return result;
   }, [docs, filter, query]);
-
-  console.log(docs);
 
   return (
     <>
@@ -109,6 +111,11 @@ function RecordsDocuments({
         typeTone={typeTone}
         getFileTypeLabel={getFileTypeLabel}
         internshipId={internshipId}
+        userRole={userRole}
+        currentUserId={currentUserId}
+        canDelete={canDelete}
+        canApprove={canApprove}
+        downloadAction={downloadAction}
       />
     </>
   );

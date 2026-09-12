@@ -1,27 +1,25 @@
 "use server";
-import { auth } from "./auth";
+// import { auth } from "./auth";
 import { cache } from "react";
+import { getAccessToken, getUserSession } from "./auth";
 
-export const getUserSession = cache(async () => {
-  const session = await auth();
+// export const getUserSession = cache(async () => {
+//   const session = await auth();
 
-  return session;
-});
+//   return session;
+// });
 
 export const getOngoingInternshipRecord = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["student", "admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internships/active?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internships/active`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -42,22 +40,15 @@ export const getOngoingInternshipRecord = cache(async () => {
 // For the Map Page, we need to fetch all ongoing internships for the department head
 export const getActiveInternships = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
       `${process.env.API_BASE_URL}/api/internships/active/all?userId=${userId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -75,24 +66,37 @@ export const getActiveInternships = cache(async () => {
   }
 });
 
-export const getInternshipRecords = cache(async () => {
+export const getMyPastInternshipRecords = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internships/all?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internships/my-past-internships`,
       {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
+
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+});
+
+export const getInternshipRecords = cache(async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
+
+    const res = await fetch(`${process.env.API_BASE_URL}/api/internships/all`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -107,21 +111,15 @@ export const getInternshipRecords = cache(async () => {
 
 export const getUserProfile = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/account/user?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/account/user`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -136,22 +134,20 @@ export const getUserProfile = cache(async () => {
 
 export const getDtrToday = async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["student", "admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
+
     const internshipData = await getOngoingInternshipRecord();
     if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const userId = session.user.id;
     const internshipId = internshipData.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/dtr/today?userId=${userId}&internshipId=${internshipId}`,
+      `${process.env.API_BASE_URL}/api/dtr/today?internshipId=${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -174,22 +170,20 @@ export const getDtrToday = async () => {
 // NEW: Optimized for checking status without downloading the whole history
 export const getLatestDtrStatus = async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["student", "admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
+
     const internshipData = await getOngoingInternshipRecord();
     if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const userId = session.user.id;
     const internshipId = internshipData.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/dtr/status?userId=${userId}&internshipId=${internshipId}`,
+      `${process.env.API_BASE_URL}/api/dtr/status?internshipId=${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -209,25 +203,52 @@ export const getLatestDtrStatus = async () => {
   }
 };
 
-export const getFileRequirementTypes = cache(async () => {
+export const getMySettedDtrLocation = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
+
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
+
+    const internshipId = internshipData.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internships/files/requirements?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/dtr/setted-location?internshipId=${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.message || "Failed to fetch setted dtr location.",
+      };
+    }
+
+    const data = await res.json();
+
+    return data || null;
+  } catch (err) {
+    return null;
+  }
+});
+
+export const getFileRequirementTypes = cache(async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/internships/files/requirements`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -247,62 +268,54 @@ export const getFileRequirementTypes = cache(async () => {
   }
 });
 
-export const getInternshipFiles = cache(async () => {
-  try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-    const userId = session.user.id;
+export const getInternshipFiles = cache(
+  async ({ internshipId, category = "" }) => {
+    try {
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internships/files?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+      const res = await fetch(
+        `${process.env.API_BASE_URL}/api/internships/files?internshipId=${internshipId}&category=${category}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
+      );
 
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.message ||
-          "No Internship related files found or you haven't uploaded any yet.",
-      };
+      if (!res.ok) {
+        const error = await res.json();
+        return {
+          error:
+            error.message ||
+            "No Internship related files found or you haven't uploaded any yet.",
+        };
+      }
+
+      const data = await res.json();
+
+      return data || [];
+    } catch (err) {
+      return null;
     }
-
-    const data = await res.json();
-
-    return data || [];
-  } catch (err) {
-    return null;
-  }
-});
+  },
+);
 
 export async function downloadInternshipFile(prevState, formData) {
   try {
     const fileId = formData.fileId; // formData is your plain object {fileId: id} here, not a real FormData
 
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "department_head", "admin"].includes(session.user.role)
-    ) {
-      return { success: false, error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { success: false, error: "You must be logged in." };
     }
-    const userId = session.user.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internships/files/${fileId}/download?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internships/files/${fileId}/download`,
       {
         method: "GET",
-        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
@@ -330,19 +343,15 @@ export async function downloadInternshipFile(prevState, formData) {
 export const getAllAnnouncements = cache(
   async ({ category = "all", page = 1, search = "" }) => {
     try {
-      const session = await getUserSession();
-      if (!session?.user) {
-        throw new Error("Unauthorized");
-      }
-
-      const userId = session.user.id;
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
       const res = await fetch(
-        `${process.env.API_BASE_URL}/api/announcements/history?userId=${userId}&category=${category}&page=${page}&search=${search}`,
+        `${process.env.API_BASE_URL}/api/announcements/history?category=${category}&page=${page}&search=${search}`,
         {
           method: "GET",
           headers: {
-            "x-api-key": process.env.BACKEND_SECRET_KEY,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       );
@@ -368,19 +377,15 @@ export const getAllAnnouncements = cache(
 export const fetchMoreAnnouncements = cache(
   async ({ category = "all", page = 1, search = "" }) => {
     try {
-      const session = await getUserSession();
-      if (!session?.user) {
-        throw new Error("Unauthorized");
-      }
-
-      const userId = session.user.id;
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
       const res = await fetch(
-        `${process.env.API_BASE_URL}/api/announcements/history?userId=${userId}&category=${category}&page=${page}&search=${search}`,
+        `${process.env.API_BASE_URL}/api/announcements/history?category=${category}&page=${page}&search=${search}`,
         {
           method: "GET",
           headers: {
-            "x-api-key": process.env.BACKEND_SECRET_KEY,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       );
@@ -406,19 +411,15 @@ export const fetchMoreAnnouncements = cache(
 
 export const getAnnouncementCategories = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/announcements/categories?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/announcements/categories`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -440,61 +441,17 @@ export const getAnnouncementCategories = cache(async () => {
   }
 });
 
-export const getAllAccounts = cache(async () => {
-  try {
-    const session = await getUserSession();
-    if (!session?.user || !["admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
-
-    // ROLES : 1 = Student, 2 = Employer, 3 = Department Head, 4 = Admin
-
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/accounts?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
-      },
-    );
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error: error.message || "Failed to get all accounts. Please try again.",
-      };
-    }
-
-    const data = await res.json();
-
-    return data || [];
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-});
-
 export const getRoles = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/roles?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/roles`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -513,22 +470,15 @@ export const getRoles = cache(async () => {
 
 export const getRegions = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/regions?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/regions`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -545,27 +495,15 @@ export const getRegions = cache(async () => {
 
 export const getCourses = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/courses?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/courses`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -584,25 +522,15 @@ export const getCourses = cache(async () => {
 
 export const getDepartments = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "student", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/departments?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/departments`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -625,15 +553,10 @@ export const getInbox = async ({
   limit = 10,
 } = {}) => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const params = new URLSearchParams({
-      userId,
       scope,
       page: String(page),
       limit: String(limit),
@@ -644,7 +567,7 @@ export const getInbox = async ({
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         cache: "no-store",
       },
@@ -666,19 +589,15 @@ export const getInbox = async ({
 
 export const fetchMoreNotifications = cache(async ({ page = 1 }) => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/notifications?userId=${userId}&page=${page}`,
+      `${process.env.API_BASE_URL}/api/notifications?page=${page}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -701,19 +620,15 @@ export const fetchMoreNotifications = cache(async ({ page = 1 }) => {
 
 export const getStudentEvaluationCriterias = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["employer"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/student-evaluation/criteria?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/student-evaluation/criteria`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -736,19 +651,15 @@ export const getStudentEvaluationCriterias = cache(async () => {
 
 export const getEmployerEvaluationCriterias = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/evaluation-criterias?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/evaluation-criterias`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -771,24 +682,15 @@ export const getEmployerEvaluationCriterias = cache(async () => {
 
 export const getStudentPastEvaluations = cache(async (searchedUserId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/student-past-evaluations/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/student-past-evaluations/${searchedUserId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -811,22 +713,15 @@ export const getStudentPastEvaluations = cache(async (searchedUserId) => {
 
 export const getStudentPendingEvaluations = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/evaluations/pending?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/evaluations/pending`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -849,22 +744,15 @@ export const getStudentPendingEvaluations = cache(async () => {
 
 export const getAllEvaluations = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["student"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/evaluations/all?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/evaluations/all`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -883,19 +771,15 @@ export const getAllEvaluations = cache(async () => {
 
 export const getDisputedEvaluations = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["student"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/evaluations/disputed?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/evaluations/disputed`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -918,22 +802,15 @@ export const getDisputedEvaluations = cache(async () => {
 
 export const getStudentDashboardStats = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["student"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/dashboard-stats?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/dashboard-stats`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -954,24 +831,15 @@ export const getStudentDashboardStats = cache(async () => {
 
 export const getSearchedUserProfile = cache(async (searchedUserId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/${searchedUserId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -996,24 +864,15 @@ export const getSearchedUserProfile = cache(async (searchedUserId) => {
 
 export const getSearchHistory = cache(async ({ type }) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "employer", "department_head", "admin"].includes(
-        session.user.role,
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/search-history?userId=${userId}&type=${type}`,
+      `${process.env.API_BASE_URL}/api/search-history?type=${type}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1041,22 +900,15 @@ export const getSearchedStudentDTRs = cache(async (searchedUserId, page) => {
   const validatedPage = Math.max(1, parseInt(page));
   const offset = (validatedPage - 1) * limit;
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["employer", "department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/dtrs/${searchedUserId}?userId=${userId}&limit=${limit}&offset=${offset}`,
+      `${process.env.API_BASE_URL}/api/searched-user/dtrs/${searchedUserId}?limit=${limit}&offset=${offset}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1081,22 +933,15 @@ export const getSearchedStudentDTRs = cache(async (searchedUserId, page) => {
 
 export const getSearchedStudentNarratives = cache(async (searchedUserId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["employer", "department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1124,22 +969,15 @@ export async function fetchMoreSearchedStudentNarratives({
   page,
 }) {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["employer", "department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}?userId=${userId}&page=${page}`,
+      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}?page=${page}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1164,19 +1002,15 @@ export async function fetchMoreSearchedStudentNarratives({
 
 export const getSearchedStudentDtrLocation = cache(async (searchedUserId) => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["employer", "admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/set-dtr-location/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/set-dtr-location/${searchedUserId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1201,22 +1035,15 @@ export const getSearchedStudentDtrLocation = cache(async (searchedUserId) => {
 
 export const getSearchedStudentFiles = cache(async (searchedUserId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/files/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/files/${searchedUserId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1241,23 +1068,18 @@ export const getSearchedStudentFiles = cache(async (searchedUserId) => {
 
 export const downloadSearchedStudentFiles = async (prevState, formData) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["employer", "department_head", "admin"].includes(session.user.role)
-    ) {
-      return { success: false, error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { success: false, error: "You must be logged in." };
     }
-
-    const userId = session.user.id;
 
     const { searchedUserId, fileId } = formData;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/files/${fileId}/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/files/${fileId}/${searchedUserId}`,
       {
         method: "GET",
-        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
@@ -1288,19 +1110,15 @@ export const downloadSearchedStudentFiles = async (prevState, formData) => {
 
 export const getEmployerUploadedFiles = cache(async (searchedUserId) => {
   try {
-    const session = await getUserSession();
-    if (!session?.user || !["employer", "admin"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/employer-uploaded-files/${searchedUserId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/employer-uploaded-files/${searchedUserId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -1332,15 +1150,10 @@ export const getInternshipPosts = cache(
     page = 1,
   }) => {
     try {
-      const session = await getUserSession();
-      if (!session?.user) {
-        throw new Error("Unauthorized");
-      }
-
-      const userId = session.user.id;
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
       const params = new URLSearchParams({
-        userId,
         workType,
         courseId,
         search,
@@ -1353,7 +1166,7 @@ export const getInternshipPosts = cache(
         {
           method: "GET",
           headers: {
-            "x-api-key": process.env.BACKEND_SECRET_KEY,
+            Authorization: `Bearer ${accessToken}`,
           },
           cache: "no-store",
         },
@@ -1380,19 +1193,17 @@ export const getInternshipPosts = cache(
 
 export const getSupervisorStatus = async (employerId = "") => {
   try {
-    const session = await getUserSession();
-    if (!session?.user) {
-      return { error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
     }
 
-    const userId = session.user.id;
-
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/supervisor-status/${employerId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/supervisor-status/${employerId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );

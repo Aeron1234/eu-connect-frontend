@@ -1,29 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getUserSession } from "./services";
+// import { getUserSession } from "./services";
+import { getAccessToken, getUserSession } from "./auth";
 import { cache } from "react";
 
 // To be replaced by update internship records later
 export async function approveInternshipRecord(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
     const status = formData.get("status");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship/${internshipId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ status }),
       },
@@ -42,22 +39,18 @@ export async function approveInternshipRecord(prevState, formData) {
 
 export async function restoreInternshipRecord(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/restore/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/restore/${internshipId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -75,12 +68,8 @@ export async function restoreInternshipRecord(prevState, formData) {
 
 export async function updateInternshipRecordStatus(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
     const status = formData.get("status");
@@ -89,14 +78,14 @@ export async function updateInternshipRecordStatus(prevState, formData) {
     let body;
 
     if (["ongoing", "rejected"].includes(status)) {
-      url = `${process.env.API_BASE_URL}/api/internship/${internshipId}?userId=${userId}`;
+      url = `${process.env.API_BASE_URL}/api/internship/${internshipId}`;
       body = { status };
     } else if (status === "pending") {
       // restore a rejected record back to pending
-      url = `${process.env.API_BASE_URL}/api/internship-records/${internshipId}/restore?userId=${userId}`;
+      url = `${process.env.API_BASE_URL}/api/internship-records/${internshipId}/restore`;
       body = null;
     } else if (status === "finished") {
-      url = `${process.env.API_BASE_URL}/api/internship-records/${internshipId}/finish?userId=${userId}`;
+      url = `${process.env.API_BASE_URL}/api/internship-records/${internshipId}/finish`;
       body = null;
     } else {
       return { success: false, error: "Invalid status." };
@@ -106,7 +95,7 @@ export async function updateInternshipRecordStatus(prevState, formData) {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.BACKEND_SECRET_KEY,
+        Authorization: `Bearer ${accessToken}`,
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
@@ -124,22 +113,18 @@ export async function updateInternshipRecordStatus(prevState, formData) {
 
 export async function createAnnouncement(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const announcementData = Object.fromEntries(formData);
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/announcement/new?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/announcement/new`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(announcementData),
       },
@@ -158,23 +143,19 @@ export async function createAnnouncement(prevState, formData) {
 
 export async function togglePinAnnouncement(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const announcementId = formData.get("announcementId");
     const is_pinned = formData.get("is_pinned");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/announcements/pin/${announcementId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/announcements/pin/${announcementId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ is_pinned }),
       },
@@ -193,23 +174,19 @@ export async function togglePinAnnouncement(prevState, formData) {
 
 export async function updateAnnouncement(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const announcementData = Object.fromEntries(formData);
     const announcementId = announcementData.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/announcements/${announcementId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/announcements/${announcementId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(announcementData),
       },
@@ -228,22 +205,18 @@ export async function updateAnnouncement(prevState, formData) {
 
 export async function deleteAnnouncement(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const announcementId = formData.get("announcementId");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/announcement/${announcementId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/announcement/${announcementId}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -263,25 +236,15 @@ export async function deleteAnnouncement(prevState, formData) {
 
 export const getMapLocations = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/student-map?userId=${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
+    const res = await fetch(`${process.env.API_BASE_URL}/api/student-map`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -308,18 +271,10 @@ export const getDepartmentInternshipRecords = async ({
   limit = 10,
 }) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const params = new URLSearchParams({
-      userId,
       status,
       search,
       page,
@@ -331,7 +286,7 @@ export const getDepartmentInternshipRecords = async ({
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -356,22 +311,15 @@ export const getDepartmentInternshipRecords = async ({
 
 export const getInternshipRecordOverview = cache(async (internshipId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/overview/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/overview/${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -396,22 +344,15 @@ export const getInternshipRecordOverview = cache(async (internshipId) => {
 
 export const getInternshipRecordDtr = cache(async (internshipId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/dtr/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/dtr/${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -436,22 +377,15 @@ export const getInternshipRecordDtr = cache(async (internshipId) => {
 
 export const getInternshipRecordNarratives = cache(async (internshipId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/narratives/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/narratives/${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -476,22 +410,15 @@ export const getInternshipRecordNarratives = cache(async (internshipId) => {
 
 export const getInternshipRecordEvaluations = cache(async (internshipId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/evaluations/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/evaluations/${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -516,22 +443,18 @@ export const getInternshipRecordEvaluations = cache(async (internshipId) => {
 
 export async function restoreInternshipRecordEvaluations(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["student"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const evaluationId = formData.get("evaluationId");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/restore/${evaluationId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/restore/${evaluationId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -549,22 +472,15 @@ export async function restoreInternshipRecordEvaluations(prevState, formData) {
 
 export const getInternshipRecordDocuments = cache(async (internshipId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/documents/${internshipId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/documents/${internshipId}`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -592,23 +508,18 @@ export const downloadInternshipRecordDocuments = async (
   formData,
 ) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      return { success: false, error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { success: false, error: "You must be logged in." };
     }
-
-    const userId = session.user.id;
 
     const { fileId, internshipId } = formData;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/files/download/${internshipId}/${fileId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/files/download/${internshipId}/${fileId}`,
       {
         method: "GET",
-        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
@@ -639,23 +550,19 @@ export const downloadInternshipRecordDocuments = async (
 
 export async function reviewDisputedEvaluation(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const evaluationId = formData.get("evaluationId");
     const review_notes = formData.get("review_notes");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/evaluations/review/${evaluationId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/evaluations/review/${evaluationId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ review_notes }),
       },
@@ -681,17 +588,10 @@ export const getAlumniInternships = async ({
   page = 1,
 }) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["student", "department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
-    const userId = session.user.id;
-
-    const params = new URLSearchParams({ userId, page: String(page) });
+    const params = new URLSearchParams({ page: String(page) });
     if (academicYear) params.set("academicYear", academicYear);
     if (search) params.set("search", search);
 
@@ -700,7 +600,7 @@ export const getAlumniInternships = async ({
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -725,22 +625,18 @@ export const getAlumniInternships = async ({
 
 export async function postAlumniRecord(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head"].includes(session.user.role))
-      throw new Error("Unauthorized.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const pastRecord = Object.fromEntries(formData);
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/alumni-internships?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/alumni-internships`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(pastRecord),
       },
@@ -759,22 +655,18 @@ export async function postAlumniRecord(prevState, formData) {
 
 export async function deleteAlumniRecord(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const recordId = formData.get("recordId");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/alumni-internships/${recordId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/alumni-internships/${recordId}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -792,23 +684,19 @@ export async function deleteAlumniRecord(prevState, formData) {
 
 export async function updateAlumniRecord(prevState, formData) {
   try {
-    const session = await getUserSession();
-    if (!session?.user) throw new Error("You must be logged in");
-
-    const userId = session.user.id;
-    if (!["department_head", "admin"].includes(session.user.role))
-      throw new Error("Unauthorized role.");
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in");
 
     const recordData = Object.fromEntries(formData);
     const recordId = recordData.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/alumni-internships/${recordId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/alumni-internships/${recordId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(recordData),
       },
@@ -825,27 +713,158 @@ export async function updateAlumniRecord(prevState, formData) {
   }
 }
 
+export const getDepartmentHeadDashboardStats = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
+    }
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/department-head-dashboard-stats`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get department head dashboard stats. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get department head dashboard stats error:", err);
+    return {
+      error: "Failed to get department head dashboard stats. Please try again.",
+    };
+  }
+};
+
+export const getOngoingInternshipsPerCourse = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
+    }
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/ongoing-internships-per-course`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get internships per course. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get ongoing internships per course error:", err);
+    return {
+      error: "Failed to get internships per course. Please try again.",
+    };
+  }
+};
+
+export const getAverageShiftHours = async ({ month, year } = {}) => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
+    }
+
+    const params = new URLSearchParams();
+    if (month) params.set("month", month);
+    if (year) params.set("year", year);
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/average-shift-hours?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error || "Failed to get average shift hours. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get average shift hours error:", err);
+    return { error: "Failed to get average shift hours. Please try again." };
+  }
+};
+
+export const getAvailableShiftHoursMonths = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
+    }
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/available-shift-hours-months`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error || "Failed to get available months. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get available shift hours months error:", err);
+    return { error: "Failed to get available months. Please try again." };
+  }
+};
+
 /////////////////////////
 //FOR REGISTRAR
 /////////////////////////
 export const getAvailableAcademicYears = cache(async () => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const userId = session.user.id;
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/reports/academic-years?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/reports/academic-years`,
       {
         method: "GET",
         headers: {
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );
@@ -871,17 +890,10 @@ export const getAvailableAcademicYears = cache(async () => {
 export const getHteCompanyList = cache(
   async ({ academicYear = "", search = "", page = 1 }) => {
     try {
-      const session = await getUserSession();
-      if (
-        !session?.user ||
-        !["department_head", "admin"].includes(session.user.role)
-      ) {
-        throw new Error("Unauthorized");
-      }
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
-      const userId = session.user.id;
-
-      const params = new URLSearchParams({ userId, page: String(page) });
+      const params = new URLSearchParams({ page: String(page) });
       if (academicYear) params.set("academicYear", academicYear);
       if (search) params.set("search", search);
 
@@ -890,7 +902,7 @@ export const getHteCompanyList = cache(
         {
           method: "GET",
           headers: {
-            "x-api-key": process.env.BACKEND_SECRET_KEY,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       );
@@ -914,22 +926,15 @@ export const getHteCompanyList = cache(
 export const getHteCompanyReport = cache(
   async ({ academicYear, companyKey }) => {
     try {
-      const session = await getUserSession();
-      if (
-        !session?.user ||
-        !["department_head", "admin"].includes(session.user.role)
-      ) {
-        throw new Error("Unauthorized");
-      }
-
-      const userId = session.user.id;
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
       const res = await fetch(
-        `${process.env.API_BASE_URL}/api/reports/hte-annual/company?userId=${userId}&academicYear=${academicYear}&companyKey=${companyKey}`,
+        `${process.env.API_BASE_URL}/api/reports/hte-annual/company?academicYear=${academicYear}&companyKey=${companyKey}`,
         {
           method: "GET",
           headers: {
-            "x-api-key": process.env.BACKEND_SECRET_KEY,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       );
@@ -955,26 +960,19 @@ export const getHteCompanyReport = cache(
 
 export const saveAnnexCReport = async (payload) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      return { error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
     }
-    const userId = session.user.id;
 
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/reports/annex-c?userId=${userId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.BACKEND_SECRET_KEY,
-        },
-        body: JSON.stringify(payload),
+    const res = await fetch(`${process.env.API_BASE_URL}/api/reports/annex-c`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+      body: JSON.stringify(payload),
+    });
 
     if (!res.ok) {
       const error = await res.json();
@@ -994,22 +992,18 @@ export const getAnnexCReports = async ({
   page = 1,
 } = {}) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      return { error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
     }
-    const userId = session.user.id;
 
-    const params = new URLSearchParams({ userId, page: String(page) });
+    const params = new URLSearchParams({ page: String(page) });
     if (academicYear) params.set("academicYear", academicYear);
     if (search) params.set("search", search);
 
     const res = await fetch(
       `${process.env.API_BASE_URL}/api/reports/annex-c?${params.toString()}`,
-      { headers: { "x-api-key": process.env.BACKEND_SECRET_KEY } },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
 
     if (!res.ok) {
@@ -1026,20 +1020,16 @@ export const getAnnexCReports = async ({
 
 export const deleteAnnexCReport = async (reportId) => {
   try {
-    const session = await getUserSession();
-    if (
-      !session?.user ||
-      !["department_head", "admin"].includes(session.user.role)
-    ) {
-      return { error: "Unauthorized" };
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
     }
-    const userId = session.user.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/reports/annex-c/${reportId}?userId=${userId}`,
+      `${process.env.API_BASE_URL}/api/reports/annex-c/${reportId}`,
       {
         method: "DELETE",
-        headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 

@@ -1,10 +1,9 @@
 import SearchedUserFilter from "@/app/_components/SearchedUserFilter";
 import SearchedUserHeader from "@/app/_components/SearchedUserHeader";
 import SearchedUserRecords from "@/app/_components/SearchedUserRecords";
-import {
-  getUserSession,
-  getSearchedUserProfile,
-} from "@/app/_services/services";
+import { getSearchedUserProfile } from "@/app/_services/services";
+
+import { getUserSession } from "@/app/_services/auth";
 import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
@@ -18,9 +17,10 @@ export async function generateMetadata({ params }) {
   if (!searchedUserId) return { title: "User Profile" };
 
   const profileData = await getSearchedUserProfile(searchedUserId);
-  if (profileData?.user) {
+  const header = profileData?.user?.header;
+  if (header) {
     return {
-      title: `${profileData.user.first_name} ${profileData.user.last_name} - Profile`,
+      title: `${header.first_name} ${header.last_name} - Profile`,
     };
   }
 
@@ -47,19 +47,19 @@ async function UserProfilePage({ params, searchParams }) {
     return notFound();
   }
 
-  const userRole = session?.user.role || null;
-  const searchedUserRole = profileData.user.role || "student";
+  const { header, info } = profileData.user;
+
+  const userRole = session?.user?.role || null;
+  const searchedUserRole = header.role || "student";
 
   const filter =
     userRole === "student" || searchedUserRole !== "student"
       ? "info"
       : sParams.filter || "dtr";
 
-  console.log(profileData);
-
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
-      <SearchedUserHeader userProfile={profileData.user} />
+      <SearchedUserHeader userProfile={header} />
 
       <SearchedUserFilter
         searchedUserId={searchedUserId}
@@ -80,10 +80,11 @@ async function UserProfilePage({ params, searchParams }) {
           <SearchedUserRecords
             filter={filter}
             searchedUserId={searchedUserId}
-            userId={session?.user.id || ""}
+            userId={session?.user?.id || ""}
             userRole={userRole}
             searchedUserRole={searchedUserRole}
             currentDtrPage={currentDtrPage}
+            searchedUserInfo={info}
           />
         </Suspense>
       </div>

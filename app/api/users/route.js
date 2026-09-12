@@ -1,43 +1,36 @@
 // app/api/users/route.js
-import { getUserSession } from "@/app/_services/services";
+import { getAccessToken } from "@/app/_services/auth";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
-  // 1. Authenticate and authorize the user session
-  const session = await getUserSession();
-  if (
-    !session?.user ||
-    !["student", "admin", "employer", "department_head"].includes(
-      session.user.role,
-    )
-  ) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // 1. Authenticate — getAccessToken() self-refreshes if the access token
+  // is expired but the refresh token is still valid, so this only returns
+  // null when the whole session is actually gone.
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
-
-  const userId = session.user.id;
 
   // 2. Extract the search query string
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() || "";
 
-  // 🛡️ Guard Clause: If empty OR 3 characters or less, return empty results immediately
+  // Guard clause: empty or 3 characters or less -> return empty results immediately
   if (!q || q.length <= 2) {
     return NextResponse.json({ success: true, users: [] });
   }
 
   // 3. Server-secret environment variables
   const backendUrl = process.env.API_BASE_URL;
-  const secretKey = process.env.BACKEND_SECRET_KEY;
-
-  const queryPath = `/api/search-users?userId=${userId}&q=${encodeURIComponent(q)}`;
+  const queryPath = `/api/search-users?q=${encodeURIComponent(q)}`;
 
   try {
     // 4. Secure server-to-server fetch
     const res = await fetch(`${backendUrl}${queryPath}`, {
       method: "GET",
       headers: {
-        "x-api-key": secretKey,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 

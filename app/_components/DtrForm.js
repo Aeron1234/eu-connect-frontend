@@ -17,8 +17,8 @@ function DtrForm({ isOut }) {
   // const { latitude, longitude } = coords;
 
   function handleAction(formData) {
-    const tempLat = 13.922662984858786;
-    const tempLon = 121.43409490585329;
+    const tempLat = 13.9304557;
+    const tempLon = 121.4312752;
 
     formData.append(isOut ? "lat_in" : "lat_out", tempLat);
     formData.append(isOut ? "lon_in" : "lon_out", tempLon);

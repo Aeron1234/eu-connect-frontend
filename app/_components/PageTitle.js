@@ -1,30 +1,12 @@
-async function PageTitle({
-  children = null,
-  title,
-  name = "",
-  description = "",
-  icon = null,
-}) {
+function PageTitle({ Icon = null, title, description }) {
   return (
-    <header className="flex items-start justify-between gap-4">
-      <div>
-        <h1
-          className={`${icon ? "flex items-center gap-2" : ""} text-xl self-start font-bold text-stone-800 max-md:text-lg max-xs:text-base`}
-        >
-          {icon && <span className="text-primary-500">{icon}</span>}
-          {name ? (
-            <span>
-              {title}, {name}!
-            </span>
-          ) : (
-            <span>{title}</span>
-          )}
-        </h1>
-        {description && <span className="text-stone-600">{description}</span>}
-      </div>
-
-      {children}
-    </header>
+    <div>
+      <h1 className="text-xl lg:text-3xl font-bold text-stone-800 flex items-center gap-2">
+        {Icon && <Icon className="w-5 h-5 md:w-7 md:h-7 text-primary-500" />}
+        {title}
+      </h1>
+      <p className="text-xs sm:text-sm text-stone-600 mt-1">{description}</p>
+    </div>
   );
 }
 

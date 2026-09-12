@@ -1,18 +1,4 @@
 import { format } from "date-fns";
-import {
-  ArrowLeft,
-  Building2,
-  CheckCircle2,
-  ChevronLeft,
-  ClipboardCheck,
-  Clock,
-  FileText,
-  FolderOpen,
-  RotateCcw,
-  Star,
-  XCircle,
-} from "lucide-react";
-import Link from "next/link";
 import RecordsDtrTable from "./RecordsDtrTable";
 import {
   getInternshipRecordDocuments,
@@ -22,8 +8,12 @@ import {
 } from "../_services/dept-head-actions";
 import RecordsNarrative from "./RecordsNarratives";
 import EvaluationCard from "./EvaluationCard";
-import { getFileRequirementTypes } from "../_services/services";
+import {
+  getFileRequirementTypes,
+  getSearchedStudentDtrLocation,
+} from "../_services/services";
 import RecordsDocuments from "./RecordsDocuments";
+import SetDtrLocation from "./SetDtrLocation";
 
 function RecordsDetailsPageContent({
   record,
@@ -96,7 +86,9 @@ function RecordsDetailsPageContent({
         </div>
       )}
 
-      {filter === "dtr" && <DtrTab internshipId={internshipId} />}
+      {filter === "dtr" && (
+        <DtrTab internshipId={internshipId} studentId={record?.student_id} />
+      )}
 
       {filter === "narratives" && <NarrativesTab internshipId={internshipId} />}
 
@@ -109,14 +101,42 @@ function RecordsDetailsPageContent({
   );
 }
 
-async function DtrTab({ internshipId }) {
+async function DtrTab({ internshipId, studentId }) {
   const dtrs = await getInternshipRecordDtr(internshipId);
 
   return (
-    <div className="rounded-xl bg-white border border-stone-200 p-5 sm:p-6">
-      <RecordsDtrTable dtrs={dtrs || []} />
-    </div>
+    <>
+      <div className="rounded-xl bg-white border border-stone-200 p-5 sm:p-6">
+        <RecordsDtrTable dtrs={dtrs || []} />
+      </div>
+
+      <SetLocationForm studentId={studentId} />
+    </>
   );
+}
+
+async function SetLocationForm({ studentId }) {
+  console.log("studentId:", studentId);
+  const data = (await getSearchedStudentDtrLocation(studentId)) || {};
+
+  console.log("searchedStudentDtrLocation:", data);
+
+  const dataLocation = {
+    internship_id: data?.internship_id,
+    is_custom_location: data?.is_custom_location || false,
+    location: {
+      lat: data?.location?.lat,
+      lon: data?.location?.lon,
+      radius_meters: data?.location?.radius_meters,
+      label: data?.location?.label,
+      address: data?.location?.address || null,
+      set_by: data?.location?.set_by || null,
+      created_at: data?.location?.created_at || null,
+      updated_at: data?.location?.updated_at || null,
+    },
+  };
+
+  return <SetDtrLocation studentId={studentId} dataLocation={dataLocation} />;
 }
 
 async function NarrativesTab({ internshipId }) {

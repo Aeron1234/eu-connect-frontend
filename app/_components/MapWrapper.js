@@ -3,6 +3,7 @@
 import { Building2, MapPin, Search, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import PageTitle from "./PageTitle";
 
 const Map = dynamic(() => import("./Map"), {
   ssr: false,
@@ -94,15 +95,13 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <div className="flex gap-3 items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-maroon sm:text-3xl">
-            <MapPin className="h-7 w-7 text-primary-500" />
-            Student Map
-          </h1>
-          <p className="text-sm text-stone-600 mt-1">
-            Showing all the interns and their company across the map
-          </p>
-        </div>
+        <PageTitle
+          Icon={MapPin}
+          title={"Student Map"}
+          description={
+            "Showing all the interns and their company across the map."
+          }
+        />
 
         <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
           {tabs.map((t) => (

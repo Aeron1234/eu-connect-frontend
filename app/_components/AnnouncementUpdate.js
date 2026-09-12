@@ -5,7 +5,7 @@ import AnnouncementForm from "./AnnouncementForm";
 import { toastAndAction } from "../_services/helpers";
 import { updateAnnouncement } from "../_services/dept-head-actions";
 
-function AnnouncementUpdate({ data = null, categories }) {
+function AnnouncementUpdate({ data = null, categories, onChanged }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
@@ -19,7 +19,10 @@ function AnnouncementUpdate({ data = null, categories }) {
       formData,
     };
 
-    startTransition(async () => await toastAndAction(handlers));
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
+      if (result?.success && onChanged) onChanged();
+    });
   }
 
   return (

@@ -7,9 +7,12 @@ function SearchBar({
   placeholder = "",
   defaultValue = "",
   ariaLabel = "",
+  position = "left",
 }) {
   return (
-    <div className="relative flex-1 md:flex-none ml-auto">
+    <div
+      className={`relative flex-1 sm:flex-none ${position === "left" ? "ml-auto" : ""}`}
+    >
       <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
       <input
         type="text"

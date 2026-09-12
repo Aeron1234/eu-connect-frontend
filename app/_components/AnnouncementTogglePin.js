@@ -5,7 +5,7 @@ import AnnouncementForm from "./AnnouncementForm";
 import { togglePinAnnouncement } from "../_services/dept-head-actions";
 import { toastAndAction } from "../_services/helpers";
 
-function AnnouncementTogglePin({ announcementId, is_pinned }) {
+function AnnouncementTogglePin({ announcementId, is_pinned, onChanged }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
@@ -18,7 +18,8 @@ function AnnouncementTogglePin({ announcementId, is_pinned }) {
     };
 
     startTransition(async () => {
-      await toastAndAction(handlers);
+      const result = await toastAndAction(handlers);
+      if (result?.success && onChanged) onChanged();
     });
   }
 

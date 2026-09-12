@@ -5,6 +5,7 @@ import Logo from "./Logo";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionState, useState } from "react";
 import { ArrowRight, Eye, EyeOff, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 
 function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, null);
@@ -16,9 +17,6 @@ function LoginForm() {
         <h2 className="font-display text-3xl font-bold">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Select your role and enter your credentials
-        </p>
 
         <form className="mt-7 space-y-5" action={formAction}>
           <div>
@@ -71,13 +69,12 @@ function LoginForm() {
               </button>
             </div>
             <div className="mt-2 text-right">
-              <button
-                type="button"
-                disabled={isPending}
+              <Link
+                href="/forgot-password"
                 className="text-xs font-semibold text-primary-500 hover:underline"
               >
                 Forgot password?
-              </button>
+              </Link>
             </div>
           </div>
 

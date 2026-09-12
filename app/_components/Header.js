@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getInbox } from "../_services/services";
-import Logo from "./Logo";
 import Navigation from "./Navigation";
 
 async function Header() {
@@ -8,7 +7,7 @@ async function Header() {
 
   return (
     <nav className="flex-1 flex items-center gap-4 z-50">
-      <h1 className="font-semibold">
+      <h1 className="hidden lg:block font-semibold">
         Manuel S. Enverga University Foundation &mdash; Candelaria Inc.
       </h1>
       <Suspense fallback={<span></span>}>

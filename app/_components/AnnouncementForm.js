@@ -13,6 +13,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 import DeleteForm from "./DeleteForm";
+import { useUser } from "@/contexts/UserContext";
 
 function AnnouncementForm({
   handleAction,
@@ -66,12 +67,28 @@ function CreateUpdateAnnouncementForm({
   data = null,
 }) {
   const isEdit = type === "edit";
+  const { user } = useUser();
+  const isAdmin = user?.role === "admin";
+
+  // Admin can only ever post/edit General-category announcements — find
+  // that category's real id from whatever the backend returned, rather
+  // than hardcoding "1" and hoping the seed data never changes.
+  const generalCategory = categories?.find((c) => c.name === "General");
+
   const [selectedCategory, setSelectedCategory] = useState(
-    isEdit ? `${data.category_id}` : "",
+    isAdmin
+      ? generalCategory
+        ? `${generalCategory.id}`
+        : ""
+      : isEdit
+        ? `${data.category_id}`
+        : "",
   );
 
   return (
     <form action={handleAction} className="flex-1 flex flex-col gap-4">
+      {isEdit && <input type="hidden" name="id" defaultValue={data.id} />}
+
       <div className="flex gap-4 flex-1 max-sm:flex-col">
         <label className="flex flex-col gap-1 flex-1">
           <span className="text-sm font-semibold text-stone-500">Title</span>
@@ -97,26 +114,35 @@ function CreateUpdateAnnouncementForm({
             value={selectedCategory}
             disabled={isPending}
           />
-          <Select
-            className="w-full h-full "
-            onValueChange={setSelectedCategory}
-            disabled={isPending}
-            defaultValue={isEdit ? `${data.category_id}` : undefined}
-          >
-            <SelectTrigger className="h-9.5 px-3 text-sm w-full rounded-sm border border-stone-300 focus:ring-2 focus:ring-stone-300 focus:border-transparent">
-              <SelectValue placeholder={"Select category"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Categories</SelectLabel>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={`${category.id}`}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+
+          {isAdmin ? (
+            // Admin has no department, so Department-category is never a
+            // valid choice — no picker at all, just a locked display.
+            <div className="h-9.5 px-3 flex items-center text-sm w-full rounded-sm border border-stone-200 bg-stone-50 text-stone-500">
+              General
+            </div>
+          ) : (
+            <Select
+              className="w-full h-full "
+              onValueChange={setSelectedCategory}
+              disabled={isPending}
+              defaultValue={isEdit ? `${data.category_id}` : undefined}
+            >
+              <SelectTrigger className="h-9.5 px-3 text-sm w-full rounded-sm border border-stone-300 focus:ring-2 focus:ring-stone-300 focus:border-transparent">
+                <SelectValue placeholder={"Select category"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Categories</SelectLabel>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={`${category.id}`}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
         </label>
       </div>
 

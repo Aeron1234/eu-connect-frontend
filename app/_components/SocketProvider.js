@@ -10,6 +10,13 @@ export const socket = io(SOCKET_URL, {
   autoConnect: false,
   withCredentials: true,
   transports: ["websocket", "polling"],
+  // Caps reconnection so a sleeping/unreachable backend (e.g. Render free
+  // tier spin-down) doesn't retry indefinitely for hours while the tab
+  // sits idle — without this, socket.io-client defaults to unlimited
+  // retries every few seconds.
+  reconnectionAttempts: 10,
+  reconnectionDelay: 2000,
+  reconnectionDelayMax: 10000,
 });
 
 export default function SocketProvider({ children, userId }) {

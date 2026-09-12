@@ -1,12 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import Header from "../_components/Header";
 import SideNavigation from "../_components/SideNavigation";
-import { getUserSession } from "../_services/services";
+import { getUserSession } from "../_services/auth";
 import SocketProvider from "../_components/SocketProvider";
 import Alert from "../_components/Alert";
 import { UserProvider } from "@/contexts/UserContext";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 
-async function DepartmentHeadLayout({ children }) {
+async function EmployerLayout({ children }) {
   const session = await getUserSession();
   if (!session?.user) return redirect("/login");
 
@@ -16,23 +17,23 @@ async function DepartmentHeadLayout({ children }) {
   return (
     <SocketProvider userId={session.user.id}>
       <UserProvider initialUser={session?.user ?? null}>
-        <div className="relative grid grid-cols-[auto_1fr] h-screen overflow-hidden antialiased text-stone-800">
-          <SideNavigation />
+        <SidebarProvider>
+          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] h-screen overflow-hidden antialiased text-stone-800">
+            <SideNavigation />
 
-          <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-stone-100">
-            <div className="px-6 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 h-16 border-b border-stone-300 z-50">
-              <Header />
-              <Alert />
-            </div>
+            <main className="flex flex-col min-w-0 h-screen overflow-hidden bg-stone-100 w-full">
+              <div className="px-6 py-1 flex items-center w-full bg-white/50 backdrop-blur-sm text-stone-800 h-16 border-b border-stone-300 z-30">
+                <Header />
+                <Alert />
+              </div>
 
-            <div className="py-4 px-8 max-lg:px-4 flex-1 overflow-y-auto">
-              {children}
-            </div>
-          </main>
-        </div>
+              <div className="flex-1 overflow-y-auto">{children}</div>
+            </main>
+          </div>
+        </SidebarProvider>
       </UserProvider>
     </SocketProvider>
   );
 }
 
-export default DepartmentHeadLayout;
+export default EmployerLayout;

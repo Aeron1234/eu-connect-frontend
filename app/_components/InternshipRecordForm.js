@@ -20,8 +20,6 @@ import { toastAndAction } from "../_services/helpers";
 const labelClass = "text-sm font-medium text-foreground";
 const inputClass =
   "mt-1 flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
-// shadcn's SelectTrigger ships its own h-9 + shadow-xs defaults — h-10 and
-// shadow-none here override those so it renders at the exact same size as inputClass.
 const selectTriggerClass =
   "flex h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm shadow-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed";
 const textareaClass =
@@ -89,8 +87,8 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
       />
 
       {status && (
-        <p className="flex items-center gap-2 rounded-md border border-border bg-secondary/70 px-4 py-3 text-sm text-muted-foreground">
-          <span className="text-primary-500">
+        <p className="flex items-start sm:items-center gap-2 rounded-md border border-border bg-secondary/70 px-3 sm:px-4 py-3 text-xs sm:text-sm text-muted-foreground my-5 line-clamp-1">
+          <span className="text-primary-500 flex-shrink-0">
             <CircleAlert className="h-5 w-5" />
           </span>
           The form is locked because you currently have an ongoing or pending
@@ -100,10 +98,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
 
       {showForm && (
         <form
-          className={`flex flex-col gap-6 ${status ? "opacity-50 pointer-events-none" : ""} z-10`}
+          className={`flex flex-col gap-5 sm:gap-6 ${status ? "opacity-50 pointer-events-none" : ""} z-10`}
           action={handleAction}
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
             <Input
               name={"company_name"}
               label={"Name of company *"}
@@ -135,7 +133,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
                 onValueChange={setSelectedRegion}
                 disabled={isPending || status}
               >
-                <SelectTrigger id="region_id" className={selectTriggerClass}>
+                <SelectTrigger
+                  id="region_id"
+                  className={`mt-1 ${selectTriggerClass}`}
+                >
                   <SelectValue placeholder="Select Region" />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,7 +154,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
             <Input
               name={"internship_position"}
               label={"Position *"}
@@ -186,7 +187,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
             <Input
               name={"date_started"}
               label={"Start date *"}
@@ -217,7 +218,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
           </div>
 
           {/* Total Hours and Semester */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
             <div>
               <label htmlFor="semester" className={labelClass}>
                 Semester *
@@ -236,7 +237,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
                 }
                 disabled={isPending || status}
               >
-                <SelectTrigger id="semester" className={selectTriggerClass}>
+                <SelectTrigger
+                  id="semester"
+                  className={`mt-1 ${selectTriggerClass}`}
+                >
                   <SelectValue placeholder="Select Semester" />
                 </SelectTrigger>
                 <SelectContent>
@@ -297,7 +301,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
           <div className="flex flex-col gap-2">
             <p className="flex flex-col gap-1">
               <span className={`flex items-center gap-1.5 ${labelClass}`}>
-                <MapPin className="h-4 w-4" /> Company Location *
+                <MapPin className="h-4 w-4 flex-shrink-0" /> Company Location *
               </span>
               <span className="text-xs text-muted-foreground">
                 Use the search bar inside the map to find your company, or click
@@ -309,7 +313,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
               data={internshipForm}
               setData={setInternshipForm}
               formType={"internshipRecord"}
-              mapStyle={{ height: "400px", width: "100%" }}
+              mapStyle={{ height: "320px", width: "100%" }}
             />
 
             <div className="flex flex-col">
@@ -334,7 +338,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
           </div>
 
           <button
-            className="mt-2 inline-flex items-center justify-center gap-2 self-end rounded-md bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            className="mt-2 inline-flex items-center justify-center gap-2 w-full sm:w-auto sm:self-end rounded-md bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             disabled={isPending || status}
           >
             {isPending ? (

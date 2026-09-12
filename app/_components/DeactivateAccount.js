@@ -3,28 +3,28 @@
 import { useState, useTransition } from "react";
 import { toastAndAction } from "../_services/helpers";
 import { deactivateAccount } from "../_services/admin-actions";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { ShieldBan, ShieldMinus } from "lucide-react";
-import { is } from "date-fns/locale";
+import { ShieldBan } from "lucide-react";
 import CustomToolTip from "./CustomToolTip";
 
-function DeactivateAccount({ id }) {
+function DeactivateAccount({ id, onSuccess }) {
   const [isPending, startTransition] = useTransition();
   const [isHover, setIsHover] = useState(false);
 
   function handleAction(formData) {
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: "Deleting account...",
-          successLabel: "Account deleted.",
-          errorLabel: "Failed to delete account.",
-          action: deactivateAccount,
-          formData,
-        }),
-    );
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Deactivating account...",
+        successLabel: "Account deactivated.",
+        errorLabel: "Failed to deactivate account.",
+        action: deactivateAccount,
+        formData,
+      });
+
+      if (result?.success) {
+        onSuccess?.();
+      }
+    });
   }
 
   return (
@@ -36,30 +36,6 @@ function DeactivateAccount({ id }) {
         className="pointer-events-none cursor-not-allowed"
         disabled={isPending}
       />
-      {/* <DialogFooter>
-        <div className="flex gap-2 font-semibold w-full justify-end">
-          <DialogClose asChild>
-            <Button variant="outline" className={"w-fit"}>
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <DialogClose asChild>
-            <Button
-              className={"bg-primary-500 hover:bg-primary-400 w-fit "}
-              type="submit"
-              disabled={isPending}
-              // onClick={() => toast.success("Event has been created")}
-            >
-              {isPending ? (
-                <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
-              ) : (
-                "Deactivate"
-              )}
-            </Button>
-          </DialogClose>
-        </div>
-      </DialogFooter> */}
 
       <button
         className="relative cursor-pointer flex flex-col justify-center items-center gap-1 p-1 rounded-sm transition-colors hover:bg-red-200 hover:text-red-600"

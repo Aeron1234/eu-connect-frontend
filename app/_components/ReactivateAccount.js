@@ -7,21 +7,24 @@ import { ShieldCheck } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import CustomToolTip from "./CustomToolTip";
 
-function ReactivateAccount({ id }) {
+function ReactivateAccount({ id, onSuccess }) {
   const [isHover, setIsHover] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: "Reactivating account...",
-          successLabel: "Account reactivated.",
-          errorLabel: "Failed to reactivate account.",
-          action: reactivateAccount,
-          formData,
-        }),
-    );
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Reactivating account...",
+        successLabel: "Account reactivated.",
+        errorLabel: "Failed to reactivate account.",
+        action: reactivateAccount,
+        formData,
+      });
+
+      if (result?.success) {
+        onSuccess?.();
+      }
+    });
   }
 
   return (

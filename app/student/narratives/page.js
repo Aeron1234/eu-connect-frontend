@@ -1,6 +1,7 @@
 import DailyNarrativeContent from "@/app/_components/DailyNarrativeContent";
 import DailyNarrativePostButton from "@/app/_components/DailyNarrativePostButton";
 import DailyNarrativesStats from "@/app/_components/DailyNarrativesStats";
+import PageTitle from "@/app/_components/PageTitle";
 import { getDailyNarratives } from "@/app/_services/student-actions";
 import { BookOpen } from "lucide-react";
 
@@ -18,16 +19,13 @@ async function NarrativesPage({ searchParams }) {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-2">
-              <BookOpen className="w-7 h-7 text-primary-500" />
-              Daily Narratives
-            </h1>
-            <p className="text-sm text-stone-600 mt-1">
-              Journal your OJT learnings, activities, and reflections day by
-              day.
-            </p>
-          </div>
+          <PageTitle
+            Icon={BookOpen}
+            title={"Daily Narratives"}
+            description={
+              "Journal your OJT learnings, activities, and reflections day by day."
+            }
+          />
 
           <DailyNarrativePostButton />
         </div>

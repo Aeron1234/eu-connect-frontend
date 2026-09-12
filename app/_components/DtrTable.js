@@ -36,7 +36,7 @@ function DtrTable({
   console.log(dtrs);
   return (
     <>
-      <table className="w-full text-sm">
+      <table className="w-xl md:w-full text-sm ">
         <thead>
           <tr className="border-b border-stone-300 text-[11px] uppercase tracking-wide text-muted-foreground">
             <th className="text-left py-2 font-medium">Date</th>

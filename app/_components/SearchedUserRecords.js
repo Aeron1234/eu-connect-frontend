@@ -2,23 +2,19 @@ import { notFound } from "next/navigation";
 import {
   getSearchedStudentDtrLocation,
   getSearchedStudentDTRs,
-  getSearchedStudentFiles,
   getSearchedStudentNarratives,
   getStudentEvaluationCriterias,
   getStudentPastEvaluations,
-  getFileRequirementTypes,
   getEmployerUploadedFiles,
 } from "../_services/services";
 
 import DtrTable from "./DtrTable";
-import StudentDocuments from "./StudentDocuments";
 import StudentNarratives from "./StudentNarratives";
-// import EmployerProfileInfo from "./EmployerProfileInfo"; // Uncomment when ready
 import StudentEvaluationList from "./StudentEvaluationList";
 import StudentEvaluationCriteria from "./StudentEvaluationCriteria";
 import SetDtrLocation from "./SetDtrLocation";
-import { FolderOpen } from "lucide-react";
 import EmployerCertificateUploads from "./EmployerCertificateUploads";
+import ProfileInfoGrid from "./ProfileInfoGrid";
 
 export default async function SearchedUserRecords({
   filter,
@@ -27,10 +23,17 @@ export default async function SearchedUserRecords({
   userRole = "",
   searchedUserRole = "",
   currentDtrPage = 1,
+  searchedUserInfo = null,
 }) {
   if (searchedUserRole !== "student") {
     if (filter !== "info") return notFound();
-    return <EmployerInfoTab searchedUserId={searchedUserId} />;
+    return (
+      <EmployerInfoTab
+        searchedUserId={searchedUserId}
+        info={searchedUserInfo}
+        role={searchedUserRole}
+      />
+    );
   }
 
   if (userRole === "student" && filter !== "info") {
@@ -72,13 +75,6 @@ export default async function SearchedUserRecords({
         />
       );
 
-    case "documents":
-      // Only internal academic administrators manage legal/compliance folders
-      if (!["department_head", "admin"].includes(userRole)) return notFound();
-      return (
-        <DocumentsTab searchedUserId={searchedUserId} userRole={userRole} />
-      );
-
     case "certificates":
       if (!["employer", "admin"].includes(userRole)) return notFound();
       return (
@@ -89,7 +85,9 @@ export default async function SearchedUserRecords({
         />
       );
     case "info":
-      return <InfoTab searchedUserId={searchedUserId} />;
+      return (
+        <InfoTab searchedUserId={searchedUserId} info={searchedUserInfo} />
+      );
 
     default:
       return notFound();
@@ -179,43 +177,6 @@ async function EvaluationsTab({ searchedUserId, userRole, userId }) {
   );
 }
 
-async function DocumentsTab({ searchedUserId, userRole }) {
-  // const [fileData, requirementTypes] = await Promise.all([
-  //   getSearchedStudentFiles(searchedUserId),
-  //   getFileRequirementTypes(),
-  // ]);
-  // console.log("DocumentsTab file data:", fileData);
-  // console.log("DocumentsTab requirement types:", requirementTypes);
-  // return (
-  //   <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
-  //     {fileData.length > 0 ? (
-  //       fileData.map((data) => (
-  //         <StudentDocuments
-  //           searchedUserId={searchedUserId}
-  //           fileData={data}
-  //           requirementTypes={requirementTypes}
-  //           key={data.id}
-  //         />
-  //       ))
-  //     ) : (
-  //       <div className="p-12 text-center">
-  //         <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
-  //           <FolderOpen className="w-7 h-7 text-muted-foreground/50" />
-  //         </div>
-  //         <p className="text-sm font-medium text-foreground">
-  //           No documents yet
-  //         </p>
-  //         <p className="text-xs text-muted-foreground mt-1">
-  //           Internship documents will appear here once uploaded.
-  //         </p>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
-
-  return null;
-}
-
 async function EmployerCertificateTab({ searchedUserId, userRole, userId }) {
   const uploadedFiles = await getEmployerUploadedFiles(searchedUserId);
 
@@ -229,21 +190,20 @@ async function EmployerCertificateTab({ searchedUserId, userRole, userId }) {
   );
 }
 
-async function InfoTab({ searchedUserId }) {
+async function InfoTab({ searchedUserId, info }) {
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
-      Student info place holder
+      <ProfileInfoGrid info={info} />
     </div>
   );
 }
 
-async function EmployerInfoTab({ searchedUserId }) {
+async function EmployerInfoTab({ searchedUserId, info, role }) {
+  
+
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
-      {/* <EmployerProfileInfo searchedUserId={searchedUserId} /> */}
-      <p className="text-sm text-stone-500">
-        Employer profile details layout placeholder.
-      </p>
+      <ProfileInfoGrid info={info} />
     </div>
   );
 }

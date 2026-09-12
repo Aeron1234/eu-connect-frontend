@@ -6,10 +6,22 @@ const MapSmall = dynamic(() => import("app/_components/MapSmall"), {
   ssr: false,
 });
 
-function MapSmallContainer({ company_lat, company_lon }) {
+function MapSmallContainer({
+  latitude = 0,
+  longitude = 0,
+  radius = 100,
+  label = "",
+  address = "",
+}) {
   return (
-    <div className="rounded-sm" style={{ height: "200px", width: "100%" }}>
-      <MapSmall company_lat={company_lat} company_lon={company_lon} />
+    <div className="rounded-sm" style={{ height: "100%", width: "100%" }}>
+      <MapSmall
+        latitude={latitude}
+        longitude={longitude}
+        radius={radius}
+        label={label}
+        address={address}
+      />
     </div>
   );
 }

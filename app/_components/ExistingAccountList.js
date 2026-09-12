@@ -3,36 +3,42 @@ import {
   Crown,
   GraduationCap,
   ShieldBan,
-  ShieldMinus,
-  Trash2,
+  ShieldAlert,
+  Users,
 } from "lucide-react";
-import Modal from "./Modal";
 import DeactivateAccount from "./DeactivateAccount";
 import ReactivateAccount from "./ReactivateAccount";
 import { format } from "date-fns";
 
-function ExistingAccountList({ filteredAccounts }) {
+function getInitials(first = "", last = "") {
+  return `${first[0] || ""}${last[0] || ""}`.toUpperCase();
+}
+
+function ExistingAccountList({ filteredAccounts = [], onActionSuccess }) {
+  if (filteredAccounts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center">
+        <Users className="size-8 text-stone-300" />
+        <p className="text-sm font-medium text-stone-500">No accounts found</p>
+        <p className="max-w-sm text-xs text-stone-400">
+          Try a different search term or filter.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <ul className="flex-1 flex flex-col gap-2 mt-4">
-      {filteredAccounts &&
-        filteredAccounts.map((account) => (
-          <li
-            key={account.id}
-            className={`flex-1 ${account.status === "inactive" ? "opacity-40 hover:opacity-100" : ""} transition-all`}
-          >
-            <ExistingAccountListItem accountDetails={account} />
-          </li>
-        ))}
-      {!filteredAccounts.length && (
-        <li className="flex-1 flex justify-center text-stone-600 mt-4w">
-          <p className="">No result.</p>
+    <ul className="flex flex-col gap-3">
+      {filteredAccounts.map((account) => (
+        <li key={account.id}>
+          <AccountCard account={account} onActionSuccess={onActionSuccess} />
         </li>
-      )}
+      ))}
     </ul>
   );
 }
 
-function ExistingAccountListItem({ accountDetails }) {
+function AccountCard({ account, onActionSuccess }) {
   const {
     id,
     first_name,
@@ -40,110 +46,104 @@ function ExistingAccountListItem({ accountDetails }) {
     role,
     email,
     course_name,
+    department_name,
+    company_name,
     status,
     created_at,
-  } = accountDetails;
+  } = account;
+
+  const isSuspended = status === "suspended";
+  const isInactive = status === "inactive";
 
   return (
     <div
-      className={`grid grid-cols-[1fr_auto] gap-4 w-full p-4 border border-stone-300 rounded-sm hover:bg-stone-100 transition-colors `}
+      className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm transition-colors hover:bg-stone-50 ${
+        isInactive || isSuspended ? "opacity-70 hover:opacity-100" : ""
+      }`}
     >
-      <div className="flex flex-col gap-1 w-full">
-        <div className="flex gap-4">
-          <h3 className="text-sm font-semibold self-end">
-            {last_name}, {first_name}
-          </h3>
+      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-500">
+          {getInitials(first_name, last_name)}
+        </span>
 
-          {role && <Tag role={role} status={status} />}
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-semibold text-stone-800">
+              {last_name}, {first_name}
+            </h3>
+            <RoleTag role={role} />
+            {isSuspended && <StatusTag label="Suspended" tone="red" />}
+            {isInactive && <StatusTag label="Inactive" tone="stone" />}
+          </div>
+          <div className="mt-0.5 flex flex-col text-xs text-stone-500">
+            {email && <span className="truncate">{email}</span>}
+            {course_name && <span>Course: {course_name}</span>}
+            {department_name && <span>Dept: {department_name}</span>}
+            {company_name && <span>Company: {company_name}</span>}
+          </div>
         </div>
-        <p className="text-xs text-stone-500 flex flex-col ">
-          <span>{email}</span>
-          {course_name && <span>Dept: {course_name}</span>}
-          {/* {company && <span>Company: {company}</span>} */}
-          {role === "employer" && <span>Company: Jollibee</span>}
-        </p>
       </div>
 
-      <div className="flex items-center gap-2 h-full">
-        <p className="text-stone-500 text-[10px] tracking-wider">
-          Created: {format(new Date(created_at), "MM-dd-yyyy")}
+      <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
+        <p className="text-[11px] text-stone-500 tracking-wide">
+          Created: {format(new Date(created_at), "MMM d, yyyy")}
         </p>
-        {status === "active" && <DeactivateAccount id={id} />}
-        {status === "inactive" && <ReactivateAccount id={id} />}
+        {status === "active" && (
+          <DeactivateAccount id={id} onSuccess={onActionSuccess} />
+        )}
+        {(isInactive || isSuspended) && (
+          <ReactivateAccount id={id} onSuccess={onActionSuccess} />
+        )}
       </div>
     </div>
   );
 }
 
-function Tag({ role, status }) {
-  if (role === "student")
-    return (
-      <div
-        className={`flex items-center px-2.5 py-0.5 ${status === "active" ? "bg-blue-100 text-blue-600" : "bg-stone-200 text-stone-600"}  text-[10px] tracking-wide rounded-full gap-1 font-semibold`}
-      >
-        {status === "active" ? (
-          <>
-            <span>
-              <GraduationCap className="h-4 w-4" />
-            </span>
-            Student
-          </>
-        ) : (
-          <>
-            <span>
-              <ShieldBan className="h-4 w-4" />
-            </span>
-            Inactive
-          </>
-        )}
-      </div>
-    );
+function RoleTag({ role }) {
+  const config = {
+    student: {
+      label: "Student",
+      icon: GraduationCap,
+      tone: "bg-blue-50 text-blue-700",
+    },
+    department_head: {
+      label: "Dept. Head",
+      icon: Crown,
+      tone: "bg-purple-50 text-purple-700",
+    },
+    employer: {
+      label: "Employer",
+      icon: Briefcase,
+      tone: "bg-emerald-50 text-emerald-700",
+    },
+  }[role];
 
-  if (role === "department_head")
-    return (
-      <div
-        className={`flex items-center px-2.5 py-0.5 ${status === "active" ? "bg-purple-200 text-purple-600" : "bg-stone-200 text-stone-600"}  text-[10px] tracking-wide rounded-full gap-1 font-semibold`}
-      >
-        {status === "active" ? (
-          <>
-            <span>
-              <Crown className="h-4 w-4" />
-            </span>
-            Dept. Head
-          </>
-        ) : (
-          <>
-            <span>
-              <ShieldBan className="h-4 w-4" />
-            </span>
-            Inactive
-          </>
-        )}
-      </div>
-    );
+  if (!config) return null;
+  const Icon = config.icon;
 
-  if (role === "employer")
-    return (
-      <div
-        className={`flex items-center px-2.5 py-0.5 ${status === "active" ? " bg-green-100 text-green-600" : "bg-stone-200 text-stone-600"} text-[10px] tracking-wide rounded-full gap-1 font-semibold`}
-      >
-        {status === "active" ? (
-          <>
-            <span>
-              <Briefcase className="h-4 w-4" />
-            </span>
-            Employer
-          </>
-        ) : (
-          <>
-            <span>
-              <ShieldBan className="h-4 w-4" />
-            </span>
-            Inactive
-          </>
-        )}
-      </div>
-    );
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${config.tone}`}
+    >
+      <Icon className="h-3 w-3" />
+      {config.label}
+    </span>
+  );
+}
+
+function StatusTag({ label, tone }) {
+  const toneClass =
+    tone === "red" ? "bg-red-50 text-red-700" : "bg-stone-100 text-stone-600";
+  const Icon = tone === "red" ? ShieldAlert : ShieldBan;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${toneClass}`}
+    >
+      <Icon className="h-3 w-3" />
+      {label}
+    </span>
+  );
 }
 
 export default ExistingAccountList;

@@ -20,15 +20,14 @@ async function renderPdf(html) {
   }
 }
 
-export async function generateAnnexDPdf(companyKey, academicYear, userId) {
+export async function generateAnnexDPdf(companyKey, academicYear, accessToken) {
   const url = new URL(`${BACKEND_URL}/api/reports/hte-annual/company`);
   url.searchParams.set("academicYear", academicYear);
   url.searchParams.set("companyKey", companyKey);
-  url.searchParams.set("userId", userId);
 
   const res = await fetch(url, {
     headers: {
-      "x-api-key": process.env.BACKEND_SECRET_KEY,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 
@@ -55,12 +54,11 @@ export async function generateAnnexDPdf(companyKey, academicYear, userId) {
   return renderPdf(html);
 }
 
-export async function generateAnnexCPdf(reportId, userId) {
+export async function generateAnnexCPdf(reportId, accessToken) {
   const url = new URL(`${BACKEND_URL}/api/reports/annex-c/${reportId}`);
-  url.searchParams.set("userId", userId);
 
   const res = await fetch(url, {
-    headers: { "x-api-key": process.env.BACKEND_SECRET_KEY },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (res.status === 403)

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "./_services/auth";
+// import { auth } from "./_services/auth";
 import Image from "next/image";
 import logo from "@/public/logo.png";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import {
   Phone,
   Users,
 } from "lucide-react";
+import { getUserSession } from "./_services/auth";
 
 const navLinks = [
   { label: "About", href: "#about" },
@@ -97,7 +98,7 @@ const roles = [
 ];
 
 async function HomePage() {
-  const session = await auth();
+  const session = await getUserSession();
   const user = session?.user;
   const role = session?.user?.role;
 

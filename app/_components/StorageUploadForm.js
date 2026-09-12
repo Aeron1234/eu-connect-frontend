@@ -25,9 +25,6 @@ function StorageUploadForm({ fileRequirementTypes = [] }) {
   }, []);
 
   function handleAction(formData) {
-    const x = Object.fromEntries(formData);
-    console.log(x);
-
     startTransition(() =>
       toastAndAction({
         loadingLabel: "Uploading file...",

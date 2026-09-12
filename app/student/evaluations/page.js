@@ -1,5 +1,6 @@
 import EmployerEvaluationsFilter from "@/app/_components/EmployerEvaluationsFilter";
 import EvaluationPageContent from "@/app/_components/EvaluationPageContent";
+import PageTitle from "@/app/_components/PageTitle";
 import { ClipboardCheck } from "lucide-react";
 
 export const metadata = {
@@ -14,16 +15,13 @@ async function EvaluationsPage({ searchParams }) {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 flex items-center gap-2">
-            <ClipboardCheck className="w-7 h-7 text-primary-500" />
-            Evaluations
-          </h1>
-          <p className="text-sm text-stone-600 mt-1">
-            Rate your supervisor, confirm evaluations submitted about you, and
-            review past records.
-          </p>
-        </div>
+        <PageTitle
+          Icon={ClipboardCheck}
+          title={"Evaluations"}
+          description={
+            "Rate your supervisor, confirm evaluations submitted about you, and review past records."
+          }
+        />
       </div>
 
       <EmployerEvaluationsFilter filter={filter} />

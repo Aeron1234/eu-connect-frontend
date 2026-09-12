@@ -41,7 +41,7 @@ const EMPTY_ACCOUNT_FORM = {
   email: "",
 };
 
-function CreateAccountForm({ roles, courses, departments }) {
+function CreateAccountForm({ roles, courses, departments, onCreated }) {
   const [isPending, startTransition] = useTransition();
 
   const [isFocused, setIsFocused] = useState(false);
@@ -62,14 +62,13 @@ function CreateAccountForm({ roles, courses, departments }) {
         formData,
       });
 
-      // Only clear on success — a failed submission (e.g. duplicate
-      // username) keeps everything the admin already typed intact.
       if (result?.success) {
         setAccountForm(EMPTY_ACCOUNT_FORM);
         setSelectedCourseId("");
         setSelectedDepartmentId("");
         setSelectedRole("");
         setSelectedGender("");
+        onCreated?.();
       }
     });
   }
@@ -98,8 +97,7 @@ function CreateAccountForm({ roles, courses, departments }) {
   const selectedRoleName = roles.find((r) => `${r.id}` === selectedRole)?.role;
 
   const showCourse = selectedRoleName === "student";
-  const showDepartment =
-    selectedRoleName === "student" || selectedRoleName === "department_head";
+  const showDepartment = selectedRoleName === "department_head";
   const showGender = selectedRoleName === "student";
   const showConditionalRow = showCourse || showDepartment || showGender;
 
@@ -302,6 +300,17 @@ function CreateAccountForm({ roles, courses, departments }) {
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
+              {selectedCourseId && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Department:{" "}
+                  {departments.find(
+                    (d) =>
+                      d.id ===
+                      courses.find((c) => c.id === selectedCourseId)
+                        ?.department_id,
+                  )?.name || "—"}
+                </p>
+              )}
             </div>
           )}
 

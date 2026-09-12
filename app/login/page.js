@@ -1,10 +1,11 @@
 import LoginForm from "../_components/LoginForm";
 import logo from "@/public/logo.png";
-import { auth } from "../_services/auth";
+// import { auth } from "../_services/auth";
 import { redirect } from "next/navigation";
 import { ArrowLeft, BarChart3, Clock, FileText, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getUserSession } from "../_services/auth";
 
 export const metadata = {
   title: "Log in",
@@ -17,8 +18,8 @@ const highlights = [
   { icon: MapPin, label: "Internship placement map" },
 ];
 
-async function page() {
-  const session = await auth();
+async function LoginPage() {
+  const session = await getUserSession();
   const user = session?.user;
   const role = session?.user?.role;
   if (user && role) redirect(`/${role}`);
@@ -84,4 +85,4 @@ async function page() {
   );
 }
 
-export default page;
+export default LoginPage;
