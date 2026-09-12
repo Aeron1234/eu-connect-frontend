@@ -8,6 +8,8 @@ export const metadata = {
   title: "Create Account",
 };
 
+export const dynamic = "force-dynamic";
+
 async function CreateAccountPage() {
   const [roles, courses, departments, accountsRes] = await Promise.all([
     getRoles(),

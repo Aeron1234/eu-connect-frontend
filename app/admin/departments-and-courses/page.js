@@ -5,6 +5,8 @@ export const metadata = {
   title: "Departments & Courses",
 };
 
+export const dynamic = "force-dynamic";
+
 async function DepartmentsAndCoursesPage() {
   const [courses, departments] = await Promise.all([
     getCourses(),
