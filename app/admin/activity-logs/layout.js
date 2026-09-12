@@ -1,6 +1,4 @@
-import { getUserSession } from "@/app/_services/services";
 import { Spinner } from "@/components/ui/spinner";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 function ActivityLogsLayout({ children }) {
