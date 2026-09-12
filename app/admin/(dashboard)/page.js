@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 function getActivityVisual(action = "") {
   if (action.includes("document")) {
     if (action.includes("deleted"))
