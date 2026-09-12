@@ -7,6 +7,8 @@ import SocketProvider from "../_components/SocketProvider";
 import { UserProvider } from "@/contexts/UserContext";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 
+export const dynamic = "force-dynamic";
+
 async function AccountLayout({ children }) {
   const session = await getUserSession();
   if (!session?.user) return redirect("/login");

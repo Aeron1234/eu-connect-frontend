@@ -8,6 +8,8 @@ export const metadata = {
   title: "Announcements",
 };
 
+export const dynamic = "force-dynamic";
+
 async function AnnouncementPage() {
   const [categories, announcementData] = await Promise.all([
     getAnnouncementCategories(),

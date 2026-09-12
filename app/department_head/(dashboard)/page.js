@@ -43,6 +43,8 @@ function getActivityVisual(action = "") {
   return { icon: Sparkles, color: "text-blue-600" };
 }
 
+export const dynamic = "force-dynamic";
+
 async function DepartmentHeadDashboardPage() {
   const [activityLogs, perCourseRes, monthsRes] = await Promise.all([
     getMyActivityLogs({ page: 1 }),
