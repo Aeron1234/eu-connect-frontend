@@ -7,6 +7,8 @@ import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import PageTitle from "../_components/PageTitle";
 
+export const dynamic = "force-dynamic";
+
 async function PastInternshipsPage({ searchParams }) {
   const sParams = await searchParams;
   const yearFilter = sParams.filter || "all";

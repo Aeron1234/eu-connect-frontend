@@ -9,6 +9,8 @@ export const metadata = {
   title: "Notifications",
 };
 
+export const dynamic = "force-dynamic";
+
 async function NotificationsPage() {
   const inboxData = await getInbox({ scope: "all" });
 

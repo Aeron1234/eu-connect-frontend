@@ -5,6 +5,8 @@ export const metadata = {
   title: "Map",
 };
 
+export const dynamic = "force-dynamic";
+
 async function MapPage() {
   const studentLocationsData = await getMapLocations();
 

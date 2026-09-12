@@ -19,6 +19,8 @@ import {
 import { getMyActivityLogs } from "@/app/_services/general-actions";
 import { formatDistanceToNow } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 function getActivityVisual(action = "") {
   if (action.includes("document")) {
     if (action.includes("deleted"))
@@ -42,8 +44,6 @@ function getActivityVisual(action = "") {
   }
   return { icon: Sparkles, color: "text-blue-600" };
 }
-
-export const dynamic = "force-dynamic";
 
 async function DepartmentHeadDashboardPage() {
   const [activityLogs, perCourseRes, monthsRes] = await Promise.all([

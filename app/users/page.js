@@ -8,6 +8,8 @@ export const metadata = {
   title: "Users",
 };
 
+export const dynamic = "force-dynamic";
+
 async function UsersPage() {
   const searchedUserHistory = await getSearchHistory({ type: "user" });
 
