@@ -5,6 +5,8 @@ export const metadata = {
   title: "Activity Logs",
 };
 
+export const dynamic = "force-dynamic";
+
 async function ActivityLogsPage() {
   const logsData = await getAllActivityLogs({});
 
