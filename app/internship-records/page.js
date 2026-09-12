@@ -5,6 +5,8 @@ export const metadata = {
   title: "Internship Records",
 };
 
+export const dynamic = "force-dynamic";
+
 async function InternshipRecordsPage({ searchParams }) {
   const internshipRecordsData = await getDepartmentInternshipRecords({});
 

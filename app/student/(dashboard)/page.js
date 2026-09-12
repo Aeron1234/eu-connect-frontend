@@ -21,6 +21,8 @@ export const metadata = {
   title: "Student",
 };
 
+export const dynamic = "force-dynamic";
+
 // Maps the raw `action` string stored in activity_logs to an icon/color —
 // nothing in the DB row carries visual info, so this has to be derived
 // from the action name itself. Falls back to a generic icon for anything
