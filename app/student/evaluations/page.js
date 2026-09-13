@@ -1,34 +1,28 @@
-import EmployerEvaluationsFilter from "@/app/_components/EmployerEvaluationsFilter";
-import EvaluationPageContent from "@/app/_components/EvaluationPageContent";
+import EvaluationsManager from "@/app/_components/EvaluationsManager";
 import PageTitle from "@/app/_components/PageTitle";
+import { getEmployerEvaluationCriterias } from "@/app/_services/services";
 import { ClipboardCheck } from "lucide-react";
 
 export const metadata = {
   title: "Evaluations",
 };
 
-async function EvaluationsPage({ searchParams }) {
-  const sParams = await searchParams;
+export const dynamic = "force-dynamic";
 
-  const filter = sParams.filter || "evaluate-supervisor";
+async function EvaluationsPage() {
+  const employerEvaluationCriterias = await getEmployerEvaluationCriterias();
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <PageTitle
-          Icon={ClipboardCheck}
-          title={"Evaluations"}
-          description={
-            "Rate your supervisor, confirm evaluations submitted about you, and review past records."
-          }
-        />
-      </div>
+      <PageTitle
+        Icon={ClipboardCheck}
+        title={"Evaluations"}
+        description={
+          "Rate your supervisor, confirm evaluations submitted about you, and review past records."
+        }
+      />
 
-      <EmployerEvaluationsFilter filter={filter} />
-
-      <div className="flex flex-col gap-2 mt-2">
-        <EvaluationPageContent filter={filter} />
-      </div>
+      <EvaluationsManager initialCriteria={employerEvaluationCriterias || []} />
     </main>
   );
 }

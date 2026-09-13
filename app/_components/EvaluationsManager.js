@@ -1,0 +1,151 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
+import EmployerEvaluations from "./EmployerEvaluations";
+import EvaluationCard from "./EvaluationCard";
+import {
+  getAllEvaluations,
+  getDisputedEvaluations,
+  getEmployerEvaluationCriterias,
+  getStudentPendingEvaluations,
+} from "../_services/services";
+
+const tabs = [
+  { label: "Evaluate Supervisor", value: "evaluate-supervisor" },
+  { label: "Pending Confirmation", value: "pending-confirmation" },
+  { label: "Past Evaluations", value: "past-evaluations" },
+  { label: "Disputed", value: "disputed" },
+];
+
+// Each tab pulls from a different endpoint with a different shape — this
+// normalizes them all to { criteria } or { evaluations } so the render
+// logic below stays simple.
+const fetchers = {
+  "evaluate-supervisor": async () => {
+    const criteria = await getEmployerEvaluationCriterias();
+    return { criteria: criteria || [] };
+  },
+  "pending-confirmation": async () => {
+    const res = await getStudentPendingEvaluations();
+    return { evaluations: res?.data || [] };
+  },
+  "past-evaluations": async () => {
+    const res = await getAllEvaluations();
+    return { evaluations: res?.data || [] };
+  },
+  disputed: async () => {
+    const res = await getDisputedEvaluations();
+    return { evaluations: res?.data || [] };
+  },
+};
+
+function EvaluationsManager({ initialCriteria = [] }) {
+  // Applied tab — drives what's actually fetched/rendered, only updates
+  // after the debounce settles.
+  const [filter, setFilter] = useState("evaluate-supervisor");
+  // Selected tab — updates immediately on click so the active pill
+  // highlights right away, even while the fetch is still debouncing.
+  const [selectedTab, setSelectedTab] = useState("evaluate-supervisor");
+  const [data, setData] = useState({ criteria: initialCriteria });
+  const [isPending, setIsPending] = useState(false);
+
+  const requestIdRef = useRef(0);
+  const isFirstRun = useRef(true);
+
+  function handleTabClick(value) {
+    setSelectedTab(value);
+  }
+
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
+    if (selectedTab === filter) return;
+
+    const thisRequestId = ++requestIdRef.current;
+
+    const timeout = setTimeout(async () => {
+      setIsPending(true);
+      try {
+        const result = await fetchers[selectedTab]();
+
+        if (thisRequestId !== requestIdRef.current) return;
+
+        setFilter(selectedTab);
+        setData(result);
+      } catch (error) {
+        if (thisRequestId === requestIdRef.current) {
+          console.error("Error loading evaluations tab:", error);
+          setFilter(selectedTab);
+          setData({});
+        }
+      } finally {
+        if (thisRequestId === requestIdRef.current) setIsPending(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [selectedTab, filter]);
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-300 bg-white shadow-sm p-1.5">
+        {tabs.map((t) => (
+          <button
+            key={t.value}
+            type="button"
+            onClick={() => handleTabClick(t.value)}
+            className={`rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
+              selectedTab === t.value
+                ? "bg-primary-500 text-primary-foreground"
+                : "text-stone-600 hover:bg-stone-100"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2 mt-2">
+        {isPending ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+          </div>
+        ) : (
+          <>
+            {filter === "evaluate-supervisor" && (
+              <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 mb-8">
+                <EmployerEvaluations
+                  employerEvaluationCriterias={data?.criteria || []}
+                />
+              </div>
+            )}
+            {filter === "pending-confirmation" && (
+              <EvaluationCard
+                evaluations={data?.evaluations || []}
+                type={"confirmation"}
+              />
+            )}
+            {filter === "past-evaluations" && (
+              <EvaluationCard
+                evaluations={data?.evaluations || []}
+                type={"all"}
+              />
+            )}
+            {filter === "disputed" && (
+              <EvaluationCard
+                evaluations={data?.evaluations || []}
+                type={"disputed"}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default EvaluationsManager;

@@ -33,32 +33,17 @@ function NotificationList({ inboxData: initialData }) {
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
-  // Guards the initialData-reconciliation effect below so it doesn't
-  // redundantly re-derive and re-set state (with a new array reference)
-  // on the very first mount, when state is already correctly seeded from
-  // initialData via useState's initializer above. Effects run after every
-  // render including the first one, regardless of the dependency array, so
-  // without this guard the first commit is followed immediately by a
-  // second, functionally-identical commit.
   const isFirstReconcile = useRef(true);
   const prevPage1KeysRef = useRef(
     new Set((initialData?.data || []).map(keyOf)),
   );
 
-  // Defensive: the Requests tab only exists for employers, so scope should
-  // never be able to sit on "requests" for anyone else. Guards against edge
-  // cases like role resolving asynchronously through context.
   useEffect(() => {
     if (!isEmployer && scope !== "all") {
       setScope("all");
     }
   }, [isEmployer, scope]);
 
-  // Reconciles server-revalidated `initialData` (mark-all-as-read, or a
-  // respond-to-request action that calls revalidatePath) back into state
-  // without discarding pages already loaded via "See more" — same merge
-  // pattern used for Past Internships. Only applies on the All tab, since
-  // initialData is always the unfiltered fetch from the server.
   useEffect(() => {
     if (scope !== "all") return;
 
@@ -99,8 +84,6 @@ function NotificationList({ inboxData: initialData }) {
     prevPage1KeysRef.current = new Set((initialData?.data || []).map(keyOf));
   }, [initialData, scope]);
 
-  // Debounced refetch on tab switch — clicking a tab resets the timer, so
-  // rapid switching only fires one request once things settle.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -180,16 +163,16 @@ function NotificationList({ inboxData: initialData }) {
 
   return (
     <div className="space-y-6">
-      {/* Filter bar — same shape as the scope toggle in InternshipPosts */}
+      {/* Filter bar */}
       <div className="flex w-full flex-wrap items-center gap-3">
         {isEmployer && (
-          <div className="flex rounded-lg bg-stone-200 p-1">
+          <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
             {scopeTabs.map((tab) => (
               <button
                 key={tab.value}
                 type="button"
                 onClick={() => setScope(tab.value)}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   scope === tab.value
                     ? "bg-primary-500 text-primary-foreground"
                     : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -211,8 +194,8 @@ function NotificationList({ inboxData: initialData }) {
         </div>
       </div>
 
-      {/* Stat cards — same pattern as AnnexDHteList's StatCard row */}
-      <div className="grid gap-4 grid-cols-2">
+      {/* Stat cards */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2">
         <StatCard
           icon={<Bell className="size-5 opacity-80" />}
           value={String(totalRecords)}
@@ -230,14 +213,14 @@ function NotificationList({ inboxData: initialData }) {
 
       {/* List */}
       {notifications.length === 0 && !isPending ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background px-6 py-16 text-center">
-          <Inbox className="size-8 text-muted-foreground" />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+          <Inbox className="size-8 text-stone-300" />
+          <p className="text-sm font-medium text-stone-500">
             {scope === "requests"
               ? "No supervisor requests right now"
               : "You're all caught up"}
           </p>
-          <p className="mt-2 max-w-sm text-xs text-muted-foreground/70">
+          <p className="max-w-sm text-xs text-stone-400">
             {scope === "requests"
               ? "New requests from students will show up here."
               : "New approvals, announcements, and updates will show up here."}
@@ -275,15 +258,15 @@ function NotificationList({ inboxData: initialData }) {
 function StatCard({ icon, value, label, highlight }) {
   return (
     <div
-      className={`flex items-center gap-4 rounded-xl border px-5 py-5 shadow-sm ${
+      className={`flex items-center gap-3 sm:gap-4 rounded-xl border px-4 sm:px-5 py-4 sm:py-5 shadow-sm ${
         highlight
           ? "border-primary-500 bg-primary-500 text-primary-foreground"
-          : "border-border bg-card text-foreground"
+          : "border-stone-300 bg-white text-stone-800"
       }`}
     >
       {icon}
       <div>
-        <p className="text-2xl font-bold leading-none">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold leading-none">{value}</p>
         <p
           className={`mt-1.5 text-xs ${
             highlight ? "opacity-80" : "text-muted-foreground"

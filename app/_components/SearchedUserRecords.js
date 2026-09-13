@@ -167,7 +167,7 @@ async function EvaluationsTab({ searchedUserId, userRole, userId }) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
+      <div className="">
         <StudentEvaluationList
           studentId={searchedUserId}
           pastEvaluations={pastEvaluations?.data || []}
@@ -199,8 +199,6 @@ async function InfoTab({ searchedUserId, info }) {
 }
 
 async function EmployerInfoTab({ searchedUserId, info, role }) {
-  
-
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
       <ProfileInfoGrid info={info} />

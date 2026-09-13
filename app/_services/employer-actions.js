@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getAccessToken } from "./auth";
+import { getAccessToken, getUserSession } from "./auth";
 import { cache } from "react";
 // import { getUserSession } from "./services";
 
@@ -9,6 +9,11 @@ export async function postStudentEvaluation(prevState, formData) {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
+
+    const session = await getUserSession(); // adjust to whatever your app already uses elsewhere (e.g. the same helper DashboardLayout components call)
+    const evaluated_by = session?.user?.id;
+
+    if (!evaluated_by) throw new Error("You must be logged in");
 
     const { scores, other_remarks, student_id } = formData;
 
@@ -24,6 +29,7 @@ export async function postStudentEvaluation(prevState, formData) {
           scores,
           other_remarks,
           student_id,
+          evaluated_by,
         }),
       },
     );

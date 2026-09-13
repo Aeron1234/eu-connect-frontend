@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BriefcaseBusiness, Search } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
 import { getInternshipPosts } from "../_services/services";
 import { useUser } from "@/contexts/UserContext";
-import SearchBar from "./SearchBar";
 
 const scopeTabs = [
   { label: "All Companies", value: "" },
@@ -58,16 +58,8 @@ function InternshipPosts({
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
-  // Which post ids were on page 1 as of the last time server-driven
-  // filters (or a revalidation from create/update/delete) refreshed initialData
   const prevPage1KeysRef = useRef(new Set((initialData || []).map(keyOf)));
 
-  // Runs whenever initialData changes — either because the user clicked a
-  // filter Link (new searchParams -> new server render), or because some
-  // other action (posting, editing) called revalidatePath and Next.js
-  // refreshed this route's RSC payload in place. Merges the fresh page 1
-  // into state without discarding pages already loaded via "See more",
-  // unless those items no longer belong on the (possibly new) page 1.
   useEffect(() => {
     const freshMap = new Map((initialData || []).map((p) => [keyOf(p), p]));
     const prevPage1Keys = prevPage1KeysRef.current;
@@ -98,8 +90,6 @@ function InternshipPosts({
     prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
   }, [initialData, initialPage, initialTotalPages, initialTotal]);
 
-  // Search stays client-driven and debounced — workType/courseId/scope no
-  // longer belong here, they're URL params now and flow in via the effect above.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -210,12 +200,12 @@ function InternshipPosts({
 
       {userRole === "employer" && (
         <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="flex rounded-lg bg-stone-200 p-1">
+          <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
             {scopeTabs.map((s) => (
               <Link
                 key={s.value}
                 href={buildHref({ scope: s.value, workType, courseId })}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   scope === s.value
                     ? "bg-primary-500 text-primary-foreground"
                     : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -232,7 +222,7 @@ function InternshipPosts({
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={buildHref({ scope, workType, courseId: null })}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
               !courseId
                 ? "bg-primary-500 text-primary-foreground"
                 : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -244,7 +234,7 @@ function InternshipPosts({
             <Link
               key={c.id}
               href={buildHref({ scope, workType, courseId: c.id })}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                 String(courseId) === String(c.id)
                   ? "bg-primary-500 text-primary-foreground"
                   : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -256,13 +246,13 @@ function InternshipPosts({
         </div>
       ) : null}
 
-      <div className="flex flex-1 flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex flex-wrap items-center gap-2">
           {workTypeTabs.map((wt) => (
             <Link
               key={wt.label}
               href={buildHref({ scope, workType: wt.workType, courseId })}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                 workType === wt.workType
                   ? "bg-primary-500 text-primary-foreground"
                   : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -273,11 +263,16 @@ function InternshipPosts({
           ))}
         </div>
 
-        <SearchBar
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search company or position..."
-        />
+        <div className="relative sm:max-w-md sm:flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search company or position..."
+            aria-label="Search company or position"
+            className="w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+          />
+        </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
@@ -285,8 +280,7 @@ function InternshipPosts({
       </p>
 
       {/* Listings */}
-      {/* <div className="grid xl:grid-cols-2 gap-5"> */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {internshipPosts.map((item) => {
           const isFavorited = favoriteIds.has(item.id);
           return (
@@ -305,9 +299,12 @@ function InternshipPosts({
         })}
 
         {internshipPosts.length === 0 && !isPending && (
-          <p className="rounded-xl border border-dashed border-border bg-background p-10 text-center text-sm text-muted-foreground">
-            No internship listings found.
-          </p>
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+            <BriefcaseBusiness className="size-8 text-stone-300" />
+            <p className="text-sm text-stone-500">
+              No internship listings found.
+            </p>
+          </div>
         )}
       </div>
 
@@ -316,8 +313,7 @@ function InternshipPosts({
           <button
             onClick={handleSeeMore}
             disabled={isPending}
-            className="w-full text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
-            // className="w-full pl-12 md:pl-16 text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="w-full text-center text-sm sm:text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
           >
             {isPending ? "Loading..." : "See more"}
           </button>

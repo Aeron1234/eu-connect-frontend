@@ -181,7 +181,6 @@ export default function ActivityLogsManager({
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
-      {/* Header — no export button */}
       <PageTitle
         Icon={Activity}
         title={"Activity Logs"}
@@ -200,92 +199,92 @@ export default function ActivityLogsManager({
 
       {/* Filters */}
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActorRole("")}
+            className={cx(
+              "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
+              !actorRole
+                ? "bg-primary-500 text-primary-foreground"
+                : "bg-stone-200 text-muted-foreground hover:text-primary-500",
+            )}
+          >
+            All Roles
+          </button>
+          {filterOptions.actorRoles.map((role) => (
             <button
+              key={role}
               type="button"
-              onClick={() => setActorRole("")}
+              onClick={() => setActorRole(role)}
               className={cx(
-                "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                !actorRole
+                "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
+                actorRole === role
                   ? "bg-primary-500 text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground",
+                  : "bg-stone-200 text-muted-foreground hover:text-primary-500",
               )}
             >
-              All Roles
+              {ROLE_LABELS[role] || toTitleCase(role)}
             </button>
-            {filterOptions.actorRoles.map((role) => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => setActorRole(role)}
-                className={cx(
-                  "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                  actorRole === role
-                    ? "bg-primary-500 text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {ROLE_LABELS[role] || toTitleCase(role)}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setTargetType("")}
+            className={cx(
+              "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
+              !targetType
+                ? "bg-primary-500 text-primary-foreground"
+                : "bg-stone-200 text-muted-foreground hover:text-primary-500",
+            )}
+          >
+            All Modules
+          </button>
+          {filterOptions.targetTypes.map((type) => (
             <button
+              key={type}
               type="button"
-              onClick={() => setTargetType("")}
+              onClick={() => setTargetType(type)}
               className={cx(
-                "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                !targetType
+                "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
+                targetType === type
                   ? "bg-primary-500 text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground",
+                  : "bg-stone-200 text-muted-foreground hover:text-primary-500",
               )}
             >
-              All Modules
+              {toTitleCase(type)}
             </button>
-            {filterOptions.targetTypes.map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setTargetType(type)}
-                className={cx(
-                  "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                  targetType === type
-                    ? "bg-primary-500 text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {toTitleCase(type)}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 
       {/* Table */}
       {logs.length === 0 && !isPending ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-24 text-center shadow-sm">
-          <ScrollText className="size-8 text-muted-foreground" />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-24 text-center shadow-sm">
+          <ScrollText className="size-8 text-stone-300" />
+          <p className="text-sm font-medium text-stone-500">
             No activity found
           </p>
-          <p className="mt-2 max-w-sm text-xs text-muted-foreground/70">
+          <p className="max-w-sm text-xs text-stone-400">
             Try a different filter or clear the search.
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-xl border border-stone-300 bg-white shadow-sm">
+          <table className="w-full min-w-[720px] text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
-                <th className="px-5 py-3 font-medium">User</th>
-                <th className="px-5 py-3 font-medium">Action</th>
-                <th className="px-5 py-3 font-medium">Module</th>
-                <th className="px-5 py-3 font-medium">Timestamp</th>
-                <th className="px-5 py-3 font-medium text-right">Actions</th>
+              <tr className="border-b border-stone-200 text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 sm:px-5 py-3 font-medium">User</th>
+                <th className="px-4 sm:px-5 py-3 font-medium">Action</th>
+                <th className="px-4 sm:px-5 py-3 font-medium">Module</th>
+                <th className="px-4 sm:px-5 py-3 font-medium whitespace-nowrap">
+                  Timestamp
+                </th>
+                <th className="px-4 sm:px-5 py-3 font-medium text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -294,38 +293,38 @@ export default function ActivityLogsManager({
                 return (
                   <tr
                     key={log.id}
-                    className="border-b border-border last:border-0"
+                    className="border-b border-stone-200 last:border-0"
                   >
-                    <td className="px-5 py-3">
-                      <p className="font-medium text-foreground">
+                    <td className="px-4 sm:px-5 py-3 max-w-[180px]">
+                      <p className="font-medium text-stone-800 truncate">
                         {log.actor_name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {ROLE_LABELS[log.actor_role] ||
                           toTitleCase(log.actor_role)}
                         {ip ? ` · ${ip}` : ""}
                       </p>
                     </td>
-                    <td className="px-5 py-3">
-                      <p className="font-medium text-foreground">
+                    <td className="px-4 sm:px-5 py-3 max-w-[280px]">
+                      <p className="font-medium text-stone-800">
                         {toSentenceCase(log.action)}
                       </p>
                       {log.description && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground line-clamp-2">
                           {log.description}
                         </p>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">
+                    <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
                       {toTitleCase(log.target_type)}
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">
+                    <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
                       {formatTimestamp(log.created_at)}
                     </td>
-                    <td className="px-5 py-3 text-right">
+                    <td className="px-4 sm:px-5 py-3 text-right">
                       <button
                         onClick={() => handleDelete(log.id)}
-                        className="rounded-md p-2 text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                        className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                         title="Delete log entry"
                       >
                         <Trash2 className="size-4" />

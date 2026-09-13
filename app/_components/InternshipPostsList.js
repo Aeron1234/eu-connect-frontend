@@ -80,6 +80,9 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
     });
   }
 
+  const canDelete = item.isOwner || userRole === "admin";
+  const canEdit = item.isOwner;
+
   return (
     <article
       key={item.id}
@@ -115,8 +118,9 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
             <Users className="h-4 w-4 text-muted-foreground" /> {item.vacancies}{" "}
             vacancies
           </span>
-          {item.isOwner && (
-            <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-3">
+            {canEdit && (
               <Modal
                 trigger={
                   <div
@@ -141,6 +145,8 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
                   data={item}
                 />
               </Modal>
+            )}
+            {canDelete && (
               <Modal
                 trigger={
                   <div
@@ -164,8 +170,9 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
                   id={item.id}
                 />
               </Modal>
-            </div>
-          )}
+            )}
+          </div>
+
           {!item.isOwner && userRole === "student" && (
             <button
               type="button"

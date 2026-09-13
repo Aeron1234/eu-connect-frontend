@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { postStudentEvaluation } from "../_services/employer-actions";
 import { toastAndAction } from "../_services/helpers";
+import { useUser } from "@/contexts/UserContext";
 
 function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {
@@ -17,6 +18,8 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
   });
   const [remarks, setRemarks] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const { user } = useUser();
 
   const grades = [0, 1, 2, 3, 4, 5];
 

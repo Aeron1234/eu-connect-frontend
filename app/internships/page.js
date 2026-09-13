@@ -1,7 +1,7 @@
 import { getCourses, getInternshipPosts } from "../_services/services";
 
 import InternshipPosts from "../_components/InternshipPosts";
-import { Briefcase, BriefcaseBusiness } from "lucide-react";
+import { BriefcaseBusiness } from "lucide-react";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";

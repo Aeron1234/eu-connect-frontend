@@ -16,7 +16,7 @@ async function EvaluationCriteriaPage({ searchParams }) {
   const criteria = await getAllEvaluationCriteria({ type: formType });
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-4">
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <PageTitle
         Icon={SlidersHorizontal}
         title={"Evaluation Criteria"}

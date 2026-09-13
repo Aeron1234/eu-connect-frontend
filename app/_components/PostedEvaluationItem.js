@@ -10,7 +10,7 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import { startTransition, useState } from "react";
+import { useState, useTransition } from "react";
 import Modal from "./Modal";
 import StudentEvaluationDeleteForm from "./StudentEvaluationDeleteForm";
 import {
@@ -21,8 +21,15 @@ import { toastAndAction } from "../_services/helpers";
 import { reviewDisputedEvaluation } from "../_services/dept-head-actions";
 import { useUser } from "@/contexts/UserContext";
 
-function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
+function PostedEvaluationItem({
+  ev,
+  defaultOpen,
+  type = "default",
+  onOptimisticRemove,
+  onOptimisticRestore,
+}) {
   const [open, setOpen] = useState(!!defaultOpen);
+  const [isPending, startTransition] = useTransition();
 
   const { user } = useUser();
   const userId = user.id || "";
@@ -54,16 +61,24 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
 
     const isAccepted = res === "completed";
 
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation...`,
-          successLabel: `Student evaluation was ${isAccepted ? "Accepted!" : "Disputed!"}`,
-          errorLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation failed.`,
-          action: respondToStudentEvaluation,
-          formData,
-        }),
-    );
+    // Optimistically leaves the "Pending Confirmation" list the instant
+    // the button is clicked — it now belongs in "Past Evaluations" or
+    // "Disputed", not here.
+    onOptimisticRemove?.();
+
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation...`,
+        successLabel: `Student evaluation was ${isAccepted ? "Accepted!" : "Disputed!"}`,
+        errorLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation failed.`,
+        action: respondToStudentEvaluation,
+        formData,
+      });
+
+      if (result?.error) {
+        onOptimisticRestore?.(ev);
+      }
+    });
   }
 
   function handleRestore() {
@@ -71,22 +86,31 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
 
     const formData = new FormData();
     formData.append("evaluationId", ev.id);
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: `Restoring student evaluation...`,
-          successLabel: `Student evaluation was restored!`,
-          errorLabel: `Restoring student evaluation failed.`,
-          action: restoreDisputedEvaluation,
-          formData,
-        }),
-    );
+
+    // Optimistically leaves the "Disputed" list the instant Restore is
+    // clicked — it now belongs back in "Pending Confirmation".
+    onOptimisticRemove?.();
+
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: `Restoring student evaluation...`,
+        successLabel: `Student evaluation was restored!`,
+        errorLabel: `Restoring student evaluation failed.`,
+        action: restoreDisputedEvaluation,
+        formData,
+      });
+
+      if (result?.error) {
+        onOptimisticRestore?.(ev);
+      }
+    });
   }
 
   function handleStaffReview(formData) {
     if (!isStaff) return;
 
     formData.append("evaluationId", ev.id);
+
     startTransition(
       async () =>
         await toastAndAction({
@@ -103,7 +127,7 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
     <div
       className={`border border-stone-300 rounded-xl bg-white overflow-hidden mb-3`}
     >
-      <div className="w-full flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+      <div className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors">
         <button
           onClick={() => setOpen((o) => !o)}
           className="contents text-left"
@@ -112,7 +136,7 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
           <CircularScore score={total} max={totalMax} />
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-500">
                 {ev.type}
               </span>
               <span
@@ -121,7 +145,7 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
                 {ev.status}
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className="text-sm font-semibold text-stone-800">
               {ev.period}
             </h3>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
@@ -145,7 +169,7 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
           <Modal
             trigger={
               <div
-                className="shrink-0 p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                className="shrink-0 p-2 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
                 aria-label="Delete evaluation"
                 title="Delete evaluation"
               >
@@ -155,7 +179,6 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
             title={
               <span className={`text-primary-500`}>Delete Evaluation</span>
             }
-            // title={<span className="text-red-600">Clock-out?</span>}
             description={`Are you sure you want to delete this evaluation?`}
           >
             <StudentEvaluationDeleteForm
@@ -232,13 +255,15 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
           <div className="flex w-full justify-end gap-2">
             <button
               onClick={() => handleResponse("disputed")}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-accent"
+              disabled={isPending}
+              className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold transition-colors hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Dispute
             </button>
             <button
               onClick={() => handleResponse("completed")}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
+              disabled={isPending}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="h-4 w-4" />
               Accept &amp; Confirm
@@ -252,7 +277,8 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
           <div className="flex w-full justify-end gap-2">
             <button
               onClick={handleRestore}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
+              disabled={isPending}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RotateCcw className="h-4 w-4" /> Restore
             </button>
@@ -267,14 +293,16 @@ function PostedEvaluationItem({ ev, defaultOpen, type = "default" }) {
             action={handleStaffReview}
           >
             <textarea
-              className="text-sm text-stone-600 italic leading-relaxed border border-border rounded-lg w-full outline-none bg-stone-100 px-4 max-w-100 resize-none focus:border-primary-500"
+              className="text-sm text-stone-600 italic leading-relaxed border border-stone-300 rounded-lg w-full outline-none bg-stone-100 px-4 max-w-100 resize-none focus:border-primary-500"
               name="review_notes"
               defaultValue={ev?.review_notes || ""}
+              disabled={isPending}
             />
 
             <button
               type="submitt"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-maroon-deep"
+              disabled={isPending}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <MessageSquareQuote className="h-4 w-4" /> Submitt Review
             </button>
