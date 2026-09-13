@@ -94,7 +94,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
-      <div className="flex gap-3 items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <PageTitle
           Icon={MapPin}
           title={"Student Map"}
@@ -109,7 +109,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
                 tab === t
                   ? "bg-primary-500 text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-primary-500"
@@ -120,9 +120,10 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
           ))}
         </div>
       </div>
+
       <div className="space-y-6">
         {/* Search + location filter */}
-        <div className="space-y-4 rounded-xl">
+        <div className="space-y-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -130,7 +131,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search student, company, course..."
               aria-label="Search student, company, course"
-              className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
+              className="w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent sm:max-w-md"
             />
           </div>
 
@@ -142,7 +143,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
               <button
                 type="button"
                 onClick={() => setRegionId(null)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                   !regionId
                     ? "bg-primary-500 text-primary-foreground"
                     : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -155,7 +156,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
                   key={r.id}
                   type="button"
                   onClick={() => setRegionId(r.id)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                     regionId === r.id
                       ? "bg-primary-500 text-primary-foreground"
                       : "bg-stone-200 text-muted-foreground hover:text-primary-500"
@@ -169,8 +170,8 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
         </div>
 
         {tab === "Map View" ? (
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-            <div className="overflow-hidden rounded-xl border border-border bg-background p-2">
+          <div className="grid gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="overflow-hidden rounded-xl border border-stone-300 bg-white p-2 shadow-sm">
               <Map
                 sites={sites}
                 selectedId={selectedId}
@@ -182,7 +183,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
               </p>
             </div>
 
-            <aside className="rounded-xl border border-border bg-background p-4">
+            <aside className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm">
               {selected ? (
                 <>
                   <div className="flex items-center gap-3">
@@ -190,10 +191,10 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
                       {selected.initials}
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate font-display text-base font-bold">
+                      <p className="truncate text-sm sm:text-base font-bold text-stone-800">
                         {selected.company}
                       </p>
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
                         {selected.address}
                         {selected.region_name
                           ? `, ${selected.region_name}`
@@ -206,18 +207,23 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
                   </p>
                   <ul className="mt-2 space-y-3">
                     {selected.interns.map((i) => (
-                      <li key={i.id} className="rounded-lg bg-secondary/60 p-3">
-                        <p className="text-sm font-semibold">{i.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                      <li
+                        key={i.id}
+                        className="rounded-lg bg-stone-100 p-2.5 sm:p-3"
+                      >
+                        <p className="text-sm font-semibold text-stone-800 truncate">
+                          {i.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">
                           {i.role} · {i.course}
                         </p>
-                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border">
+                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-stone-300">
                           <div
                             className="h-full rounded-full bg-primary-500"
                             style={{ width: `${i.progress}%` }}
                           />
                         </div>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
+                        <p className="mt-1 text-[11px] text-muted-foreground truncate">
                           {i.progress}% complete · {i.period}
                         </p>
                       </li>
@@ -226,8 +232,10 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
                 </>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-2 py-10 text-center">
-                  <MapPin className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-semibold">No company selected</p>
+                  <MapPin className="h-8 w-8 text-stone-300" />
+                  <p className="text-sm font-semibold text-stone-800">
+                    No company selected
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     Click a pin on the map to see the students deployed there.
                   </p>
@@ -236,57 +244,60 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
             </aside>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {sites.map((s) => (
               <article
                 key={s.id}
-                className="rounded-xl border border-border bg-background p-6 shadow-sm"
+                className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 lg:p-6 shadow-sm"
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex min-w-0 gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
+                  <div className="flex min-w-0 gap-3 sm:gap-4">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-500 text-xs font-bold text-primary-foreground">
                       {s.initials}
                     </span>
                     <div className="min-w-0">
-                      <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-                        <Building2 className="h-4 w-4 text-primary-500" />
-                        {s.company}
+                      <h2 className="flex items-center gap-2 text-base sm:text-lg font-bold text-stone-800">
+                        <Building2 className="h-4 w-4 flex-shrink-0 text-primary-500" />
+                        <span className="truncate">{s.company}</span>
                       </h2>
-                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" /> {s.address}
-                        {s.region_name ? `, ${s.region_name}` : ""}
+                      <p className="mt-0.5 flex items-start gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+                        <span className="line-clamp-2">
+                          {s.address}
+                          {s.region_name ? `, ${s.region_name}` : ""}
+                        </span>
                       </p>
                     </div>
                   </div>
-                  <span className="flex items-center gap-1.5 rounded-full border border-border bg-stone-200 px-3 py-1 text-xs font-semibold text-foreground/80">
+                  <span className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-stone-300 bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700">
                     <Users className="h-3.5 w-3.5" /> {s.interns.length} ongoing
                   </span>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-4 sm:mt-5 grid gap-3 sm:grid-cols-2">
                   {s.interns.map((i) => (
                     <div
                       key={i.id}
-                      className="rounded-lg border border-border p-4"
+                      className="rounded-lg border border-stone-200 p-3 sm:p-4"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <p className="truncate text-sm font-semibold">
+                        <p className="truncate text-sm font-semibold text-stone-800">
                           {i.name}
                         </p>
                         <span className="shrink-0 text-xs font-semibold text-primary-500">
                           {i.progress}%
                         </span>
                       </div>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
                         {i.role} · {i.course}
                       </p>
-                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
                         <div
                           className="h-full rounded-full bg-primary-500"
                           style={{ width: `${i.progress}%` }}
                         />
                       </div>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
+                      <p className="mt-1 text-[11px] text-muted-foreground truncate">
                         {i.period}
                       </p>
                     </div>
@@ -298,9 +309,12 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
         )}
 
         {sites.length === 0 && (
-          <p className="rounded-xl border border-dashed border-border bg-background p-10 text-center text-sm text-muted-foreground">
-            No interns match your filters.
-          </p>
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+            <MapPin className="size-8 text-stone-300" />
+            <p className="text-sm text-stone-500">
+              No interns match your filters.
+            </p>
+          </div>
         )}
       </div>
     </main>
