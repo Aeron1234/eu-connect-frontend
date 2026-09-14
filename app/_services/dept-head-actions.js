@@ -851,6 +851,99 @@ export const getAvailableShiftHoursMonths = async () => {
   }
 };
 
+export const getStudentEvaluationAverages = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "You must be logged in." };
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/student-evaluation-averages`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get student evaluation averages. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get student evaluation averages error:", err);
+    return {
+      error: "Failed to get student evaluation averages. Please try again.",
+    };
+  }
+};
+
+export const getEmployerEvaluationAverages = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "You must be logged in." };
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/employer-evaluation-averages`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get employer evaluation averages. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get employer evaluation averages error:", err);
+    return {
+      error: "Failed to get employer evaluation averages. Please try again.",
+    };
+  }
+};
+
+export const getStudentHoursTracker = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "You must be logged in." };
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/student-hours-tracker`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get student hours tracker. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get student hours tracker error:", err);
+    return {
+      error: "Failed to get student hours tracker. Please try again.",
+    };
+  }
+};
+
 /////////////////////////
 //FOR REGISTRAR
 /////////////////////////

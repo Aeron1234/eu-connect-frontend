@@ -1,5 +1,5 @@
-function Default() {
+function DefaultDtr() {
   return null;
 }
 
-export default Default;
+export default DefaultDtr;

@@ -1,6 +1,9 @@
 import ShiftHoursChart from "@/app/_components/ShiftHoursChart";
 import InternshipsPerCourseChart from "@/app/_components/InternshipsPerCourseChart";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
+import EvaluationScoresChart from "@/app/_components/EvaluationScoresChart";
+import HoursDistributionDonut from "@/app/_components/HoursDistributionDonut";
+import StudentHoursTracker from "@/app/_components/StudentHoursTracker";
 import {
   ClipboardCheck,
   CheckCircle2,
@@ -10,11 +13,16 @@ import {
   FileUp,
   Trash2,
   Pin,
+  UserCheck,
+  Building2,
 } from "lucide-react";
 import {
   getAvailableShiftHoursMonths,
   getAverageShiftHours,
   getOngoingInternshipsPerCourse,
+  getStudentEvaluationAverages,
+  getEmployerEvaluationAverages,
+  getStudentHoursTracker,
 } from "@/app/_services/dept-head-actions";
 import { getMyActivityLogs } from "@/app/_services/general-actions";
 import { formatDistanceToNow } from "date-fns";
@@ -46,10 +54,20 @@ function getActivityVisual(action = "") {
 }
 
 async function DepartmentHeadDashboardPage() {
-  const [activityLogs, perCourseRes, monthsRes] = await Promise.all([
+  const [
+    activityLogs,
+    perCourseRes,
+    monthsRes,
+    studentEvalRes,
+    employerEvalRes,
+    hoursTrackerRes,
+  ] = await Promise.all([
     getMyActivityLogs({ page: 1 }),
     getOngoingInternshipsPerCourse(),
     getAvailableShiftHoursMonths(),
+    getStudentEvaluationAverages(),
+    getEmployerEvaluationAverages(),
+    getStudentHoursTracker(),
   ]);
 
   const perCourseData = (perCourseRes?.courses || []).map((row) => ({
@@ -79,6 +97,11 @@ async function DepartmentHeadDashboardPage() {
     };
   });
 
+  const studentEvalScores = studentEvalRes?.categories || [];
+  const employerEvalScores = employerEvalRes?.categories || [];
+  const students = hoursTrackerRes?.students || [];
+  const courses = hoursTrackerRes?.courses || [];
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -88,6 +111,26 @@ async function DepartmentHeadDashboardPage() {
           initialWeeks={weeksRes?.weeks || []}
         />
         <InternshipsPerCourseChart data={perCourseData} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <EvaluationScoresChart
+          title="Student Evaluations"
+          description="Average score per category, rated by employers/supervisors"
+          icon={<UserCheck className="w-4 h-4 text-primary-500" />}
+          data={studentEvalScores}
+        />
+        <EvaluationScoresChart
+          title="Employer Evaluations"
+          description="Average score per category, rated by students"
+          icon={<Building2 className="w-4 h-4 text-primary-500" />}
+          data={employerEvalScores}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <HoursDistributionDonut students={students} />
+        <StudentHoursTracker students={students} courses={courses} />
       </div>
 
       <RecentActivityCard activities={activities} />
