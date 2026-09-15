@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { getMyActivityLogs } from "@/app/_services/general-actions";
 import {
-  getSupervisedInterns,
+  getEmployerDashboardData,
   getPostedJobs,
 } from "@/app/_services/employer-actions";
 import { formatDistanceToNow } from "date-fns";
@@ -56,13 +56,16 @@ async function EmployerDashboardPage({ searchParams }) {
   const params = await searchParams;
   const currentJobPage = Number(params.j_page) || 1;
 
-  const [activityLogs, internsRes, jobsRes] = await Promise.all([
+  // The aggregate endpoint only ever returns page 1 of posted jobs — if the
+  // user navigated to a later page (j_page > 1), fetch that page directly
+  // instead of relying on the aggregate.
+  const [activityLogs, dashboardRes, jobsPageRes] = await Promise.all([
     getMyActivityLogs({ page: 1 }),
-    getSupervisedInterns(),
-    getPostedJobs({ page: currentJobPage }),
+    getEmployerDashboardData(),
+    currentJobPage > 1 ? getPostedJobs({ page: currentJobPage }) : null,
   ]);
 
-  const interns = (internsRes?.interns || []).map((row) => ({
+  const interns = (dashboardRes?.interns || []).map((row) => ({
     id: row.student_id,
     name: `${row.first_name || ""} ${row.last_name || ""}`.trim() || "Unknown",
     status: statusMap[row.status] || row.status,
@@ -75,6 +78,7 @@ async function EmployerDashboardPage({ searchParams }) {
     email: row.email,
   }));
 
+  const jobsRes = currentJobPage > 1 ? jobsPageRes : dashboardRes?.postedJobs;
   const jobs = (jobsRes?.jobs || []).map(mapJobRow);
 
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {

@@ -293,38 +293,6 @@ export async function respondToSupervisorRequest(prevState, formData) {
   }
 }
 
-export const getSupervisedInterns = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      return { error: "You must be logged in." };
-    }
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/supervised-interns`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.error || "Failed to get supervised interns. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get supervised interns error:", err);
-    return { error: "Failed to get supervised interns. Please try again." };
-  }
-};
-
 export const getPostedJobs = cache(async ({ page = 1 } = {}) => {
   try {
     const accessToken = await getAccessToken();
@@ -385,6 +353,41 @@ export const getEmployerDashboardStats = async () => {
     console.error("Get employer dashboard stats error:", err);
     return {
       error: "Failed to get employer dashboard stats. Please try again.",
+    };
+  }
+};
+
+export const getEmployerDashboardData = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return { error: "You must be logged in." };
+    }
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/employer-dashboard-data`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get employer dashboard data. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get employer dashboard data error:", err);
+    return {
+      error: "Failed to get employer dashboard data. Please try again.",
     };
   }
 };

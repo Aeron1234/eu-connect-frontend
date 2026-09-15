@@ -748,41 +748,6 @@ export const getDepartmentHeadDashboardStats = async () => {
   }
 };
 
-export const getOngoingInternshipsPerCourse = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      return { error: "You must be logged in." };
-    }
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/ongoing-internships-per-course`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.error ||
-          "Failed to get internships per course. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get ongoing internships per course error:", err);
-    return {
-      error: "Failed to get internships per course. Please try again.",
-    };
-  }
-};
-
 export const getAverageShiftHours = async ({ month, year } = {}) => {
   try {
     const accessToken = await getAccessToken();
@@ -851,13 +816,13 @@ export const getAvailableShiftHoursMonths = async () => {
   }
 };
 
-export const getStudentEvaluationAverages = async () => {
+export const getDepartmentHeadDashboardData = async () => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) return { error: "You must be logged in." };
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/student-evaluation-averages`,
+      `${process.env.API_BASE_URL}/api/department-head-dashboard-data`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -869,77 +834,15 @@ export const getStudentEvaluationAverages = async () => {
       return {
         error:
           error.error ||
-          "Failed to get student evaluation averages. Please try again.",
+          "Failed to get department head dashboard data. Please try again.",
       };
     }
 
     return await res.json();
   } catch (err) {
-    console.error("Get student evaluation averages error:", err);
+    console.error("Get department head dashboard data error:", err);
     return {
-      error: "Failed to get student evaluation averages. Please try again.",
-    };
-  }
-};
-
-export const getEmployerEvaluationAverages = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) return { error: "You must be logged in." };
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/employer-evaluation-averages`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.error ||
-          "Failed to get employer evaluation averages. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get employer evaluation averages error:", err);
-    return {
-      error: "Failed to get employer evaluation averages. Please try again.",
-    };
-  }
-};
-
-export const getStudentHoursTracker = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) return { error: "You must be logged in." };
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/student-hours-tracker`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.error ||
-          "Failed to get student hours tracker. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get student hours tracker error:", err);
-    return {
-      error: "Failed to get student hours tracker. Please try again.",
+      error: "Failed to get department head dashboard data. Please try again.",
     };
   }
 };

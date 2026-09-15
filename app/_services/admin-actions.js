@@ -626,62 +626,13 @@ export const getAdminDashboardStats = async () => {
   }
 };
 
-export const getUserGrowthOverTime = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) return { error: "You must be logged in." };
-
-    const res = await fetch(`${process.env.API_BASE_URL}/api/user-growth`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.error || "Failed to get user growth data. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get user growth error:", err);
-    return { error: "Failed to get user growth data. Please try again." };
-  }
-};
-
-export const getUsersByRole = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) return { error: "You must be logged in." };
-
-    const res = await fetch(`${process.env.API_BASE_URL}/api/users-by-role`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error: error.error || "Failed to get users by role. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get users by role error:", err);
-    return { error: "Failed to get users by role. Please try again." };
-  }
-};
-
-export const getOngoingInternshipsByDepartment = async () => {
+export const getAdminDashboardData = async () => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) return { error: "You must be logged in." };
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internships-by-department`,
+      `${process.env.API_BASE_URL}/api/admin-dashboard-data`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -693,43 +644,13 @@ export const getOngoingInternshipsByDepartment = async () => {
       return {
         error:
           error.error ||
-          "Failed to get internships by department. Please try again.",
+          "Failed to get admin dashboard data. Please try again.",
       };
     }
 
     return await res.json();
   } catch (err) {
-    console.error("Get internships by department error:", err);
-    return {
-      error: "Failed to get internships by department. Please try again.",
-    };
-  }
-};
-
-export const getRecentSystemActivity = async () => {
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) return { error: "You must be logged in." };
-
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/admin-recent-activity`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
-
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.error || "Failed to get recent activity. Please try again.",
-      };
-    }
-
-    return await res.json();
-  } catch (err) {
-    console.error("Get recent system activity error:", err);
-    return { error: "Failed to get recent activity. Please try again." };
+    console.error("Get admin dashboard data error:", err);
+    return { error: "Failed to get admin dashboard data. Please try again." };
   }
 };

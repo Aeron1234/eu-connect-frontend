@@ -2,12 +2,7 @@ import UserGrowthChart from "@/app/_components/UserGrowthChart";
 import UsersByRoleChart from "@/app/_components/UsersByRoleChart";
 import InternshipsByDepartmentChart from "@/app/_components/InternshipsByDepartmentChart";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
-import {
-  getUserGrowthOverTime,
-  getUsersByRole,
-  getOngoingInternshipsByDepartment,
-  getRecentSystemActivity,
-} from "@/app/_services/admin-actions";
+import { getAdminDashboardData } from "@/app/_services/admin-actions";
 import {
   ClipboardCheck,
   CheckCircle2,
@@ -50,24 +45,21 @@ function getActivityVisual(action = "") {
 }
 
 async function AdminDashboardPage() {
-  const [growthRes, rolesRes, departmentsRes, activityRes] = await Promise.all([
-    getUserGrowthOverTime(),
-    getUsersByRole(),
-    getOngoingInternshipsByDepartment(),
-    getRecentSystemActivity(),
-  ]);
+  const dashboardRes = await getAdminDashboardData();
 
-  const growthData = growthRes?.growth || [];
+  const growthData = dashboardRes?.userGrowth || [];
 
-  const roleData = rolesRes?.roles || [];
+  const roleData = dashboardRes?.usersByRole || [];
 
-  const departmentData = (departmentsRes?.departments || []).map((row) => ({
-    department: row.department_code || row.department_name || "—",
-    departmentName: row.department_name,
-    interns: row.interns,
-  }));
+  const departmentData = (dashboardRes?.ongoingByDepartment || []).map(
+    (row) => ({
+      department: row.department_code || row.department_name || "—",
+      departmentName: row.department_name,
+      interns: row.interns,
+    }),
+  );
 
-  const activities = (activityRes?.data || []).map((log) => {
+  const activities = (dashboardRes?.recentActivity || []).map((log) => {
     const { icon, color } = getActivityVisual(log.action);
     return {
       icon,

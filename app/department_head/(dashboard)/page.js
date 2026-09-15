@@ -17,12 +17,8 @@ import {
   Building2,
 } from "lucide-react";
 import {
-  getAvailableShiftHoursMonths,
   getAverageShiftHours,
-  getOngoingInternshipsPerCourse,
-  getStudentEvaluationAverages,
-  getEmployerEvaluationAverages,
-  getStudentHoursTracker,
+  getDepartmentHeadDashboardData,
 } from "@/app/_services/dept-head-actions";
 import { getMyActivityLogs } from "@/app/_services/general-actions";
 import { formatDistanceToNow } from "date-fns";
@@ -54,31 +50,20 @@ function getActivityVisual(action = "") {
 }
 
 async function DepartmentHeadDashboardPage() {
-  const [
-    activityLogs,
-    perCourseRes,
-    monthsRes,
-    studentEvalRes,
-    employerEvalRes,
-    hoursTrackerRes,
-  ] = await Promise.all([
+  const [activityLogs, dashboardRes] = await Promise.all([
     getMyActivityLogs({ page: 1 }),
-    getOngoingInternshipsPerCourse(),
-    getAvailableShiftHoursMonths(),
-    getStudentEvaluationAverages(),
-    getEmployerEvaluationAverages(),
-    getStudentHoursTracker(),
+    getDepartmentHeadDashboardData(),
   ]);
 
-  const perCourseData = (perCourseRes?.courses || []).map((row) => ({
+  const perCourseData = (dashboardRes?.ongoingPerCourse || []).map((row) => ({
     course: row.short_name || row.course_name || "—",
     courseName: row.course_name,
     interns: row.interns,
   }));
 
   const availableMonths =
-    monthsRes?.months?.length > 0
-      ? monthsRes.months
+    dashboardRes?.availableShiftHoursMonths?.length > 0
+      ? dashboardRes.availableShiftHoursMonths
       : [{ month: new Date().getMonth() + 1, year: new Date().getFullYear() }];
 
   const defaultMonth = availableMonths[0];
@@ -97,10 +82,10 @@ async function DepartmentHeadDashboardPage() {
     };
   });
 
-  const studentEvalScores = studentEvalRes?.categories || [];
-  const employerEvalScores = employerEvalRes?.categories || [];
-  const students = hoursTrackerRes?.students || [];
-  const courses = hoursTrackerRes?.courses || [];
+  const studentEvalScores = dashboardRes?.studentEvaluationAverages || [];
+  const employerEvalScores = dashboardRes?.employerEvaluationAverages || [];
+  const students = dashboardRes?.hoursTracker?.students || [];
+  const courses = dashboardRes?.hoursTracker?.courses || [];
 
   return (
     <div className="space-y-6">

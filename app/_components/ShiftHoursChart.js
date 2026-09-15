@@ -1,7 +1,7 @@
 // app/_components/ShiftHoursChart.js
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Clock } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -16,10 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  getAverageShiftHours,
-  getAvailableShiftHoursMonths,
-} from "@/app/_services/dept-head-actions";
+import { getAverageShiftHours } from "@/app/_services/dept-head-actions";
 
 const monthNames = [
   "January",
