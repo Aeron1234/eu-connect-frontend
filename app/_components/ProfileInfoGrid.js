@@ -3,7 +3,7 @@ import { Phone, MapPin, Briefcase, Building2, IdCard } from "lucide-react";
 function InfoItem({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start gap-3 bg-stone-50 rounded-lg p-4">
-      <div className="w-9 h-9 rounded-lg bg-red-100 text-primary-500 flex items-center justify-center shrink-0">
+      <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center shrink-0">
         <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0">

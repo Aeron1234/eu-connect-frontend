@@ -6,15 +6,16 @@ import {
   getStudentEvaluationCriterias,
   getStudentPastEvaluations,
   getEmployerUploadedFiles,
-} from "../_services/services";
+} from "../app/_services/services";
 
-import DtrTable from "./DtrTable";
-import StudentNarratives from "./StudentNarratives";
-import StudentEvaluationList from "./StudentEvaluationList";
-import StudentEvaluationCriteria from "./StudentEvaluationCriteria";
-import SetDtrLocation from "./SetDtrLocation";
-import EmployerCertificateUploads from "./EmployerCertificateUploads";
-import ProfileInfoGrid from "./ProfileInfoGrid";
+import DtrTable from "../app/_components/DtrTable";
+import StudentNarratives from "../app/_components/StudentNarratives";
+import StudentEvaluationList from "../app/_components/StudentEvaluationList";
+import StudentEvaluationCriteria from "../app/_components/StudentEvaluationCriteria";
+import SetDtrLocation from "../app/_components/SetDtrLocation";
+import EmployerCertificateUploads from "../app/_components/EmployerCertificateUploads";
+import ProfileInfoGrid from "../app/_components/ProfileInfoGrid";
+import EvaluationCard from "../app/_components/EvaluationCard";
 
 export default async function SearchedUserRecords({
   filter,
@@ -96,6 +97,7 @@ export default async function SearchedUserRecords({
 
 async function DtrTab({ searchedUserId, currentDtrPage }) {
   const dtrData = await getSearchedStudentDTRs(searchedUserId, currentDtrPage);
+
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6">
       <DtrTable
@@ -137,7 +139,7 @@ async function SetLocationForm({ searchedUserId, userRole }) {
 
 async function NarrativesTab({ searchedUserId }) {
   const narrativeData = await getSearchedStudentNarratives(searchedUserId);
-  console.log(narrativeData);
+
   return (
     <StudentNarratives
       narratives={narrativeData?.narratives || []}
@@ -168,10 +170,7 @@ async function EvaluationsTab({ searchedUserId, userRole, userId }) {
       )}
 
       <div className="">
-        <StudentEvaluationList
-          studentId={searchedUserId}
-          pastEvaluations={pastEvaluations?.data || []}
-        />
+        <EvaluationCard evaluations={pastEvaluations ?? []} />
       </div>
     </>
   );

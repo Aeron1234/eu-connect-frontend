@@ -1,11 +1,11 @@
-import SearchedUserFilter from "@/app/_components/SearchedUserFilter";
 import SearchedUserHeader from "@/app/_components/SearchedUserHeader";
-import SearchedUserRecords from "@/app/_components/SearchedUserRecords";
-import { getSearchedUserProfile } from "@/app/_services/services";
-
+import SearchedUserRecordsManager from "@/app/_components/SearchedUserRecordsManager";
+import {
+  getSearchedUserProfile,
+  getSearchedStudentDTRs,
+  getSearchedStudentDtrLocation,
+} from "@/app/_services/services";
 import { getUserSession } from "@/app/_services/auth";
-import { Spinner } from "@/components/ui/spinner";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }) {
@@ -52,42 +52,42 @@ async function UserProfilePage({ params, searchParams }) {
   const userRole = session?.user?.role || null;
   const searchedUserRole = header.role || "student";
 
-  const filter =
-    userRole === "student" || searchedUserRole !== "student"
-      ? "info"
-      : sParams.filter || "dtr";
+  // "info" only for students viewing someone, or when the searched user
+  // isn't a student at all (employer profiles have no dtr/narratives/etc.).
+  // Otherwise staff default to "dtr".
+  const defaultFilter =
+    userRole === "student" || searchedUserRole !== "student" ? "info" : "dtr";
+
+  // Only fetch DTR data server-side when it's actually the default tab —
+  // everything else is fetched client-side on demand when a tab is clicked.
+  let initialDtrData = null;
+  let initialDtrLocation = null;
+  if (defaultFilter === "dtr") {
+    const [dtrData, dtrLocation] = await Promise.all([
+      getSearchedStudentDTRs(searchedUserId, currentDtrPage),
+      ["employer", "admin"].includes(userRole)
+        ? getSearchedStudentDtrLocation(searchedUserId)
+        : null,
+    ]);
+    initialDtrData = dtrData;
+    initialDtrLocation = dtrLocation;
+  }
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <SearchedUserHeader userProfile={header} />
 
-      <SearchedUserFilter
+      <SearchedUserRecordsManager
         searchedUserId={searchedUserId}
-        filter={filter}
+        userId={session?.user?.id || ""}
         userRole={userRole}
         searchedUserRole={searchedUserRole}
+        info={info}
+        defaultFilter={defaultFilter}
+        initialDtrData={initialDtrData}
+        initialDtrLocation={initialDtrLocation}
+        currentDtrPage={currentDtrPage}
       />
-
-      <div>
-        <Suspense
-          fallback={
-            <div className="self-center justify-self-center p-5">
-              <span className="sr-only">Loading profile records...</span>
-              <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
-            </div>
-          }
-        >
-          <SearchedUserRecords
-            filter={filter}
-            searchedUserId={searchedUserId}
-            userId={session?.user?.id || ""}
-            userRole={userRole}
-            searchedUserRole={searchedUserRole}
-            currentDtrPage={currentDtrPage}
-            searchedUserInfo={info}
-          />
-        </Suspense>
-      </div>
     </main>
   );
 }

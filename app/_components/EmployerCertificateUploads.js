@@ -72,7 +72,6 @@ const EmployerCertificateUploads = ({
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
       setPending(file);
-      // default the file name field to the actual file's name — still editable
       setFileName((prev) => prev || file.name);
     }
   }, []);
@@ -112,7 +111,7 @@ const EmployerCertificateUploads = ({
 
     startTransition(async () => {
       const result = await toastAndAction(handlers);
-      if (!result?.success) return; // toastAndAction already showed the error toast
+      if (!result?.success) return;
 
       // 🌟 TODO: replace with a real refetch once revalidation is wired up —
       // this optimistically adds it, matching the real API's field shape
@@ -145,7 +144,7 @@ const EmployerCertificateUploads = ({
 
     startTransition(async () => {
       const result = await toastAndAction(handlers);
-      if (!result?.success) return; // toastAndAction already showed the error toast
+      if (!result?.success) return;
 
       window.open(result.url, "_blank", "noopener,noreferrer");
     });
@@ -155,13 +154,6 @@ const EmployerCertificateUploads = ({
     const formData = new FormData();
     formData.append("searchedUserId", searchedUserId);
     formData.append("fileId", fileId);
-
-    console.log(
-      "Deleting file with ID:",
-      fileId,
-      "for searchedUserId:",
-      searchedUserId,
-    );
 
     const handlers = {
       loadingLabel: "Deleting certificate...",
@@ -173,7 +165,7 @@ const EmployerCertificateUploads = ({
 
     startTransition(async () => {
       const result = await toastAndAction(handlers);
-      if (!result?.success) return; // toastAndAction already showed the error toast
+      if (!result?.success) return;
 
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
     });
@@ -182,11 +174,11 @@ const EmployerCertificateUploads = ({
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary-500/10 text-primary-500 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center shrink-0">
           <Building2 className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-foreground">
+          <h3 className="text-sm font-semibold text-stone-800">
             Certificate of Completion
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -197,18 +189,16 @@ const EmployerCertificateUploads = ({
       </div>
 
       {/* Upload panel */}
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5 space-y-4">
+      <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4 sm:p-5 space-y-4">
         <div
           {...getRootProps()}
           className={`w-full flex flex-col items-center justify-center gap-2 py-6 rounded-lg transition-colors cursor-pointer ${
-            isDragActive
-              ? "bg-primary-500/5 border-primary"
-              : "hover:bg-muted/60"
+            isDragActive ? "bg-primary-50" : "hover:bg-stone-100"
           }`}
         >
           <input {...getInputProps()} disabled={isUploading} />
           <Upload className="w-6 h-6 text-primary-500" />
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-sm font-medium text-stone-800">
             {pending
               ? pending.name
               : isDragActive
@@ -230,7 +220,7 @@ const EmployerCertificateUploads = ({
               onChange={(e) => setFileName(e.target.value)}
               placeholder="e.g. Certificate of Completion"
               disabled={isUploading}
-              className="mt-1 w-full rounded-md border bg-card text-foreground text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-md border border-stone-300 bg-white text-stone-800 text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
             />
           </div>
           <div>
@@ -242,7 +232,7 @@ const EmployerCertificateUploads = ({
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="e.g. Accenture"
               disabled={isUploading}
-              className="mt-1 w-full rounded-md border bg-card text-foreground text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="mt-1 w-full rounded-md border border-stone-300 bg-white text-stone-800 text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
             />
           </div>
         </div>
@@ -262,7 +252,7 @@ const EmployerCertificateUploads = ({
                 setPending(null);
                 setFileName("");
               }}
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800"
             >
               <X className="w-4 h-4" /> Clear
             </button>
@@ -276,22 +266,24 @@ const EmployerCertificateUploads = ({
           Uploaded files ({files.length})
         </p>
         {files.length === 0 ? (
-          <div className="py-10 text-center text-muted-foreground">
-            <Paperclip className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            <p className="text-sm">No certificate uploaded yet</p>
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-10 text-center">
+            <Paperclip className="w-8 h-8 text-stone-300" />
+            <p className="text-sm text-stone-500">
+              No certificate uploaded yet
+            </p>
           </div>
         ) : (
           files.map((f) => (
             <div
               key={f.id}
-              className="flex items-center gap-3 rounded-lg border bg-card p-3"
+              className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3"
             >
-              <div className="w-9 h-9 rounded-lg bg-primary-500/10 text-primary-500 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center shrink-0">
                 <FileText className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-foreground truncate">
+                  <p className="text-sm font-medium text-stone-800 truncate">
                     {f.file_name}
                   </p>
                   <StatusBadge status={f.verification_status} />
@@ -305,7 +297,7 @@ const EmployerCertificateUploads = ({
               <button
                 onClick={() => handleDownload(f.id)}
                 disabled={isUploading}
-                className="p-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+                className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-800 transition-colors disabled:opacity-40"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -313,7 +305,7 @@ const EmployerCertificateUploads = ({
                 <button
                   onClick={() => handleDelete(f.id)}
                   disabled={isUploading}
-                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
+                  className="p-1.5 rounded-md text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

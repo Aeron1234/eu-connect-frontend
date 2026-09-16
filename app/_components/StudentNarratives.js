@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import Modal from "./Modal";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchMoreSearchedStudentNarratives } from "../_services/services";
 
 function StudentNarratives({
@@ -15,8 +15,6 @@ function StudentNarratives({
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
 
-  // useEffect(() => {}, [initialData, initialTotalPages]);
-
   async function handleSeeMore() {
     if (isPending || page >= totalPages) return;
     setIsPending(true);
@@ -28,7 +26,6 @@ function StudentNarratives({
         searchedUserId,
       });
 
-      console.log("nextPage:", nextPage, "newData:", newData);
       const incoming = newData?.narratives || [];
 
       setNarratives((prev) => {
@@ -36,8 +33,6 @@ function StudentNarratives({
         const filteredNew = incoming.filter((n) => !existingIds.has(n.id));
         return [...prev, ...filteredNew];
       });
-
-      // setNarratives((prev) => [...prev, ...incoming]);
 
       setPage(nextPage);
       if (newData?.totalPages) {
@@ -51,16 +46,16 @@ function StudentNarratives({
   }
 
   return (
-    <ul className="space-y-4">
+    <ul className="space-y-3 sm:space-y-4">
       {narratives.length === 0 ? (
-        <li className="border border-stone-200 rounded-xl text-stone-500 text-sm text-center py-8 bg-white shadow-sm">
-          No narratives submitted yet.
+        <li className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+          <p className="text-sm text-stone-500">No narratives submitted yet.</p>
         </li>
       ) : (
         narratives.map((n) => (
           <li
             key={n.id}
-            className="border border-stone-200 rounded-xl p-4 bg-white shadow-sm"
+            className="border border-stone-300 rounded-xl p-4 sm:p-5 bg-white shadow-sm"
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-bold text-primary-500 text-xs">
@@ -70,7 +65,7 @@ function StudentNarratives({
                 {format(new Date(n.created_at), "MM/dd/yyyy")}
               </span>
             </div>
-            <h3 className="font-medium mb-2">{n.title}</h3>
+            <h3 className="font-medium text-stone-800 mb-2">{n.title}</h3>
             <p className="text-sm text-stone-600 leading-relaxed mt-3 line-clamp-3">
               {n.narrative}
             </p>
@@ -83,7 +78,7 @@ function StudentNarratives({
                 </p>
               }
               description={
-                <span className="text-lg font-bold text-stone-900 block">
+                <span className="text-lg font-bold text-stone-800 block">
                   {n.title || "Untitled"}
                 </span>
               }
@@ -93,8 +88,8 @@ function StudentNarratives({
                 </div>
               }
             >
-              <div className="bg-card rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+              <div className="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+                <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">
                   {n.narrative}
                 </p>
               </div>
@@ -108,7 +103,7 @@ function StudentNarratives({
           <button
             onClick={handleSeeMore}
             disabled={isPending}
-            className="w-full pl-12 md:pl-16 text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="w-full text-center text-sm sm:text-base font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
           >
             {isPending ? "Loading..." : "See more"}
           </button>
