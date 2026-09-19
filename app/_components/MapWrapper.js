@@ -4,6 +4,8 @@ import { Building2, MapPin, Search, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import PageTitle from "./PageTitle";
+import SearchBar from "./SearchBar";
+import MapDropdownFilter from "./MapDropdownFilter";
 
 const Map = dynamic(() => import("./Map"), {
   ssr: false,
@@ -123,10 +125,11 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
 
       <div className="space-y-6">
         {/* Search + location filter */}
-        <div className="space-y-4">
+
+        <div className="flex gap-2 flex-col sm:flex-row">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
+            {/* <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /> */}
+            <SearchBar
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search student, company, course..."
@@ -135,38 +138,11 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
             />
           </div>
 
-          <div className="space-y-2">
-            <span className="text-sm font-semibold text-muted-foreground">
-              Locations
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setRegionId(null)}
-                className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
-                  !regionId
-                    ? "bg-primary-500 text-primary-foreground"
-                    : "bg-stone-200 text-muted-foreground hover:text-primary-500"
-                }`}
-              >
-                All Locations
-              </button>
-              {regions.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setRegionId(r.id)}
-                  className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
-                    regionId === r.id
-                      ? "bg-primary-500 text-primary-foreground"
-                      : "bg-stone-200 text-muted-foreground hover:text-primary-500"
-                  }`}
-                >
-                  {r.name}
-                </button>
-              ))}
-            </div>
-          </div>
+          <MapDropdownFilter
+            regions={regions}
+            regionId={regionId}
+            onChange={setRegionId}
+          />
         </div>
 
         {tab === "Map View" ? (

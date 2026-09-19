@@ -375,38 +375,32 @@ export const getInternshipRecordDtr = cache(async (internshipId) => {
   }
 });
 
-export const getInternshipRecordNarratives = cache(async (internshipId) => {
+export const getInternshipRecordWeeklyNarratives = async (internshipId) => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/internship-records/narratives/${internshipId}`,
+      `${process.env.API_BASE_URL}/api/internship-records/weekly-narratives/${internshipId}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
     if (!res.ok) {
       const error = await res.json();
       return {
-        error:
-          error.message ||
-          "Failed to get the internship record's narratives. Please try again.",
+        error: error.error || "Failed to get narratives. Please try again.",
       };
     }
 
-    const data = await res.json();
-
-    return data;
+    return await res.json();
   } catch (err) {
-    console.log(err);
-    return null;
+    console.error("Get internship record weekly narratives error:", err);
+    return { error: "Failed to get narratives. Please try again." };
   }
-});
+};
 
 export const getInternshipRecordEvaluations = cache(async (internshipId) => {
   try {

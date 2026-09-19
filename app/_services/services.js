@@ -841,6 +841,10 @@ export const getSearchedUserProfile = cache(async (searchedUserId) => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        // The response now varies by viewer (supervision), so it must never
+        // be cached by searchedUserId alone across requests. cache() still
+        // dedupes it within a single request.
+        cache: "no-store",
       },
     );
 
@@ -849,6 +853,7 @@ export const getSearchedUserProfile = cache(async (searchedUserId) => {
       return {
         error:
           error.message ||
+          error.error ||
           "Failed to get searched user profile. Please try again.",
       };
     }
@@ -931,74 +936,62 @@ export const getSearchedStudentDTRs = cache(async (searchedUserId, page) => {
   }
 });
 
-export const getSearchedStudentNarratives = cache(async (searchedUserId) => {
+export const getSearchedStudentWeeklyNarratives = async (searchedUserId) => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}`,
+      `${process.env.API_BASE_URL}/api/searched-user/weekly-narratives/${searchedUserId}?page=1`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
     if (!res.ok) {
       const error = await res.json();
       return {
-        error:
-          error.message ||
-          "Failed to get searched user's Narratives. Please try again.",
+        error: error.error || "Failed to get narratives. Please try again.",
       };
     }
 
-    const data = await res.json();
-
-    return data;
+    return await res.json();
   } catch (err) {
-    console.log(err);
-    return null;
+    console.error("Get searched student weekly narratives error:", err);
+    return { error: "Failed to get narratives. Please try again." };
   }
-});
+};
 
-export async function fetchMoreSearchedStudentNarratives({
+export const fetchMoreSearchedStudentWeeklyNarratives = async ({
+  page = 1,
   searchedUserId,
-  page,
-}) {
+} = {}) => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/narratives/${searchedUserId}?page=${page}`,
+      `${process.env.API_BASE_URL}/api/searched-user/weekly-narratives/${searchedUserId}?page=${page}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
     if (!res.ok) {
       const error = await res.json();
       return {
-        error:
-          error.message ||
-          "Failed to get more of searched user's Narratives. Please try again.",
+        error: error.error || "Failed to get narratives. Please try again.",
       };
     }
 
-    const data = await res.json();
-
-    return data || [];
+    return await res.json();
   } catch (err) {
-    console.log(err);
-    return null;
+    console.error("Fetch more searched student weekly narratives error:", err);
+    return { error: "Failed to get narratives. Please try again." };
   }
-}
+};
 
 export const getSearchedStudentDtrLocation = cache(async (searchedUserId) => {
   try {

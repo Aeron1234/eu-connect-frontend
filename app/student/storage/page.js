@@ -14,6 +14,7 @@ import { FolderOpen, Upload } from "lucide-react";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import PageTitle from "@/app/_components/PageTitle";
+import TitleButton from "@/app/_components/TitleButton";
 
 export const metadata = {
   title: "Student's Storage",
@@ -39,12 +40,9 @@ async function StoragePage() {
 
         <Modal
           trigger={
-            <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition">
-              <Upload className="w-4 h-4" />
-              <span className="text-white text-sm font-semibold">
-                Upload File
-              </span>
-            </div>
+            <TitleButton>
+              <Upload className="w-4 h-4" /> Upload File
+            </TitleButton>
           }
           description="Save your internship related documents here."
           triggerStyles="max-xs:w-full"

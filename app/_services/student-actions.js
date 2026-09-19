@@ -15,53 +15,6 @@ import { getAccessToken } from "./auth";
 // AUTHENTICATION
 ////////////////////////////////////////////////////
 
-// export async function login(prevState, formData) {
-//   const username = formData.get("username");
-
-//   //Validate email safely
-//   if (!username || typeof username !== "string") {
-//     return { error: "Username is required." };
-//   }
-
-//   const usernameRegex = /^\S+$/;
-//   if (!usernameRegex.test(username)) {
-//     return { error: "Invalid username format." };
-//   }
-
-//   try {
-//     await signIn("credentials", {
-//       ...Object.fromEntries(formData),
-//       redirect: false,
-//     });
-//   } catch (error) {
-//     if (error instanceof AuthError) {
-//       // Access the code you passed in the authorize function
-//       const errorCode = error.cause?.err?.code || error.code;
-
-//       if (errorCode === "inactive_account") {
-//         return {
-//           error: "This account has been deactivated. Please contact the Admin.",
-//         };
-//       }
-
-//       if (error.type === "CredentialsSignin") {
-//         return { error: "Invalid username or password." };
-//       }
-
-//       return { error: "Something went wrong during sign in." };
-//     }
-
-//     // This re-throws the error if it's a redirect (success case)
-//     throw error;
-//   }
-
-//   redirect("/");
-// }
-
-// export async function logout() {
-//   await signOut({ redirectTo: "/login" });
-// }
-
 export async function login(prevState, formData) {
   const username = formData.get("username");
   const password = formData.get("password");
@@ -422,185 +375,155 @@ export async function deleteDtr(prevState, formData) {
 }
 
 ////////////////////////////////////////////////////
-// DAILY NARRATIVES
+// WEEKLY NARRATIVES
 ////////////////////////////////////////////////////
-export async function getDailyNarratives() {
+
+export const getWeeklyNarratives = async () => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
-    const internship = await getOngoingInternshipRecord();
-    if (!internship) return null;
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const internshipId = internship.id;
+    const internshipId = internshipData?.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/narratives/history?internshipId=${internshipId}`,
+      `${process.env.API_BASE_URL}/api/weekly-narratives/history?internshipId=${internshipId}&page=1`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
     if (!res.ok) {
       const error = await res.json();
-      return { error: error.message || "No ongoing internship found" };
+      return {
+        error: error.error || "Failed to get narratives. Please try again.",
+      };
     }
 
-    const data = await res.json();
-
-    return data || [];
+    return await res.json();
   } catch (err) {
-    console.log(err);
-    return null;
+    console.error("Get weekly narratives error:", err);
+    return { error: "Failed to get narratives. Please try again." };
   }
-}
+};
 
-export async function fetchMoreDailyNarratives({ page }) {
+export const fetchMoreWeeklyNarratives = async ({ page = 1 } = {}) => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
-    const internship = await getOngoingInternshipRecord();
-    if (!internship) return null;
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const internshipId = internship.id;
+    const internshipId = internshipData?.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/narratives/history?internshipId=${internshipId}&page=${page}`,
+      `${process.env.API_BASE_URL}/api/weekly-narratives/history?internshipId=${internshipId}&page=${page}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
     if (!res.ok) {
       const error = await res.json();
-      return { error: error.message || "No ongoing internship found" };
+      return {
+        error: error.error || "Failed to get narratives. Please try again.",
+      };
     }
 
-    const data = await res.json();
-
-    return data || [];
+    return await res.json();
   } catch (err) {
-    console.log(err);
-    return null;
+    console.error("Fetch more weekly narratives error:", err);
+    return { error: "Failed to get narratives. Please try again." };
   }
-}
+};
 
-export async function createNarrative(prevState, formData) {
+export async function createWeeklyNarrative(prevState, formData) {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
-    if (!formData || typeof formData.get !== "function") {
-      throw new Error("Invalid form submission.");
-    }
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const narrativeData = Object.fromEntries(formData);
-
-    const internship = await getOngoingInternshipRecord();
-    if (!internship) throw new Error("No ongoing internship found.");
-
-    const internshipId = internship.id;
+    const internshipId = internshipData?.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/narratives/new?internshipId=${internshipId}`,
+      `${process.env.API_BASE_URL}/api/weekly-narratives/new?internshipId=${internshipId}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(narrativeData),
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
       },
     );
 
-    const data = await res.json();
-    if (res.ok) revalidatePath("/student/narratives");
+    if (res?.ok) revalidatePath("/student/narratives");
 
-    return data;
+    return await res.json();
   } catch (err) {
-    console.log(err);
+    console.error("Create weekly narrative error:", err.message);
     return { success: false, error: err.message };
   }
 }
 
-export async function editNarrative(narrativeId, formData) {
+export async function editWeeklyNarrative(prevState, formData) {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
-    if (!formData || typeof formData.get !== "function") {
-      throw new Error("Invalid form submission.");
-    }
+    const narrativeId = formData.get("narrativeId");
 
-    const internship = await getOngoingInternshipRecord();
-    if (!internship) throw new Error("No ongoing internship found.");
+    const internshipData = await getOngoingInternshipRecord();
+    if (!internshipData) throw new Error("No ongoing internship found.");
 
-    const internshipId = internship.id;
-    const narrativeData = Object.fromEntries(formData);
+    const internshipId = internshipData?.id;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/narratives/${narrativeId}?internshipId=${internshipId}`,
+      `${process.env.API_BASE_URL}/api/weekly-narratives/${narrativeId}?internshipId=${internshipId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(narrativeData),
+        body: JSON.stringify(Object.fromEntries(formData)),
       },
     );
 
-    const data = await res.json();
-    if (res.ok) revalidatePath("/student/narratives");
+    if (res?.ok) revalidatePath("/student/narratives");
 
-    return data;
+    return await res.json();
   } catch (err) {
-    console.log(err);
+    console.error("Edit weekly narrative error:", err.message);
     return { success: false, error: err.message };
   }
 }
 
-export async function deleteNarrative(prevState, formData) {
-  // Added prevState for useActionState compatibility
-  const connection = await db.getConnection();
-
+export async function deleteWeeklyNarrative(prevState, formData) {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
-    if (!formData || typeof formData.get !== "function") {
-      throw new Error("Invalid form submission.");
-    }
-
-    const narrativeId = Number(formData.get("narrativeId"));
+    const narrativeId = formData.get("narrativeId");
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/api/narratives/${narrativeId}`,
+      `${process.env.API_BASE_URL}/api/weekly-narratives/${narrativeId}`,
       {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       },
     );
 
-    const data = await res.json();
-    if (res.ok) revalidatePath("/student/narratives");
+    if (res?.ok) revalidatePath("/student/narratives");
 
-    return data;
+    return await res.json();
   } catch (err) {
-    await connection.rollback();
-    console.error("Delete Error:", err.message);
+    console.error("Delete weekly narrative error:", err.message);
     return { success: false, error: err.message };
-  } finally {
-    connection.release();
   }
 }
 

@@ -22,18 +22,18 @@ import {
 const statusMeta = {
   pending: {
     label: "Pending Approval",
-    cls: "bg-amber-100 text-amber-800",
+    cls: "bg-amber-50 text-amber-700",
     icon: Clock,
   },
-  ongoing: { label: "Ongoing", cls: "bg-blue-100 text-blue-800", icon: Clock },
+  ongoing: { label: "Ongoing", cls: "bg-blue-50 text-blue-700", icon: Clock },
   finished: {
     label: "Finished",
-    cls: "bg-emerald-100 text-emerald-800",
+    cls: "bg-emerald-50 text-emerald-700",
     icon: CheckCircle2,
   },
   rejected: {
     label: "Rejected",
-    cls: "bg-rose-100 text-rose-800",
+    cls: "bg-red-50 text-red-700",
     icon: XCircle,
   },
 };
@@ -69,21 +69,13 @@ function RecordsPageContent({
   const [stats, setStats] = useState(initialStats);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isPending, startTransition] = useTransition(); // status-update transition, unchanged
+  const [isPending, startTransition] = useTransition();
 
-  // Tracks the most recent request so a slow-resolving stale response
-  // can never overwrite a newer one's result
   const requestIdRef = useRef(0);
-  // Skip the debounced fetch on mount — initialData already matches
-  // the current filter/query (empty query) on first render
   const isFirstRun = useRef(true);
 
   const statusParam = filter === "all" ? "" : filter;
 
-  // Debounce search changes and refetch page 1, scoped to the current
-  // URL-driven `filter`. Filter changes themselves are handled by
-  // navigation (Link) in RecordsPageFilter — the parent page.jsx should
-  // remount this component (key={filter}) so state resets cleanly then.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -102,7 +94,7 @@ function RecordsPageContent({
           limit,
         });
 
-        if (thisRequestId !== requestIdRef.current) return; // stale, ignore
+        if (thisRequestId !== requestIdRef.current) return;
 
         if (newData?.error) {
           console.error("Error loading filtered records:", newData.error);
@@ -144,7 +136,7 @@ function RecordsPageContent({
         limit,
       });
 
-      if (thisRequestId !== requestIdRef.current) return; // stale, ignore
+      if (thisRequestId !== requestIdRef.current) return;
 
       if (newData?.error) {
         console.error("Error loading more records:", newData.error);
@@ -172,7 +164,6 @@ function RecordsPageContent({
     }
   }
 
-  // Unchanged — already working as intended
   function handleStatus(internshipId, status) {
     const formData = new FormData();
     formData.append("id", internshipId);
@@ -209,7 +200,7 @@ function RecordsPageContent({
         {records.map((r) => (
           <article
             key={r.id}
-            className="rounded-xl border border-stone-200  bg-background p-5 transition-shadow hover:shadow-md"
+            className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <Link
@@ -217,7 +208,7 @@ function RecordsPageContent({
                 className="min-w-0 flex-1 text-left"
               >
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="font-display text-lg font-bold text-primary-500">
+                  <h2 className="text-base sm:text-lg font-bold text-primary-500">
                     {r.student_name}
                   </h2>
                   {r?.student_number && (
@@ -227,7 +218,7 @@ function RecordsPageContent({
                   )}
                   <StatusPill status={r.status} />
                 </div>
-                <p className="mt-1 text-sm text-foreground/80">
+                <p className="mt-1 text-sm text-stone-600">
                   {r.internship_position} · {r.company_name}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
@@ -255,7 +246,7 @@ function RecordsPageContent({
                       type="button"
                       disabled={isPending}
                       onClick={() => handleStatus(r.id, "ongoing")}
-                      className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-500-deep"
+                      className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-600 transition disabled:opacity-50"
                     >
                       Approve
                     </button>
@@ -263,7 +254,7 @@ function RecordsPageContent({
                       type="button"
                       disabled={isPending}
                       onClick={() => handleStatus(r.id, "rejected")}
-                      className="rounded-lg border border-stone-200 px-4 py-2 text-sm font-semibold text-foreground/70 hover:text-primary-500"
+                      className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 transition disabled:opacity-50"
                     >
                       Reject
                     </button>
@@ -274,7 +265,7 @@ function RecordsPageContent({
                     type="button"
                     disabled={isPending}
                     onClick={() => handleStatus(r.id, "pending")}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-primary-500 px-4 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-500 hover:text-primary-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-primary-500 px-4 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-500 hover:text-white transition disabled:opacity-50"
                   >
                     <RotateCcw className="h-4 w-4" /> Restore
                   </button>
@@ -284,14 +275,14 @@ function RecordsPageContent({
                     type="button"
                     disabled={isPending}
                     onClick={() => handleStatus(r.id, "finished")}
-                    className="rounded-lg border border-stone-200 px-4 py-2 text-sm font-semibold text-foreground/70 hover:text-primary-500"
+                    className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-100 transition disabled:opacity-50"
                   >
                     Mark Finished
                   </button>
                 )}
                 <Link
                   href={`/internship-records/${r.id}`}
-                  className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-primary-500 hover:bg-accent/70"
+                  className="rounded-lg bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-500 hover:bg-primary-100 transition"
                 >
                   View Record
                 </Link>
@@ -300,7 +291,7 @@ function RecordsPageContent({
 
             {r.status !== "pending" && r.status !== "rejected" && (
               <div className="mt-4">
-                <div className="h-2 w-full overflow-hidden rounded-full bg-accent">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
                   <div
                     className="h-full rounded-full bg-primary-500"
                     style={{
@@ -314,9 +305,11 @@ function RecordsPageContent({
         ))}
 
         {records.length === 0 && !isSearching && (
-          <p className="rounded-xl border border-dashed border-stone-200 bg-background p-10 text-center text-sm text-muted-foreground">
-            No internship records match your filters.
-          </p>
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+            <p className="text-sm text-stone-500">
+              No internship records match your filters.
+            </p>
+          </div>
         )}
       </div>
 
@@ -326,7 +319,7 @@ function RecordsPageContent({
             type="button"
             onClick={handleSeeMore}
             disabled={isLoadingMore}
-            className="text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="text-sm sm:text-base font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
           >
             {isLoadingMore ? "Loading..." : "See more"}
           </button>

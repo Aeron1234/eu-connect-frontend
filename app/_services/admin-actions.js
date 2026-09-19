@@ -575,10 +575,12 @@ export const getAllActivityLogs = cache(
   },
 );
 
-export const deleteActivityLog = async (logId) => {
+export const deleteActivityLog = async (prevState, formData) => {
   try {
     const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
+
+    const logId = formData.get("logId");
 
     const res = await fetch(
       `${process.env.API_BASE_URL}/api/activity-logs/${logId}`,

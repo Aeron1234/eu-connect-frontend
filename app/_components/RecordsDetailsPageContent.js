@@ -4,7 +4,7 @@ import {
   getInternshipRecordDocuments,
   getInternshipRecordDtr,
   getInternshipRecordEvaluations,
-  getInternshipRecordNarratives,
+  getInternshipRecordWeeklyNarratives,
 } from "../_services/dept-head-actions";
 import RecordsNarrative from "./RecordsNarratives";
 import EvaluationCard from "./EvaluationCard";
@@ -29,8 +29,8 @@ function RecordsDetailsPageContent({
     <>
       {filter === "overview" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-stone-200 shadow-sm bg-background p-5">
-            <h3 className="font-display text-lg font-bold text-primary-500">
+          <div className="rounded-xl border border-stone-300 shadow-sm bg-white p-4 sm:p-5">
+            <h3 className="text-base sm:text-lg font-bold text-primary-500">
               Internship Details
             </h3>
             <dl className="mt-3 space-y-2 text-sm">
@@ -53,22 +53,22 @@ function RecordsDetailsPageContent({
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4">
                   <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="text-right font-medium">{v}</dd>
+                  <dd className="text-right font-medium text-stone-800">{v}</dd>
                 </div>
               ))}
             </dl>
           </div>
-          <div className="rounded-xl border border-stone-200 shadow-sm bg-background p-5">
-            <h3 className="font-display text-lg font-bold text-primary-500">
+          <div className="rounded-xl border border-stone-300 shadow-sm bg-white p-4 sm:p-5">
+            <h3 className="text-base sm:text-lg font-bold text-primary-500">
               Hours Rendered
             </h3>
-            <p className="mt-3 font-display text-3xl font-bold text-primary-500">
+            <p className="mt-3 text-2xl sm:text-3xl font-bold text-primary-500">
               {record.accumulated_hours.toFixed(1)}
-              <span className="text-base text-muted-foreground">
+              <span className="text-sm sm:text-base font-normal text-muted-foreground">
                 /{record.total_hours} hrs
               </span>
             </p>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-accent">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-stone-200">
               <div
                 className="h-full rounded-full bg-primary-500"
                 style={{ width: `${pct}%` }}
@@ -77,7 +77,7 @@ function RecordsDetailsPageContent({
             <p className="mt-2 text-xs text-muted-foreground">
               {pct}% of required hours completed
             </p>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 text-center text-xs">
               <Stat label="DTR entries" value={record.dtr_count} />
               <Stat label="Narratives" value={record.narrative_count} />
               <Stat label="Documents" value={record.document_count} />
@@ -106,7 +106,7 @@ async function DtrTab({ internshipId, studentId }) {
 
   return (
     <>
-      <div className="rounded-xl bg-white border border-stone-200 p-5 sm:p-6">
+      <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-4 sm:p-6">
         <RecordsDtrTable dtrs={dtrs || []} />
       </div>
 
@@ -116,10 +116,7 @@ async function DtrTab({ internshipId, studentId }) {
 }
 
 async function SetLocationForm({ studentId }) {
-  console.log("studentId:", studentId);
   const data = (await getSearchedStudentDtrLocation(studentId)) || {};
-
-  console.log("searchedStudentDtrLocation:", data);
 
   const dataLocation = {
     internship_id: data?.internship_id,
@@ -140,20 +137,22 @@ async function SetLocationForm({ studentId }) {
 }
 
 async function NarrativesTab({ internshipId }) {
-  const narratives = await getInternshipRecordNarratives(internshipId);
+  const narratives = await getInternshipRecordWeeklyNarratives(internshipId);
+
+  console.log(narratives);
 
   return (
-    <ul className="space-y-4">
-      {narratives.map((narrative) => (
+    <ul className="space-y-3 sm:space-y-4">
+      {(Array.isArray(narratives) ? narratives : []).map((narrative) => (
         <RecordsNarrative
           key={`${narrative.id}-${narrative.updated_at || narrative.created_at}`}
           narrative={narrative}
         />
       ))}
 
-      {narratives.length === 0 && (
-        <li className="pl-12 md:pl-16 py-10 text-center text-sm text-stone-600">
-          No narratives yet.
+      {(!Array.isArray(narratives) || narratives.length === 0) && (
+        <li className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+          <p className="text-sm text-stone-500">No narratives yet.</p>
         </li>
       )}
     </ul>
@@ -183,8 +182,8 @@ async function DocumentsTab({ internshipId }) {
 
 function Stat({ label, value }) {
   return (
-    <div className="rounded-lg bg-accent/60 py-2">
-      <p className="font-display text-lg font-bold text-primary-500">{value}</p>
+    <div className="rounded-lg bg-stone-100 py-2">
+      <p className="text-base sm:text-lg font-bold text-primary-500">{value}</p>
       <p className="text-muted-foreground">{label}</p>
     </div>
   );

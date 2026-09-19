@@ -320,7 +320,7 @@ export default function DepartmentsAndCoursesManager({
       {/* Filters */}
       <div className="space-y-3">
         <div className="flex flex-row sm:flex-col gap-3 justify-between ">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap-reverse items-center gap-3">
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"

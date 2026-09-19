@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { BriefcaseBusiness, Search } from "lucide-react";
+import { BriefcaseBusiness } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
+import SearchBar from "./SearchBar";
+import DropdownFilter from "./DropdownFilter";
 import { getInternshipPosts } from "../_services/services";
 import { useUser } from "@/contexts/UserContext";
 
@@ -19,11 +21,9 @@ const workTypeTabs = [
   { label: "Remote", workType: "remote" },
 ];
 
-function buildHref({ scope, workType, courseId }) {
+function buildHref({ scope }) {
   const params = new URLSearchParams();
   if (scope) params.set("scope", scope);
-  if (workType) params.set("workType", workType);
-  if (courseId) params.set("courseId", courseId);
   const qs = params.toString();
   return `/internships${qs ? `?${qs}` : ""}`;
 }
@@ -40,8 +40,8 @@ function InternshipPosts({
     totalPages: initialTotalPages = 1,
   },
   courses = [],
-  workType = "",
-  courseId = "",
+  workType: initialWorkType = "",
+  courseId: initialCourseId = "",
   scope = "",
 }) {
   const [internshipPosts, setInternshipPosts] = useState(initialData);
@@ -49,6 +49,10 @@ function InternshipPosts({
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [total, setTotal] = useState(initialTotal);
   const [query, setQuery] = useState("");
+  const [workType, setWorkType] = useState(initialWorkType || "");
+  const [courseId, setCourseId] = useState(
+    initialCourseId ? String(initialCourseId) : "",
+  );
   const [isPending, setIsPending] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
@@ -59,6 +63,16 @@ function InternshipPosts({
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
   const prevPage1KeysRef = useRef(new Set((initialData || []).map(keyOf)));
+
+  const workTypeOptions = workTypeTabs.map((wt) => ({
+    value: wt.workType,
+    label: wt.label,
+  }));
+
+  const courseOptions = [
+    { value: "", label: "All" },
+    ...courses.map((c) => ({ value: String(c.id), label: c.course_name })),
+  ];
 
   useEffect(() => {
     const freshMap = new Map((initialData || []).map((p) => [keyOf(p), p]));
@@ -196,15 +210,14 @@ function InternshipPosts({
 
   return (
     <>
-      {/* Filters */}
-
+      {/* Scope tabs */}
       {userRole === "employer" && (
         <div className="flex flex-1 flex-wrap items-center gap-3">
           <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
             {scopeTabs.map((s) => (
               <Link
                 key={s.value}
-                href={buildHref({ scope: s.value, workType, courseId })}
+                href={buildHref({ scope: s.value })}
                 className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   scope === s.value
                     ? "bg-primary-500 text-primary-foreground"
@@ -218,60 +231,33 @@ function InternshipPosts({
         </div>
       )}
 
-      {courses.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={buildHref({ scope, workType, courseId: null })}
-            className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
-              !courseId
-                ? "bg-primary-500 text-primary-foreground"
-                : "bg-stone-200 text-muted-foreground hover:text-primary-500"
-            }`}
-          >
-            All
-          </Link>
-          {courses.map((c) => (
-            <Link
-              key={c.id}
-              href={buildHref({ scope, workType, courseId: c.id })}
-              className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
-                String(courseId) === String(c.id)
-                  ? "bg-primary-500 text-primary-foreground"
-                  : "bg-stone-200 text-muted-foreground hover:text-primary-500"
-              }`}
-            >
-              {c.short_name}
-            </Link>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex flex-wrap items-center gap-2">
-          {workTypeTabs.map((wt) => (
-            <Link
-              key={wt.label}
-              href={buildHref({ scope, workType: wt.workType, courseId })}
-              className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
-                workType === wt.workType
-                  ? "bg-primary-500 text-primary-foreground"
-                  : "bg-stone-200 text-muted-foreground hover:text-primary-500"
-              }`}
-            >
-              {wt.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="relative sm:max-w-md sm:flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+      {/* Filters — same style as ActivityLogsManager */}
+      <div className="flex gap-2 flex-col sm:flex-row">
+        <div className="items-start">
+          <SearchBar
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search company or position..."
-            aria-label="Search company or position"
-            className="w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
           />
+        </div>
+
+        <div className="flex gap-2 flex-wrap">
+          <DropdownFilter
+            value={workType}
+            onValueChange={setWorkType}
+            options={workTypeOptions}
+            placeholder="Work Type"
+            className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+          />
+          {courses.length > 0 && (
+            <DropdownFilter
+              value={courseId}
+              onValueChange={setCourseId}
+              options={courseOptions}
+              placeholder="Course"
+              className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+            />
+          )}
         </div>
       </div>
 

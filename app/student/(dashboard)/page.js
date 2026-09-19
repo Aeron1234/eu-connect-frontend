@@ -60,8 +60,6 @@ async function StudentDashboardPage() {
 
   const locationData = settedLocation?.location || {};
 
-  console.log(settedLocation);
-
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {
     const { icon, color } = getActivityVisual(log.action);
     return {

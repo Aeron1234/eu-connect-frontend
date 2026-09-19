@@ -27,7 +27,7 @@ import { useUser } from "@/contexts/UserContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 
 function roleRoutes(userRole, userDepartment) {
-  let routes;
+  let routes = [];
   if (userRole === "student") {
     routes = [
       {
@@ -59,7 +59,15 @@ function roleRoutes(userRole, userDepartment) {
   }
 
   if (userRole === "department_head") {
+    if (userDepartment === "REG")
+      routes.push({
+        name: "SIPP Reports",
+        href: "/department_head/sipp-reports",
+        icon: <FileText className="h-5 w-5 shrink-0" />,
+      });
+
     routes = [
+      ...routes,
       {
         name: "Map",
         href: "/map",
@@ -71,13 +79,6 @@ function roleRoutes(userRole, userDepartment) {
         icon: <Building2 className="h-5 w-5 shrink-0" />,
       },
     ];
-
-    if (userDepartment === "REG")
-      routes.push({
-        name: "SIPP Reports",
-        href: "/department_head/sipp-reports",
-        icon: <FileText className="h-5 w-5 shrink-0" />,
-      });
 
     if (userDepartment !== "REG")
       routes.push({
@@ -222,15 +223,17 @@ function SideNavigationList({ firstName = "" }) {
         )}
 
         <ul className="flex flex-col gap-1 flex-1 w-full overflow-y-auto">
-          <NavLink
-            href={homeHref}
-            name="Dashboard"
-            icon={<LayoutDashboard className="h-5 w-5 shrink-0" />}
-            pathName={pathName}
-            isCollapsed={isCollapsed}
-            onClick={closeMobile}
-            exact
-          />
+          {userDepartment !== "REG" && (
+            <NavLink
+              href={homeHref}
+              name="Dashboard"
+              icon={<LayoutDashboard className="h-5 w-5 shrink-0" />}
+              pathName={pathName}
+              isCollapsed={isCollapsed}
+              onClick={closeMobile}
+              exact
+            />
+          )}
 
           {routes.map((item) => (
             <li key={item.name}>

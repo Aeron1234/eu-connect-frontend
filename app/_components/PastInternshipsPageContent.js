@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Building2 } from "lucide-react";
 import SearchBar from "./SearchBar";
-import Link from "next/link";
 import AlumniCompanies from "./AlumniCompanies";
-import { cx } from "@/lib/utils";
+import AcademicYearFilter from "./AcademicYearFilter";
 import { getAlumniInternships } from "../_services/dept-head-actions";
 
 function keyOf(company) {
@@ -16,7 +15,7 @@ function PastInternshipsPageContent({
   initialData = [],
   academicYears = [],
   courses = [],
-  yearFilter = "all",
+  yearFilter: initialYearFilter = "all",
   pagination: {
     page: initialPage = 1,
     total = 0,
@@ -24,6 +23,7 @@ function PastInternshipsPageContent({
   },
 }) {
   const [query, setQuery] = useState("");
+  const [yearFilter, setYearFilter] = useState(initialYearFilter);
   const [companies, setCompanies] = useState(initialData || []);
   const [page, setPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
@@ -62,9 +62,9 @@ function PastInternshipsPageContent({
     prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
   }, [initialData, initialPage, initialTotalPages]);
 
-  // Debounced search — the missing piece. Fires whenever `query` changes,
-  // fetches page 1 with the search term, and ignores stale responses if
-  // the user keeps typing before an earlier request resolves.
+  // Debounced search + year filter — fires whenever either changes,
+  // fetches page 1, and ignores stale responses if the user keeps
+  // typing/switching before an earlier request resolves.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -151,28 +151,19 @@ function PastInternshipsPageContent({
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-4 justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          {["All", ...academicYears].map((year) => (
-            <Link
-              key={year}
-              href={`/past-internships?filter=${year == "All" ? year.toLowerCase() : year}`}
-              className={cx(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                yearFilter === year.toLowerCase()
-                  ? "bg-primary-500 text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {year}
-            </Link>
-          ))}
+      <div className="flex gap-2 flex-col sm:flex-row">
+        <div className="items-start">
+          <SearchBar
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search company or alumni..."
+          />
         </div>
 
-        <SearchBar
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search company or alumni..."
+        <AcademicYearFilter
+          academicYears={academicYears}
+          value={yearFilter}
+          onChange={setYearFilter}
         />
       </div>
 

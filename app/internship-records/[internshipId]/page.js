@@ -49,22 +49,22 @@ async function InternshipRecordsDetailsPage({ params, searchParams }) {
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <Link
         href={`/internship-records`}
-        className="inline-flex items-center gap-2 text-sm text-stone-500 hover:underline"
+        className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors"
       >
         <ChevronLeft className="h-4 w-4" /> Back to records
       </Link>
 
       <RecordsHeader record={overviewData || {}} internshipId={internshipId} />
 
-      <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-200 bg-background p-1.5">
+      <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-300 bg-white shadow-sm p-1.5">
         {detailTabs.map((t) => (
           <Link
             key={t.value}
             href={`/internship-records/${internshipId}?filter=${t.value}`}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
               filter === t.value
                 ? "bg-primary-500 text-primary-foreground"
-                : "text-foreground/70 hover:text-primary-500"
+                : "text-stone-600 hover:bg-stone-100"
             }`}
           >
             {t.label}

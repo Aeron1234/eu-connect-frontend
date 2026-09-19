@@ -7,6 +7,7 @@ import { useTransition } from "react";
 import { createAnnouncement } from "../_services/dept-head-actions";
 import { toastAndAction } from "../_services/helpers";
 import { useUser } from "@/contexts/UserContext";
+import TitleButton from "./TitleButton";
 
 function PostAnnouncementButton({ categories, onPosted }) {
   const [isPending, startTransition] = useTransition();
@@ -33,10 +34,9 @@ function PostAnnouncementButton({ categories, onPosted }) {
   return (
     <Modal
       trigger={
-        <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition">
-          <Plus className="w-4 h-4" />
-          <span className="text-white text-sm font-semibold">Announce</span>
-        </div>
+        <TitleButton>
+          <Plus className="w-4 h-4" /> Announce
+        </TitleButton>
       }
       title="Post Announcement"
       titleIcon={

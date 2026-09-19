@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import Modal from "./Modal";
 import { useState } from "react";
-import { fetchMoreSearchedStudentNarratives } from "../_services/services";
+import { fetchMoreSearchedStudentWeeklyNarratives } from "../_services/services";
 
 function StudentNarratives({
   narratives: initialData = [],
@@ -21,7 +21,7 @@ function StudentNarratives({
     const nextPage = page + 1;
 
     try {
-      const newData = await fetchMoreSearchedStudentNarratives({
+      const newData = await fetchMoreSearchedStudentWeeklyNarratives({
         page: nextPage,
         searchedUserId,
       });
@@ -39,7 +39,7 @@ function StudentNarratives({
         setTotalPages(newData.totalPages);
       }
     } catch (error) {
-      console.error("Error loading more daily narratives:", error);
+      console.error("Error loading more weekly narratives:", error);
     } finally {
       setIsPending(false);
     }
@@ -59,7 +59,7 @@ function StudentNarratives({
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-bold text-primary-500 text-xs">
-                Day {n.day_number}
+                Week {n.week_number}
               </h3>
               <span className="text-xs text-stone-500">
                 {format(new Date(n.created_at), "MM/dd/yyyy")}
@@ -73,8 +73,8 @@ function StudentNarratives({
             <Modal
               title={
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(n.created_at), "MMMM-dd-yyyy")} · Day{" "}
-                  {n.day_number}
+                  {format(new Date(n.created_at), "MMMM-dd-yyyy")} · Week{" "}
+                  {n.week_number}
                 </p>
               }
               description={

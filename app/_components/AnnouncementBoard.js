@@ -132,7 +132,7 @@ function AnnouncementBoard({
 
   return (
     <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitle
           Icon={Megaphone}
           title={"Announcements"}
@@ -146,19 +146,20 @@ function AnnouncementBoard({
       </div>
 
       <div
-        className={`flex ${userRole !== "employer" ? "flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" : ""}`}
+        className={`flex ${userRole !== "employer" ? "flex-col gap-4 sm:flex-row sm:items-center" : ""}`}
       >
-        <AnnouncementsFilter
-          categories={categories}
-          category={category}
-          setCategory={setCategory}
-        />
         <SearchBar
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search announcements..."
           ariaLabel="Search announcements"
           position={userRole !== "employer" ? "right" : "left"}
+        />
+
+        <AnnouncementsFilter
+          categories={categories}
+          category={category}
+          setCategory={setCategory}
         />
       </div>
 

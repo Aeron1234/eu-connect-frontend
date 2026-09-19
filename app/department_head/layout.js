@@ -11,7 +11,7 @@ async function DepartmentHeadLayout({ children }) {
   const session = await getUserSession();
   if (!session?.user) return redirect("/login");
 
-  const role = session.user.role;
+  const role = session?.user?.role;
   if (role !== "department_head") return notFound();
 
   return (

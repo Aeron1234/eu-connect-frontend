@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { Search, UserPlus } from "lucide-react";
 import { getAllAccounts } from "../_services/admin-actions";
 import CreateAccountForm from "./CreateAccountForm";
-import AccountFilterChips from "./AccountFilterChips";
 import ExistingAccountList from "./ExistingAccountList";
+import SearchBar from "./SearchBar";
+import AccountDropdownFilter from "./AccountDropdownFilter";
 
 const tabs = ["Form", "Accounts"];
 
@@ -143,22 +144,24 @@ function AccountsManager({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name or email..."
-              aria-label="Search accounts"
-              className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
+          <div className="flex gap-2 flex-col sm:flex-row">
+            <div className="relative">
+              {/* <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /> */}
+              <SearchBar
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name or email..."
+                aria-label="Search accounts"
+                className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
+              />
+            </div>
+
+            <AccountDropdownFilter
+              roles={roles}
+              value={filter}
+              onChange={setFilter}
             />
           </div>
-
-          <AccountFilterChips
-            roles={roles}
-            value={filter}
-            onChange={setFilter}
-          />
 
           {accounts.length > 0 ? (
             <ExistingAccountList

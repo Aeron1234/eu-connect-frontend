@@ -13,13 +13,13 @@ import ProfileInfoGrid from "./ProfileInfoGrid";
 import {
   getSearchedStudentDTRs,
   getSearchedStudentDtrLocation,
-  getSearchedStudentNarratives,
+  getSearchedStudentWeeklyNarratives,
   getStudentPastEvaluations,
   getStudentEvaluationCriterias,
   getEmployerUploadedFiles,
 } from "../_services/services";
 
-function buildTabs({ userRole, searchedUserRole }) {
+function buildTabs({ userRole, searchedUserRole, supervision }) {
   if (searchedUserRole !== "student") {
     return [{ value: "info", text: "Info" }];
   }
@@ -27,6 +27,12 @@ function buildTabs({ userRole, searchedUserRole }) {
     return [{ value: "info", text: "Info" }];
   }
   if (userRole === "employer") {
+    // An employer only gets the record tabs for their own accepted intern.
+    // Anyone else they've searched — pending request, rejected, unrelated —
+    // sees Info only.
+    if (supervision?.status !== "accepted") {
+      return [{ value: "info", text: "Info" }];
+    }
     return [
       { value: "dtr", text: "DTR" },
       { value: "narratives", text: "Narratives" },
@@ -72,14 +78,23 @@ function SearchedUserRecordsManager({
   initialDtrData,
   initialDtrLocation,
   currentDtrPage,
+  supervision,
 }) {
-  const tabs = buildTabs({ userRole, searchedUserRole });
+  const tabs = buildTabs({ userRole, searchedUserRole, supervision });
 
-  const [selectedTab, setSelectedTab] = useState(defaultFilter);
-  const [filter, setFilter] = useState(defaultFilter);
+  // Defends against `defaultFilter` (computed server-side, in the page
+  // component) disagreeing with `tabs` (computed here) — e.g. if the two
+  // ever drift, or supervision resolves differently between the two calls.
+  // Always land on a tab that's actually in the list.
+  const safeDefaultFilter = tabs.some((tab) => tab.value === defaultFilter)
+    ? defaultFilter
+    : "info";
+
+  const [selectedTab, setSelectedTab] = useState(safeDefaultFilter);
+  const [filter, setFilter] = useState(safeDefaultFilter);
   const [dtrPage, setDtrPage] = useState(currentDtrPage || 1);
   const [data, setData] = useState(
-    defaultFilter === "dtr"
+    safeDefaultFilter === "dtr"
       ? { dtrData: initialDtrData, dtrLocation: initialDtrLocation }
       : {},
   );
@@ -101,7 +116,8 @@ function SearchedUserRecordsManager({
       return { dtrData, dtrLocation };
     },
     narratives: async () => {
-      const narrativeData = await getSearchedStudentNarratives(searchedUserId);
+      const narrativeData =
+        await getSearchedStudentWeeklyNarratives(searchedUserId);
       return { narrativeData };
     },
     evaluations: async () => {

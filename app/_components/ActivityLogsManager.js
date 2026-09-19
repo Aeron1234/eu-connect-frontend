@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Activity, ScrollText, Trash2 } from "lucide-react";
 import {
   getAllActivityLogs,
@@ -8,10 +8,10 @@ import {
 } from "@/app/_services/admin-actions";
 import SearchBar from "./SearchBar";
 import PageTitle from "./PageTitle";
-
-function cx(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+import DropdownFilter from "./DropdownFilter";
+import Modal from "./Modal";
+import DeleteForm from "./DeleteForm";
+import { toastAndAction } from "../_services/helpers";
 
 const ROLE_LABELS = {
   student: "Student",
@@ -68,6 +68,7 @@ export default function ActivityLogsManager({
     totalPages: initialTotalPages = 1,
   } = {},
 }) {
+  const [isLoading, startTransition] = useTransition();
   const [logs, setLogs] = useState(initialData);
   const [filterOptions] = useState(initialFilters);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -81,6 +82,22 @@ export default function ActivityLogsManager({
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
+
+  const actorRoleOptions = [
+    { value: "", label: "All Roles" },
+    ...filterOptions.actorRoles.map((role) => ({
+      value: role,
+      label: ROLE_LABELS[role] || toTitleCase(role),
+    })),
+  ];
+
+  const targetTypeOptions = [
+    { value: "", label: "All Modules" },
+    ...filterOptions.targetTypes.map((type) => ({
+      value: type,
+      label: toTitleCase(type),
+    })),
+  ];
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -169,14 +186,29 @@ export default function ActivityLogsManager({
     }
   }
 
-  async function handleDelete(logId) {
-    const result = await deleteActivityLog(logId);
-    if (result?.error) {
-      console.error(result.error);
-      return;
-    }
-    setLogs((prev) => prev.filter((l) => l.id !== logId));
+  async function handleDelete(formData) {
+    const logId = formData.get("logId");
+    const previousLogs = logs;
+
+    // Optimistically remove immediately
+    setLogs((prev) => prev.filter((l) => String(l.id) !== String(logId)));
     setTotal((prev) => Math.max(0, prev - 1));
+
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Deleting log entry...",
+        successLabel: "Log entry deleted.",
+        errorLabel: "Failed to delete.",
+        action: deleteActivityLog,
+        formData,
+      });
+
+      if (!result?.success) {
+        // Roll back on failure
+        setLogs(previousLogs);
+        setTotal((prev) => prev + 1);
+      }
+    });
   }
 
   return (
@@ -189,74 +221,31 @@ export default function ActivityLogsManager({
         }
       />
 
-      <div className="w-full items-start">
-        <SearchBar
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by description..."
-        />
-      </div>
-
       {/* Filters */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setActorRole("")}
-            className={cx(
-              "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
-              !actorRole
-                ? "bg-primary-500 text-primary-foreground"
-                : "bg-stone-200 text-muted-foreground hover:text-primary-500",
-            )}
-          >
-            All Roles
-          </button>
-          {filterOptions.actorRoles.map((role) => (
-            <button
-              key={role}
-              type="button"
-              onClick={() => setActorRole(role)}
-              className={cx(
-                "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
-                actorRole === role
-                  ? "bg-primary-500 text-primary-foreground"
-                  : "bg-stone-200 text-muted-foreground hover:text-primary-500",
-              )}
-            >
-              {ROLE_LABELS[role] || toTitleCase(role)}
-            </button>
-          ))}
+      <div className="flex gap-2 flex-col sm:flex-row">
+        <div className="items-start">
+          <SearchBar
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by description..."
+          />
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setTargetType("")}
-            className={cx(
-              "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
-              !targetType
-                ? "bg-primary-500 text-primary-foreground"
-                : "bg-stone-200 text-muted-foreground hover:text-primary-500",
-            )}
-          >
-            All Modules
-          </button>
-          {filterOptions.targetTypes.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setTargetType(type)}
-              className={cx(
-                "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
-                targetType === type
-                  ? "bg-primary-500 text-primary-foreground"
-                  : "bg-stone-200 text-muted-foreground hover:text-primary-500",
-              )}
-            >
-              {toTitleCase(type)}
-            </button>
-          ))}
+        <div className="flex gap-2 flex-wrap">
+          <DropdownFilter
+            value={actorRole}
+            onValueChange={setActorRole}
+            options={actorRoleOptions}
+            placeholder="Role"
+            className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+          />
+          <DropdownFilter
+            value={targetType}
+            onValueChange={setTargetType}
+            options={targetTypeOptions}
+            placeholder="Module"
+            className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+          />
         </div>
       </div>
 
@@ -322,13 +311,30 @@ export default function ActivityLogsManager({
                       {formatTimestamp(log.created_at)}
                     </td>
                     <td className="px-4 sm:px-5 py-3 text-right">
-                      <button
-                        onClick={() => handleDelete(log.id)}
-                        className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                        title="Delete log entry"
+                      <Modal
+                        trigger={
+                          <div
+                            title="Delete log entry"
+                            className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 className="size-4" />
+                          </div>
+                        }
+                        title={
+                          <span className={`text-primary-500`}>
+                            Delete Daily Time Record
+                          </span>
+                        }
+                        // title={<span className="text-red-600">Clock-out?</span>}
+                        description={`Are you sure you want to delete this activity log entry?`}
                       >
-                        <Trash2 className="size-4" />
-                      </button>
+                        <DeleteForm
+                          handleAction={handleDelete}
+                          id={log.id}
+                          isPending={isLoading}
+                          name={"logId"}
+                        />
+                      </Modal>
                     </td>
                   </tr>
                 );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import EmployerEvaluations from "./EmployerEvaluations";
 import EvaluationCard from "./EvaluationCard";
+import TabBar from "./TabBar";
 import {
   getAllEvaluations,
   getDisputedEvaluations,
@@ -17,6 +18,11 @@ const tabs = [
   { label: "Past Evaluations", value: "past-evaluations" },
   { label: "Disputed", value: "disputed" },
 ];
+
+// TabBar expects { value, text } — this file's evaluation tabs use
+// { value, label } — mapped once here rather than changing either
+// component's expected shape.
+const filterTabs = tabs.map((t) => ({ value: t.value, text: t.label }));
 
 // Each tab pulls from a different endpoint with a different shape — this
 // normalizes them all to { criteria } or { evaluations } so the render
@@ -92,22 +98,11 @@ function EvaluationsManager({ initialCriteria = [] }) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-300 bg-white shadow-sm p-1.5">
-        {tabs.map((t) => (
-          <button
-            key={t.value}
-            type="button"
-            onClick={() => handleTabClick(t.value)}
-            className={`rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
-              selectedTab === t.value
-                ? "bg-primary-500 text-primary-foreground"
-                : "text-stone-600 hover:bg-stone-100"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <TabBar
+        tabs={filterTabs}
+        selectedTab={selectedTab}
+        onSelect={handleTabClick}
+      />
 
       <div className="flex flex-col gap-2 mt-2">
         {isPending ? (

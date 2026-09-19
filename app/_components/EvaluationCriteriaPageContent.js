@@ -247,15 +247,15 @@ export default function EvaluationCriteriaPageContent({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-stone-300 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex rounded-lg bg-stone-200 p-1 w-fit">
+        <div className="inline-flex rounded-lg bg-stone-200 p-1">
           {[
-            { value: "student", label: "Student Performance" },
-            { value: "employer", label: "Employer / Supervisor" },
+            { value: "student", label: "Student" },
+            { value: "employer", label: "Employer" },
           ].map((t) => (
             <Link
               key={t.value}
               href={`/admin/evaluation-criteria?form_type=${t.value}&filter=${filter}`}
-              className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-1 text-center ${
                 formType === t.value
                   ? "bg-primary-500 text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-primary-500"

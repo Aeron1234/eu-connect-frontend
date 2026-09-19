@@ -7,6 +7,7 @@ import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
 import { useTransition } from "react";
 import { postAlumniRecord } from "../_services/dept-head-actions";
 import { toastAndAction } from "../_services/helpers";
+import TitleButton from "./TitleButton";
 
 function PastInternshipPostButton({ courses = [] }) {
   const [isPending, startTransition] = useTransition();
@@ -32,10 +33,9 @@ function PastInternshipPostButton({ courses = [] }) {
   return (
     <Modal
       trigger={
-        <div className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition cursor-pointer shrink-0">
-          <Plus className="w-4 h-4" />
-          <span className="text-white text-sm font-semibold">Post Record</span>
-        </div>
+        <TitleButton>
+          <Plus className="w-4 h-4" /> Post Record
+        </TitleButton>
       }
       title={
         <span className={`text-primary-500`}>

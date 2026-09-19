@@ -10,7 +10,6 @@ import {
 
 import DtrTable from "../app/_components/DtrTable";
 import StudentNarratives from "../app/_components/StudentNarratives";
-import StudentEvaluationList from "../app/_components/StudentEvaluationList";
 import StudentEvaluationCriteria from "../app/_components/StudentEvaluationCriteria";
 import SetDtrLocation from "../app/_components/SetDtrLocation";
 import EmployerCertificateUploads from "../app/_components/EmployerCertificateUploads";

@@ -13,24 +13,14 @@ function DailyNarrativePostButton() {
   function handleAction(formData) {
     startTransition(() =>
       toastAndAction({
-        loadingLabel: "Deleting narrative...",
-        successLabel: "Narrative deleted.",
-        errorLabel: "Failed to delete.",
+        loadingLabel: "Saving narrative...",
+        successLabel: "Narrative saved.",
+        errorLabel: "Failed to save narrative.",
         action: createNarrative,
         formData,
       }),
     );
   }
-
-  // useEffect(() => {
-  //   if (!state) return;
-
-  //   if (state.success) {
-  //     toast.success(state.message || "Narrative added");
-  //   } else {
-  //     toast.error(state.error || "Failed");
-  //   }
-  // }, [state]);
 
   return (
     <Modal

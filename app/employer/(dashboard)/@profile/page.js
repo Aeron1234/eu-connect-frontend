@@ -8,8 +8,6 @@ export const metadata = {
 async function ProfilePage() {
   const profile = await getUserProfile();
 
-  console.log("user profile", profile);
-
   return <EmployerProfileCard profile={profile} />;
 }
 
