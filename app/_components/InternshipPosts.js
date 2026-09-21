@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { BriefcaseBusiness } from "lucide-react";
+import { BriefcaseBusiness, Loader2 } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
 import SearchBar from "./SearchBar";
 import DropdownFilter from "./DropdownFilter";
@@ -21,13 +20,6 @@ const workTypeTabs = [
   { label: "Remote", workType: "remote" },
 ];
 
-function buildHref({ scope }) {
-  const params = new URLSearchParams();
-  if (scope) params.set("scope", scope);
-  const qs = params.toString();
-  return `/internships${qs ? `?${qs}` : ""}`;
-}
-
 function keyOf(post) {
   return post.id;
 }
@@ -42,7 +34,7 @@ function InternshipPosts({
   courses = [],
   workType: initialWorkType = "",
   courseId: initialCourseId = "",
-  scope = "",
+  scope: initialScope = "",
 }) {
   const [internshipPosts, setInternshipPosts] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -53,6 +45,7 @@ function InternshipPosts({
   const [courseId, setCourseId] = useState(
     initialCourseId ? String(initialCourseId) : "",
   );
+  const [scope, setScope] = useState(initialScope || "");
   const [isPending, setIsPending] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
@@ -104,6 +97,9 @@ function InternshipPosts({
     prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
   }, [initialData, initialPage, initialTotalPages, initialTotal]);
 
+  // Debounced refetch — now also fires on scope changes, not just
+  // query/workType/courseId, since scope switched from URL navigation
+  // to local state.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -210,14 +206,15 @@ function InternshipPosts({
 
   return (
     <>
-      {/* Scope tabs */}
+      {/* Scope tabs — now client state instead of Link navigation */}
       {userRole === "employer" && (
         <div className="flex flex-1 flex-wrap items-center gap-3">
           <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
             {scopeTabs.map((s) => (
-              <Link
+              <button
                 key={s.value}
-                href={buildHref({ scope: s.value })}
+                type="button"
+                onClick={() => setScope(s.value)}
                 className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   scope === s.value
                     ? "bg-primary-500 text-primary-foreground"
@@ -225,13 +222,13 @@ function InternshipPosts({
                 }`}
               >
                 {s.label}
-              </Link>
+              </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Filters — same style as ActivityLogsManager */}
+      {/* Filters */}
       <div className="flex gap-2 flex-col sm:flex-row">
         <div className="items-start">
           <SearchBar
@@ -266,33 +263,39 @@ function InternshipPosts({
       </p>
 
       {/* Listings */}
-      <div className="space-y-4 sm:space-y-6">
-        {internshipPosts.map((item) => {
-          const isFavorited = favoriteIds.has(item.id);
-          return (
-            <InternshipPostsList
-              key={item.id}
-              item={item}
-              isFavorited={isFavorited}
-              setFavoriteIds={setFavoriteIds}
-              userRole={userRole}
-              userId={userId}
-              courses={courses}
-              onUpdate={handleItemUpdate}
-              onDelete={() => handleItemDelete(item.id)}
-            />
-          );
-        })}
+      {isPending && internshipPosts.length === 0 ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        </div>
+      ) : (
+        <div className="space-y-4 sm:space-y-6">
+          {internshipPosts.map((item) => {
+            const isFavorited = favoriteIds.has(item.id);
+            return (
+              <InternshipPostsList
+                key={item.id}
+                item={item}
+                isFavorited={isFavorited}
+                setFavoriteIds={setFavoriteIds}
+                userRole={userRole}
+                userId={userId}
+                courses={courses}
+                onUpdate={handleItemUpdate}
+                onDelete={() => handleItemDelete(item.id)}
+              />
+            );
+          })}
 
-        {internshipPosts.length === 0 && !isPending && (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-            <BriefcaseBusiness className="size-8 text-stone-300" />
-            <p className="text-sm text-stone-500">
-              No internship listings found.
-            </p>
-          </div>
-        )}
-      </div>
+          {internshipPosts.length === 0 && !isPending && (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+              <BriefcaseBusiness className="size-8 text-stone-300" />
+              <p className="text-sm text-stone-500">
+                No internship listings found.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {currentPage < totalPages && (
         <div className="w-full">

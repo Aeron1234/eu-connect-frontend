@@ -62,9 +62,6 @@ function PastInternshipsPageContent({
     prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
   }, [initialData, initialPage, initialTotalPages]);
 
-  // Debounced search + year filter — fires whenever either changes,
-  // fetches page 1, and ignores stale responses if the user keeps
-  // typing/switching before an earlier request resolves.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -82,7 +79,7 @@ function PastInternshipsPageContent({
           page: 1,
         });
 
-        if (thisRequestId !== requestIdRef.current) return; // stale, ignore
+        if (thisRequestId !== requestIdRef.current) return;
 
         if (newData?.error) {
           console.error("Error searching past internships:", newData.error);
@@ -168,18 +165,16 @@ function PastInternshipsPageContent({
       </div>
 
       {companies.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-24 text-center ">
-          <Building2 className="size-8 text-muted-foreground" />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">
-            No companies found
-          </p>
-          <p className="mt-2 max-w-sm text-xs text-muted-foreground/70">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+          <Building2 className="size-8 text-stone-300" />
+          <p className="text-sm text-stone-500">No companies found</p>
+          <p className="max-w-sm text-xs text-stone-400">
             Try a different batch filter or clear the search.
           </p>
         </div>
       ) : (
         <>
-          <div className="mt-6 space-y-3">
+          <div className="space-y-3">
             {companies.map((c) => (
               <AlumniCompanies
                 company={c}
@@ -195,7 +190,7 @@ function PastInternshipsPageContent({
             <button
               onClick={handleSeeMore}
               disabled={isPending}
-              className="w-full text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+              className="w-full text-center text-sm sm:text-base font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
             >
               {isPending ? "Loading..." : "See more"}
             </button>

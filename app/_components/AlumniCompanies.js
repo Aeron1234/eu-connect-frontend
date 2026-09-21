@@ -1,7 +1,6 @@
 "use client";
 
-import { cx } from "@/lib/utils";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toastAndAction } from "../_services/helpers";
 import {
@@ -12,6 +11,8 @@ import Modal from "./Modal";
 import DeleteForm from "./DeleteForm";
 import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
 import { useUser } from "@/contexts/UserContext";
+import { cx } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 
 function initialsOf(name) {
   return name
@@ -32,30 +33,28 @@ function AlumniCompanies({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card hover:shadow-md">
+    <div className="overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm hover:shadow-md transition-shadow">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+        className="flex w-full items-center justify-between gap-3 px-4 sm:px-5 py-4 text-left"
       >
-        <div className="flex items-center gap-3">
-          <div>
-            <p className="text-base font-semibold text-foreground">
-              {company.company_name}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {company.company_address} · {company.industry}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <p className="text-sm sm:text-base font-semibold text-stone-800 truncate">
+            {company.company_name}
+          </p>
+          <p className="text-xs text-stone-500">
+            {company.company_address} · {company.industry}
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
             {company.alumni_count}{" "}
             {company.alumni_count === 1 ? "alumnus" : "alumni"}
           </span>
           <ChevronDown
             className={cx(
-              "size-4 text-muted-foreground transition-transform",
+              "size-4 text-stone-400 transition-transform",
               isOpen && "rotate-180",
             )}
           />
@@ -63,12 +62,12 @@ function AlumniCompanies({
       </button>
 
       {isOpen && (
-        <div className="border-t border-border">
+        <div className="border-t border-stone-200">
           {company.alumni.map((a) => (
             <AlumniRow
               key={a.id}
               alumni={a}
-              batch={a.academic_year.split("-")[1]}
+              batch={a.academic_year?.split("-")[1]}
               onUpdate={handleItemUpdate}
               onDelete={handleItemDelete}
               courses={courses}
@@ -94,7 +93,6 @@ function AlumniRow({
   industry,
 }) {
   const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
   const { user } = useUser();
 
   const userRole = user.role;
@@ -139,56 +137,38 @@ function AlumniRow({
     });
   }
 
-  const pct = alumni.total_hours
-    ? Math.min(
-        100,
-        Math.round((alumni.accumulated_hours / alumni.total_hours) * 100),
-      )
-    : 0;
-
   return (
-    <div className="border-t border-border first:border-t-0">
-      <div className="flex w-full items-center justify-between gap-3 px-5 py-3">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 text-left"
-        >
-          <div className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center rounded-lg bg-primary-500/10 text-xs font-semibold text-primary">
-              {initialsOf(alumni.alumni_name)}
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {alumni.alumni_name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {alumni.course_name} · Batch {batch}
-              </p>
-            </div>
+    <div className="border-t border-stone-200 first:border-t-0">
+      <div className="flex w-full items-center justify-between gap-3 px-4 sm:px-5 py-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-500">
+            {initialsOf(alumni.alumni_name)}
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-stone-800 truncate">
+              {alumni.alumni_name}
+            </p>
+            <p className="text-xs text-stone-500">
+              {alumni.course_name}
+              {batch ? ` · Batch ${batch}` : ""}
+            </p>
           </div>
-          <ChevronDown
-            className={cx(
-              "size-4 shrink-0 text-muted-foreground transition-transform",
-              open && "rotate-180",
-            )}
-          />
-        </button>
+        </div>
 
         {isAuthorizedStaff ? (
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-shrink-0">
             <Modal
-              title={<span className="text-red-600">Update Record</span>}
+              title={<span className="text-primary-500">Update Record</span>}
               trigger={
                 <div
-                  aria-label={`Edit record`}
+                  aria-label="Edit record"
                   title="Edit record"
-                  className="text-muted-foreground hover:text-primary-500"
+                  className="text-stone-400 hover:text-primary-500 transition-colors cursor-pointer"
                 >
                   <Pencil className="h-4 w-4" />
                 </div>
               }
-              description={"Do you want to change something?"}
+              description="Do you want to change something?"
             >
               <PastInternshipPostEditForm
                 data={{
@@ -209,68 +189,24 @@ function AlumniRow({
               trigger={
                 <div
                   title="Delete record"
-                  aria-label={`Delete record`}
-                  className="text-muted-foreground hover:text-destructive"
+                  aria-label="Delete record"
+                  className="text-stone-400 hover:text-red-600 transition-colors cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                 </div>
               }
-              description={"Are you sure you want to delete this record?"}
+              description="Are you sure you want to delete this record?"
             >
               <DeleteForm
                 isPending={isPending}
                 id={alumni.id}
-                name={"recordId"}
+                name="recordId"
                 handleAction={handleDelete}
               />
             </Modal>
           </div>
         ) : null}
       </div>
-
-      {open && (
-        <div className="px-5 pb-5">
-          <div className="grid gap-4 sm:grid-cols-4">
-            <div>
-              <p className="text-xs text-muted-foreground">Position</p>
-              <p className="mt-0.5 text-sm font-medium text-foreground">
-                {alumni.internship_position || "—"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Supervisor</p>
-              <p className="mt-0.5 text-sm font-medium text-foreground">
-                {alumni.supervisor_name || "—"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Hours</p>
-              <p className="mt-0.5 text-sm font-medium text-foreground">
-                {Number(alumni.accumulated_hours.toFixed(1))} /{" "}
-                {alumni.total_hours} hrs
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Notes</p>
-              <p className="mt-0.5 text-sm font-medium text-foreground">
-                {alumni.notes || "—"}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary-500 transition-all"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              {pct}% hours completed
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

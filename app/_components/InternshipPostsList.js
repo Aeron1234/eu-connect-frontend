@@ -84,58 +84,46 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
   const canEdit = item.isOwner;
 
   return (
-    <article
-      key={item.id}
-      className="rounded-xl border border-border bg-background p-6 shadow-sm"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 gap-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-500/10 text-primary-500 text-xs font-bold">
+    <article className="rounded-xl border border-stone-300 bg-white p-4 sm:p-6 shadow-sm">
+      {/* Header row: avatar + title/company, edit/delete pinned top-right */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 gap-3 sm:gap-4">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-500 text-xs font-bold">
             {companyNameInitials(item.company_name)}
           </span>
           <div className="min-w-0">
-            <h2 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold">
-              {item.position}
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base sm:text-lg font-semibold sm:font-bold text-stone-800">
+                {item.position}
+              </h2>
               {item.isOwner && (
-                <span className="rounded-md bg-accent px-2 py-0.5 text-[11px] font-semibold text-primary-500">
+                <span className="rounded-md bg-primary-50 px-2 py-0.5 text-[11px] font-semibold text-primary-600">
                   My Post
                 </span>
               )}
-            </h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {item.company_name}
-            </p>
+            </div>
+            <p className="mt-0.5 text-sm text-stone-500">{item.company_name}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span
-            className={`rounded-full border px-3 py-1 text-xs font-medium ${workTypeStyles[item.work_type]}`}
-          >
-            {item.work_type}
-          </span>
-          <span className="flex items-center gap-1.5 text-sm text-foreground/80">
-            <Users className="h-4 w-4 text-muted-foreground" /> {item.vacancies}{" "}
-            vacancies
-          </span>
-
-          <div className="flex items-center gap-3">
+        {(canEdit || canDelete) && (
+          <div className="flex items-center gap-1 flex-shrink-0">
             {canEdit && (
               <Modal
                 trigger={
                   <div
-                    aria-label={`Edit ${item.title}`}
-                    className="text-muted-foreground hover:text-primary-500"
+                    aria-label={`Edit ${item.position}`}
+                    className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-primary-500 transition-colors cursor-pointer"
                   >
                     <Pencil className="h-4 w-4" />
                   </div>
                 }
                 title={
-                  <span className={`text-primary-500`}>
+                  <span className="text-primary-500">
                     Update internship post
                   </span>
                 }
-                description={`Are you sure you want to delete this post?`}
+                description="Update the details for this posting."
               >
                 <InternshipPostForm
                   handleAction={handleUpdate}
@@ -150,18 +138,18 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
               <Modal
                 trigger={
                   <div
-                    aria-label={`Delete ${item.title}`}
-                    className="text-muted-foreground hover:text-destructive"
+                    aria-label={`Delete ${item.position}`}
+                    className="p-1.5 rounded-md text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </div>
                 }
                 title={
-                  <span className={`text-primary-500`}>
+                  <span className="text-primary-500">
                     Delete internship post
                   </span>
                 }
-                description={`Are you sure you want to delete this post?`}
+                description="Are you sure you want to delete this post?"
               >
                 <DeleteForm
                   handleAction={handleDelete}
@@ -172,90 +160,103 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
               </Modal>
             )}
           </div>
-
-          {!item.isOwner && userRole === "student" && (
-            <button
-              type="button"
-              onClick={toggleFavorite}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                isFavorited
-                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                  : "bg-primary-500 text-primary-foreground hover:bg-primary-500-deep"
-              }`}
-            >
-              {isFavorited && <Check className="h-3.5 w-3.5" />}
-              {isFavorited ? "Favorite" : "Mark as Favorite"}
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
-      <p className="mt-4 text-sm text-foreground/80">{item.description}</p>
+      {/* Work type, vacancies, favorite — its own row so it always wraps cleanly */}
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <span
+          className={`rounded-full border px-3 py-1 text-xs font-medium ${workTypeStyles[item.work_type]}`}
+        >
+          {item.work_type}
+        </span>
+        <span className="flex items-center gap-1.5 text-sm text-stone-600">
+          <Users className="h-4 w-4 text-stone-400" /> {item.vacancies}{" "}
+          vacancies
+        </span>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-        <div className="flex flex-wrap items-center gap-5">
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5" /> {item.location}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5" /> {item.duration_hours} hours
-          </span>
-          {item.courses.length > 0 ? (
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-foreground/70">Course:</span>{" "}
-              <ul className="flex gap-1.5">
-                {item.courses.map((c) => (
-                  <li key={c.id} className="p-1 bg-stone-100 rounded-lg">
-                    {c.shortName}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
-        <span>Posted {format(new Date(item.created_at), "mm-dd-yyyy")}</span>
+        {!item.isOwner && userRole === "student" && (
+          <button
+            type="button"
+            onClick={toggleFavorite}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+              isFavorited
+                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                : "bg-primary-500 text-white hover:bg-primary-600"
+            }`}
+          >
+            {isFavorited && <Check className="h-3.5 w-3.5" />}
+            {isFavorited ? "Favorite" : "Mark as Favorite"}
+          </button>
+        )}
+      </div>
+
+      <p className="mt-4 text-sm text-stone-700">{item.description}</p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-stone-500">
+        <span className="flex items-center gap-1.5">
+          <MapPin className="h-3.5 w-3.5" /> {item.location}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5" /> {item.duration_hours} hours
+        </span>
+        {item.courses.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-medium text-stone-600">Course:</span>
+            {item.courses.map((c) => (
+              <span
+                key={c.id}
+                className="rounded-md bg-stone-100 px-2 py-0.5 text-stone-700"
+              >
+                {c.shortName}
+              </span>
+            ))}
+          </div>
+        )}
+        <span className="ml-0 sm:ml-auto">
+          Posted {format(new Date(item.created_at), "MMM d, yyyy")}
+        </span>
       </div>
 
       <div className="mt-4">
-        <p className="text-xs font-semibold text-foreground/70">
-          Requirements:
-        </p>
-        <ul className="mt-2 space-y-1.5 list-inside">
+        <p className="text-xs font-semibold text-stone-600">Requirements:</p>
+        <ul className="mt-2 space-y-1.5">
           {item.requirements.split("\n").map((r, i) => (
             <li
               key={i}
-              className="flex items-start gap-2 text-sm text-foreground/80"
+              className="flex items-start gap-2 text-sm text-stone-700"
             >
-              <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-muted-foreground" />
+              <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-stone-400" />
               {r}
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="mt-5 border-t border-border pt-4">
-        <p className="text-xs font-semibold text-muted-foreground">
-          Contact Details:
-        </p>
+      <div className="mt-5 border-t border-stone-200 pt-4">
+        <p className="text-xs font-semibold text-stone-500">Contact Details:</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-          <span className="font-medium">{item.contact_name}</span>
+          <span className="font-medium text-stone-800">
+            {item.contact_name}
+          </span>
           <a
             href={`mailto:${item.contact_email}`}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-500"
+            className="flex items-center gap-1.5 text-stone-500 hover:text-primary-500 transition-colors"
           >
             <Mail className="h-3.5 w-3.5" /> {item.contact_email}
           </a>
           <a
             href={`tel:${item.contact_phone.replace(/[^\d+]/g, "")}`}
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-500"
+            className="flex items-center gap-1.5 text-stone-500 hover:text-primary-500 transition-colors"
           >
             <Phone className="h-3.5 w-3.5" /> {item.contact_phone}
           </a>
+
           <a
             href={`https://${item.contact_website}`}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-500"
+            className="flex items-center gap-1.5 text-stone-500 hover:text-primary-500 transition-colors"
           >
             <Globe className="h-3.5 w-3.5" /> {item.contact_website}
           </a>
