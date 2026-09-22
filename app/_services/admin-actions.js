@@ -6,8 +6,9 @@ import { revalidatePath } from "next/cache";
 
 export const getAllAccounts = cache(
   async ({ filter = "all", search = "", page = 1 } = {}) => {
+    const accessToken = await getAccessToken();
+
     try {
-      const accessToken = await getAccessToken();
       if (!accessToken) throw new Error("You must be logged in.");
 
       const res = await fetch(
@@ -37,8 +38,9 @@ export const getAllAccounts = cache(
 );
 
 export async function createUser(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const userData = Object.fromEntries(formData);
@@ -67,8 +69,9 @@ export async function createUser(prevState, formData) {
 }
 
 export async function deactivateAccount(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     if (!formData || typeof formData.get !== "function") {
@@ -101,8 +104,9 @@ export async function deactivateAccount(prevState, formData) {
 }
 
 export async function reactivateAccount(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     if (!formData || typeof formData.get !== "function") {
@@ -137,8 +141,9 @@ export async function reactivateAccount(prevState, formData) {
 }
 
 export const getAllEvaluationCriteria = cache(async ({ type = "employer" }) => {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     if (!["student", "employer"].includes(type)) {
@@ -183,8 +188,9 @@ export const getAllEvaluationCriteria = cache(async ({ type = "employer" }) => {
 });
 
 export async function addCriterion(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const type = formData.get("type");
@@ -227,8 +233,9 @@ export async function addCriterion(prevState, formData) {
 }
 
 export async function deactivateCriterion(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const criterionId = formData.get("id");
@@ -270,8 +277,9 @@ export async function deactivateCriterion(prevState, formData) {
 }
 
 export async function reactivateCriterion(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const criterionId = formData.get("id");
@@ -310,8 +318,9 @@ export async function reactivateCriterion(prevState, formData) {
 }
 
 export async function deactivateSection(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const category = formData.get("category");
@@ -353,8 +362,9 @@ export async function deactivateSection(prevState, formData) {
 }
 
 export async function reactivateSection(prevState, formData) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const category = formData.get("category");
@@ -400,8 +410,9 @@ export async function reactivateSection(prevState, formData) {
 }
 
 export async function activateDepartment(id) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const res = await fetch(
@@ -422,8 +433,9 @@ export async function activateDepartment(id) {
 }
 
 export async function deactivateDepartment(id) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const res = await fetch(
@@ -444,8 +456,9 @@ export async function deactivateDepartment(id) {
 }
 
 export async function activateCourse(id) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const res = await fetch(
@@ -466,8 +479,9 @@ export async function activateCourse(id) {
 }
 
 export async function deactivateCourse(id) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const res = await fetch(
@@ -488,8 +502,9 @@ export async function deactivateCourse(id) {
 }
 
 export async function addDepartment({ name, code }) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const res = await fetch(`${process.env.API_BASE_URL}/api/departments`, {
@@ -514,8 +529,9 @@ export async function addDepartment({ name, code }) {
 }
 
 export async function addCourse({ course_name, short_name, department_id }) {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const res = await fetch(`${process.env.API_BASE_URL}/api/courses`, {
@@ -547,8 +563,9 @@ export const getAllActivityLogs = cache(
     search = "",
     page = 1,
   } = {}) => {
+    const accessToken = await getAccessToken();
+
     try {
-      const accessToken = await getAccessToken();
       if (!accessToken) return { error: "Not signed in." };
 
       const params = new URLSearchParams({ page: String(page) });
@@ -576,8 +593,9 @@ export const getAllActivityLogs = cache(
 );
 
 export const deleteActivityLog = async (prevState, formData) => {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const logId = formData.get("logId");
@@ -600,8 +618,9 @@ export const deleteActivityLog = async (prevState, formData) => {
 };
 
 export const getAdminDashboardStats = async () => {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "You must be logged in." };
 
     const res = await fetch(
@@ -629,8 +648,9 @@ export const getAdminDashboardStats = async () => {
 };
 
 export const getAdminDashboardData = async () => {
+  const accessToken = await getAccessToken();
+
   try {
-    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "You must be logged in." };
 
     const res = await fetch(
