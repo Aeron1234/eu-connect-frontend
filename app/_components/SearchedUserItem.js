@@ -26,6 +26,7 @@ function SearchedUserItem({ searchedUser }) {
       totalHours={searchedUser.total_hours}
       hoursRendered={searchedUser.hours_rendered}
       department={searchedUser.department}
+      avatar={searchedUser.avatar}
       onClick={handleSaveHistory}
     />
   );

@@ -22,23 +22,23 @@ export default function AccountPageHeader({
           }
         />
 
-        <div className="flex justify-end">
+        <div className="flex sm:justify-end w-full">
           {!isEditing ? (
             <button
               type="button"
               onClick={onEdit}
-              className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition"
+              className="inline-flex items-center justify-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
             >
               <Pencil className="h-4 w-4" />
               <span className="text-sm font-semibold">Edit Profile</span>
             </button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={onCancel}
                 disabled={isSaving}
-                className="inline-flex items-center gap-2 border border-border px-4 py-2.5 rounded-md text-sm font-semibold text-foreground hover:bg-secondary transition disabled:opacity-50"
+                className="inline-flex items-center justify-center border border-border gap-2 px-4 py-2.5 rounded-md text-sm text-foreground font-semibold transition w-full sm:w-auto disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
                 Cancel
@@ -47,7 +47,7 @@ export default function AccountPageHeader({
                 type="button"
                 onClick={onSave}
                 disabled={isSaving}
-                className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
               >
                 <Check className="h-4 w-4" />
                 {isSaving ? "Saving..." : "Save Changes"}

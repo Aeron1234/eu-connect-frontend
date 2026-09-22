@@ -1,17 +1,8 @@
 import RecordsDetailsPageContent from "@/app/_components/RecordsDetailsPageContent";
 import RecordsHeader from "@/app/_components/RecordsHeader";
 import { getInternshipRecordOverview } from "@/app/_services/dept-head-actions";
-import { getUserSession } from "@/src-copies/services";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-
-const detailTabs = [
-  { label: "Overview", value: "overview" },
-  { label: "DTR", value: "dtr" },
-  { label: "Narratives", value: "narratives" },
-  { label: "Evaluations", value: "evaluations" },
-  { label: "Documents", value: "documents" },
-];
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -31,9 +22,8 @@ export async function generateMetadata({ params }) {
   return { title: "Internship Record" };
 }
 
-async function InternshipRecordsDetailsPage({ params, searchParams }) {
+async function InternshipRecordsDetailsPage({ params }) {
   const resolvedParams = await params;
-  const sParams = await searchParams;
 
   const internshipId = resolvedParams.internshipId
     ? decodeURIComponent(resolvedParams.internshipId)
@@ -42,8 +32,6 @@ async function InternshipRecordsDetailsPage({ params, searchParams }) {
   const overviewData = internshipId
     ? await getInternshipRecordOverview(internshipId)
     : null;
-
-  const filter = sParams.filter || "overview";
 
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -56,25 +44,8 @@ async function InternshipRecordsDetailsPage({ params, searchParams }) {
 
       <RecordsHeader record={overviewData || {}} internshipId={internshipId} />
 
-      <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-300 bg-white shadow-sm p-1.5">
-        {detailTabs.map((t) => (
-          <Link
-            key={t.value}
-            href={`/internship-records/${internshipId}?filter=${t.value}`}
-            className={`rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
-              filter === t.value
-                ? "bg-primary-500 text-primary-foreground"
-                : "text-stone-600 hover:bg-stone-100"
-            }`}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </div>
-
       <RecordsDetailsPageContent
         record={overviewData || {}}
-        filter={filter}
         internshipId={internshipId}
       />
     </main>

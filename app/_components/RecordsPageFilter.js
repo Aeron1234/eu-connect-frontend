@@ -10,12 +10,12 @@ const tabs = [
   { value: "rejected", text: "Rejected" },
 ];
 
-function RecordsPageFilter({ filter, stats = {}, totalItems = 0 }) {
+function RecordsPageFilter({ filter, onSelect, stats = {}, totalItems = 0 }) {
   return (
     <TabBar
       tabs={tabs}
       selectedTab={filter}
-      getHref={(t) => `/internship-records?filter=${t.value}`}
+      onSelect={onSelect}
       getBadge={(t) =>
         t.value === "all" ? totalItems || null : stats[t.value] || null
       }

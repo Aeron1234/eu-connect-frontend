@@ -66,6 +66,7 @@ function SearchedUserHistoryItem({ history }) {
       totalHours={history.total_hours}
       hoursRendered={history.hours_rendered}
       department={history.department}
+      avatar={history.avatar}
       actions={
         <button
           onClick={(e) => {

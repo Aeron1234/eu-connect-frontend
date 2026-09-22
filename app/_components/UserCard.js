@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { GraduationCap, Briefcase, Crown, ShieldCheck } from "lucide-react";
+import {
+  GraduationCap,
+  Briefcase,
+  Crown,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import SupervisorRequestButton from "./SupervisorRequestButton";
 
@@ -61,6 +67,7 @@ function UserCard({
   totalHours,
   hoursRendered,
   department,
+  avatar = null,
   onClick,
   actions,
   className = "",
@@ -92,9 +99,16 @@ function UserCard({
           href={`/users/${userId}`}
           className="flex items-start sm:items-center gap-3 flex-1 min-w-0"
         >
-          <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 text-base font-bold shrink-0">
-            {firstName?.charAt(0).toUpperCase()}
-            {lastName?.charAt(0).toUpperCase()}
+          <div className="w-12 h-12 sm:w-15 sm:h-15 rounded-xl bg-stone-100 border-2 border-primary-100 overflow-hidden flex items-center justify-center text-stone-400">
+            {avatar ? (
+              <img
+                src={`/avatars/${avatar}`}
+                alt="Avatar option"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <User className="w-7 h-7 sm:w-9 sm:h-9" />
+            )}
           </div>
 
           <div className="flex-1 min-w-0">

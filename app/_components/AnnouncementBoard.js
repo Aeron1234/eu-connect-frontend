@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Megaphone } from "lucide-react";
+import { Loader2, Megaphone } from "lucide-react";
 import { getAllAnnouncements } from "../_services/services";
 import PostAnnouncementButton from "./PostAnnouncementButton";
 import AnnouncementCard from "./AnnouncementCard";
@@ -26,7 +26,8 @@ function AnnouncementBoard({
   const [regular, setRegular] = useState(initialRegular);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [isPending, setIsPending] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
@@ -52,7 +53,7 @@ function AnnouncementBoard({
     const thisRequestId = ++requestIdRef.current;
 
     const timeout = setTimeout(async () => {
-      setIsPending(true);
+      setIsSearching(true);
       try {
         const newData = await getAllAnnouncements({
           category,
@@ -80,7 +81,7 @@ function AnnouncementBoard({
           console.error("Error loading announcements:", error);
         }
       } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
+        if (thisRequestId === requestIdRef.current) setIsSearching(false);
       }
     }, 500);
 
@@ -88,8 +89,8 @@ function AnnouncementBoard({
   }, [category, search]);
 
   async function handleSeeMore() {
-    if (isPending || page >= totalPages) return;
-    setIsPending(true);
+    if (isSearching || isLoadingMore || page >= totalPages) return;
+    setIsLoadingMore(true);
     const nextPage = page + 1;
     const thisRequestId = ++requestIdRef.current;
 
@@ -122,7 +123,7 @@ function AnnouncementBoard({
         console.error("Error loading more announcements:", error);
       }
     } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
+      if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
     }
   }
 
@@ -163,63 +164,70 @@ function AnnouncementBoard({
         />
       </div>
 
-      <div className="space-y-6">
-        {isPinnedExist && (
-          <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary-500">
-              Pinned
-            </p>
-            <ul className="flex flex-col gap-3">
-              {pinned.map((announcement) => (
-                <li key={`pinned-${announcement.id}`}>
-                  <AnnouncementCard
-                    announcement={announcement}
-                    categories={categories}
-                    onChanged={refreshList}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {filteredRegular.length > 0 ? (
-          <div>
-            {isPinnedExist && (
-              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-stone-400">
-                Earlier
+      {isSearching ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {isPinnedExist && (
+            <div>
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary-500">
+                Pinned
               </p>
-            )}
-            <ul className="flex flex-col gap-3">
-              {filteredRegular.map((announcement) => (
-                <li key={`reg-${announcement.id}`}>
-                  <AnnouncementCard
-                    announcement={announcement}
-                    categories={categories}
-                    onChanged={refreshList}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          !isPending &&
-          page === 1 && (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-white border-stone-200 py-16 text-center">
-              <Megaphone className="size-8 text-stone-300" />
-              <p className="text-sm text-stone-500">No announcements found.</p>
+              <ul className="flex flex-col gap-3">
+                {pinned.map((announcement) => (
+                  <li key={`pinned-${announcement.id}`}>
+                    <AnnouncementCard
+                      announcement={announcement}
+                      categories={categories}
+                      onChanged={refreshList}
+                    />
+                  </li>
+                ))}
+              </ul>
             </div>
-          )
-        )}
-      </div>
+          )}
 
-      {page < totalPages && (
+          {filteredRegular.length > 0 ? (
+            <div>
+              {isPinnedExist && (
+                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-stone-400">
+                  Earlier
+                </p>
+              )}
+              <ul className="flex flex-col gap-3">
+                {filteredRegular.map((announcement) => (
+                  <li key={`reg-${announcement.id}`}>
+                    <AnnouncementCard
+                      announcement={announcement}
+                      categories={categories}
+                      onChanged={refreshList}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            page === 1 && (
+              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-white border-stone-200 py-16 text-center">
+                <Megaphone className="size-8 text-stone-300" />
+                <p className="text-sm text-stone-500">
+                  No announcements found.
+                </p>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      {!isSearching && page < totalPages && (
         <button
           onClick={handleSeeMore}
-          disabled={isPending}
+          disabled={isLoadingMore}
           className="w-full text-center text-lg font-semibold text-stone-600 transition hover:text-primary-500 disabled:opacity-50"
         >
-          {isPending ? "Loading..." : "See more"}
+          {isLoadingMore ? "Loading..." : "See more"}
         </button>
       )}
     </main>

@@ -133,6 +133,7 @@ export default function AccountProfile({ roleLabel, userData = {} }) {
           isNameEditable={isNameEditable}
           onNameChange={setName}
           subtitle={buildSubtitle(role, userData)}
+          avatar={userData.avatar}
         />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">

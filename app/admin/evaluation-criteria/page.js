@@ -7,13 +7,8 @@ export const metadata = {
   title: "Evaluation Criteria",
 };
 
-async function EvaluationCriteriaPage({ searchParams }) {
-  const sParams = await searchParams;
-
-  const formType = sParams.form_type || "student";
-  const filter = sParams.filter || "all";
-
-  const criteria = await getAllEvaluationCriteria({ type: formType });
+async function EvaluationCriteriaPage() {
+  const criteria = await getAllEvaluationCriteria({ type: "student" });
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
@@ -25,11 +20,7 @@ async function EvaluationCriteriaPage({ searchParams }) {
         }
       />
 
-      <EvaluationCriteriaPageContent
-        criteria={criteria || []}
-        formType={formType}
-        filter={filter}
-      />
+      <EvaluationCriteriaPageContent initialCriteria={criteria || []} />
     </main>
   );
 }

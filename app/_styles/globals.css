@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --color-primary: #800000;
+
   --color-primary-50: #f2e6e6;
   --color-primary-100: #e6cccc;
   --color-primary-200: #cc9999;

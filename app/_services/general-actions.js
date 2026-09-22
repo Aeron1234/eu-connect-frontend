@@ -234,6 +234,78 @@ export async function updatePassword(prevState, formData) {
   }
 }
 
+export const getAvailableAvatars = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "You must be logged in." };
+
+    const res = await fetch(`${process.env.API_BASE_URL}/api/avatars`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error: error.error || "Failed to get avatars. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get available avatars error:", err);
+    return { error: "Failed to get avatars. Please try again." };
+  }
+};
+
+export async function updateUserAvatar(prevState, formData) {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) throw new Error("You must be logged in.");
+
+    const avatar = formData.get("avatar");
+
+    const res = await fetch(`${process.env.API_BASE_URL}/api/profile/avatar`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ avatar }),
+    });
+
+    return await res.json();
+  } catch (err) {
+    console.error("Update avatar error:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export const deleteUserAvatar = async (req, res) => {
+  let connection;
+  try {
+    const { id: userId } = req.verifiedUser;
+
+    connection = await db.getConnection();
+
+    const [result] = await connection.execute(
+      `UPDATE user_profiles SET avatar = NULL WHERE user_id = ?`,
+      [userId],
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Profile not found." });
+    }
+
+    res.status(200).json({ success: true, avatar: null });
+  } catch (error) {
+    console.error("Delete user avatar error:", error);
+    res.status(500).json({ error: "Failed to reset avatar." });
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
 export const getMyActivityLogs = cache(async ({ page = 1 } = {}) => {
   try {
     const accessToken = await getAccessToken();

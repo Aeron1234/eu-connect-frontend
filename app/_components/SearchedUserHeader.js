@@ -198,8 +198,16 @@ function SearchedUserHeader({
 
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 ">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-8 sm:-mt-10">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-stone-100 border-2 border-white flex items-center justify-center text-stone-400 shrink-0">
-              <User className="w-8 h-8 sm:w-9 sm:h-9" />
+            <div className="shadow-lg w-14 h-14 sm:w-20 sm:h-20 rounded-xl bg-stone-100 border-2 border-white overflow-hidden flex items-center justify-center text-stone-400">
+              {userProfile.avatar ? (
+                <img
+                  src={`/avatars/${userProfile.avatar}`}
+                  alt="Avatar option"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <User className="w-7 h-7 sm:w-9 sm:h-9" />
+              )}
             </div>
 
             <div className="flex-1 min-w-0 pb-1">

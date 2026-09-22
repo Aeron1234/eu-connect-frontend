@@ -8,15 +8,15 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   addCriterion,
   deactivateCriterion,
   reactivateCriterion,
   deactivateSection,
   reactivateSection,
+  getAllEvaluationCriteria,
 } from "@/app/_services/admin-actions";
-import Link from "next/link";
 import { cx } from "@/lib/utils";
 
 // Backend returns [{ category, items: [{ id, name, is_active }] }].
@@ -45,12 +45,17 @@ const FILTERS = [
   { value: "inactive", label: "Inactive" },
 ];
 
+const FORM_TYPES = [
+  { value: "student", label: "Student" },
+  { value: "employer", label: "Employer" },
+];
+
 export default function EvaluationCriteriaPageContent({
-  criteria = [],
-  formType = "student",
-  filter = "all",
+  initialCriteria = [],
 }) {
-  const [sections, setSections] = useState(() => toSections(criteria));
+  const [formType, setFormType] = useState("student");
+  const [filter, setFilter] = useState("all");
+  const [sections, setSections] = useState(() => toSections(initialCriteria));
   const [error, setError] = useState(null);
   const [newSection, setNewSection] = useState("");
   // Sections created locally with no criteria yet — a category only exists
@@ -64,15 +69,47 @@ export default function EvaluationCriteriaPageContent({
   const [activeKey, setActiveKey] = useState(null);
   const isKeyPending = (key) => isPending && activeKey === key;
 
-  // Re-sync local state whenever the server gives us a fresh `criteria`
-  // payload (e.g. navigating between form-type tabs via Link). This does
-  // NOT run after our own optimistic mutations, since those don't change
-  // the `criteria` prop identity.
+  // Separate from the mutation transition above — this is specifically for
+  // switching between Student/Employer tabs, which needs a real fetch.
+  const [isSwitchingType, setIsSwitchingType] = useState(false);
+  const typeRequestIdRef = useRef(0);
+  const isFirstTypeRun = useRef(true);
+
+  // Debounced fetch whenever formType changes — mirrors the pattern used
+  // in EvaluationsManager. `filter` (All/Active/Inactive) does NOT trigger
+  // this; it's applied client-side below against data already on hand.
   useEffect(() => {
-    setSections(toSections(criteria));
-    setDraftSections([]);
-    setError(null);
-  }, [criteria, formType]);
+    if (isFirstTypeRun.current) {
+      isFirstTypeRun.current = false;
+      return;
+    }
+
+    const thisRequestId = ++typeRequestIdRef.current;
+
+    const timeout = setTimeout(async () => {
+      setIsSwitchingType(true);
+      try {
+        const result = await getAllEvaluationCriteria({ type: formType });
+
+        if (thisRequestId !== typeRequestIdRef.current) return;
+
+        setSections(toSections(result));
+        setDraftSections([]);
+        setError(null);
+      } catch (err) {
+        if (thisRequestId === typeRequestIdRef.current) {
+          console.error("Error loading evaluation criteria:", err);
+          setError("Failed to load criteria. Please try again.");
+        }
+      } finally {
+        if (thisRequestId === typeRequestIdRef.current) {
+          setIsSwitchingType(false);
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [formType]);
 
   // Runs a server action outside of a <form>, applying an optimistic UI
   // update immediately and rolling it back only if the action reports an
@@ -214,8 +251,8 @@ export default function EvaluationCriteriaPageContent({
     return { sections: all.length, criteria: activeCriteria };
   }, [sections, draftSections]);
 
-  // What's actually rendered, filtered by the `filter` query param.
-  // Draft (unsaved) sections are always shown regardless of filter.
+  // What's actually rendered, filtered by `filter` — purely client-side,
+  // no fetch involved since we already have the full dataset for this type.
   const visibleSections = useMemo(() => {
     const applyFilter = (items) => {
       if (filter === "active") return items.filter((i) => i.is_active);
@@ -248,13 +285,11 @@ export default function EvaluationCriteriaPageContent({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border border-stone-300 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="inline-flex rounded-lg bg-stone-200 p-1">
-          {[
-            { value: "student", label: "Student" },
-            { value: "employer", label: "Employer" },
-          ].map((t) => (
-            <Link
+          {FORM_TYPES.map((t) => (
+            <button
               key={t.value}
-              href={`/admin/evaluation-criteria?form_type=${t.value}&filter=${filter}`}
+              type="button"
+              onClick={() => setFormType(t.value)}
               className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-1 text-center ${
                 formType === t.value
                   ? "bg-primary-500 text-primary-foreground shadow-sm"
@@ -262,7 +297,7 @@ export default function EvaluationCriteriaPageContent({
               }`}
             >
               {t.label}
-            </Link>
+            </button>
           ))}
         </div>
 
@@ -274,9 +309,10 @@ export default function EvaluationCriteriaPageContent({
 
       <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map((f) => (
-          <Link
+          <button
             key={f.value}
-            href={`/admin/evaluation-criteria?form_type=${formType}&filter=${f.value}`}
+            type="button"
+            onClick={() => setFilter(f.value)}
             className={cx(
               "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
               filter === f.value
@@ -285,7 +321,7 @@ export default function EvaluationCriteriaPageContent({
             )}
           >
             {f.label}
-          </Link>
+          </button>
         ))}
       </div>
 
@@ -298,52 +334,60 @@ export default function EvaluationCriteriaPageContent({
         </div>
       )}
 
-      <div className="space-y-4">
-        {visibleSections.map((section) => (
-          <SectionCard
-            key={section.id}
-            section={section}
-            isKeyPending={isKeyPending}
-            onAddCriterion={addCriterionHandler}
-            onDeactivateCriterion={deactivateCriterionHandler}
-            onReactivateCriterion={reactivateCriterionHandler}
-            onDeactivateSection={deactivateSectionHandler}
-            onReactivateSection={reactivateSectionHandler}
-          />
-        ))}
+      {isSwitchingType ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        </div>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {visibleSections.map((section) => (
+              <SectionCard
+                key={section.id}
+                section={section}
+                isKeyPending={isKeyPending}
+                onAddCriterion={addCriterionHandler}
+                onDeactivateCriterion={deactivateCriterionHandler}
+                onReactivateCriterion={reactivateCriterionHandler}
+                onDeactivateSection={deactivateSectionHandler}
+                onReactivateSection={reactivateSectionHandler}
+              />
+            ))}
 
-        {visibleSections.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-            <ClipboardList className="size-8 text-stone-300" />
-            <p className="text-sm text-stone-500">
-              {filter === "all"
-                ? "No criteria yet. Add your first section below."
-                : `No ${filter} criteria found.`}
-            </p>
+            {visibleSections.length === 0 && (
+              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+                <ClipboardList className="size-8 text-stone-300" />
+                <p className="text-sm text-stone-500">
+                  {filter === "all"
+                    ? "No criteria yet. Add your first section below."
+                    : `No ${filter} criteria found.`}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Add section (local placeholder — persists once its first criterion is added) */}
-      <div className="flex flex-col gap-3 rounded-xl border border-stone-300 bg-white p-4 shadow-sm sm:flex-row">
-        <input
-          value={newSection}
-          onChange={(e) => setNewSection(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addSection()}
-          placeholder="New section title (e.g. Communication Skills)"
-          className="flex-1 rounded-lg border border-stone-300 bg-white px-3 sm:px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
-        />
-        <button
-          type="button"
-          onClick={addSection}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 sm:px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" /> Add Section
-        </button>
-      </div>
-      <p className="-mt-3 text-xs text-stone-500">
-        A new section is only saved once you add its first criterion below.
-      </p>
+          {/* Add section (local placeholder — persists once its first criterion is added) */}
+          <div className="flex flex-col gap-3 rounded-xl border border-stone-300 bg-white p-4 shadow-sm sm:flex-row">
+            <input
+              value={newSection}
+              onChange={(e) => setNewSection(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addSection()}
+              placeholder="New section title (e.g. Communication Skills)"
+              className="flex-1 rounded-lg border border-stone-300 bg-white px-3 sm:px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+            />
+            <button
+              type="button"
+              onClick={addSection}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 sm:px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" /> Add Section
+            </button>
+          </div>
+          <p className="-mt-3 text-xs text-stone-500">
+            A new section is only saved once you add its first criterion below.
+          </p>
+        </>
+      )}
     </div>
   );
 }

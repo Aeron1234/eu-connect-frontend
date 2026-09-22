@@ -14,7 +14,7 @@ const scopeTabs = [
 ];
 
 const workTypeTabs = [
-  { label: "All", workType: "" },
+  { label: "Work types", workType: "" },
   { label: "On-site", workType: "on-site" },
   { label: "Hybrid", workType: "hybrid" },
   { label: "Remote", workType: "remote" },
@@ -63,7 +63,7 @@ function InternshipPosts({
   }));
 
   const courseOptions = [
-    { value: "", label: "All" },
+    { value: "", label: "Courses" },
     ...courses.map((c) => ({ value: String(c.id), label: c.course_name })),
   ];
 
@@ -243,7 +243,7 @@ function InternshipPosts({
             value={workType}
             onValueChange={setWorkType}
             options={workTypeOptions}
-            placeholder="Work Type"
+            placeholder="All work type"
             className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
           />
           {courses.length > 0 && (
