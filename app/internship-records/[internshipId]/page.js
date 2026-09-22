@@ -4,6 +4,7 @@ import { getInternshipRecordOverview } from "@/app/_services/dept-head-actions";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const internshipId = resolvedParams.internshipId

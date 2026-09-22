@@ -6,6 +6,8 @@ export const metadata = {
   title: "Employer",
 };
 
+export const dynamic = "force-dynamic";
+
 async function StatsPage() {
   const getStats = await getEmployerDashboardStats();
 

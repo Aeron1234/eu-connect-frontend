@@ -11,6 +11,8 @@ export const metadata = {
   title: "Department Head",
 };
 
+export const dynamic = "force-dynamic";
+
 async function StatsPage() {
   const getStats = await getDepartmentHeadDashboardStats();
 
