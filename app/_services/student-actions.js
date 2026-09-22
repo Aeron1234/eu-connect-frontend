@@ -142,8 +142,8 @@ export async function setPassword(prevState, formData) {
   if (newPassword !== confirmPassword) {
     return { error: "Passwords do not match." };
   }
-  const accessToken = await getAccessToken();
 
+  const accessToken = await getAccessToken();
   if (!accessToken) {
     redirect("/login");
   }
@@ -181,9 +181,8 @@ export async function setPassword(prevState, formData) {
 //INTERNSHIP RECORDS
 ////////////////////////////////////////////////////
 export async function createInternshipRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(`${process.env.API_BASE_URL}/api/internships/new`, {
@@ -204,9 +203,8 @@ export async function createInternshipRecord(prevState, formData) {
 }
 
 export async function finishInternshipRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
@@ -241,9 +239,8 @@ export async function getDtrs(page = 1) {
   const validatedPage = Math.max(1, parseInt(page));
   const offset = (validatedPage - 1) * limit;
 
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const internship = await getOngoingInternshipRecord();
@@ -275,9 +272,8 @@ export async function getDtrs(page = 1) {
 }
 
 export async function clockIn(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     // 1. Check if they have an internship
@@ -314,9 +310,8 @@ export async function clockIn(prevState, formData) {
 }
 
 export async function clockOut(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const internshipData = await getOngoingInternshipRecord();
@@ -352,9 +347,8 @@ export async function clockOut(prevState, formData) {
 }
 
 export async function deleteDtr(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     if (!formData || typeof formData.get !== "function") {
@@ -385,9 +379,8 @@ export async function deleteDtr(prevState, formData) {
 ////////////////////////////////////////////////////
 
 export const getWeeklyNarratives = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const internshipData = await getOngoingInternshipRecord();
@@ -418,9 +411,8 @@ export const getWeeklyNarratives = async () => {
 };
 
 export const fetchMoreWeeklyNarratives = async ({ page = 1 } = {}) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const internshipData = await getOngoingInternshipRecord();
@@ -451,9 +443,8 @@ export const fetchMoreWeeklyNarratives = async ({ page = 1 } = {}) => {
 };
 
 export async function createWeeklyNarrative(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const internshipData = await getOngoingInternshipRecord();
@@ -480,9 +471,8 @@ export async function createWeeklyNarrative(prevState, formData) {
 }
 
 export async function editWeeklyNarrative(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const narrativeId = formData.get("narrativeId");
@@ -514,9 +504,8 @@ export async function editWeeklyNarrative(prevState, formData) {
 }
 
 export async function deleteWeeklyNarrative(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const narrativeId = formData.get("narrativeId");
@@ -542,9 +531,8 @@ export async function deleteWeeklyNarrative(prevState, formData) {
 // STORAGE
 ////////////////////////////////////////////////////
 export async function uploadInternshipFile(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -569,9 +557,8 @@ export async function uploadInternshipFile(prevState, formData) {
 }
 
 export async function approveInternshipDocument(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const fileId = formData.get("fileId");
@@ -596,9 +583,8 @@ export async function approveInternshipDocument(prevState, formData) {
 export async function deleteFile(prevState, formData) {
   // Added prevState for useActionState compatibility
 
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     if (!formData || typeof formData.get !== "function") {
@@ -630,9 +616,8 @@ export async function deleteFile(prevState, formData) {
 }
 
 export async function toggleInternshipFavorite(postingId) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
@@ -657,9 +642,8 @@ export async function toggleInternshipFavorite(postingId) {
 }
 
 export async function requestSupervisor(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const employerId = formData.get("employerId");
@@ -692,9 +676,8 @@ export async function requestSupervisor(prevState, formData) {
 }
 
 export async function cancelSupervisorRequest(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const requestId = formData.get("requestId");
@@ -725,9 +708,8 @@ export async function cancelSupervisorRequest(prevState, formData) {
 }
 
 export async function postEmployerEvaluation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const { scores, other_remarks } = formData;
@@ -759,9 +741,8 @@ export async function postEmployerEvaluation(prevState, formData) {
 }
 
 export async function respondToStudentEvaluation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const evaluationId = formData.get("evaluationId");
@@ -793,9 +774,8 @@ export async function respondToStudentEvaluation(prevState, formData) {
 }
 
 export async function restoreDisputedEvaluation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const evaluationId = formData.get("evaluationId");

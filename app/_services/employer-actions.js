@@ -6,9 +6,8 @@ import { cache } from "react";
 // import { getUserSession } from "./services";
 
 export async function postStudentEvaluation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const session = await getUserSession(); // adjust to whatever your app already uses elsewhere (e.g. the same helper DashboardLayout components call)
@@ -47,9 +46,8 @@ export async function postStudentEvaluation(prevState, formData) {
 }
 
 export async function deletePendingStudentEvaluation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const evaluation_id = formData.get("evaluationId");
@@ -77,9 +75,8 @@ export async function deletePendingStudentEvaluation(prevState, formData) {
 }
 
 export async function setStudentDtrLocation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const studentId = formData.studentId;
@@ -116,9 +113,8 @@ export async function setStudentDtrLocation(prevState, formData) {
 }
 
 export async function uploadCertificateOfCompletion(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const searchedUserId = formData.get("searchedUserId");
@@ -148,9 +144,8 @@ export async function uploadCertificateOfCompletion(prevState, formData) {
 }
 
 export async function deleteEmployerCertificate(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const searchedUserId = formData.get("searchedUserId");
@@ -179,9 +174,8 @@ export async function deleteEmployerCertificate(prevState, formData) {
 }
 
 export async function createInternshipPosting(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const payload = Object.fromEntries(formData.entries());
@@ -211,9 +205,8 @@ export async function createInternshipPosting(prevState, formData) {
 }
 
 export async function updateInternshipPosting(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const postingId = formData.get("postingId");
@@ -242,9 +235,8 @@ export async function updateInternshipPosting(prevState, formData) {
 }
 
 export async function deleteInternshipPosting(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const postingId = formData.get("postingId");
@@ -272,9 +264,8 @@ export async function deleteInternshipPosting(prevState, formData) {
 }
 
 export async function respondToSupervisorRequest(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const requestId = formData.get("requestId");
@@ -303,9 +294,8 @@ export async function respondToSupervisorRequest(prevState, formData) {
 }
 
 export const getPostedJobs = cache(async ({ page = 1 } = {}) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -333,9 +323,8 @@ export const getPostedJobs = cache(async ({ page = 1 } = {}) => {
 });
 
 export const getEmployerDashboardStats = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }
@@ -369,9 +358,8 @@ export const getEmployerDashboardStats = async () => {
 };
 
 export const getEmployerDashboardData = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }

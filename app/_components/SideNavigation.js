@@ -1,4 +1,4 @@
-import { getUserProfile, getUserSession } from "../_services/services";
+import { getUserProfile } from "../_services/services";
 import SideNavigationList from "./SideNavigationList";
 
 async function SideNavigation() {

@@ -6,9 +6,8 @@ import { cache } from "react";
 // import { getUserSession } from "./services";
 
 export async function markAsRead(notificationId) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
@@ -34,9 +33,8 @@ export async function markAsRead(notificationId) {
 }
 
 export async function markAllAsRead(formData = null) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(`${process.env.API_BASE_URL}/api/notifications`, {
@@ -59,9 +57,8 @@ export async function markAllAsRead(formData = null) {
 }
 
 export async function deleteNotification(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const notificationId = formData.get("notificationId");
@@ -91,9 +88,8 @@ export async function saveSearchHistory({
   searchedUUID = "",
   type,
 }) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
@@ -124,9 +120,8 @@ export async function saveSearchHistory({
 }
 
 export const clearSearchHistory = async ({ type }) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
@@ -151,9 +146,8 @@ export const clearSearchHistory = async ({ type }) => {
 };
 
 export async function deleteSearchHistoryItem({ historyId, type }) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const res = await fetch(
@@ -178,9 +172,8 @@ export async function deleteSearchHistoryItem({ historyId, type }) {
 }
 
 export async function updateUserInfo(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     const session = await getUserSession();
     if (!accessToken || !session?.user) {
       throw new Error("You must be logged in.");
@@ -209,9 +202,8 @@ export async function updateUserInfo(prevState, formData) {
 }
 
 export async function updatePassword(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     const session = await getUserSession();
     if (!accessToken || !session?.user) {
       throw new Error("You must be logged in.");
@@ -243,9 +235,8 @@ export async function updatePassword(prevState, formData) {
 }
 
 export const getAvailableAvatars = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "You must be logged in." };
 
     const res = await fetch(`${process.env.API_BASE_URL}/api/avatars`, {
@@ -268,9 +259,8 @@ export const getAvailableAvatars = async () => {
 };
 
 export async function updateUserAvatar(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const avatar = formData.get("avatar");
@@ -317,9 +307,8 @@ export const deleteUserAvatar = async (req, res) => {
 };
 
 export const getMyActivityLogs = cache(async ({ page = 1 } = {}) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "Not signed in." };
 
     const params = new URLSearchParams({ page: String(page) });

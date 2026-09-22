@@ -7,9 +7,8 @@ import { cache } from "react";
 
 // To be replaced by update internship records later
 export async function approveInternshipRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
@@ -39,9 +38,8 @@ export async function approveInternshipRecord(prevState, formData) {
 }
 
 export async function restoreInternshipRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
@@ -69,9 +67,8 @@ export async function restoreInternshipRecord(prevState, formData) {
 }
 
 export async function updateInternshipRecordStatus(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const internshipId = formData.get("id");
@@ -115,9 +112,8 @@ export async function updateInternshipRecordStatus(prevState, formData) {
 }
 
 export async function createAnnouncement(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const announcementData = Object.fromEntries(formData);
@@ -146,9 +142,8 @@ export async function createAnnouncement(prevState, formData) {
 }
 
 export async function togglePinAnnouncement(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const announcementId = formData.get("announcementId");
@@ -178,9 +173,8 @@ export async function togglePinAnnouncement(prevState, formData) {
 }
 
 export async function updateAnnouncement(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const announcementData = Object.fromEntries(formData);
@@ -210,9 +204,8 @@ export async function updateAnnouncement(prevState, formData) {
 }
 
 export async function deleteAnnouncement(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const announcementId = formData.get("announcementId");
@@ -242,9 +235,8 @@ export async function deleteAnnouncement(prevState, formData) {
 }
 
 export const getMapLocations = cache(async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(`${process.env.API_BASE_URL}/api/student-map`, {
@@ -278,9 +270,8 @@ export const getDepartmentInternshipRecords = async ({
   page = 1,
   limit = 10,
 }) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const params = new URLSearchParams({
@@ -319,9 +310,8 @@ export const getDepartmentInternshipRecords = async ({
 };
 
 export const getInternshipRecordOverview = cache(async (internshipId) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -353,9 +343,8 @@ export const getInternshipRecordOverview = cache(async (internshipId) => {
 });
 
 export const getInternshipRecordDtr = cache(async (internshipId) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -387,9 +376,8 @@ export const getInternshipRecordDtr = cache(async (internshipId) => {
 });
 
 export const getInternshipRecordWeeklyNarratives = async (internshipId) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -415,9 +403,8 @@ export const getInternshipRecordWeeklyNarratives = async (internshipId) => {
 };
 
 export const getInternshipRecordEvaluations = cache(async (internshipId) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -449,9 +436,8 @@ export const getInternshipRecordEvaluations = cache(async (internshipId) => {
 });
 
 export async function restoreInternshipRecordEvaluations(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const evaluationId = formData.get("evaluationId");
@@ -479,9 +465,8 @@ export async function restoreInternshipRecordEvaluations(prevState, formData) {
 }
 
 export const getInternshipRecordDocuments = cache(async (internshipId) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -516,9 +501,8 @@ export const downloadInternshipRecordDocuments = async (
   prevState,
   formData,
 ) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { success: false, error: "You must be logged in." };
     }
@@ -559,9 +543,8 @@ export const downloadInternshipRecordDocuments = async (
 };
 
 export async function reviewDisputedEvaluation(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const evaluationId = formData.get("evaluationId");
@@ -598,9 +581,8 @@ export const getAlumniInternships = async ({
   search = "",
   page = 1,
 }) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const params = new URLSearchParams({ page: String(page) });
@@ -636,9 +618,8 @@ export const getAlumniInternships = async ({
 };
 
 export async function postAlumniRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const pastRecord = Object.fromEntries(formData);
@@ -667,9 +648,8 @@ export async function postAlumniRecord(prevState, formData) {
 }
 
 export async function deleteAlumniRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const recordId = formData.get("recordId");
@@ -697,9 +677,8 @@ export async function deleteAlumniRecord(prevState, formData) {
 }
 
 export async function updateAlumniRecord(prevState, formData) {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in");
 
     const recordData = Object.fromEntries(formData);
@@ -729,9 +708,8 @@ export async function updateAlumniRecord(prevState, formData) {
 }
 
 export const getDepartmentHeadDashboardStats = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }
@@ -765,9 +743,8 @@ export const getDepartmentHeadDashboardStats = async () => {
 };
 
 export const getAverageShiftHours = async ({ month, year } = {}) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }
@@ -802,9 +779,8 @@ export const getAverageShiftHours = async ({ month, year } = {}) => {
 };
 
 export const getAvailableShiftHoursMonths = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }
@@ -835,9 +811,8 @@ export const getAvailableShiftHoursMonths = async () => {
 };
 
 export const getDepartmentHeadDashboardData = async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) return { error: "You must be logged in." };
 
     const res = await fetch(
@@ -870,9 +845,8 @@ export const getDepartmentHeadDashboardData = async () => {
 //FOR REGISTRAR
 /////////////////////////
 export const getAvailableAcademicYears = cache(async () => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) throw new Error("You must be logged in.");
 
     const res = await fetch(
@@ -905,9 +879,8 @@ export const getAvailableAcademicYears = cache(async () => {
 
 export const getHteCompanyList = cache(
   async ({ academicYear = "", search = "", page = 1 }) => {
-    const accessToken = await getAccessToken();
-
     try {
+      const accessToken = await getAccessToken();
       if (!accessToken) throw new Error("You must be logged in.");
 
       const params = new URLSearchParams({ page: String(page) });
@@ -942,9 +915,8 @@ export const getHteCompanyList = cache(
 
 export const getHteCompanyReport = cache(
   async ({ academicYear, companyKey }) => {
-    const accessToken = await getAccessToken();
-
     try {
+      const accessToken = await getAccessToken();
       if (!accessToken) throw new Error("You must be logged in.");
 
       const res = await fetch(
@@ -977,9 +949,8 @@ export const getHteCompanyReport = cache(
 );
 
 export const saveAnnexCReport = async (payload) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }
@@ -1010,9 +981,8 @@ export const getAnnexCReports = async ({
   search = "",
   page = 1,
 } = {}) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }
@@ -1039,9 +1009,8 @@ export const getAnnexCReports = async ({
 };
 
 export const deleteAnnexCReport = async (reportId) => {
-  const accessToken = await getAccessToken();
-
   try {
+    const accessToken = await getAccessToken();
     if (!accessToken) {
       return { error: "You must be logged in." };
     }

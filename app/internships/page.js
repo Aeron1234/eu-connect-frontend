@@ -11,6 +11,8 @@ export const metadata = {
   title: "Internships",
 };
 
+export const dynamic = "force-dynamic";
+
 async function InternshipPage({ searchParams }) {
   const sParams = await searchParams;
   const workType = sParams.workType || "";
