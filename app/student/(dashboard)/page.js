@@ -1,8 +1,8 @@
 import MapSmallContainer from "@/app/_components/MapSmallContainer";
-import {
-  getMySettedDtrLocation,
-  getOngoingInternshipRecord,
-} from "@/app/_services/services";
+import DtrTodayCard from "@/app/_components/DtrTodayCard";
+import DtrTable from "@/app/_components/DtrTable";
+import RecentActivityCard from "@/app/_components/RecentActivityCard";
+import { getStudentDashboardData } from "@/app/_services/student-actions";
 import { getMyActivityLogs } from "@/app/_services/general-actions";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -15,7 +15,6 @@ import {
   Pin,
   ClipboardCheck,
 } from "lucide-react";
-import RecentActivityCard from "@/app/_components/RecentActivityCard";
 
 export const metadata = {
   title: "Student",
@@ -23,10 +22,6 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-// Maps the raw `action` string stored in activity_logs to an icon/color —
-// nothing in the DB row carries visual info, so this has to be derived
-// from the action name itself. Falls back to a generic icon for anything
-// that doesn't match a known pattern, rather than guessing.
 function getActivityVisual(action = "") {
   if (action.includes("document")) {
     if (action.includes("deleted"))
@@ -51,14 +46,20 @@ function getActivityVisual(action = "") {
   return { icon: Sparkles, color: "text-blue-600" };
 }
 
-async function StudentDashboardPage() {
-  const [internshipData, activityLogs, settedLocation] = await Promise.all([
-    getOngoingInternshipRecord(),
+async function StudentDashboardPage({ searchParams }) {
+  const sParams = await searchParams;
+  const currentDtrPage = Number(sParams.d_page) || 1;
+
+  const [activityLogs, dashboardRes] = await Promise.all([
     getMyActivityLogs({ page: 1 }),
-    getMySettedDtrLocation(),
+    getStudentDashboardData(),
   ]);
 
-  const locationData = settedLocation?.location || {};
+  const internshipData = dashboardRes?.internshipData;
+  const dtrToday = dashboardRes?.dtrToday || {};
+  const dtrStatus = dashboardRes?.dtrStatus?.status;
+  const dtrData = dashboardRes?.dtrData || {};
+  const locationData = dashboardRes?.location || {};
 
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {
     const { icon, color } = getActivityVisual(log.action);
@@ -70,35 +71,55 @@ async function StudentDashboardPage() {
     };
   });
 
-  <div className="lg:col-span-2 h-full">
-    <RecentActivityCard activities={activities} />
-  </div>;
-
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      {/* Recent activity */}
-      <div className="lg:col-span-2">
-        <RecentActivityCard activities={activities} />
-      </div>
+    <div className="space-y-6">
+      {/* Today card */}
+      <DtrTodayCard
+        internshipData={internshipData}
+        status={dtrStatus}
+        dtrToday={dtrToday}
+      />
 
-      {/* Right column */}
-      <div className="flex flex-col gap-5">
-        <InternshipProgress
-          accumulated_hours={internshipData?.accumulated_hours || 0}
-          total_hours={internshipData?.total_hours || 0}
-        />
-
-        <div className="rounded-xl bg-white border border-stone-300 shadow-sm h-64 lg:h-full min-h-64">
-          <MapSmallContainer
-            latitude={locationData?.lat || 0}
-            longitude={locationData?.lon || 0}
-            radius={locationData?.radius_meters || 100}
-            label={locationData?.label || ""}
-            address={locationData?.address || ""}
+      {/* Recent Time Records */}
+      <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
+          <span className="w-4 h-4 rounded-full border-2 border-primary-500 flex-shrink-0" />
+          Recent Time Records
+        </h3>
+        <div className="overflow-x-auto">
+          <DtrTable
+            dtrs={dtrData?.dtrs || []}
+            totalPages={dtrData?.totalPages}
+            currentDtrPage={currentDtrPage}
+            isStudentDashboard={true}
           />
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Activity + sidebar row */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <RecentActivityCard activities={activities} />
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <InternshipProgress
+            accumulated_hours={internshipData?.accumulated_hours || 0}
+            total_hours={internshipData?.total_hours || 0}
+          />
+
+          <div className="rounded-xl bg-white border border-stone-300 shadow-sm h-64 lg:h-full min-h-64">
+            <MapSmallContainer
+              latitude={locationData?.lat || 0}
+              longitude={locationData?.lon || 0}
+              radius={locationData?.radius_meters || 100}
+              label={locationData?.label || ""}
+              address={locationData?.address || ""}
+            />
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 

@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, BarChart3, Clock, FileText, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getUserSession } from "../_services/auth";
 
 export const metadata = {
   title: "Log in",
@@ -19,11 +18,6 @@ const highlights = [
 ];
 
 async function LoginPage() {
-  const session = await getUserSession();
-  const user = session?.user;
-  const role = session?.user?.role;
-  if (user && role) redirect(`/${role}`);
-
   return (
     <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
       {/* Brand panel */}

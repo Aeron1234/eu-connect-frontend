@@ -10,6 +10,7 @@ import {
   // getUserSession
 } from "./services";
 import { getAccessToken } from "./auth";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "./auth-shared";
 
 ////////////////////////////////////////////////////
 // AUTHENTICATION
@@ -60,29 +61,21 @@ export async function login(prevState, formData) {
   }
 
   const cookieStore = await cookies();
-  const isProd = process.env.NODE_ENV === "production";
 
-  cookieStore.set("access_token", tokens.accessToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 15 * 60,
-  });
-  cookieStore.set("refresh_token", tokens.refreshToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 30 * 24 * 60 * 60,
-  });
+  cookieStore.set(ACCESS_COOKIE, tokens.accessToken, accessCookieOptions);
+  cookieStore.set(REFRESH_COOKIE, tokens.refreshToken, refreshCookieOptions);
+
+  // Without this, Next.js can serve the previous user's cached RSC render
+  // for routes under "/" right after redirect — which is what caused the
+  // "logging in as a different account shows stale data" bug.
+  revalidatePath("/", "layout");
 
   redirect(mustChangePassword ? "/set-password" : "/");
 }
 
 export async function logout() {
   const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refresh_token")?.value;
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
 
   try {
     await fetch(`${process.env.API_BASE_URL}/api/auth/logout`, {
@@ -93,15 +86,23 @@ export async function logout() {
         // a server-to-server call, so there's no browser-managed cookie
         // jar to rely on here. cookie-parser on the Express side parses
         // this exactly the same as a real browser-sent cookie.
-        ...(refreshToken ? { Cookie: `refresh_token=${refreshToken}` } : {}),
+        ...(refreshToken
+          ? { Cookie: `${REFRESH_COOKIE}=${refreshToken}` }
+          : {}),
       },
     });
   } catch (error) {
     console.error(error);
   }
 
-  cookieStore.delete("access_token");
-  cookieStore.delete("refresh_token");
+  cookieStore.delete(ACCESS_COOKIE);
+  cookieStore.delete(REFRESH_COOKIE);
+
+  // Same reasoning as in login() — invalidate cached RSC renders so the
+  // next visitor (or the same user logging back in) doesn't see stale
+  // session-dependent data.
+  revalidatePath("/", "layout");
+
   redirect("/login");
 }
 
@@ -229,6 +230,41 @@ export async function finishInternshipRecord(prevState, formData) {
     return { success: false, error: err.message };
   }
 }
+
+////////////////////////////////////////////////////
+// DASHBOARD
+////////////////////////////////////////////////////
+
+export const getStudentDashboardData = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "You must be logged in." };
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/student-dashboard-data`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error ||
+          "Failed to get student dashboard data. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get student dashboard data error:", err);
+    return {
+      error: "Failed to get student dashboard data. Please try again.",
+    };
+  }
+};
 
 ////////////////////////////////////////////////////
 // DAILY TIME RECORDS
