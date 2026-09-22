@@ -9,6 +9,8 @@ export const metadata = {
   title: "Student's Narratives",
 };
 
+export const dynamic = "force-dynamic";
+
 async function NarrativesPage() {
   const narrativesData = await getWeeklyNarratives();
 
