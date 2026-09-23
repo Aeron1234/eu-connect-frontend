@@ -1,11 +1,21 @@
-import { Spinner } from "@/components/ui/spinner";
+import RecentActivityCardSkeleton from "@/app/_components/RecentActivityCardSkeleton";
+import UserGrowthChartSkeleton from "@/app/_components/UserGrowthChartSkeleton";
+import UsersByRoleChartSkeleton from "@/app/_components/UsersByRoleChartSkeleton";
+import InternshipsByDepartmentChartSkeleton from "@/app/_components/InternshipsByDepartmentChartSkeleton";
 
-function Loading() {
+function AdminDashboardLoading() {
   return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
+    <div className="space-y-6">
+      <UserGrowthChartSkeleton />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <UsersByRoleChartSkeleton />
+        <InternshipsByDepartmentChartSkeleton />
+      </div>
+
+      <RecentActivityCardSkeleton />
     </div>
   );
 }
 
-export default Loading;
+export default AdminDashboardLoading;

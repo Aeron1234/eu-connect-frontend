@@ -5,7 +5,7 @@ function DashboardStats({ stats = [] }) {
         <div key={s.label} className={`rounded-xl p-4 ${s.accent} shadow-sm`}>
           <div className="flex lg:items-center gap-2 flex-col sm:flex-row ">
             <s.icon className="w-4 h-4 opacity-90" />
-            <p className={`text-xs font-medium ${s.labelClass}`}>{s.label}</p>
+            <p className={`text-sm font-medium ${s.labelClass}`}>{s.label}</p>
           </div>
           <p
             className={`${s.small ? "text-xl" : "text-3xl"} font-bold mt-3 ${s.valueClass}`}

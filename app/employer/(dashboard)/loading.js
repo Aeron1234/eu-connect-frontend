@@ -1,11 +1,28 @@
-import { Spinner } from "@/components/ui/spinner";
+import RecentActivityCardSkeleton from "@/app/_components/RecentActivityCardSkeleton";
+import InternsSupervisedCardSkeleton from "@/app/_components/InternsSupervisedCardSkeleton";
+import QuickActionsCardSkeleton from "@/app/_components/QuickActionsCardSkeleton";
+import JobsPostedTableSkeleton from "@/app/_components/JobsPostedTableSkeleton";
 
-function Loading() {
+function EmployerDashboardLoading() {
   return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <InternsSupervisedCardSkeleton />
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <div className="lg:col-span-2">
+            <RecentActivityCardSkeleton />
+          </div>
+
+          <QuickActionsCardSkeleton />
+        </div>
+      </div>
+
+      <JobsPostedTableSkeleton />
     </div>
   );
 }
 
-export default Loading;
+export default EmployerDashboardLoading;

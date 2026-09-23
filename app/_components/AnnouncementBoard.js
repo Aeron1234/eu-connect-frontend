@@ -83,7 +83,7 @@ function AnnouncementBoard({
       } finally {
         if (thisRequestId === requestIdRef.current) setIsSearching(false);
       }
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [category, search]);

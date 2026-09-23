@@ -12,11 +12,10 @@ import {
   History,
   AlertTriangle,
   LayoutGrid,
-  LayoutDashboard,
-  Files,
   CheckCircle2,
   XCircle,
   RotateCcw,
+  ClipboardList,
 } from "lucide-react";
 
 const iconMap = {
@@ -25,8 +24,6 @@ const iconMap = {
   evaluations: Star,
   certificates: FileCheck,
   info: User,
-  overview: LayoutDashboard,
-  documents: Files,
   "evaluate-supervisor": ClipboardCheck,
   "pending-confirmation": Hourglass,
   "past-evaluations": History,
@@ -36,11 +33,17 @@ const iconMap = {
   ongoing: Clock,
   finished: CheckCircle2,
   rejected: XCircle,
+  "annex-c": FileText,
+  "annex-d": ClipboardCheck,
+  form: FileText,
+  reports: ClipboardList,
 };
 
 // `onSelect` (click-based, e.g. client-state tabs) and `getHref` (Link-based,
 // e.g. URL-driven filters) are mutually exclusive — pass exactly one.
 // `getBadge(tab)` is optional and renders a small count pill next to the label.
+// `t.shortText`, if provided on a tab, shows on mobile instead of the icon
+// falling back to icon-only; `t.text` always shows at sm+.
 function TabBar({ tabs, selectedTab, onSelect, getHref, getBadge }) {
   // Nothing to switch between — e.g. a student viewing another profile,
   // or an employer profile with no tabs beyond Info.
@@ -55,8 +58,15 @@ function TabBar({ tabs, selectedTab, onSelect, getHref, getBadge }) {
 
         const content = (
           <>
-            <Icon className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">{t.text}</span>
+            {!t.shortText && <Icon className="w-4 h-4 shrink-0" />}
+            {t.shortText ? (
+              <>
+                <span className="sm:hidden">{t.shortText}</span>
+                <span className="hidden sm:inline">{t.text}</span>
+              </>
+            ) : (
+              <span className="hidden sm:inline">{t.text}</span>
+            )}
             {badge !== null && badge !== undefined && (
               <span
                 className={`hidden sm:inline text-xs ${isActive ? "opacity-80" : "opacity-60"}`}

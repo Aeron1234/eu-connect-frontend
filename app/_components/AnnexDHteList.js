@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, FileText, Search, Users } from "lucide-react";
+import { Building2, FileText, Loader2, Users } from "lucide-react";
 
 import ExportPdfButton from "./ExportPdfButton";
 import { getHteCompanyList } from "../_services/dept-head-actions";
@@ -123,8 +123,15 @@ export function AnnexDHteList({
 
   return (
     <div>
-      {/* Filter bar — same pattern as AnnexCManager's Reports tab */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex gap-2 flex-col sm:flex-row">
+        <div className="items-start">
+          <SearchBar
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search company or student name..."
+          />
+        </div>
+
         <div className="flex flex-wrap items-center gap-2">
           {["All", ...availableAcadYear].map((ay) => (
             <button
@@ -135,23 +142,16 @@ export function AnnexDHteList({
                 "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                 (ay === "All" && !year) || year === ay
                   ? "bg-primary-500 text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground",
+                  : "bg-stone-200 text-muted-foreground hover:text-primary-500",
               )}
             >
               {ay}
             </button>
           ))}
         </div>
-
-        <SearchBar
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search company or student name..."
-        />
       </div>
 
-      {/* Stat cards */}
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <div className="mt-6 grid gap-3 sm:gap-4 md:grid-cols-3">
         <StatCard
           icon={<Building2 className="size-5 opacity-80" />}
           value={String(total)}
@@ -159,51 +159,52 @@ export function AnnexDHteList({
           highlight
         />
         <StatCard
-          icon={<Users className="size-5 text-muted-foreground" />}
+          icon={<Users className="size-5 text-stone-400" />}
           value={String(totalInterns)}
           label="Total Interns (loaded)"
         />
         <StatCard
-          icon={<FileText className="size-5 text-muted-foreground" />}
+          icon={<FileText className="size-5 text-stone-400" />}
           value={year || "All"}
           label="Academic Year"
         />
       </div>
 
-      {/* HTE sections */}
-      {companies.length === 0 && !isPending ? (
-        <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-border bg-card px-6 py-24 text-center shadow-sm">
-          <FileText className="size-8 text-muted-foreground" />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">
-            No placements found
-          </p>
-          <p className="mt-2 max-w-sm text-xs text-muted-foreground/70">
+      {isPending ? (
+        <div className="mt-6 flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        </div>
+      ) : companies.length === 0 ? (
+        <div className="mt-6 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
+          <FileText className="size-8 text-stone-300" />
+          <p className="text-sm text-stone-500">No placements found</p>
+          <p className="max-w-sm text-xs text-stone-400">
             Try a different academic year or clear the search filter.
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-5">
+        <div className="mt-6 space-y-4 sm:space-y-5">
           {companies.map((c) => (
             <section
               key={c.company_key}
-              className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+              className="overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm"
             >
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-lg bg-primary-500/10 text-xs font-semibold text-primary-500">
+              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 px-4 sm:px-5 py-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-500">
                     {c.company_name.slice(0, 2).toUpperCase()}
                   </span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-stone-800 truncate">
                       {c.company_name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-stone-500 truncate">
                       {c.company_address}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-500">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-500">
                     {c.intern_count}{" "}
                     {c.intern_count === 1 ? "intern" : "interns"}
                   </span>
@@ -216,59 +217,60 @@ export function AnnexDHteList({
                   />
                 </div>
               </header>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
-                    <th className="w-12 px-5 py-3 font-medium">#</th>
-                    <th className="px-5 py-3 font-medium">
-                      Name of Student Intern
-                    </th>
-                    <th className="px-5 py-3 font-medium">Program</th>
-                    <th className="px-5 py-3 font-medium">Gender</th>
-                    <th className="px-5 py-3 font-medium">
-                      Duration of Internship
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {c.interns.map((intern, i) => (
-                    <tr
-                      key={`${c.company_key}-${i}`}
-                      className="border-b border-border last:border-0"
-                    >
-                      <td className="px-5 py-3 text-muted-foreground">
-                        {i + 1}
-                      </td>
-                      <td className="px-5 py-3 font-medium text-foreground">
-                        {intern.name}
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground">
-                        {intern.course}
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground">
-                        {intern.gender || "—"}
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground">
-                        {intern.date_started?.slice(0, 10)} –{" "}
-                        {intern.date_ended?.slice(0, 10) || "Present"}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] text-sm">
+                  <thead>
+                    <tr className="border-b border-stone-200 text-left text-[0.7rem] uppercase tracking-wider text-stone-500">
+                      <th className="w-12 px-4 sm:px-5 py-3 font-medium">#</th>
+                      <th className="px-4 sm:px-5 py-3 font-medium">
+                        Name of Student Intern
+                      </th>
+                      <th className="px-4 sm:px-5 py-3 font-medium">Program</th>
+                      <th className="px-4 sm:px-5 py-3 font-medium">Gender</th>
+                      <th className="px-4 sm:px-5 py-3 font-medium">
+                        Duration of Internship
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {c.interns.map((intern, i) => (
+                      <tr
+                        key={`${c.company_key}-${i}`}
+                        className="border-b border-stone-200 last:border-0"
+                      >
+                        <td className="px-4 sm:px-5 py-3 text-stone-500">
+                          {i + 1}
+                        </td>
+                        <td className="px-4 sm:px-5 py-3 font-medium text-stone-800">
+                          {intern.name}
+                        </td>
+                        <td className="px-4 sm:px-5 py-3 text-stone-600">
+                          {intern.course}
+                        </td>
+                        <td className="px-4 sm:px-5 py-3 text-stone-600">
+                          {intern.gender || "—"}
+                        </td>
+                        <td className="px-4 sm:px-5 py-3 text-stone-600">
+                          {intern.date_started?.slice(0, 10)} –{" "}
+                          {intern.date_ended?.slice(0, 10) || "Present"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           ))}
         </div>
       )}
 
-      {currentPage < totalPages && (
+      {!isPending && currentPage < totalPages && (
         <div className="mt-5 text-center">
           <button
             onClick={handleSeeMore}
-            disabled={isPending}
-            className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition-colors"
           >
-            {isPending ? "Loading..." : "See more"}
+            See more
           </button>
         </div>
       )}
@@ -280,19 +282,19 @@ function StatCard({ icon, value, label, highlight }) {
   return (
     <div
       className={cx(
-        "flex items-center gap-4 rounded-xl border px-5 py-5 shadow-sm",
+        "flex items-center gap-3 sm:gap-4 rounded-xl border px-4 sm:px-5 py-4 sm:py-5 shadow-sm",
         highlight
           ? "border-primary-500 bg-primary-500 text-primary-foreground"
-          : "border-border bg-card text-foreground",
+          : "border-stone-300 bg-white text-stone-800",
       )}
     >
       {icon}
       <div>
-        <p className="text-2xl font-bold leading-none">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold leading-none">{value}</p>
         <p
           className={cx(
             "mt-1.5 text-xs",
-            highlight ? "opacity-80" : "text-muted-foreground",
+            highlight ? "opacity-80" : "text-stone-500",
           )}
         >
           {label}

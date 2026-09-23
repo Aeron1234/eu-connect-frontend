@@ -144,7 +144,7 @@ function InternshipPosts({
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
       }
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [query, workType, courseId, scope]);
