@@ -5,7 +5,7 @@ import DropdownFilter from "./DropdownFilter";
 
 function AcademicYearFilter({ academicYears = [], value, onChange }) {
   const options = [
-    { value: "all", label: "All" },
+    { value: "all", label: "Academic Year" },
     ...academicYears.map((year) => ({
       value: year.toLowerCase(),
       label: year,

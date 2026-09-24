@@ -6,6 +6,7 @@ import SearchBar from "./SearchBar";
 import AlumniCompanies from "./AlumniCompanies";
 import AcademicYearFilter from "./AcademicYearFilter";
 import { getAlumniInternships } from "../_services/dept-head-actions";
+import AlumniCompaniesSkeleton from "./AlumniCompaniesSkeleton";
 
 function keyOf(company) {
   return company.company_name.trim().toLowerCase();
@@ -174,17 +175,25 @@ function PastInternshipsPageContent({
         </div>
       ) : (
         <>
-          <div className="space-y-3">
-            {companies.map((c) => (
-              <AlumniCompanies
-                company={c}
-                key={keyOf(c)}
-                handleItemDelete={handleItemDelete}
-                handleItemUpdate={handleItemUpdate}
-                courses={courses}
-              />
-            ))}
-          </div>
+          {isPending ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <AlumniCompaniesSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {companies.map((c) => (
+                <AlumniCompanies
+                  company={c}
+                  key={keyOf(c)}
+                  handleItemDelete={handleItemDelete}
+                  handleItemUpdate={handleItemUpdate}
+                  courses={courses}
+                />
+              ))}
+            </div>
+          )}
 
           {page < totalPages && (
             <button

@@ -1,5 +1,5 @@
 import { getBrowser } from "./pdfBrowser";
-import { annexCHtml, annexDHtml } from "./pdfTemplates";
+import { annexCHtml, annexDHtml, studentEvaluationHtml } from "./pdfTemplates";
 
 const HEI_NAME = "Manuel S. Enverga University Foundation-Candelaria, Inc.";
 const HEI_ADDRESS = "Malabanban Norte, Candelaria, Quezon";
@@ -80,6 +80,36 @@ export async function generateAnnexCPdf(reportId, accessToken) {
     })),
     preparedBy: data.prepared_by || "",
     certifiedBy: data.certified_by || "",
+  });
+
+  return renderPdf(html);
+}
+
+export async function generateStudentEvaluationPdf(evaluationId, accessToken) {
+  const url = new URL(
+    `${BACKEND_URL}/api/evaluations/student/${evaluationId}/print`,
+  );
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (res.status === 403) {
+    const { error } = await res.json().catch(() => ({}));
+    throw new Error(error || "Not authorized to export this evaluation.");
+  }
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+
+  const data = await res.json();
+
+  const html = studentEvaluationHtml({
+    hei: HEI_NAME,
+    departmentName: data.department_name,
+    studentName: data.student_name,
+    companyName: data.company_name,
+    categories: data.categories,
+    remarks: data.other_remarks,
   });
 
   return renderPdf(html);

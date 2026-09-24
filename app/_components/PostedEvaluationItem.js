@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import Modal from "./Modal";
+import ExportPdfButton from "./ExportPdfButton";
 import StudentEvaluationDeleteForm from "./StudentEvaluationDeleteForm";
 import {
   respondToStudentEvaluation,
@@ -39,8 +40,10 @@ function PostedEvaluationItem({
   const totalMax = ev.breakdown.reduce((a, b) => a + b.max, 0);
 
   const isStaff = userRole === "department_head" || userRole === "admin";
-
-  console.log(ev);
+  const canPrint =
+    ev.type === "Performance Evaluation" &&
+    userRole === "student" &&
+    type === "all";
 
   const statusClass = (status) =>
     status === "Completed"
@@ -268,6 +271,18 @@ function PostedEvaluationItem({
               <CheckCircle2 className="h-4 w-4" />
               Accept &amp; Confirm
             </button>
+          </div>
+        </div>
+      )}
+
+      {canPrint && (
+        <div className="bg-white px-5 py-4 border-t border-stone-200">
+          <div className="flex w-full justify-end">
+            <ExportPdfButton
+              endpoint="/api/reports/student-evaluation"
+              params={{ evaluationId: ev.id }}
+              label="Print"
+            />
           </div>
         </div>
       )}

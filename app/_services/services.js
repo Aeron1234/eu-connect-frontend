@@ -1140,6 +1140,7 @@ export const getInternshipPosts = cache(
     courseId = "",
     search = "",
     mine = "",
+    favorite = "",
     page = 1,
   }) => {
     try {
@@ -1151,6 +1152,7 @@ export const getInternshipPosts = cache(
         courseId,
         search,
         mine,
+        favorite,
         page,
       });
 

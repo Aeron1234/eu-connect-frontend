@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import SearchedUserFilter from "./SearchedUserFilter";
 import DtrTable from "./DtrTable";
 import SetDtrLocation from "./SetDtrLocation";
@@ -10,6 +9,7 @@ import StudentEvaluationList from "./StudentEvaluationList";
 import StudentEvaluationCriteria from "./StudentEvaluationCriteria";
 import EmployerCertificateUploads from "./EmployerCertificateUploads";
 import ProfileInfoGrid from "./ProfileInfoGrid";
+import TabContentSkeleton from "./TabContentSkeleton";
 import {
   getSearchedStudentDTRs,
   getSearchedStudentDtrLocation,
@@ -188,14 +188,12 @@ function SearchedUserRecordsManager({
 
       <div className="mt-6">
         {isPending ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-          </div>
+          <TabContentSkeleton tab={selectedTab} userRole={userRole} />
         ) : (
           <>
             {filter === "dtr" && (
               <>
-                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6">
+                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll">
                   <DtrTable
                     searchedUserId={searchedUserId}
                     dtrs={data?.dtrData?.dtrs}

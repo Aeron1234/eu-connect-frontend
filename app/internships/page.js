@@ -2,8 +2,6 @@ import { getCourses, getInternshipPosts } from "../_services/services";
 
 import InternshipPosts from "../_components/InternshipPosts";
 import { BriefcaseBusiness } from "lucide-react";
-import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";
 import PageTitle from "../_components/PageTitle";
 
@@ -13,19 +11,10 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-async function InternshipPage({ searchParams }) {
-  const sParams = await searchParams;
-  const workType = sParams.workType || "";
-  const courseId = sParams.courseId || "";
-  const scope = sParams.scope || "";
-
+async function InternshipPage() {
   const [courses, internshipPosts] = await Promise.all([
     getCourses(),
-    getInternshipPosts({
-      workType,
-      courseId,
-      mine: scope === "myposts" ? "true" : "",
-    }),
+    getInternshipPosts({}),
   ]);
 
   return (
@@ -40,23 +29,11 @@ async function InternshipPage({ searchParams }) {
         <InternshipPostButtonWrapper courses={courses || []} />
       </div>
 
-      <Suspense
-        fallback={
-          <div className="self-center justify-self-center p-5">
-            <span className="sr-only">Loading Internship posts...</span>
-            <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
-          </div>
-        }
-      >
-        <InternshipPosts
-          internshipPosts={internshipPosts?.data || []}
-          pagination={internshipPosts?.pagination || {}}
-          courses={courses || []}
-          workType={workType}
-          courseId={courseId}
-          scope={scope}
-        />
-      </Suspense>
+      <InternshipPosts
+        internshipPosts={internshipPosts?.data || []}
+        pagination={internshipPosts?.pagination || {}}
+        courses={courses || []}
+      />
     </main>
   );
 }

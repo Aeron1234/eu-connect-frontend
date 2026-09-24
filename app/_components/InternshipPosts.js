@@ -14,10 +14,16 @@ const scopeTabs = [
 ];
 
 const workTypeTabs = [
-  { label: "Work types", workType: "" },
+  { label: "Work Type", workType: "" },
   { label: "On-site", workType: "on-site" },
   { label: "Hybrid", workType: "hybrid" },
   { label: "Remote", workType: "remote" },
+];
+
+const favoriteOptions = [
+  { value: "", label: "All Posts" },
+  { value: "favorited", label: "Marked Favorite" },
+  { value: "not_favorited", label: "Not Favorite" },
 ];
 
 function keyOf(post) {
@@ -32,20 +38,16 @@ function InternshipPosts({
     totalPages: initialTotalPages = 1,
   },
   courses = [],
-  workType: initialWorkType = "",
-  courseId: initialCourseId = "",
-  scope: initialScope = "",
 }) {
   const [internshipPosts, setInternshipPosts] = useState(initialData);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [total, setTotal] = useState(initialTotal);
   const [query, setQuery] = useState("");
-  const [workType, setWorkType] = useState(initialWorkType || "");
-  const [courseId, setCourseId] = useState(
-    initialCourseId ? String(initialCourseId) : "",
-  );
-  const [scope, setScope] = useState(initialScope || "");
+  const [workType, setWorkType] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [scope, setScope] = useState("");
+  const [favorite, setFavorite] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
@@ -97,9 +99,6 @@ function InternshipPosts({
     prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
   }, [initialData, initialPage, initialTotalPages, initialTotal]);
 
-  // Debounced refetch — now also fires on scope changes, not just
-  // query/workType/courseId, since scope switched from URL navigation
-  // to local state.
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -116,6 +115,7 @@ function InternshipPosts({
           courseId: courseId ?? "",
           search: query,
           mine: scope === "myposts" ? "true" : "",
+          favorite,
           page: 1,
         });
 
@@ -144,10 +144,10 @@ function InternshipPosts({
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
       }
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timeout);
-  }, [query, workType, courseId, scope]);
+  }, [query, workType, courseId, scope, favorite]);
 
   async function handleSeeMore() {
     if (isPending || currentPage >= totalPages) return;
@@ -161,6 +161,7 @@ function InternshipPosts({
         courseId: courseId ?? "",
         search: query,
         mine: scope === "myposts" ? "true" : "",
+        favorite,
         page: nextPage,
       });
 
@@ -206,7 +207,6 @@ function InternshipPosts({
 
   return (
     <>
-      {/* Scope tabs — now client state instead of Link navigation */}
       {userRole === "employer" && (
         <div className="flex flex-1 flex-wrap items-center gap-3">
           <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
@@ -228,7 +228,6 @@ function InternshipPosts({
         </div>
       )}
 
-      {/* Filters */}
       <div className="flex gap-2 flex-col sm:flex-row">
         <div className="items-start">
           <SearchBar
@@ -243,7 +242,7 @@ function InternshipPosts({
             value={workType}
             onValueChange={setWorkType}
             options={workTypeOptions}
-            placeholder="All work type"
+            placeholder="Work Type"
             className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
           />
           {courses.length > 0 && (
@@ -255,6 +254,15 @@ function InternshipPosts({
               className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
             />
           )}
+          {userRole === "student" && (
+            <DropdownFilter
+              value={favorite}
+              onValueChange={setFavorite}
+              options={favoriteOptions}
+              placeholder="All Posts"
+              className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+            />
+          )}
         </div>
       </div>
 
@@ -262,7 +270,6 @@ function InternshipPosts({
         {total ? total : null} listings
       </p>
 
-      {/* Listings */}
       {isPending && internshipPosts.length === 0 ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-primary-500" />

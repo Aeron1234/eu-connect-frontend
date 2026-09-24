@@ -35,6 +35,9 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/reports/annex-c": ["./node_modules/@sparticuz/chromium/**"],
     "/api/reports/annex-d": ["./node_modules/@sparticuz/chromium/**"],
+    "/api/reports/student-evaluation": [
+      "./node_modules/@sparticuz/chromium/**",
+    ],
   },
 
   reactCompiler: true,

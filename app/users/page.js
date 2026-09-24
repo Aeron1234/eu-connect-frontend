@@ -1,7 +1,6 @@
 import SearchUsers from "../_components/SearchUsers";
 import { getSearchHistory } from "../_services/services";
-import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
+
 import PageTitle from "../_components/PageTitle";
 
 export const metadata = {
@@ -22,16 +21,7 @@ async function UsersPage() {
         }
       />
 
-      <Suspense
-        fallback={
-          <div className="self-center justify-self-center p-5">
-            <span className="sr-only">Loading profile records...</span>
-            <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
-          </div>
-        }
-      >
-        <SearchUsers historyData={searchedUserHistory?.history || []} />
-      </Suspense>
+      <SearchUsers historyData={searchedUserHistory?.history || []} />
     </main>
   );
 }

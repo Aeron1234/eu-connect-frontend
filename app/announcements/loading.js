@@ -1,11 +1,26 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
+import AnnouncementCardSkeleton from "@/app/_components/AnnouncementCardSkeleton";
 
-function Loading() {
+function AnnouncementsLoading() {
   return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
-    </div>
+    <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <PageTitleSkeleton />
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <Skeleton className="h-10 w-full sm:w-64 rounded-md" />
+        <Skeleton className="h-10 w-full sm:w-40 rounded-md" />
+      </div>
+
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <AnnouncementCardSkeleton key={i} />
+        ))}
+      </div>
+    </main>
   );
 }
 
-export default Loading;
+export default AnnouncementsLoading;

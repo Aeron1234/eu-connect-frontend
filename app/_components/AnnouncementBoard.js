@@ -9,6 +9,7 @@ import AnnouncementsFilter from "./AnnouncementsFilter";
 import SearchBar from "./SearchBar";
 import { useUser } from "@/contexts/UserContext";
 import PageTitle from "./PageTitle";
+import AnnouncementCardSkeleton from "./AnnouncementCardSkeleton";
 
 function AnnouncementBoard({
   categories = [],
@@ -165,8 +166,10 @@ function AnnouncementBoard({
       </div>
 
       {isSearching ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <AnnouncementCardSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <div className="space-y-6">

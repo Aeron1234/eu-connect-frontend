@@ -1,11 +1,13 @@
-import { Spinner } from "@/components/ui/spinner";
+import SearchedUserHeaderSkeleton from "@/app/_components/SearchedUserHeaderSkeleton";
+import SearchedUserFilterSkeleton from "@/app/_components/SearchedUserFilterSkeleton";
 
-function Loading() {
+function UserProfileLoading() {
   return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
-    </div>
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+      <SearchedUserHeaderSkeleton />
+      <SearchedUserFilterSkeleton />
+    </main>
   );
 }
 
-export default Loading;
+export default UserProfileLoading;
