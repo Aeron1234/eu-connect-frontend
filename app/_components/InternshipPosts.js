@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar";
 import DropdownFilter from "./DropdownFilter";
 import { getInternshipPosts } from "../_services/services";
 import { useUser } from "@/contexts/UserContext";
+import InternshipPostsListSkeleton from "./InternshipPostsListSkeleton";
 
 const scopeTabs = [
   { label: "All Companies", value: "" },
@@ -271,8 +272,10 @@ function InternshipPosts({
       </p>
 
       {isPending && internshipPosts.length === 0 ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        <div className="space-y-4 sm:space-y-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <InternshipPostsListSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-6">
