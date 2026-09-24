@@ -4,6 +4,7 @@ import PastInternshipPostButton from "../_components/PastInternshipPostButton";
 import { getAlumniInternships } from "../_services/dept-head-actions";
 import { getCourses } from "../_services/services";
 import PageTitle from "../_components/PageTitle";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -32,13 +33,15 @@ async function PastInternshipsPage({ searchParams }) {
         <PastInternshipPostButton courses={courses || []} />
       </div>
 
-      <PastInternshipsPageContent
-        initialData={pastInternshipsData?.data || []}
-        academicYears={pastInternshipsData?.academicYears || []}
-        pagination={pastInternshipsData?.pagination || {}}
-        yearFilter={yearFilter}
-        courses={courses || []}
-      />
+      <Suspense fallback={<div>...</div>}>
+        <PastInternshipsPageContent
+          initialData={pastInternshipsData?.data || []}
+          academicYears={pastInternshipsData?.academicYears || []}
+          pagination={pastInternshipsData?.pagination || {}}
+          yearFilter={yearFilter}
+          courses={courses || []}
+        />
+      </Suspense>
     </main>
   );
 }

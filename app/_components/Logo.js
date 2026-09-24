@@ -14,6 +14,7 @@ function Logo({ size = "default" }) {
         alt="the eu-connect logo"
         fill
         sizes="(max-width: 768px) 64px, 80px"
+        loading="eager"
         className="object-contain"
         priority
       />

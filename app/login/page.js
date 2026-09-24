@@ -43,6 +43,7 @@ function LoginPage() {
                 alt="MSEUF-CI seal"
                 width={80}
                 height={80}
+                loading="eager"
                 className="h-25 w-25 object-contain"
               />
             </div>
