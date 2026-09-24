@@ -33,7 +33,6 @@ function DtrTable({
     ? `/student?d_page=${currentDtrPage + 1}&n_page=${currentNarrativePage}`
     : `/users/${searchedUserId}?filter=dtr&d_page=${currentDtrPage + 1}`;
 
-  console.log(dtrs);
   return (
     <>
       <table className="w-xl md:w-full text-sm ">
