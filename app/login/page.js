@@ -1,7 +1,5 @@
 import LoginForm from "../_components/LoginForm";
 import logo from "@/public/logo.png";
-// import { auth } from "../_services/auth";
-import { redirect } from "next/navigation";
 import { ArrowLeft, BarChart3, Clock, FileText, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +15,7 @@ const highlights = [
   { icon: MapPin, label: "Internship placement map" },
 ];
 
-async function LoginPage() {
+function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
       {/* Brand panel */}

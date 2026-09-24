@@ -1,7 +1,6 @@
 "use client";
 
 import { login } from "@/app/_services/student-actions";
-import Logo from "./Logo";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionState, useState } from "react";
 import { ArrowRight, Eye, EyeOff, TriangleAlert } from "lucide-react";
