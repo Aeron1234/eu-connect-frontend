@@ -21,16 +21,17 @@ function DtrTable({
   dtrs = [],
   totalPages = 1,
   currentDtrPage = 1,
-  currentNarrativePage = 1,
   searchedUserId = "",
   isStudentDashboard = true,
+  onDelete,
+  onPageChange, // NEW
 }) {
   const hrefPrev = isStudentDashboard
-    ? `/student?d_page=${currentDtrPage - 1}&n_page=${currentNarrativePage}`
+    ? `/student?d_page=${currentDtrPage - 1}`
     : `/users/${searchedUserId}?filter=dtr&d_page=${currentDtrPage - 1}`;
 
   const hrefNext = isStudentDashboard
-    ? `/student?d_page=${currentDtrPage + 1}&n_page=${currentNarrativePage}`
+    ? `/student?d_page=${currentDtrPage + 1}`
     : `/users/${searchedUserId}?filter=dtr&d_page=${currentDtrPage + 1}`;
 
   return (
@@ -104,7 +105,7 @@ function DtrTable({
                     // title={<span className="text-red-600">Clock-out?</span>}
                     description={`Are you sure you want to delete this daily time record?`}
                   >
-                    <DtrDeleteForm dtrId={dtr.id} />
+                    <DtrDeleteForm dtrId={dtr.id} onDelete={onDelete} />
                   </Modal>
                 </td>
               )}
@@ -128,10 +129,16 @@ function DtrTable({
         className="mt-6 w-full flex justify-end text-sm text-stone-600"
       >
         <Pagination
-          hrefPrev={hrefPrev || ""}
-          hrefNext={hrefNext || ""}
           currentPage={currentDtrPage}
           totalPages={totalPages}
+          onPrev={
+            onPageChange ? () => onPageChange(currentDtrPage - 1) : undefined
+          }
+          onNext={
+            onPageChange ? () => onPageChange(currentDtrPage + 1) : undefined
+          }
+          hrefPrev={hrefPrev}
+          hrefNext={hrefNext}
         />
         {/* <span>See all</span> */}
       </div>

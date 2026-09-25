@@ -1,6 +1,5 @@
 import MapSmallContainer from "@/app/_components/MapSmallContainer";
 import DtrTodayCard from "@/app/_components/DtrTodayCard";
-import DtrTable from "@/app/_components/DtrTable";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
 import { getStudentDashboardData } from "@/app/_services/student-actions";
 import { getMyActivityLogs } from "@/app/_services/general-actions";
@@ -15,6 +14,7 @@ import {
   Pin,
   ClipboardCheck,
 } from "lucide-react";
+import StudentDashboardDtrTable from "@/app/_components/StudentDashboardDtrTable";
 
 export const metadata = {
   title: "Student",
@@ -81,20 +81,11 @@ async function StudentDashboardPage({ searchParams }) {
       />
 
       {/* Recent Time Records */}
-      <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
-          <span className="w-4 h-4 rounded-full border-2 border-primary-500 flex-shrink-0" />
-          Recent Time Records
-        </h3>
-        <div className="overflow-x-auto">
-          <DtrTable
-            dtrs={dtrData?.dtrs || []}
-            totalPages={dtrData?.totalPages}
-            currentDtrPage={currentDtrPage}
-            isStudentDashboard={true}
-          />
-        </div>
-      </section>
+      <StudentDashboardDtrTable
+        dtrData={dtrData || {}}
+        totalPages={dtrData?.totalPages}
+        currentDtrPage={currentDtrPage}
+      />
 
       {/* Activity + sidebar row */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">

@@ -99,9 +99,15 @@ function SearchedUserRecordsManager({
       : {},
   );
   const [isPending, setIsPending] = useState(false);
+  const [isDtrPagePending, setIsDtrPagePending] = useState(false); // NEW
 
   const requestIdRef = useRef(0);
+  const dtrPageRequestIdRef = useRef(0); // NEW
   const isFirstRun = useRef(true);
+  // Tracks the filter value from the *previous* render. Starts at null
+  // (not "dtr"), so a first-mount landing on the dtr tab never counts as
+  // "came from dtr" — only an actual in-tab page change does.
+  const prevFilterRef = useRef(null); // NEW
 
   // Info's data (`info`) is already resolved server-side and handed down
   // regardless of the active tab — switching to it never needs a fetch.
@@ -178,6 +184,45 @@ function SearchedUserRecordsManager({
     return () => clearTimeout(timeout);
   }, [selectedTab, filter]);
 
+  // NEW — dedicated DTR pagination handler + effect.
+  function goToDtrPage(nextPage) {
+    const totalPages = data?.dtrData?.totalPages || 1;
+    if (nextPage < 1 || nextPage > totalPages || nextPage === dtrPage) return;
+    setDtrPage(nextPage);
+  }
+
+  useEffect(() => {
+    // Snapshot "were we already on dtr before this render" before
+    // overwriting the ref, so the tab-switch effect setting filter/dtrPage
+    // in the same batch doesn't trigger a duplicate fetch here.
+    const cameFromDtr = prevFilterRef.current === "dtr";
+    prevFilterRef.current = filter;
+
+    if (filter !== "dtr" || !cameFromDtr) return;
+
+    const thisRequestId = ++dtrPageRequestIdRef.current;
+
+    const timeout = setTimeout(async () => {
+      setIsDtrPagePending(true);
+      try {
+        const dtrData = await getSearchedStudentDTRs(searchedUserId, dtrPage);
+
+        if (thisRequestId !== dtrPageRequestIdRef.current) return;
+
+        setData((prev) => ({ ...prev, dtrData }));
+      } catch (error) {
+        if (thisRequestId === dtrPageRequestIdRef.current) {
+          console.error("Error loading DTR page:", error);
+        }
+      } finally {
+        if (thisRequestId === dtrPageRequestIdRef.current)
+          setIsDtrPagePending(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [dtrPage, filter, searchedUserId]);
+
   return (
     <>
       <SearchedUserFilter
@@ -193,14 +238,21 @@ function SearchedUserRecordsManager({
           <>
             {filter === "dtr" && (
               <>
-                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll">
+                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll relative">
                   <DtrTable
                     searchedUserId={searchedUserId}
                     dtrs={data?.dtrData?.dtrs}
                     currentDtrPage={dtrPage}
                     totalPages={data?.dtrData?.totalPages}
                     isStudentDashboard={false}
+                    onPageChange={goToDtrPage}
                   />
+
+                  {isDtrPagePending && (
+                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                      {/* swap in a proper skeleton here if you have one sized for this table */}
+                    </div>
+                  )}
                 </div>
 
                 {["employer", "admin"].includes(userRole) && (
