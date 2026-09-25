@@ -19,6 +19,7 @@ import {
   updateInternshipRecordStatus,
   getDepartmentInternshipRecords,
 } from "../_services/dept-head-actions";
+import RecordCardSkeleton from "./RecordCardSkeleton";
 
 const statusMeta = {
   pending: {
@@ -210,8 +211,10 @@ function RecordsPageContent({
       />
 
       {isSearching ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <RecordCardSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <div className="space-y-3">

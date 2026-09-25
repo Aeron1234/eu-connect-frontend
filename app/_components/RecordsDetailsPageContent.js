@@ -2,13 +2,13 @@
 
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import RecordsDtrTable from "./RecordsDtrTable";
 import RecordsNarrative from "./RecordsNarratives";
 import EvaluationCard from "./EvaluationCard";
 import RecordsDocuments from "./RecordsDocuments";
 import SetDtrLocation from "./SetDtrLocation";
 import TabBar from "./TabBar";
+import RecordsTabContentSkeleton from "./RecordsTabContentSkeleton";
 import {
   getInternshipRecordDocuments,
   getInternshipRecordDtr,
@@ -131,9 +131,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
       <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={setSelectedTab} />
 
       {isPending ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-        </div>
+        <RecordsTabContentSkeleton tab={selectedTab} />
       ) : (
         <>
           {filter === "overview" && (

@@ -5,14 +5,11 @@ import {
   ShieldBan,
   ShieldAlert,
   Users,
+  User,
 } from "lucide-react";
 import DeactivateAccount from "./DeactivateAccount";
 import ReactivateAccount from "./ReactivateAccount";
 import { format } from "date-fns";
-
-function getInitials(first = "", last = "") {
-  return `${first[0] || ""}${last[0] || ""}`.toUpperCase();
-}
 
 function ExistingAccountList({ filteredAccounts = [], onActionSuccess }) {
   if (filteredAccounts.length === 0) {
@@ -50,6 +47,7 @@ function AccountCard({ account, onActionSuccess }) {
     company_name,
     status,
     created_at,
+    avatar,
   } = account;
 
   const isSuspended = status === "suspended";
@@ -62,8 +60,16 @@ function AccountCard({ account, onActionSuccess }) {
       }`}
     >
       <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-500">
-          {getInitials(first_name, last_name)}
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-stone-400">
+          {avatar ? (
+            <img
+              src={`/avatars/${avatar}`}
+              alt="Account avatar"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <User className="h-5 w-5" />
+          )}
         </span>
 
         <div className="min-w-0">

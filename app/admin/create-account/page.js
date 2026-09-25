@@ -1,7 +1,9 @@
 import AccountsManager from "@/app/_components/AccountsManager";
 import PageTitle from "@/app/_components/PageTitle";
-import { getAllAccounts } from "@/app/_services/admin-actions";
-import { getCourses, getDepartments, getRoles } from "@/app/_services/services";
+import {
+  getAllAccounts,
+  getCreateAccountFormData,
+} from "@/app/_services/admin-actions";
 import { UserPlus } from "lucide-react";
 
 export const metadata = {
@@ -11,10 +13,8 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 async function CreateAccountPage() {
-  const [roles, courses, departments, accountsRes] = await Promise.all([
-    getRoles(),
-    getCourses(),
-    getDepartments(),
+  const [formData, accountsRes] = await Promise.all([
+    getCreateAccountFormData(),
     getAllAccounts({ filter: "all", search: "", page: 1 }),
   ]);
 
@@ -29,9 +29,9 @@ async function CreateAccountPage() {
       />
 
       <AccountsManager
-        roles={roles || []}
-        courses={courses || []}
-        departments={departments || []}
+        roles={formData?.roles || []}
+        courses={formData?.courses || []}
+        departments={formData?.departments || []}
         initialAccounts={accountsRes?.accounts || []}
         initialTotalPages={accountsRes?.totalPages || 1}
       />

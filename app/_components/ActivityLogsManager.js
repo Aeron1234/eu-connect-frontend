@@ -12,6 +12,7 @@ import DropdownFilter from "./DropdownFilter";
 import Modal from "./Modal";
 import DeleteForm from "./DeleteForm";
 import { toastAndAction } from "../_services/helpers";
+import ActivityLogsTableSkeleton from "./ActivityLogsTableSkeleton";
 
 const ROLE_LABELS = {
   student: "Student",
@@ -262,85 +263,89 @@ export default function ActivityLogsManager({
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-stone-300 bg-white shadow-sm">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead>
-              <tr className="border-b border-stone-200 text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 sm:px-5 py-3 font-medium">User</th>
-                <th className="px-4 sm:px-5 py-3 font-medium">Action</th>
-                <th className="px-4 sm:px-5 py-3 font-medium">Module</th>
-                <th className="px-4 sm:px-5 py-3 font-medium whitespace-nowrap">
-                  Timestamp
-                </th>
-                <th className="px-4 sm:px-5 py-3 font-medium text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((log) => {
-                const ip = getMetadataIp(log.metadata);
-                return (
-                  <tr
-                    key={log.id}
-                    className="border-b border-stone-200 last:border-0"
-                  >
-                    <td className="px-4 sm:px-5 py-3 max-w-[180px]">
-                      <p className="font-medium text-stone-800 truncate">
-                        {log.actor_name}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {ROLE_LABELS[log.actor_role] ||
-                          toTitleCase(log.actor_role)}
-                        {ip ? ` · ${ip}` : ""}
-                      </p>
-                    </td>
-                    <td className="px-4 sm:px-5 py-3 max-w-[280px]">
-                      <p className="font-medium text-stone-800">
-                        {toSentenceCase(log.action)}
-                      </p>
-                      {log.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {log.description}
+          {isPending ? (
+            <ActivityLogsTableSkeleton />
+          ) : (
+            <table className="w-full min-w-[720px] text-sm">
+              <thead>
+                <tr className="border-b border-stone-200 text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
+                  <th className="px-4 sm:px-5 py-3 font-medium">User</th>
+                  <th className="px-4 sm:px-5 py-3 font-medium">Action</th>
+                  <th className="px-4 sm:px-5 py-3 font-medium">Module</th>
+                  <th className="px-4 sm:px-5 py-3 font-medium whitespace-nowrap">
+                    Timestamp
+                  </th>
+                  <th className="px-4 sm:px-5 py-3 font-medium text-right">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => {
+                  const ip = getMetadataIp(log.metadata);
+                  return (
+                    <tr
+                      key={log.id}
+                      className="border-b border-stone-200 last:border-0"
+                    >
+                      <td className="px-4 sm:px-5 py-3 max-w-[180px]">
+                        <p className="font-medium text-stone-800 truncate">
+                          {log.actor_name}
                         </p>
-                      )}
-                    </td>
-                    <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
-                      {toTitleCase(log.target_type)}
-                    </td>
-                    <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
-                      {formatTimestamp(log.created_at)}
-                    </td>
-                    <td className="px-4 sm:px-5 py-3 text-right">
-                      <Modal
-                        trigger={
-                          <div
-                            title="Delete log entry"
-                            className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                          >
-                            <Trash2 className="size-4" />
-                          </div>
-                        }
-                        title={
-                          <span className={`text-primary-500`}>
-                            Delete Daily Time Record
-                          </span>
-                        }
-                        // title={<span className="text-red-600">Clock-out?</span>}
-                        description={`Are you sure you want to delete this activity log entry?`}
-                      >
-                        <DeleteForm
-                          handleAction={handleDelete}
-                          id={log.id}
-                          isPending={isLoading}
-                          name={"logId"}
-                        />
-                      </Modal>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {ROLE_LABELS[log.actor_role] ||
+                            toTitleCase(log.actor_role)}
+                          {ip ? ` · ${ip}` : ""}
+                        </p>
+                      </td>
+                      <td className="px-4 sm:px-5 py-3 max-w-[280px]">
+                        <p className="font-medium text-stone-800">
+                          {toSentenceCase(log.action)}
+                        </p>
+                        {log.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {log.description}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
+                        {toTitleCase(log.target_type)}
+                      </td>
+                      <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
+                        {formatTimestamp(log.created_at)}
+                      </td>
+                      <td className="px-4 sm:px-5 py-3 text-right">
+                        <Modal
+                          trigger={
+                            <div
+                              title="Delete log entry"
+                              className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 className="size-4" />
+                            </div>
+                          }
+                          title={
+                            <span className={`text-primary-500`}>
+                              Delete Daily Time Record
+                            </span>
+                          }
+                          // title={<span className="text-red-600">Clock-out?</span>}
+                          description={`Are you sure you want to delete this activity log entry?`}
+                        >
+                          <DeleteForm
+                            handleAction={handleDelete}
+                            id={log.id}
+                            isPending={isLoading}
+                            name={"logId"}
+                          />
+                        </Modal>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 

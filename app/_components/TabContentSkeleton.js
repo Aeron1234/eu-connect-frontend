@@ -10,7 +10,7 @@ function TabContentSkeleton({ tab, userRole }) {
   if (tab === "dtr") {
     return (
       <>
-        <DtrRecordsSkeleton />
+        <DtrRecordsSkeleton pagination={false} />
 
         {["employer", "admin"].includes(userRole) && (
           <div className="mt-6">

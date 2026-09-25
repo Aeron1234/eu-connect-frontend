@@ -36,6 +36,34 @@ export const getAllAccounts = cache(
   },
 );
 
+export const getCreateAccountFormData = async () => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return { error: "You must be logged in." };
+
+    const res = await fetch(
+      `${process.env.API_BASE_URL}/api/create-account-form-data`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      return {
+        error:
+          error.error || "Failed to load account form data. Please try again.",
+      };
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Get create account form data error:", err);
+    return { error: "Failed to load account form data. Please try again." };
+  }
+};
+
 export async function createUser(prevState, formData) {
   try {
     const accessToken = await getAccessToken();

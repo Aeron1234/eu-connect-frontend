@@ -5,6 +5,7 @@ import { Search, UserPlus } from "lucide-react";
 import { getAllAccounts } from "../_services/admin-actions";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
+import ExistingAccountListSkeleton from "./ExistingAccountListSkeleton";
 import SearchBar from "./SearchBar";
 import AccountDropdownFilter from "./AccountDropdownFilter";
 
@@ -25,7 +26,13 @@ function AccountsManager({
   const [accounts, setAccounts] = useState(initialAccounts);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [isPending, setIsPending] = useState(false);
+
+  // Split from `isLoadingMore` below — filter/search changes replace the
+  // whole list (skeleton makes sense), while "See more" appends to what's
+  // already visible (skeleton would wipe out a list the person can still
+  // see and scroll, so that one just disables the button + swaps its text).
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
@@ -50,7 +57,7 @@ function AccountsManager({
     const thisRequestId = ++requestIdRef.current;
 
     const timeout = setTimeout(async () => {
-      setIsPending(true);
+      setIsFiltering(true);
       try {
         const newData = await getAllAccounts({ filter, search, page: 1 });
 
@@ -72,7 +79,7 @@ function AccountsManager({
           console.error("Error loading accounts:", error);
         }
       } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
+        if (thisRequestId === requestIdRef.current) setIsFiltering(false);
       }
     }, 500);
 
@@ -80,8 +87,8 @@ function AccountsManager({
   }, [filter, search]);
 
   async function handleSeeMore() {
-    if (isPending || page >= totalPages) return;
-    setIsPending(true);
+    if (isFiltering || isLoadingMore || page >= totalPages) return;
+    setIsLoadingMore(true);
     const nextPage = page + 1;
     const thisRequestId = ++requestIdRef.current;
 
@@ -110,7 +117,7 @@ function AccountsManager({
         console.error("Error loading more accounts:", error);
       }
     } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
+      if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
     }
   }
 
@@ -163,27 +170,27 @@ function AccountsManager({
             />
           </div>
 
-          {accounts.length > 0 ? (
+          {isFiltering ? (
+            <ExistingAccountListSkeleton rows={10} />
+          ) : accounts.length > 0 ? (
             <ExistingAccountList
               filteredAccounts={accounts}
               onActionSuccess={refreshList}
             />
           ) : (
-            !isPending && (
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-white border-stone-300 py-16 text-center">
-                <UserPlus className="size-8 text-stone-300" />
-                <p className="text-sm text-stone-500">No accounts found.</p>
-              </div>
-            )
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-white border-stone-300 py-16 text-center">
+              <UserPlus className="size-8 text-stone-300" />
+              <p className="text-sm text-stone-500">No accounts found.</p>
+            </div>
           )}
 
           {page < totalPages && (
             <button
               onClick={handleSeeMore}
-              disabled={isPending}
+              disabled={isLoadingMore}
               className="w-full text-center text-lg font-semibold text-stone-600 transition hover:text-primary-500 disabled:opacity-50"
             >
-              {isPending ? "Loading..." : "See more"}
+              {isLoadingMore ? "Loading..." : "See more"}
             </button>
           )}
         </div>

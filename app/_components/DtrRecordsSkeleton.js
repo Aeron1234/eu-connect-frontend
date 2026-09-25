@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-function DtrRecordsSkeleton({ rows = 5 }) {
+function DtrRecordsSkeleton({ rows = 5, pagination = true }) {
   return (
     <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll">
       <table className="w-xl md:w-full text-sm">
@@ -46,11 +46,13 @@ function DtrRecordsSkeleton({ rows = 5 }) {
         </tbody>
       </table>
 
-      <div className="mt-6 w-full flex justify-end gap-2">
-        <Skeleton className="h-8 w-8 rounded-md" />
-        <Skeleton className="h-8 w-8 rounded-md" />
-        <Skeleton className="h-8 w-8 rounded-md" />
-      </div>
+      {pagination && (
+        <div className="mt-6 w-full flex justify-end gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      )}
     </div>
   );
 }

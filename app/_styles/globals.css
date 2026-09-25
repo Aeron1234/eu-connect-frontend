@@ -47,6 +47,53 @@
       transform: rotate(1turn);
     }
   }
+
+  /* Root loading screen (app/loading.js) */
+  @keyframes loading-spin-kf {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes loading-pulse-kf {
+    0%,
+    100% {
+      transform: scale(0.94);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.04);
+      opacity: 0.9;
+    }
+  }
+  @keyframes loading-fade-in-kf {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .loading-spin {
+    animation: loading-spin-kf 1.4s linear infinite;
+  }
+  .loading-pulse {
+    animation: loading-pulse-kf 2s ease-in-out infinite;
+  }
+  .loading-fade-in {
+    animation: loading-fade-in-kf 0.6s ease-out 0.1s both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .loading-spin,
+    .loading-pulse,
+    .loading-fade-in {
+      animation: none;
+    }
+  }
 }
 
 /* .rdp-root {

@@ -18,6 +18,7 @@ import {
   getAllEvaluationCriteria,
 } from "@/app/_services/admin-actions";
 import { cx } from "@/lib/utils";
+import EvaluationCriteriaListSkeleton from "./EvaluationCriteriaListSkeleton";
 
 // Backend returns [{ category, items: [{ id, name, is_active }] }].
 function toSections(groups) {
@@ -335,9 +336,7 @@ export default function EvaluationCriteriaPageContent({
       )}
 
       {isSwitchingType ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-        </div>
+        <EvaluationCriteriaListSkeleton />
       ) : (
         <>
           <div className="space-y-4">

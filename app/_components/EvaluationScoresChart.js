@@ -15,40 +15,11 @@ const chartConfig = {
   },
 };
 
-// Wraps a category label across up to 2 lines by word, so long category
-// names (e.g. "Training and Learning Opportunities") don't collide with
-// their neighbors when every tick is forced to render (interval={0}).
-function wrapLabel(text, maxCharsPerLine = 14) {
-  const words = text.split(" ");
-  const lines = [];
-  let currentLine = "";
-
-  for (const word of words) {
-    const candidate = currentLine ? `${currentLine} ${word}` : word;
-    if (candidate.length > maxCharsPerLine && currentLine) {
-      lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine = candidate;
-    }
-  }
-  if (currentLine) lines.push(currentLine);
-
-  return lines;
-}
-
-function WrappedAxisTick({ x, y, payload }) {
-  const lines = wrapLabel(payload.value);
-  const lineHeight = 12;
-
+function IndexAxisTick({ x, y, index }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <text textAnchor="middle" fontSize={11} fill="#78716c">
-        {lines.map((line, i) => (
-          <tspan key={i} x={0} dy={i === 0 ? 12 : lineHeight}>
-            {line}
-          </tspan>
-        ))}
+      <text textAnchor="middle" fontSize={11} fill="#78716c" dy={14}>
+        {index + 1}
       </text>
     </g>
   );
@@ -88,8 +59,8 @@ function EvaluationScoresChart({ title, description, icon: Icon, data = [] }) {
               tickLine={false}
               axisLine={false}
               interval={0}
-              height={50}
-              tick={<WrappedAxisTick />}
+              height={24}
+              tick={<IndexAxisTick />}
             />
             <YAxis
               domain={[0, 5]}

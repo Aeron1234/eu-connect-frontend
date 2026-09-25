@@ -1,11 +1,24 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
+import CreateAccountFormSkeleton from "@/app/_components/CreateAccountFormSkeleton";
 
-function Loading() {
+function CreateAccountLoading() {
   return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
-    </div>
+    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <PageTitleSkeleton />
+
+      <div className="space-y-6">
+        <div className="flex rounded-lg bg-stone-200 p-1 w-fit gap-1">
+          <Skeleton className="h-9 w-16 rounded-md" />
+          <Skeleton className="h-9 w-20 rounded-md" />
+        </div>
+
+        <div className="rounded-xl border border-stone-300 bg-white shadow-sm p-5 sm:p-6">
+          <CreateAccountFormSkeleton />
+        </div>
+      </div>
+    </main>
   );
 }
 
-export default Loading;
+export default CreateAccountLoading;
