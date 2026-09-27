@@ -6,6 +6,7 @@ import { Building2, FileText, Loader2, Users } from "lucide-react";
 import ExportPdfButton from "./ExportPdfButton";
 import { getHteCompanyList } from "../_services/dept-head-actions";
 import SearchBar from "./SearchBar";
+import HTEListSkeleton from "./HTEListSkeleton";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -171,9 +172,7 @@ export function AnnexDHteList({
       </div>
 
       {isPending ? (
-        <div className="mt-6 flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-        </div>
+        <HTEListSkeleton />
       ) : companies.length === 0 ? (
         <div className="mt-6 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
           <FileText className="size-8 text-stone-300" />

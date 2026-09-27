@@ -899,42 +899,44 @@ export const getSearchHistory = cache(async ({ type }) => {
   }
 });
 
-export const getSearchedStudentDTRs = cache(async (searchedUserId, page) => {
-  const limit = 5;
+export const getSearchedStudentDTRs = cache(
+  async (searchedUserId, page = 1) => {
+    const limit = 5;
 
-  const validatedPage = Math.max(1, parseInt(page));
-  const offset = (validatedPage - 1) * limit;
-  try {
-    const accessToken = await getAccessToken();
-    if (!accessToken) throw new Error("You must be logged in.");
+    const validatedPage = Math.max(1, parseInt(page));
+    const offset = (validatedPage - 1) * limit;
+    try {
+      const accessToken = await getAccessToken();
+      if (!accessToken) throw new Error("You must be logged in.");
 
-    const res = await fetch(
-      `${process.env.API_BASE_URL}/api/searched-user/dtrs/${searchedUserId}?limit=${limit}&offset=${offset}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      const res = await fetch(
+        `${process.env.API_BASE_URL}/api/searched-user/dtrs/${searchedUserId}?limit=${limit}&offset=${offset}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
+      );
 
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        error:
-          error.message ||
-          "Failed to get searched user's DTR. Please try again.",
-      };
+      if (!res.ok) {
+        const error = await res.json();
+        return {
+          error:
+            error.message ||
+            "Failed to get searched user's DTR. Please try again.",
+        };
+      }
+
+      const data = await res.json();
+
+      return data;
+    } catch (err) {
+      console.log(err);
+      return null;
     }
-
-    const data = await res.json();
-
-    return data;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-});
+  },
+);
 
 export const getSearchedStudentWeeklyNarratives = async (searchedUserId) => {
   try {

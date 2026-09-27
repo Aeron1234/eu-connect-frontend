@@ -1,11 +1,22 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
+import InternshipRecordFormSkeleton from "@/app/_components/InternshipRecordFormSkeleton";
 
-function Loading() {
+function InternshipRecordLoading() {
   return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
-    </div>
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
+      <PageTitleSkeleton />
+
+      <div className="flex gap-1 rounded-lg p-1 bg-stone-200 w-fit">
+        <Skeleton className="h-9 w-16 rounded-md" />
+        <Skeleton className="h-9 w-24 rounded-md" />
+      </div>
+
+      <div className="rounded-xl border border-stone-200 bg-white shadow-sm p-5 sm:p-8">
+        <InternshipRecordFormSkeleton />
+      </div>
+    </main>
   );
 }
 
-export default Loading;
+export default InternshipRecordLoading;

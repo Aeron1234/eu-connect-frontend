@@ -142,7 +142,7 @@ function AnnouncementBoard({
         />
 
         <PostAnnouncementButton
-          categories={categories}
+          categories={categories || []}
           onPosted={refreshList}
         />
       </div>
@@ -159,7 +159,7 @@ function AnnouncementBoard({
         />
 
         <AnnouncementsFilter
-          categories={categories}
+          categories={categories || []}
           category={category}
           setCategory={setCategory}
         />

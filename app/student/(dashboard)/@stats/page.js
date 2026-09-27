@@ -8,7 +8,7 @@ async function StatsPage() {
   const stats = [
     {
       label: "Favorite Internships",
-      value: getStats?.stats.favoriteInternships ?? 0,
+      value: getStats?.stats?.favoriteInternships ?? 0,
       icon: Briefcase,
       accent: "bg-primary-500 text-white border border-stone  -400",
       valueClass: "text-primary-foreground",
@@ -16,7 +16,7 @@ async function StatsPage() {
     },
     {
       label: "Unread Announcements",
-      value: getStats?.stats.unreadAnnouncements ?? 0,
+      value: getStats?.stats?.unreadAnnouncements ?? 0,
       icon: Megaphone,
       accent: "bg-white text-primary-500 border border-stone-300",
       valueClass: "text-foreground",
@@ -24,7 +24,7 @@ async function StatsPage() {
     },
     {
       label: "Pending Evaluations",
-      value: getStats?.stats.pendingEvaluations ?? 0,
+      value: getStats?.stats?.pendingEvaluations ?? 0,
       icon: ClipboardCheck,
       accent: "bg-white text-primary-500 border border-stone-300",
       valueClass: "text-foreground",
@@ -32,7 +32,7 @@ async function StatsPage() {
     },
     {
       label: "Documents Stored",
-      value: getStats?.stats.documentsStored ?? 0,
+      value: getStats?.stats?.documentsStored ?? 0,
       icon: FolderOpen,
       accent: "bg-white text-primary-500 border border-stone-300",
       valueClass: "text-foreground",

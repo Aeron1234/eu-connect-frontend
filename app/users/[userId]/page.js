@@ -9,6 +9,7 @@ import { getUserSession } from "@/app/_services/auth";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const searchedUserId = resolvedParams.userId
@@ -17,7 +18,6 @@ export async function generateMetadata({ params }) {
 
   if (!searchedUserId) return { title: "User Profile" };
 
-  // Shares the cache() entry with the page render below — one fetch per request.
   const profileData = await getSearchedUserProfile(searchedUserId);
   const header = profileData?.user?.header;
   if (header) {
@@ -33,6 +33,10 @@ async function UserProfilePage({ params, searchParams }) {
   const resolvedParams = await params;
   const sParams = await searchParams;
   const currentDtrPage = Number(sParams.d_page) || 1;
+  // NEW — the DTR pagination links always set ?filter=dtr, so this tells
+  // us "we're navigating within the dtr tab" even when it isn't this
+  // role's default landing tab.
+  const requestedFilter = sParams.filter || null;
 
   const searchedUserId = resolvedParams.userId
     ? decodeURIComponent(resolvedParams.userId)
@@ -54,20 +58,11 @@ async function UserProfilePage({ params, searchParams }) {
   const userRole = session?.user?.role || null;
   const searchedUserRole = header.role || "student";
 
-  // An employer only gets the record tabs (DTR, Narratives, Evaluations,
-  // Certificates) for a student who has actually accepted them as
-  // supervisor. Anyone else they've searched falls back to Info, same as
-  // buildTabs() in SearchedUserRecordsManager — kept in sync with that
-  // check so the default tab we pick down here never lands somewhere the
-  // manager is about to hide.
   const isEmployerNonSupervisor =
     userRole === "employer" &&
     searchedUserRole === "student" &&
     supervision?.status !== "accepted";
 
-  // "info" for students viewing anyone, for a non-student profile (employer
-  // profiles have no dtr/narratives/etc.), or for an employer who isn't this
-  // student's accepted supervisor. Otherwise staff default to "dtr".
   const defaultFilter =
     userRole === "student" ||
     searchedUserRole !== "student" ||
@@ -75,11 +70,12 @@ async function UserProfilePage({ params, searchParams }) {
       ? "info"
       : "dtr";
 
-  // Only fetch DTR data server-side when it's actually the default tab —
-  // everything else is fetched client-side on demand when a tab is clicked.
+  // Fetch DTR data server-side whenever it's the default landing tab OR
+  // the URL itself points at the dtr tab (a pagination link) — so every
+  // navigation, not just the first load, hands the client fresh data.
   let initialDtrData = null;
   let initialDtrLocation = null;
-  if (defaultFilter === "dtr") {
+  if (defaultFilter === "dtr" || requestedFilter === "dtr") {
     const [dtrData, dtrLocation] = await Promise.all([
       getSearchedStudentDTRs(searchedUserId, currentDtrPage),
       ["employer", "admin"].includes(userRole)

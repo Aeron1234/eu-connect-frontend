@@ -18,6 +18,8 @@ import {
   getPostedJobs,
 } from "@/app/_services/employer-actions";
 import { formatDistanceToNow } from "date-fns";
+import { Suspense } from "react";
+import JobsPostedTableSkeleton from "@/app/_components/JobsPostedTableSkeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -107,11 +109,13 @@ async function EmployerDashboardPage({ searchParams }) {
         </div>
       </div>
 
-      <JobsPostedTable
-        jobs={jobs}
-        totalPages={jobsRes?.totalPages || 1}
-        currentJobPage={currentJobPage}
-      />
+      <Suspense fallback={<JobsPostedTableSkeleton />} key={jobs}>
+        <JobsPostedTable
+          jobs={jobs}
+          totalPages={jobsRes?.totalPages || 1}
+          currentJobPage={currentJobPage}
+        />
+      </Suspense>
     </div>
   );
 }

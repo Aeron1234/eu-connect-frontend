@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import EmployerEvaluations from "./EmployerEvaluations";
 import EvaluationCard from "./EvaluationCard";
 import TabBar from "./TabBar";
+import EvaluationsTabContentSkeleton from "./EvaluationsTabContentSkeleton";
 import {
   getAllEvaluations,
   getDisputedEvaluations,
@@ -106,9 +106,7 @@ function EvaluationsManager({ initialCriteria = [] }) {
 
       <div className="flex flex-col gap-2 mt-2">
         {isPending ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-          </div>
+          <EvaluationsTabContentSkeleton tab={selectedTab} />
         ) : (
           <>
             {filter === "evaluate-supervisor" && (

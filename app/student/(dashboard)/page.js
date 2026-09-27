@@ -1,7 +1,10 @@
 import MapSmallContainer from "@/app/_components/MapSmallContainer";
 import DtrTodayCard from "@/app/_components/DtrTodayCard";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
-import { getStudentDashboardData } from "@/app/_services/student-actions";
+import {
+  getDtrs,
+  getStudentDashboardData,
+} from "@/app/_services/student-actions";
 import { getMyActivityLogs } from "@/app/_services/general-actions";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -14,7 +17,10 @@ import {
   Pin,
   ClipboardCheck,
 } from "lucide-react";
-import StudentDashboardDtrTable from "@/app/_components/StudentDashboardDtrTable";
+// import StudentDashboardDtrTable from "@/app/_components/StudentDashboardDtrTable";
+import DtrTable from "@/app/_components/DtrTable";
+import { Suspense } from "react";
+import DtrRecordsSkeleton from "@/app/_components/DtrRecordsSkeleton";
 
 export const metadata = {
   title: "Student",
@@ -50,15 +56,15 @@ async function StudentDashboardPage({ searchParams }) {
   const sParams = await searchParams;
   const currentDtrPage = Number(sParams.d_page) || 1;
 
-  const [activityLogs, dashboardRes] = await Promise.all([
+  const [activityLogs, dashboardRes, dtrData] = await Promise.all([
     getMyActivityLogs({ page: 1 }),
     getStudentDashboardData(),
+    getDtrs(currentDtrPage),
   ]);
 
   const internshipData = dashboardRes?.internshipData;
   const dtrToday = dashboardRes?.dtrToday || {};
   const dtrStatus = dashboardRes?.dtrStatus?.status;
-  const dtrData = dashboardRes?.dtrData || {};
   const locationData = dashboardRes?.location || {};
 
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {
@@ -81,11 +87,22 @@ async function StudentDashboardPage({ searchParams }) {
       />
 
       {/* Recent Time Records */}
-      <StudentDashboardDtrTable
-        dtrData={dtrData || {}}
-        totalPages={dtrData?.totalPages}
-        currentDtrPage={currentDtrPage}
-      />
+
+      <Suspense fallback={<DtrRecordsSkeleton />}>
+        <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
+            <span className="w-4 h-4 rounded-full border-2 border-primary-500 flex-shrink-0" />
+            Recent Time Records
+          </h3>
+          <div className="">
+            <DtrTable
+              dtrs={dtrData?.dtrs || []}
+              totalPages={dtrData?.totalPages}
+              currentDtrPage={currentDtrPage}
+            />
+          </div>
+        </section>
+      </Suspense>
 
       {/* Activity + sidebar row */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -127,7 +144,7 @@ function InternshipProgress({ accumulated_hours = 0, total_hours = 0 }) {
           <div className="flex items-center justify-between text-xs mb-1.5">
             <span className="text-white">Required Hours</span>
             <span className="text-white font-medium">
-              {accumulated_hours}/{total_hours}
+              {accumulated_hours.toFixed(1)}/{total_hours}
             </span>
           </div>
           <div className="h-2 rounded-full bg-primary-50/50 overflow-hidden">

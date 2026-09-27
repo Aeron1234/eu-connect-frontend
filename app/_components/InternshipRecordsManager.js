@@ -1,14 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Briefcase, FilePlus2, ListChecks } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import InternshipRecordForm from "./InternshipRecordForm";
 import StudentInternshipRecordList from "./StudentInternshipRecordList";
 import PageTitle from "./PageTitle";
-
-function cx(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
 
 function InternshipRecordsManager({
   initialRecords = [],

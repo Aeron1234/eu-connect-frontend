@@ -134,11 +134,13 @@ function CreateUpdateAnnouncementForm({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Categories</SelectLabel>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={`${category.id}`}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
+                  {categories.length > 0
+                    ? categories.map((category) => (
+                        <SelectItem key={category.id} value={`${category.id}`}>
+                          {category.name}
+                        </SelectItem>
+                      ))
+                    : null}
                 </SelectGroup>
               </SelectContent>
             </Select>

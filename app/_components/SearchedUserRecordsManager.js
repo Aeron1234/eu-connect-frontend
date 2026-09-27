@@ -27,9 +27,6 @@ function buildTabs({ userRole, searchedUserRole, supervision }) {
     return [{ value: "info", text: "Info" }];
   }
   if (userRole === "employer") {
-    // An employer only gets the record tabs for their own accepted intern.
-    // Anyone else they've searched — pending request, rejected, unrelated —
-    // sees Info only.
     if (supervision?.status !== "accepted") {
       return [{ value: "info", text: "Info" }];
     }
@@ -41,7 +38,6 @@ function buildTabs({ userRole, searchedUserRole, supervision }) {
       { value: "info", text: "Info" },
     ];
   }
-  // admin / department_head
   return [
     { value: "dtr", text: "DTR" },
     { value: "narratives", text: "Narratives" },
@@ -82,10 +78,6 @@ function SearchedUserRecordsManager({
 }) {
   const tabs = buildTabs({ userRole, searchedUserRole, supervision });
 
-  // Defends against `defaultFilter` (computed server-side, in the page
-  // component) disagreeing with `tabs` (computed here) — e.g. if the two
-  // ever drift, or supervision resolves differently between the two calls.
-  // Always land on a tab that's actually in the list.
   const safeDefaultFilter = tabs.some((tab) => tab.value === defaultFilter)
     ? defaultFilter
     : "info";
@@ -99,18 +91,10 @@ function SearchedUserRecordsManager({
       : {},
   );
   const [isPending, setIsPending] = useState(false);
-  const [isDtrPagePending, setIsDtrPagePending] = useState(false); // NEW
 
   const requestIdRef = useRef(0);
-  const dtrPageRequestIdRef = useRef(0); // NEW
   const isFirstRun = useRef(true);
-  // Tracks the filter value from the *previous* render. Starts at null
-  // (not "dtr"), so a first-mount landing on the dtr tab never counts as
-  // "came from dtr" — only an actual in-tab page change does.
-  const prevFilterRef = useRef(null); // NEW
 
-  // Info's data (`info`) is already resolved server-side and handed down
-  // regardless of the active tab — switching to it never needs a fetch.
   const fetchers = {
     dtr: async () => {
       const [dtrData, dtrLocation] = await Promise.all([
@@ -152,7 +136,6 @@ function SearchedUserRecordsManager({
 
     if (selectedTab === filter) return;
 
-    // No fetch needed — info is always already on hand.
     if (selectedTab === "info") {
       setFilter("info");
       return;
@@ -184,44 +167,21 @@ function SearchedUserRecordsManager({
     return () => clearTimeout(timeout);
   }, [selectedTab, filter]);
 
-  // NEW — dedicated DTR pagination handler + effect.
-  function goToDtrPage(nextPage) {
-    const totalPages = data?.dtrData?.totalPages || 1;
-    if (nextPage < 1 || nextPage > totalPages || nextPage === dtrPage) return;
-    setDtrPage(nextPage);
-  }
-
+  // NEW — mirrors the server's DTR props into local state whenever they
+  // change. This is what makes pagination actually work: clicking the
+  // Pagination Link navigates to ?filter=dtr&d_page=N, the server page
+  // re-runs and passes fresh initialDtrData/currentDtrPage, and this
+  // effect just reflects that into what the table renders. No client
+  // fetch, no request-id bookkeeping — same "let the server handle it"
+  // approach as the student dashboard.
   useEffect(() => {
-    // Snapshot "were we already on dtr before this render" before
-    // overwriting the ref, so the tab-switch effect setting filter/dtrPage
-    // in the same batch doesn't trigger a duplicate fetch here.
-    const cameFromDtr = prevFilterRef.current === "dtr";
-    prevFilterRef.current = filter;
-
-    if (filter !== "dtr" || !cameFromDtr) return;
-
-    const thisRequestId = ++dtrPageRequestIdRef.current;
-
-    const timeout = setTimeout(async () => {
-      setIsDtrPagePending(true);
-      try {
-        const dtrData = await getSearchedStudentDTRs(searchedUserId, dtrPage);
-
-        if (thisRequestId !== dtrPageRequestIdRef.current) return;
-
-        setData((prev) => ({ ...prev, dtrData }));
-      } catch (error) {
-        if (thisRequestId === dtrPageRequestIdRef.current) {
-          console.error("Error loading DTR page:", error);
-        }
-      } finally {
-        if (thisRequestId === dtrPageRequestIdRef.current)
-          setIsDtrPagePending(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [dtrPage, filter, searchedUserId]);
+    setDtrPage(currentDtrPage || 1);
+    setData((prev) => ({
+      ...prev,
+      dtrData: initialDtrData,
+      dtrLocation: initialDtrLocation ?? prev.dtrLocation,
+    }));
+  }, [initialDtrData, currentDtrPage, initialDtrLocation]);
 
   return (
     <>
@@ -238,21 +198,14 @@ function SearchedUserRecordsManager({
           <>
             {filter === "dtr" && (
               <>
-                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll relative">
+                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll">
                   <DtrTable
                     searchedUserId={searchedUserId}
                     dtrs={data?.dtrData?.dtrs}
                     currentDtrPage={dtrPage}
                     totalPages={data?.dtrData?.totalPages}
                     isStudentDashboard={false}
-                    onPageChange={goToDtrPage}
                   />
-
-                  {isDtrPagePending && (
-                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                      {/* swap in a proper skeleton here if you have one sized for this table */}
-                    </div>
-                  )}
                 </div>
 
                 {["employer", "admin"].includes(userRole) && (

@@ -10,12 +10,13 @@ import {
 import ExportPdfButton from "./ExportPdfButton";
 import SearchBar from "./SearchBar";
 import TabBar from "./TabBar";
+import AnnualReportSkeleton from "./AnnualReportSkeleton";
 
 const emptyRow = () => ({ issue: "", solution: "", recommendation: "" });
 
 const innerTabs = [
-  { value: "form", text: "Form", shortText: "Form" },
-  { value: "reports", text: "Reports", shortText: "Reports" },
+  { value: "form", text: "Form" },
+  { value: "reports", text: "Reports" },
 ];
 
 export default function AnnexCManager({
@@ -220,7 +221,7 @@ export default function AnnexCManager({
 
   return (
     <div>
-      <div className="mb-6 rounded-xl border border-stone-300 bg-white shadow-sm p-1.5">
+      <div className="mb-6 rounded-xl bg-stone-200 p-1.5 sm:w-fit">
         <TabBar tabs={innerTabs} selectedTab={tab} onSelect={setTab} />
       </div>
 
@@ -412,7 +413,15 @@ export default function AnnexCManager({
         </div>
       ) : (
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex gap-2 flex-col sm:flex-row">
+            <div className="items-start">
+              <SearchBar
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search degree or program..."
+              />
+            </div>
+
             <div className="flex flex-wrap items-center gap-2">
               {["All", ...availableAcadYear].map((ay) => (
                 <button
@@ -428,18 +437,10 @@ export default function AnnexCManager({
                 </button>
               ))}
             </div>
-
-            <SearchBar
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search degree program..."
-            />
           </div>
 
           {isPending ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-            </div>
+            <AnnualReportSkeleton />
           ) : reports.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
               <ClipboardList className="size-8 text-stone-300" />

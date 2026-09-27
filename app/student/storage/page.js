@@ -11,8 +11,6 @@ import {
 } from "@/app/_services/services";
 import { getUserSession } from "@/app/_services/auth";
 import { FolderOpen, Upload } from "lucide-react";
-import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import PageTitle from "@/app/_components/PageTitle";
 import TitleButton from "@/app/_components/TitleButton";
 
@@ -52,20 +50,12 @@ async function StoragePage() {
         </Modal>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="self-center justify-self-center p-5">
-            <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
-          </div>
-        }
-      >
-        <CurrentInternshipDocs
-          ongoing={ongoing}
-          requirementTypes={fileRequirementTypes}
-          currentUserId={currentUserId}
-        />
-        <PastInternshipsSection currentUserId={currentUserId} />
-      </Suspense>
+      <CurrentInternshipDocs
+        ongoing={ongoing}
+        requirementTypes={fileRequirementTypes}
+        currentUserId={currentUserId}
+      />
+      <PastInternshipsSection currentUserId={currentUserId} />
     </main>
   );
 }

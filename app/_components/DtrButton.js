@@ -1,7 +1,6 @@
 import { Clock, LogIn, LogOut } from "lucide-react";
 import Modal from "./Modal";
 import DtrForm from "./DtrForm";
-import TriggerButton from "./TriggerButton";
 
 function DtrButton({ internshipData, status }) {
   if (

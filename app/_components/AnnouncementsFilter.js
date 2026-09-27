@@ -28,25 +28,27 @@ function AnnouncementsFilter({ categories, category, setCategory }) {
           All
         </button>
       </li>
-      {categories.map((cat) => {
-        const value = cat.name.toLowerCase();
-        return (
-          <li key={cat.id}>
-            <button
-              type="button"
-              onClick={() => setCategory(value)}
-              className={cx(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                category === value
-                  ? "text-white bg-primary-500"
-                  : "hover:bg-stone-200",
-              )}
-            >
-              {cat.name}
-            </button>
-          </li>
-        );
-      })}
+      {categories.length > 0
+        ? categories.map((cat) => {
+            const value = cat.name.toLowerCase();
+            return (
+              <li key={cat.id}>
+                <button
+                  type="button"
+                  onClick={() => setCategory(value)}
+                  className={cx(
+                    "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                    category === value
+                      ? "text-white bg-primary-500"
+                      : "hover:bg-stone-200",
+                  )}
+                >
+                  {cat.name}
+                </button>
+              </li>
+            );
+          })
+        : null}
     </ul>
   );
 }
