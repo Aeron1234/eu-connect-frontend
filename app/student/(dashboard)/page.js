@@ -62,7 +62,7 @@ async function StudentDashboardPage({ searchParams }) {
     getDtrs(currentDtrPage),
   ]);
 
-  const internshipData = dashboardRes?.internshipData;
+  const internshipData = dashboardRes?.internshipData || {};
   const dtrToday = dashboardRes?.dtrToday || {};
   const dtrStatus = dashboardRes?.dtrStatus?.status;
   const locationData = dashboardRes?.location || {};
