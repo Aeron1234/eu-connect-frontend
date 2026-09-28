@@ -1,4 +1,4 @@
-import { getUserProfile } from "../_services/services";
+import { getUserProfile } from "@/lib/server-actions/account-actions";
 import SideNavigationList from "./SideNavigationList";
 
 async function SideNavigation() {

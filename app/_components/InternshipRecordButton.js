@@ -1,4 +1,4 @@
-import { getOngoingInternshipRecord } from "../_services/services";
+import { getOngoingInternshipRecord } from "@/lib/server-actions/internship-records-actions";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 import Modal from "./Modal";
 import StudentInternshipForm from "./InternshipRecordForm-v1";

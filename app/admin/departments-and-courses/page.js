@@ -1,5 +1,8 @@
 import DepartmentsAndCoursesManager from "@/app/_components/DepartmentAndCoursesManager";
-import { getCourses, getDepartments } from "@/app/_services/services";
+import {
+  getCourses,
+  getDepartments,
+} from "@/lib/server-actions/course-and-department-actions";
 
 export const metadata = {
   title: "Departments & Courses",

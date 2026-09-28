@@ -19,8 +19,8 @@ import {
 import {
   getAverageShiftHours,
   getDepartmentHeadDashboardData,
-} from "@/app/_services/dept-head-actions";
-import { getMyActivityLogs } from "@/app/_services/general-actions";
+} from "@/lib/server-actions/dashboard-actions";
+import { getMyActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 import { formatDistanceToNow } from "date-fns";
 
 export const dynamic = "force-dynamic";

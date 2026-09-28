@@ -7,7 +7,8 @@ import SearchedStudentFiles from "./SearchedStudentFiles";
 import {
   getInternshipFiles,
   downloadInternshipFile,
-} from "../_services/services";
+} from "@/lib/server-actions/internship-docs-actions";
+
 import { getFileTypeLabel, typeTone } from "@/lib/utils";
 
 const STATUS_STYLES = {

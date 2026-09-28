@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 // Adjust this import path to wherever this server action actually lives.
-import { updateUserInfo } from "../_services/general-actions";
+import { updateUserInfo } from "@/lib/server-actions/account-actions";
 
 import {
   buildName,

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Search, UserPlus } from "lucide-react";
-import { getAllAccounts } from "../_services/admin-actions";
+import { getAllAccounts } from "@/lib/server-actions/account-actions";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
 import ExistingAccountListSkeleton from "./ExistingAccountListSkeleton";

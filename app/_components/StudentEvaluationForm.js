@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { postStudentEvaluation } from "../_services/employer-actions";
-import { toastAndAction } from "../_services/helpers";
+import { postStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
+import { toastAndAction } from "../../lib/helpers";
 import { useUser } from "@/contexts/UserContext";
 
 function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {

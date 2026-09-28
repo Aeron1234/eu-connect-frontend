@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Building2, FileText, Loader2, Users } from "lucide-react";
 
 import ExportPdfButton from "./ExportPdfButton";
-import { getHteCompanyList } from "../_services/dept-head-actions";
+import { getHteCompanyList } from "@/lib/server-actions/sipp-hte-actions";
 import SearchBar from "./SearchBar";
 import HTEListSkeleton from "./HTEListSkeleton";
 

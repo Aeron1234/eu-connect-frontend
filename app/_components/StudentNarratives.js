@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import Modal from "./Modal";
 import { useState } from "react";
-import { fetchMoreSearchedStudentWeeklyNarratives } from "../_services/services";
+import { fetchMoreSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 
 function StudentNarratives({
   narratives: initialData = [],

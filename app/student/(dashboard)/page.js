@@ -1,11 +1,10 @@
 import MapSmallContainer from "@/app/_components/MapSmallContainer";
 import DtrTodayCard from "@/app/_components/DtrTodayCard";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
-import {
-  getDtrs,
-  getStudentDashboardData,
-} from "@/app/_services/student-actions";
-import { getMyActivityLogs } from "@/app/_services/general-actions";
+import { getStudentDashboardData } from "@/lib/server-actions/dashboard-actions";
+import { getDtrs } from "@/lib/server-actions/dtr-actions";
+
+import { getMyActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 import { formatDistanceToNow } from "date-fns";
 import {
   Sparkles,
@@ -21,6 +20,7 @@ import {
 import DtrTable from "@/app/_components/DtrTable";
 import { Suspense } from "react";
 import DtrRecordsSkeleton from "@/app/_components/DtrRecordsSkeleton";
+import { ckb } from "date-fns/locale";
 
 export const metadata = {
   title: "Student",

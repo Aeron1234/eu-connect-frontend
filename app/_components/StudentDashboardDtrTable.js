@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import DtrTable from "./DtrTable";
-import { getDtrs, deleteDtr } from "../_services/student-actions";
-import { toastAndAction } from "../_services/helpers";
+import { getDtrs, deleteDtr } from "@/lib/server-actions/dtr-actions";
+import { toastAndAction } from "../../lib/helpers";
 import DtrRecordsSkeleton from "./DtrRecordsSkeleton";
 
 function StudentDashboardDtrTable({

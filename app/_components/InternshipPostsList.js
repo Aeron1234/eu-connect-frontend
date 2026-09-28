@@ -15,13 +15,13 @@ import {
 import Modal from "./Modal";
 import { useTransition } from "react";
 import DeleteForm from "./DeleteForm";
-import { toastAndAction, useFavoriteToggle } from "../_services/helpers";
+import { toastAndAction, useFavoriteToggle } from "../../lib/helpers";
 import {
   deleteInternshipPosting,
   updateInternshipPosting,
-} from "../_services/employer-actions";
+} from "@/lib/server-actions/internship-posts-actions";
 import InternshipPostForm from "./InternshipPostForm";
-import { toggleInternshipFavorite } from "../_services/student-actions";
+import { toggleInternshipFavorite } from "@/lib/server-actions/internship-posts-actions";
 
 const workTypeStyles = {
   "on-site": "border-sky-200 bg-sky-50 text-sky-700",

@@ -10,14 +10,16 @@ import StudentEvaluationCriteria from "./StudentEvaluationCriteria";
 import EmployerCertificateUploads from "./EmployerCertificateUploads";
 import ProfileInfoGrid from "./ProfileInfoGrid";
 import TabContentSkeleton from "./TabContentSkeleton";
+import { getEmployerUploadedFiles } from "@/lib/server-actions/internship-docs-actions";
+import { getSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 import {
-  getSearchedStudentDTRs,
-  getSearchedStudentDtrLocation,
-  getSearchedStudentWeeklyNarratives,
   getStudentPastEvaluations,
   getStudentEvaluationCriterias,
-  getEmployerUploadedFiles,
-} from "../_services/services";
+} from "@/lib/server-actions/evaluations-actions";
+import {
+  getSearchedStudentDtrLocation,
+  getSearchedStudentDTRs,
+} from "@/lib/server-actions/dtr-actions";
 
 function buildTabs({ userRole, searchedUserRole, supervision }) {
   if (searchedUserRole !== "student") {

@@ -5,7 +5,7 @@ import {
   Megaphone,
 } from "lucide-react";
 import DashboardStats from "@/app/_components/DashboardStats";
-import { getDepartmentHeadDashboardStats } from "@/app/_services/dept-head-actions";
+import { getDepartmentHeadDashboardStats } from "@/lib/server-actions/dashboard-actions";
 
 export const metadata = {
   title: "Department Head",

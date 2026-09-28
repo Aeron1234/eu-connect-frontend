@@ -19,9 +19,12 @@ import {
   XCircle,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
-import { toastAndAction } from "../_services/helpers";
-import { markAsRead, deleteNotification } from "../_services/general-actions";
-import { respondToSupervisorRequest } from "../_services/employer-actions";
+import { toastAndAction } from "../../lib/helpers";
+import {
+  markAsRead,
+  deleteNotification,
+} from "@/lib/server-actions/notifications-actions";
+import { respondToSupervisorRequest } from "@/lib/server-actions/supervisor-actions";
 
 const TYPE_META = {
   announcement: { icon: Megaphone, tone: "primary" },

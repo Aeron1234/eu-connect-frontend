@@ -1,8 +1,8 @@
 import { Building2 } from "lucide-react";
 import PastInternshipsPageContent from "../_components/PastInternshipsPageContent";
 import PastInternshipPostButton from "../_components/PastInternshipPostButton";
-import { getAlumniInternships } from "../_services/dept-head-actions";
-import { getCourses } from "../_services/services";
+import { getAlumniInternships } from "@/lib/server-actions/past-internships-actions";
+import { getCourses } from "@/lib/server-actions/course-and-department-actions";
 import PageTitle from "../_components/PageTitle";
 import { Suspense } from "react";
 

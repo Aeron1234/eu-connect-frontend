@@ -5,7 +5,7 @@ import SideNavigation from "../_components/SideNavigation";
 import SocketProvider from "../_components/SocketProvider";
 import Alert from "../_components/Alert";
 import { UserProvider } from "@/contexts/UserContext";
-import { getUserSession } from "../_services/auth";
+import { getUserSession } from "../../lib/server-actions/auth";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 
 async function StudentLayout({ children }) {

@@ -1,6 +1,6 @@
 import EvaluationsManager from "@/app/_components/EvaluationsManager";
 import PageTitle from "@/app/_components/PageTitle";
-import { getEmployerEvaluationCriterias } from "@/app/_services/services";
+import { getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
 import { ClipboardCheck } from "lucide-react";
 
 export const metadata = {

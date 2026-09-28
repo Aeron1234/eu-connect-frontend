@@ -1,6 +1,6 @@
 import EvaluationCriteriaPageContent from "@/app/_components/EvaluationCriteriaPageContent";
 import PageTitle from "@/app/_components/PageTitle";
-import { getAllEvaluationCriteria } from "@/app/_services/admin-actions";
+import { getAllEvaluationCriteria } from "@/lib/server-actions/evaluations-actions";
 import { SlidersHorizontal } from "lucide-react";
 
 export const metadata = {

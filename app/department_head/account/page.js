@@ -1,5 +1,5 @@
 import AccountProfile from "@/app/_components/AccountProfile";
-import { getUserProfile } from "@/app/_services/services";
+import { getUserProfile } from "@/lib/server-actions/account-actions";
 
 export const metadata = {
   title: "Account",

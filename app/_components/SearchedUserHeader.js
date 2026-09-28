@@ -1,21 +1,14 @@
 "use client";
 
-import {
-  ChevronLeft,
-  User,
-  UserCheck,
-  Clock3,
-  ShieldCheck,
-  Check,
-} from "lucide-react";
+import { ChevronLeft, User, UserCheck, Clock3, Check } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { getSupervisorStatus } from "../_services/services";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import {
   cancelSupervisorRequest,
   requestSupervisor,
-} from "../_services/student-actions";
+  getSupervisorStatus,
+} from "@/lib/server-actions/supervisor-actions";
 import { Spinner } from "@/components/ui/spinner";
 
 // Keyed by direction first, then status — the same "accepted" reads

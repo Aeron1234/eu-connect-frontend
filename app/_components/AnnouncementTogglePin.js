@@ -2,8 +2,8 @@
 
 import { useTransition } from "react";
 import AnnouncementForm from "./AnnouncementForm";
-import { togglePinAnnouncement } from "../_services/dept-head-actions";
-import { toastAndAction } from "../_services/helpers";
+import { togglePinAnnouncement } from "@/lib/server-actions/announcements-actions";
+import { toastAndAction } from "../../lib/helpers";
 
 function AnnouncementTogglePin({ announcementId, is_pinned, onChanged }) {
   const [isPending, startTransition] = useTransition();

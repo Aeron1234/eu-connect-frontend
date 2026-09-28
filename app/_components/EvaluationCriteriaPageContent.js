@@ -16,7 +16,7 @@ import {
   deactivateSection,
   reactivateSection,
   getAllEvaluationCriteria,
-} from "@/app/_services/admin-actions";
+} from "@/lib/server-actions/evaluations-actions";
 import { cx } from "@/lib/utils";
 import EvaluationCriteriaListSkeleton from "./EvaluationCriteriaListSkeleton";
 

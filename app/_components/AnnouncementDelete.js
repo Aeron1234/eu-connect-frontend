@@ -2,8 +2,8 @@
 
 import { useTransition } from "react";
 import AnnouncementForm from "./AnnouncementForm";
-import { toastAndAction } from "../_services/helpers";
-import { deleteAnnouncement } from "../_services/dept-head-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { deleteAnnouncement } from "@/lib/server-actions/announcements-actions";
 
 function AnnouncementDelete({ announcementId, onChanged }) {
   const [isPending, startTransition] = useTransition();

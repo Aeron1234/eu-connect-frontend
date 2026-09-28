@@ -3,8 +3,8 @@
 import { useTransition } from "react";
 
 import DeleteForm from "./DeleteForm";
-import { toastAndAction } from "../_services/helpers";
-import { deleteDtr } from "../_services/student-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { deleteDtr } from "@/lib/server-actions/dtr-actions";
 
 function DtrDeleteForm({ dtrId }) {
   const [isPending, startTransition] = useTransition();

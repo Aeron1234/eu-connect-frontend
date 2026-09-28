@@ -5,7 +5,7 @@ import SearchedUsersHistoryList from "./SearchedUsersHistoryList";
 import UsersSearchBar from "./UsersSearchBar";
 import SearchedUserEmpty from "./SearchedUserEmpty";
 import { useState } from "react";
-import { useApiFetch } from "../_services/helpers";
+import { useApiFetch } from "@/lib/helpers";
 import SearchedUserList from "./SearchedUserList";
 
 function SearchUsers({ historyData = [] }) {

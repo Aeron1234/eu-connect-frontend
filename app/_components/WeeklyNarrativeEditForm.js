@@ -1,7 +1,7 @@
 "use client";
 import { useTransition } from "react";
-import { editWeeklyNarrative } from "../_services/student-actions";
-import { toastAndAction } from "../_services/helpers";
+import { editWeeklyNarrative } from "@/lib/server-actions/weekly-narratives-actions";
+import { toastAndAction } from "../../lib/helpers";
 import WeeklyNarrativeForm from "./WeeklyNarrativeForm";
 
 function WeeklyNarrativeEditForm({ narrative, onSuccess }) {

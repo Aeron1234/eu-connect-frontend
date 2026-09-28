@@ -14,9 +14,9 @@ import { Download, File, FileBox, FileText, Trash2 } from "lucide-react";
 import Modal from "./Modal";
 import StorageDeleteFile from "./StorageDeleteFile";
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import { Spinner } from "@/components/ui/spinner";
-import { downloadInternshipFile } from "../_services/services";
+import { downloadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 
 function StorageFilesTable({ filteredFiles = [] }) {
   return (

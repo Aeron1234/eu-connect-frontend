@@ -1,7 +1,7 @@
 import {
   getAllAnnouncements,
   getAnnouncementCategories,
-} from "../_services/services";
+} from "@/lib/server-actions/announcements-actions";
 import AnnouncementBoard from "../_components/AnnouncementBoard";
 
 export const metadata = {

@@ -2,7 +2,7 @@ import WeeklyNarrativeContent from "@/app/_components/WeeklyNarrativeContent";
 import WeeklyNarrativePostButton from "@/app/_components/WeeklyNarrativePostButton";
 import WeeklyNarrativesStats from "@/app/_components/WeeklyNarrativesStats";
 import PageTitle from "@/app/_components/PageTitle";
-import { getWeeklyNarratives } from "@/app/_services/student-actions";
+import { getWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 import { BookOpen } from "lucide-react";
 
 export const metadata = {

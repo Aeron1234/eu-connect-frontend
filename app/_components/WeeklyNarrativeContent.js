@@ -6,7 +6,7 @@ import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
 import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
-import { fetchMoreWeeklyNarratives } from "../_services/student-actions";
+import { fetchMoreWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 
 function WeeklyNarrativeContent({
   narratives: initialData = [],

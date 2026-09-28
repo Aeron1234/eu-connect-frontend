@@ -1,5 +1,5 @@
 import ActivityLogsManager from "@/app/_components/ActivityLogsManager";
-import { getAllActivityLogs } from "@/app/_services/admin-actions";
+import { getAllActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 
 export const metadata = {
   title: "Activity Logs",

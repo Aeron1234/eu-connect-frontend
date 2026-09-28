@@ -1,6 +1,6 @@
 "use client";
 
-import { forgotPassword } from "@/app/_services/student-actions";
+import { forgotPassword } from "@/lib/server-actions/auth";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionState } from "react";
 import { ArrowRight, CheckCircle2, TriangleAlert } from "lucide-react";

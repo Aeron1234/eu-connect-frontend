@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, BellRing, Inbox } from "lucide-react";
 import MarkAllAsReadButton from "./MarkAllAsReadButton";
 import NotificationItem from "./NotificationItem";
-import { getInbox } from "../_services/services";
+import { getInbox } from "@/lib/server-actions/notifications-actions";
 import { useUser } from "@/contexts/UserContext";
 
 const scopeTabs = [

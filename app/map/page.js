@@ -1,5 +1,5 @@
 import MapWrapper from "@/app/_components/MapWrapper";
-import { getMapLocations } from "@/app/_services/dept-head-actions";
+import { getMapLocations } from "@/lib/server-actions/map-actions";
 
 export const metadata = {
   title: "Map",

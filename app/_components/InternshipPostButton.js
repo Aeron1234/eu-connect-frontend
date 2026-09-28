@@ -2,8 +2,8 @@
 
 import { useTransition } from "react";
 import InternshipPostForm from "./InternshipPostForm";
-import { toastAndAction } from "../_services/helpers";
-import { createInternshipPosting } from "../_services/employer-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { createInternshipPosting } from "@/lib/server-actions/internship-posts-actions";
 
 function InternshipPostButton({ userRole, courses, onSuccess = null }) {
   const [isPending, startTransition] = useTransition();

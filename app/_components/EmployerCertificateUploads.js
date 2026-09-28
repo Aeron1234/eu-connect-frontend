@@ -17,9 +17,9 @@ import {
 import {
   uploadCertificateOfCompletion,
   deleteEmployerCertificate,
-} from "../_services/employer-actions";
-import { downloadSearchedStudentFiles } from "../_services/services";
-import { toastAndAction } from "../_services/helpers";
+} from "@/lib/server-actions/internship-docs-actions";
+import { downloadSearchedStudentFiles } from "@/lib/server-actions/internship-docs-actions";
+import { toastAndAction } from "../../lib/helpers";
 
 function getFileTypeLabel(mimeType = "") {
   const m = mimeType.toLowerCase();

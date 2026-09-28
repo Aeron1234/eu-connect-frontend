@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
-import { finishInternshipRecord } from "../_services/student-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { finishInternshipRecord } from "@/lib/server-actions/internship-records-actions";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";

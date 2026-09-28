@@ -14,11 +14,11 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import RecordsPageHeader from "./RecordsPageHeader";
 import RecordsPageFilter from "./RecordsPageFilter";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import {
   updateInternshipRecordStatus,
   getDepartmentInternshipRecords,
-} from "../_services/dept-head-actions";
+} from "@/lib/server-actions/internship-records-actions";
 import RecordCardSkeleton from "./RecordCardSkeleton";
 
 const statusMeta = {

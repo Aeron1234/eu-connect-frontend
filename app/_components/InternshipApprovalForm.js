@@ -1,13 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { CircleCheck, CircleX, User } from "lucide-react";
 import MapSmallContainer from "./MapSmallContainer";
 import { useState, useTransition } from "react";
-import { approveInternshipRecord } from "../_services/dept-head-actions";
-import { toastAndAction } from "../_services/helpers";
+import { approveInternshipRecord } from "@/lib/server-actions/internship-records-actions";
+import { toastAndAction } from "../../lib/helpers";
 
 function InternshipApprovalForm({ approvalData }) {
   const [status, setStatus] = useState("");

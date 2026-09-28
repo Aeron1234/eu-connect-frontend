@@ -4,8 +4,8 @@ import { useTransition } from "react";
 import { Download, File, FileBox, FileText, Table, Trash2 } from "lucide-react";
 import Modal from "./Modal";
 import StorageDeleteFile from "./StorageDeleteFile";
-import { downloadInternshipFile } from "../_services/services";
-import { toastAndAction } from "../_services/helpers"; // or wherever it lives
+import { downloadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
+import { toastAndAction } from "../../lib/helpers"; // or wherever it lives
 import { Spinner } from "@/components/ui/spinner";
 
 function FileCard({ item }) {

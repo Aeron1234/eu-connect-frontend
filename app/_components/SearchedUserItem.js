@@ -1,6 +1,6 @@
 "use client";
 
-import { saveSearchHistory } from "../_services/general-actions";
+import { saveSearchHistory } from "@/lib/server-actions/history-actions";
 import UserCard from "./UserCard";
 
 function SearchedUserItem({ searchedUser }) {

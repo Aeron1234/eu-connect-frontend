@@ -4,7 +4,7 @@ import { History, X } from "lucide-react";
 import {
   clearSearchHistory,
   deleteSearchHistoryItem,
-} from "../_services/general-actions";
+} from "@/lib/server-actions/history-actions";
 import UserCard from "./UserCard";
 
 function SearchedUsersHistoryList({ historyData = [] }) {

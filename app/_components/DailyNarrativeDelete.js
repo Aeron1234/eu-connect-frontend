@@ -2,7 +2,7 @@
 import { useTransition } from "react";
 import { deleteNarrative } from "../_services/student-actions";
 import DeleteForm from "./DeleteForm";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 
 function DailyNarrativeDelete({ narrativeId, onSuccess }) {
   const [isPending, startTransition] = useTransition();

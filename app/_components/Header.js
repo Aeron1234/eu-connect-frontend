@@ -1,4 +1,4 @@
-import { getInbox } from "../_services/services";
+import { getInbox } from "@/lib/server-actions/notifications-actions";
 import Navigation from "./Navigation";
 
 async function Header() {

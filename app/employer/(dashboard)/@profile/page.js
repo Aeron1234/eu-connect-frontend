@@ -1,5 +1,5 @@
 import EmployerProfileCard from "@/app/_components/EmployerProfileCard";
-import { getUserProfile } from "@/app/_services/services";
+import { getUserProfile } from "@/lib/server-actions/account-actions";
 
 export const metadata = {
   title: "Employer",

@@ -1,6 +1,6 @@
 import { Briefcase, Building2, Users, UserX } from "lucide-react";
 import DashboardStats from "@/app/_components/DashboardStats";
-import { getAdminDashboardStats } from "@/app/_services/admin-actions";
+import { getAdminDashboardStats } from "@/lib/server-actions/dashboard-actions";
 
 export const metadata = {
   title: "Admin",

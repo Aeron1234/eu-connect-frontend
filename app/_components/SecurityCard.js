@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 import { Lock } from "lucide-react";
 // Adjust this import path to wherever this server action actually lives.
-import { updatePassword } from "../_services/general-actions";
-import { toastAndAction } from "../_services/helpers";
+import { updatePassword } from "@/lib/server-actions/account-actions";
+import { toastAndAction } from "../../lib/helpers";
 
 export default function SecurityCard() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);

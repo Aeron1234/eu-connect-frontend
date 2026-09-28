@@ -12,11 +12,11 @@ import {
   Trash2,
   Pin,
 } from "lucide-react";
-import { getMyActivityLogs } from "@/app/_services/general-actions";
+import { getMyActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 import {
   getEmployerDashboardData,
   getPostedJobs,
-} from "@/app/_services/employer-actions";
+} from "@/lib/server-actions/dashboard-actions";
 import { formatDistanceToNow } from "date-fns";
 import { Suspense } from "react";
 import JobsPostedTableSkeleton from "@/app/_components/JobsPostedTableSkeleton";

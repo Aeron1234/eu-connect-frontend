@@ -1,4 +1,4 @@
-import { getDtrs } from "../_services/student-actions";
+import { getDtrs } from "@/lib/server-actions/dtr-actions";
 import DtrButton from "./DtrButton";
 import DtrTable from "./DtrTable";
 

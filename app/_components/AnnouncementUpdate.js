@@ -2,8 +2,8 @@
 
 import { useTransition } from "react";
 import AnnouncementForm from "./AnnouncementForm";
-import { toastAndAction } from "../_services/helpers";
-import { updateAnnouncement } from "../_services/dept-head-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { updateAnnouncement } from "@/lib/server-actions/announcements-actions";
 
 function AnnouncementUpdate({ data = null, categories, onChanged }) {
   const [isPending, startTransition] = useTransition();

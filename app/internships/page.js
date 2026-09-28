@@ -1,9 +1,9 @@
-import { getCourses, getInternshipPosts } from "../_services/services";
+import { getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
+import { getCourses } from "@/lib/server-actions/course-and-department-actions";
 
 import InternshipPosts from "../_components/InternshipPosts";
 import { BriefcaseBusiness } from "lucide-react";
 import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";
 import PageTitle from "../_components/PageTitle";
 

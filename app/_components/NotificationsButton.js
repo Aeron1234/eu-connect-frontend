@@ -20,12 +20,12 @@ import {
 } from "lucide-react";
 import { cx } from "@/lib/utils";
 import { socket } from "./SocketProvider";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
-} from "../_services/general-actions";
+} from "@/lib/server-actions/notifications-actions";
 
 const TYPE_META = {
   announcement: { icon: Megaphone, tone: "violet" },

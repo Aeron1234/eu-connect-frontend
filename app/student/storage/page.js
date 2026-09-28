@@ -3,13 +3,16 @@ import StorageUploadForm from "@/app/_components/StorageUploadForm";
 import RecordsDocuments from "@/app/_components/RecordsDocuments";
 import PastInternshipDocuments from "@/app/_components/PastInternshipDocuments";
 import {
-  getFileRequirementTypes,
-  getInternshipFiles,
-  getMyPastInternshipRecords,
-  downloadInternshipFile,
   getOngoingInternshipRecord,
-} from "@/app/_services/services";
-import { getUserSession } from "@/app/_services/auth";
+  getMyPastInternshipRecords,
+} from "@/lib/server-actions/internship-records-actions";
+import {
+  getInternshipFiles,
+  downloadInternshipFile,
+  getFileRequirementTypes,
+} from "@/lib/server-actions/internship-docs-actions";
+
+import { getUserSession } from "@/lib/server-actions/auth";
 import { FolderOpen, Upload } from "lucide-react";
 import PageTitle from "@/app/_components/PageTitle";
 import TitleButton from "@/app/_components/TitleButton";

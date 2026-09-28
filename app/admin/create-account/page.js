@@ -3,7 +3,7 @@ import PageTitle from "@/app/_components/PageTitle";
 import {
   getAllAccounts,
   getCreateAccountFormData,
-} from "@/app/_services/admin-actions";
+} from "@/lib/server-actions/account-actions";
 import { UserPlus } from "lucide-react";
 
 export const metadata = {

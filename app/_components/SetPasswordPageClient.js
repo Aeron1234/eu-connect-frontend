@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { KeyRound, TriangleAlert } from "lucide-react";
-import { setPassword } from "../_services/student-actions";
+import { setPassword } from "@/lib/server-actions/auth";
 
 const initialState = {};
 

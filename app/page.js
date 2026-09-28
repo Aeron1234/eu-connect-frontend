@@ -13,7 +13,7 @@ import {
   Phone,
   Users,
 } from "lucide-react";
-import { getUserSession } from "./_services/auth";
+import { getUserSession } from "../lib/server-actions/auth";
 
 const navLinks = [
   { label: "About", href: "#about" },
@@ -147,10 +147,6 @@ async function HomePage() {
       <main id="top">
         {/* Hero */}
         <section className="relative overflow-hidden bg-primary-500 pb-40 pt-24 text-primary-foreground">
-          <div
-            className="pointer-events-none absolute -right-40 top-1/2 h-[42rem] w-[42rem] -translate-y-1/2 rounded-full border border-primary-foreground/10"
-            aria-hidden="true"
-          />
           <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-6 lg:grid-cols-2">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-4 py-1.5 text-sm">
@@ -258,13 +254,9 @@ function Stats({ stats }) {
 
 function About({ logo }) {
   return (
-    <section id="about" className="bg-cream py-24">
+    <section id="about" className="bg-[#FAF9F7] py-14">
       <div className="mx-auto grid max-w-6xl items-center gap-16 px-6 lg:grid-cols-2">
         <div className="relative overflow-hidden rounded-2xl bg-primary-500 p-10 text-primary-foreground">
-          <div
-            className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary-foreground/5"
-            aria-hidden="true"
-          />
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background">
             <Image
               src={logo}
@@ -297,8 +289,8 @@ function About({ logo }) {
           </div>
         </div>
 
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500">
+        <div className="">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500 ">
             About the System
           </p>
           <h2 className="mt-4 font-display text-4xl font-bold leading-tight">
@@ -338,7 +330,7 @@ function About({ logo }) {
 
 function Features({ features }) {
   return (
-    <section id="features" className="bg-background py-24">
+    <section id="features" className="bg-background py-14">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500">
@@ -374,7 +366,7 @@ function Features({ features }) {
 
 function HowItWorks({ roles }) {
   return (
-    <section id="how-it-works" className="bg-cream py-24">
+    <section id="how-it-works" className="bg-[#FAF9F7] py-14">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500">
@@ -424,7 +416,7 @@ function CTA() {
   return (
     <section
       id="cta"
-      className="bg-primary-500 py-24 text-center text-primary-foreground"
+      className="bg-primary-500 py-14 text-center text-primary-foreground"
     >
       <div className="mx-auto max-w-2xl px-6">
         <h2 className="font-display text-4xl font-bold">

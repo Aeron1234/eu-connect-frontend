@@ -1,6 +1,6 @@
 "use client";
 import { LogOut } from "lucide-react";
-import { logout } from "../_services/student-actions";
+import { logout } from "@/lib/server-actions/auth";
 import { useUser } from "@/contexts/UserContext";
 
 function SignoutButton({ isCollapsed }) {

@@ -1,5 +1,5 @@
 import PageTitle from "@/app/_components/PageTitle";
-import { getUserSession } from "@/app/_services/auth";
+import { getUserSession } from "@/lib/server-actions/auth";
 import { redirect } from "next/navigation";
 
 async function DepartmentHeadDashboardLayout({ stats, children }) {

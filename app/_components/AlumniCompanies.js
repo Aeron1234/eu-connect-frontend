@@ -2,11 +2,11 @@
 
 import { Pencil, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import {
   deleteAlumniRecord,
   updateAlumniRecord,
-} from "../_services/dept-head-actions";
+} from "@/lib/server-actions/past-internships-actions";
 import Modal from "./Modal";
 import DeleteForm from "./DeleteForm";
 import PastInternshipPostEditForm from "./PastInternshipPostEditForm";

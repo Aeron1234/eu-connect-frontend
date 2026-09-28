@@ -3,7 +3,7 @@ import { NotebookPen, Plus } from "lucide-react";
 import Modal from "./Modal";
 import TriggerButton from "./TriggerButton";
 import DailyNarrativeForm from "./DailyNarrativeForm";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import { createNarrative } from "../_services/student-actions";
 import { useTransition } from "react";
 

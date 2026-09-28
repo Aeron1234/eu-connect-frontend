@@ -1,9 +1,10 @@
 import InternshipRecordsManager from "@/app/_components/InternshipRecordsManager";
+import { getRegions } from "@/lib/server-actions/map-actions";
+
 import {
   getInternshipRecords,
   getOngoingInternshipRecord,
-  getRegions,
-} from "@/app/_services/services";
+} from "@/lib/server-actions/internship-records-actions";
 
 export const metadata = {
   title: "Internship Records",

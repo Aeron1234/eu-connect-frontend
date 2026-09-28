@@ -1,5 +1,5 @@
 // app/api/users/route.js
-import { getAccessToken } from "@/app/_services/auth";
+import { getAccessToken } from "@/lib/server-actions/auth";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {

@@ -2,7 +2,7 @@ import UserGrowthChart from "@/app/_components/UserGrowthChart";
 import UsersByRoleChart from "@/app/_components/UsersByRoleChart";
 import InternshipsByDepartmentChart from "@/app/_components/InternshipsByDepartmentChart";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
-import { getAdminDashboardData } from "@/app/_services/admin-actions";
+import { getAdminDashboardData } from "@/lib/server-actions/dashboard-actions";
 import {
   ClipboardCheck,
   CheckCircle2,

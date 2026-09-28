@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, FileText, ClipboardList, Loader2 } from "lucide-react";
+import { Plus, Trash2, FileText, ClipboardList } from "lucide-react";
 import {
   saveAnnexCReport,
   getAnnexCReports,
   deleteAnnexCReport,
-} from "../_services/dept-head-actions";
+} from "@/lib/server-actions/sipp-hte-actions";
 import ExportPdfButton from "./ExportPdfButton";
 import SearchBar from "./SearchBar";
 import TabBar from "./TabBar";

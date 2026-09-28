@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { uploadInternshipFile } from "../_services/student-actions";
+import { uploadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 import { useState, useTransition, useRef, useEffect } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 
 function StorageUploadForm({ fileRequirementTypes = [] }) {
   const [isPending, startTransition] = useTransition();

@@ -9,16 +9,15 @@ import RecordsDocuments from "./RecordsDocuments";
 import SetDtrLocation from "./SetDtrLocation";
 import TabBar from "./TabBar";
 import RecordsTabContentSkeleton from "./RecordsTabContentSkeleton";
+import { getInternshipRecordDocuments } from "@/lib/server-actions/internship-docs-actions";
 import {
-  getInternshipRecordDocuments,
   getInternshipRecordDtr,
-  getInternshipRecordEvaluations,
-  getInternshipRecordWeeklyNarratives,
-} from "../_services/dept-head-actions";
-import {
-  getFileRequirementTypes,
   getSearchedStudentDtrLocation,
-} from "../_services/services";
+} from "@/lib/server-actions/dtr-actions";
+import { getInternshipRecordWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
+import { getInternshipRecordEvaluations } from "@/lib/server-actions/evaluations-actions";
+
+import { getFileRequirementTypes } from "@/lib/server-actions/internship-docs-actions";
 
 const tabs = [
   { value: "overview", text: "Overview" },

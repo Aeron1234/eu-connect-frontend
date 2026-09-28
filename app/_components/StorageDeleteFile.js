@@ -1,9 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import DeleteForm from "./DeleteForm";
-import { deleteFile } from "../_services/student-actions";
+import { deleteFile } from "@/lib/server-actions/internship-docs-actions";
 
 function StorageDeleteFile({ fileId = "", fileUrl = "", path }) {
   const [isPending, startTransition] = useTransition();

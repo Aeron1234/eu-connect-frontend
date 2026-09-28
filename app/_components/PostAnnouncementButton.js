@@ -4,8 +4,8 @@ import { Megaphone, Plus } from "lucide-react";
 import Modal from "./Modal";
 import AnnouncementForm from "./AnnouncementForm";
 import { useTransition } from "react";
-import { createAnnouncement } from "../_services/dept-head-actions";
-import { toastAndAction } from "../_services/helpers";
+import { createAnnouncement } from "@/lib/server-actions/announcements-actions";
+import { toastAndAction } from "../../lib/helpers";
 import { useUser } from "@/contexts/UserContext";
 import TitleButton from "./TitleButton";
 

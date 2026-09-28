@@ -1,11 +1,11 @@
-import { getUserSession } from "../../_services/auth";
+import { getUserSession } from "../../../lib/server-actions/auth";
 import { FileText } from "lucide-react";
 import SIPPReportsManager from "../../_components/SIPPReportsManager";
 import {
   getAvailableAcademicYears,
   getAnnexCReports,
   getHteCompanyList,
-} from "../../_services/dept-head-actions";
+} from "@/lib/server-actions/sipp-hte-actions";
 import { notFound } from "next/navigation";
 
 async function SIPPReportsPage() {

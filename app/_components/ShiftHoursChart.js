@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getAverageShiftHours } from "@/app/_services/dept-head-actions";
+import { getAverageShiftHours } from "@/lib/server-actions/dashboard-actions";
 
 const monthNames = [
   "January",

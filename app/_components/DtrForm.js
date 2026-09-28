@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { clockIn, clockOut } from "../_services/student-actions";
+import { clockIn, clockOut } from "@/lib/server-actions/dtr-actions";
 import { useTransition } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { toastAndAction, useGetLocation } from "../_services/helpers";
+import { toastAndAction, useGetLocation } from "../../lib/helpers";
 
 function DtrForm({ isOut }) {
   const action = isOut ? clockIn : clockOut;

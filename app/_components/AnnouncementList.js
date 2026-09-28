@@ -6,7 +6,7 @@ import AnnouncementCard from "./AnnouncementCard";
 import AnnouncementsFilter from "./AnnouncementsFilter";
 import AnnouncementSearch from "./AnnouncementSearch";
 import SeeMoreButton from "./SeeMoreButton";
-import { fetchMoreAnnouncements } from "../_services/services";
+import { fetchMoreAnnouncements } from "@/lib/server-actions/announcements-actions";
 
 function AnnouncementList({
   filteredByCategory,

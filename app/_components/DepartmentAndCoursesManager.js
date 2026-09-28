@@ -9,7 +9,7 @@ import {
   deactivateCourse,
   addDepartment,
   addCourse,
-} from "@/app/_services/admin-actions";
+} from "@/lib/server-actions/course-and-department-actions";
 import SearchBar from "./SearchBar";
 import PageTitle from "./PageTitle";
 

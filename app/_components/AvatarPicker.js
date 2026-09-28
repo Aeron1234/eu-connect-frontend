@@ -7,8 +7,8 @@ import {
   getAvailableAvatars,
   updateUserAvatar,
   deleteUserAvatar,
-} from "../_services/general-actions";
-import { toastAndAction } from "../_services/helpers";
+} from "@/lib/server-actions/account-actions";
+import { toastAndAction } from "../../lib/helpers";
 
 function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
   const [avatars, setAvatars] = useState([]);

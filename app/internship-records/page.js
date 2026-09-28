@@ -1,5 +1,5 @@
 import RecordsPageContent from "@/app/_components/RecordsPageContent";
-import { getDepartmentInternshipRecords } from "@/app/_services/dept-head-actions";
+import { getDepartmentInternshipRecords } from "@/lib/server-actions/internship-records-actions";
 
 export const metadata = {
   title: "Internship Records",

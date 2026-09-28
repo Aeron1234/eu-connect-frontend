@@ -5,8 +5,8 @@ import Modal from "./Modal";
 import { useUser } from "@/contexts/UserContext";
 import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
 import { useTransition } from "react";
-import { postAlumniRecord } from "../_services/dept-head-actions";
-import { toastAndAction } from "../_services/helpers";
+import { postAlumniRecord } from "@/lib/server-actions/past-internships-actions";
+import { toastAndAction } from "../../lib/helpers";
 import TitleButton from "./TitleButton";
 
 function PastInternshipPostButton({ courses = [] }) {

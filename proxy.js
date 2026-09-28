@@ -7,7 +7,7 @@ import {
   refreshCookieOptions,
   verifyAccessToken,
   refreshTokens,
-} from "@/app/_services/auth-shared";
+} from "@/lib/server-actions/auth-shared";
 
 const PUBLIC_EXACT_PATHS = ["/"];
 const PUBLIC_PREFIX_PATHS = ["/login", "/forgot-password"];

@@ -17,9 +17,9 @@ import StudentEvaluationDeleteForm from "./StudentEvaluationDeleteForm";
 import {
   respondToStudentEvaluation,
   restoreDisputedEvaluation,
-} from "../_services/student-actions";
-import { toastAndAction } from "../_services/helpers";
-import { reviewDisputedEvaluation } from "../_services/dept-head-actions";
+} from "@/lib/server-actions/evaluations-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { reviewDisputedEvaluation } from "@/lib/server-actions/evaluations-actions";
 import { useUser } from "@/contexts/UserContext";
 
 function PostedEvaluationItem({

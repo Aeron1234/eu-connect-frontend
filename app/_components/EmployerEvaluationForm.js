@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
-import { postEmployerEvaluation } from "../_services/student-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { postEmployerEvaluation } from "@/lib/server-actions/evaluations-actions";
 
 function EmployerEvaluationForm({ employerEvaluationCriterias }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {

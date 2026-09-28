@@ -8,11 +8,11 @@ import {
   XCircle,
 } from "lucide-react";
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import {
   restoreInternshipRecord,
   updateInternshipRecordStatus,
-} from "../_services/dept-head-actions";
+} from "@/lib/server-actions/internship-records-actions";
 
 const statusMeta = {
   pending: {

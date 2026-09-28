@@ -2,12 +2,12 @@
 
 import { Check, Clock3, UserCheck } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { getSupervisorStatus } from "../_services/services";
-import { toastAndAction } from "../_services/helpers";
+import { getSupervisorStatus } from "@/lib/server-actions/supervisor-actions";
+import { toastAndAction } from "../../lib/helpers";
 import {
   cancelSupervisorRequest,
   requestSupervisor,
-} from "../_services/student-actions";
+} from "@/lib/server-actions/supervisor-actions";
 import { Spinner } from "@/components/ui/spinner";
 
 /**

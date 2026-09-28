@@ -20,14 +20,6 @@ function LoginPage() {
     <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
       {/* Brand panel */}
       <aside className="relative overflow-hidden bg-primary-500 px-10 py-12 text-primary-foreground lg:px-14">
-        <div
-          className="pointer-events-none absolute -left-24 -top-40 h-96 w-96 rounded-full border border-primary-foreground/10"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-primary-foreground/[0.04]"
-          aria-hidden="true"
-        />
         <div className="relative flex h-full flex-col">
           <Link
             href={"/"}

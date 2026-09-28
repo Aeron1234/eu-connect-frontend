@@ -3,8 +3,8 @@
 import { useMemo, useState, useTransition } from "react";
 import { MapPin, Save, Trash2, Crosshair } from "lucide-react";
 import MapFormContainer from "./MapFormContainer";
-import { toastAndAction } from "../_services/helpers";
-import { setStudentDtrLocation } from "../_services/employer-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { setStudentDtrLocation } from "@/lib/server-actions/dtr-actions";
 
 const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
   const [loc, setLoc] = useState({

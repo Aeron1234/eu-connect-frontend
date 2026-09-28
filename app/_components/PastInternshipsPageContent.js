@@ -5,7 +5,7 @@ import { Building2 } from "lucide-react";
 import SearchBar from "./SearchBar";
 import AlumniCompanies from "./AlumniCompanies";
 import AcademicYearFilter from "./AcademicYearFilter";
-import { getAlumniInternships } from "../_services/dept-head-actions";
+import { getAlumniInternships } from "@/lib/server-actions/past-internships-actions";
 import AlumniCompaniesSkeleton from "./AlumniCompaniesSkeleton";
 
 function keyOf(company) {

@@ -8,9 +8,10 @@ import EvaluationsTabContentSkeleton from "./EvaluationsTabContentSkeleton";
 import {
   getAllEvaluations,
   getDisputedEvaluations,
-  getEmployerEvaluationCriterias,
   getStudentPendingEvaluations,
-} from "../_services/services";
+} from "@/lib/server-actions/evaluations-actions";
+
+import { getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
 
 const tabs = [
   { label: "Evaluate Supervisor", value: "evaluate-supervisor" },

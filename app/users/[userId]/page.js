@@ -1,11 +1,11 @@
 import SearchedUserHeader from "@/app/_components/SearchedUserHeader";
 import SearchedUserRecordsManager from "@/app/_components/SearchedUserRecordsManager";
 import {
-  getSearchedUserProfile,
   getSearchedStudentDTRs,
   getSearchedStudentDtrLocation,
-} from "@/app/_services/services";
-import { getUserSession } from "@/app/_services/auth";
+} from "@/lib/server-actions/dtr-actions";
+import { getSearchedUserProfile } from "@/lib/server-actions/account-actions";
+import { getUserSession } from "@/lib/server-actions/auth";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";

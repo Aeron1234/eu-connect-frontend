@@ -1,9 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import DeleteForm from "./DeleteForm";
-import { deletePendingStudentEvaluation } from "../_services/employer-actions";
+import { deletePendingStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
 
 function StudentEvaluationDeleteForm({ evaluationId, status }) {
   const [isPending, startTransition] = useTransition();

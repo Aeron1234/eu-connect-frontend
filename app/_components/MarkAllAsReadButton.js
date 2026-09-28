@@ -4,9 +4,9 @@ import Modal from "./Modal";
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { markAllAsRead } from "../_services/general-actions";
+import { markAllAsRead } from "@/lib/server-actions/notifications-actions";
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 
 function MarkAllAsReadButton({
   data,

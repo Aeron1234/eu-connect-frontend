@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Megaphone } from "lucide-react";
-import { getAllAnnouncements } from "../_services/services";
+import { getAllAnnouncements } from "@/lib/server-actions/announcements-actions";
 import PostAnnouncementButton from "./PostAnnouncementButton";
 import AnnouncementCard from "./AnnouncementCard";
 import AnnouncementsFilter from "./AnnouncementsFilter";

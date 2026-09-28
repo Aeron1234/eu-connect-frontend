@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
-import { reactivateAccount } from "../_services/admin-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { reactivateAccount } from "@/lib/server-actions/account-actions";
 import { ShieldCheck } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import CustomToolTip from "./CustomToolTip";

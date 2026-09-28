@@ -5,13 +5,13 @@ import { Activity, ScrollText, Trash2 } from "lucide-react";
 import {
   getAllActivityLogs,
   deleteActivityLog,
-} from "@/app/_services/admin-actions";
+} from "@/lib/server-actions/activity-logs-actions";
 import SearchBar from "./SearchBar";
 import PageTitle from "./PageTitle";
 import DropdownFilter from "./DropdownFilter";
 import Modal from "./Modal";
 import DeleteForm from "./DeleteForm";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import ActivityLogsTableSkeleton from "./ActivityLogsTableSkeleton";
 
 const ROLE_LABELS = {

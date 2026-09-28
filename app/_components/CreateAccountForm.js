@@ -12,8 +12,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useState, useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
-import { createUser } from "../_services/admin-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { createUser } from "@/lib/server-actions/account-actions";
 import {
   Combobox,
   ComboboxContent,

@@ -2,8 +2,8 @@
 import { Plus } from "lucide-react";
 import Modal from "./Modal";
 import WeeklyNarrativeForm from "./WeeklyNarrativeForm";
-import { toastAndAction } from "../_services/helpers";
-import { createWeeklyNarrative } from "../_services/student-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { createWeeklyNarrative } from "@/lib/server-actions/weekly-narratives-actions";
 import { useTransition } from "react";
 import TitleButton from "./TitleButton";
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BriefcaseBusiness, Loader2 } from "lucide-react";
+import { BriefcaseBusiness } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
 import SearchBar from "./SearchBar";
 import DropdownFilter from "./DropdownFilter";
-import { getInternshipPosts } from "../_services/services";
+import { getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
 import { useUser } from "@/contexts/UserContext";
 import InternshipPostsListSkeleton from "./InternshipPostsListSkeleton";
 

@@ -3,9 +3,9 @@
 import { format } from "date-fns";
 import { Check, Download, Trash2, Upload } from "lucide-react";
 import { useTransition } from "react";
-import { toastAndAction } from "../_services/helpers";
-import { downloadInternshipRecordDocuments } from "../_services/dept-head-actions";
-import { approveInternshipDocument } from "../_services/student-actions";
+import { toastAndAction } from "../../lib/helpers";
+import { downloadInternshipRecordDocuments } from "@/lib/server-actions/internship-docs-actions";
+import { approveInternshipDocument } from "@/lib/server-actions/internship-docs-actions";
 import Modal from "./Modal";
 import StorageDeleteFile from "./StorageDeleteFile";
 

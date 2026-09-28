@@ -14,8 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createInternshipRecord } from "../_services/student-actions";
-import { toastAndAction } from "../_services/helpers";
+import { createInternshipRecord } from "@/lib/server-actions/internship-records-actions";
+import { toastAndAction } from "../../lib/helpers";
 
 const labelClass = "text-sm font-medium text-foreground";
 const inputClass =

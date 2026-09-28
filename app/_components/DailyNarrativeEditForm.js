@@ -1,7 +1,7 @@
 "use client";
 import { useTransition } from "react";
 import { editNarrative } from "../_services/student-actions";
-import { toastAndAction } from "../_services/helpers";
+import { toastAndAction } from "../../lib/helpers";
 import DailyNarrativeForm from "./DailyNarrativeForm";
 
 function DailyNarrativeEditForm({ narrative, onSuccess }) {

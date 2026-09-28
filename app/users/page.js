@@ -1,5 +1,5 @@
 import SearchUsers from "../_components/SearchUsers";
-import { getSearchHistory } from "../_services/services";
+import { getSearchHistory } from "@/lib/server-actions/history-actions";
 
 import PageTitle from "../_components/PageTitle";
 
