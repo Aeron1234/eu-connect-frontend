@@ -19,7 +19,7 @@ function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
       {/* Brand panel */}
-      <aside className="relative overflow-hidden bg-primary-500 px-10 py-12 text-primary-foreground lg:px-14">
+      <aside className="relative overflow-hidden bg-primary px-10 py-12 text-primary-foreground lg:px-14">
         <div className="relative flex h-full flex-col">
           <Link
             href={"/"}
@@ -29,7 +29,7 @@ function LoginPage() {
           </Link>
 
           <div className="mt-16">
-            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-background">
+            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-white">
               <Image
                 src={logo}
                 alt="MSEUF-CI seal"

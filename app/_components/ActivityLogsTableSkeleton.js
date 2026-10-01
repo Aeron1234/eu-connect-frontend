@@ -4,7 +4,7 @@ function ActivityLogsTableSkeleton({ rows = 8 }) {
   return (
     <table className="w-full min-w-[720px] text-sm">
       <thead>
-        <tr className="border-b border-stone-200">
+        <tr className="border-b border-border">
           <th className="px-4 sm:px-5 py-3">
             <Skeleton className="h-2.5 w-10" />
           </th>
@@ -24,7 +24,7 @@ function ActivityLogsTableSkeleton({ rows = 8 }) {
       </thead>
       <tbody>
         {Array.from({ length: rows }).map((_, i) => (
-          <tr key={i} className="border-b border-stone-200 last:border-0">
+          <tr key={i} className="border-b border-border last:border-0">
             <td className="px-4 sm:px-5 py-3 max-w-[180px] space-y-1.5">
               <Skeleton className="h-3.5 w-28" />
               <Skeleton className="h-2.5 w-20" />

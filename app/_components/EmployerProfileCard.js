@@ -11,11 +11,11 @@ import Link from "next/link";
 
 function EmployerProfileCard({ profile = {} }) {
   return (
-    <section className="rounded-xl bg-primary-500 text-white p-5 sm:p-6 shadow-sm overflow-hidden">
+    <section className="rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm overflow-hidden">
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
-          <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-white flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-primary-500" />
+          <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-card flex items-center justify-center">
+            <Building2 className="w-6 h-6 text-primary-emphasis" />
           </div>
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-widest text-primary-foreground/70">
@@ -56,7 +56,7 @@ function EmployerProfileCard({ profile = {} }) {
         <div className="flex xs:items-center gap-2 flex-shrink-0 flex-col xs:flex-row">
           <Link
             href="/internships"
-            className="flex items-center gap-2 px-3 py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90 whitespace-nowrap"
+            className="flex items-center gap-2 px-3 py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-emphasis bg-card hover:bg-primary/15 whitespace-nowrap"
           >
             <Briefcase className="w-4 h-4" />
             Manage Jobs

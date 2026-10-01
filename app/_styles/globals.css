@@ -4,8 +4,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary: #800000;
-
   --color-primary-50: #f2e6e6;
   --color-primary-100: #e6cccc;
   --color-primary-200: #cc9999;
@@ -22,6 +20,19 @@
 }
 
 @layer components {
+  @keyframes notification-toast-ring {
+    0% { transform: rotate(-14deg) scale(0.88); }
+    48% { transform: rotate(10deg) scale(1.08); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .notification-toast-icon {
+      animation: notification-toast-ring 650ms ease-out both;
+    }
+  }
+
   .spinner {
     margin: 3.2rem auto 1.6rem;
     width: 60px;
@@ -117,11 +128,16 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-canvas: var(--canvas);
+  --color-foreground-soft: var(--foreground-soft);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-foreground-faint: var(--foreground-faint);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-emphasis: var(--primary-emphasis);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -149,25 +165,45 @@
 }
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --canvas: #f5f5f4;
+  --foreground-soft: #57534e;
+  --foreground-subtle: #78716c;
+  --foreground-faint: #a8a29e;
+  --primary-emphasis: #800000;
+  --chart-maroon: #800000;
+  --chart-maroon-soft: #e6cccc;
+  --admin-chart-employer: #4e1838;
+  --admin-chart-department-head: #b35465;
+  --admin-chart-admin: #a46286;
+  --progress-fill: #800000;
+  --toast-success-bg: #dcfce7;
+  --toast-success-text: #166534;
+  --toast-success-border: #4ade80;
+  --toast-error-bg: #fee2e2;
+  --toast-error-text: #991b1b;
+  --toast-error-border: #fca5a5;
+  --toast-warning-bg: #fffdd0;
+  --toast-warning-text: #854d0e;
+  --background: #ffffff;
+  --foreground: #292524;
+  --card: #ffffff;
+  --card-foreground: #292524;
+  --popover: #ffffff;
+  --popover-foreground: #292524;
+  --primary: #800000;
+  --primary-foreground: #ffffff;
+  --secondary: #e7e5e4;
+  --secondary-foreground: #292524;
+  --muted: #f5f5f4;
+  --muted-foreground: #78716c;
+  --accent: #f5f5f4;
+  --accent-foreground: #292524;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #d6d3d1;
+  --input: #d6d3d1;
+  --ring: #b36666;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -184,35 +220,56 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  color-scheme: dark;
+  --color-white: #efefef;
+  --canvas: #181614;
+  --foreground-soft: #d6d3d1;
+  --foreground-subtle: #a8a29e;
+  --foreground-faint: #78716c;
+  --primary-emphasis: #f0aaaa;
+  --chart-maroon: rgb(239 239 239 / 80%);
+  --chart-maroon-soft: rgb(239 239 239 / 25%);
+  --admin-chart-employer: #e1a9bb;
+  --admin-chart-department-head: #c86a87;
+  --admin-chart-admin: #d04455;
+  --progress-fill: rgb(239 239 239 / 80%);
+  --toast-success-bg: #123022;
+  --toast-success-text: #86efac;
+  --toast-success-border: #166534;
+  --toast-error-bg: #3b1d1d;
+  --toast-error-text: #fca5a5;
+  --toast-error-border: #991b1b;
+  --toast-warning-bg: #3a2c16;
+  --toast-warning-text: #fcd34d;
+  --background: #151311;
+  --foreground: #efefef;
+  --card: #242120;
+  --card-foreground: #efefef;
+  --popover: #242120;
+  --popover-foreground: #efefef;
+  --primary: #710000;
+  --primary-foreground: #efefef;
+  --secondary: #37312e;
+  --secondary-foreground: #efefef;
+  --muted: #302b29;
+  --muted-foreground: #a8a29e;
+  --accent: #38312f;
+  --accent-foreground: #efefef;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: #514a46;
+  --input: #514a46;
+  --ring: #b36666;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-foreground: #efefef;
   --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: #efefef;
   --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-accent-foreground: #efefef;
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
@@ -234,6 +291,10 @@
     border-radius: 6px;
   }
 
+  .dark ::-webkit-scrollbar-thumb {
+    background: #57504c;
+  }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
@@ -241,4 +302,79 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Legacy status utilities still appear in data-driven badges. Keep their
+   meaning while the surrounding cards use the semantic surface tokens. */
+@layer utilities {
+  .dark :is(.bg-primary-50, .bg-primary-100):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, var(--primary) 24%, var(--card));
+  }
+  .dark :is(.hover\:bg-primary-50, .hover\:bg-primary-100):hover {
+    background-color: color-mix(in srgb, var(--primary) 24%, var(--card));
+  }
+  .dark :is(.text-primary-600, .text-primary-700, .text-primary-800):not([class*="dark:text-"]) {
+    color: var(--primary-emphasis);
+  }
+  .dark :is(.bg-red-50, .bg-red-100, .bg-red-200, .bg-rose-100):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, #ef4444 18%, var(--card));
+  }
+  .dark :is(.text-red-500, .text-red-600, .text-red-700, .text-red-800, .text-rose-800):not([class*="dark:text-"]) {
+    color: #fca5a5;
+  }
+  .dark :is(.bg-blue-50, .bg-blue-100, .bg-sky-50):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, #3b82f6 17%, var(--card));
+  }
+  .dark :is(.text-blue-500, .text-blue-600, .text-blue-700, .text-blue-800, .text-blue-900, .text-sky-700):not([class*="dark:text-"]) {
+    color: #93c5fd;
+  }
+  .dark :is(.bg-amber-50, .bg-amber-100, .bg-yellow-100):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, #f59e0b 16%, var(--card));
+  }
+  .dark :is(.text-amber-600, .text-amber-700, .text-amber-800, .text-yellow-900):not([class*="dark:text-"]) {
+    color: #fcd34d;
+  }
+  .dark :is(.bg-emerald-50, .bg-emerald-100, .bg-emerald-200, .bg-green-50, .bg-green-100, .bg-green-200):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, #10b981 17%, var(--card));
+  }
+  .dark :is(.text-emerald-600, .text-emerald-700, .text-emerald-800, .text-green-600, .text-green-700, .text-green-900):not([class*="dark:text-"]) {
+    color: #86efac;
+  }
+  .dark :is(.bg-purple-50, .bg-violet-50, .bg-violet-100):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, #a855f7 17%, var(--card));
+  }
+  .dark :is(.text-purple-600, .text-purple-700, .text-violet-600, .text-violet-700):not([class*="dark:text-"]) {
+    color: #d8b4fe;
+  }
+
+}
+
+/* Leaflet's own CSS is unlayered, so its theme overrides must be unlayered too. */
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip,
+.dark .leaflet-control-zoom a {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.dark .leaflet-container a.leaflet-popup-close-button {
+  color: var(--foreground-soft);
+}
+
+.dark .leaflet-container a.leaflet-popup-close-button:hover,
+.dark .leaflet-container a.leaflet-popup-close-button:focus {
+  color: var(--popover-foreground);
+}
+
+.dark .leaflet-control-zoom a {
+  border-color: var(--border);
+}
+
+.dark .leaflet-container .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--popover) 88%, transparent);
+  color: var(--muted-foreground);
+}
+
+.dark .leaflet-container .leaflet-control-attribution a {
+  color: var(--primary-emphasis);
 }

@@ -11,7 +11,7 @@ function StorageFilesTiles({ filteredFiles }) {
       {filteredFiles &&
         filteredFiles.map((item) => (
           <li
-            className="flex flex-col items-center bg-white rounded-md  transition-all p-4 shadow-sm hover:shadow-md max-md:p-2"
+            className="flex flex-col items-center bg-card rounded-md  transition-all p-4 shadow-sm hover:shadow-md max-md:p-2"
             key={item.id}
           >
             <FileCard item={item} />

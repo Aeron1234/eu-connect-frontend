@@ -27,7 +27,7 @@ function StatusPill({ status }) {
   }
   return (
     <span
-      className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${STATUS_STYLES[status] || "bg-stone-100 text-stone-600"}`}
+      className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${STATUS_STYLES[status] || "bg-muted text-foreground-soft"}`}
     >
       {status}
     </span>
@@ -178,7 +178,7 @@ function GridView({
   return (
     <div
       key={item.id}
-      className="group rounded-xl border border-border/60 bg-card p-4 hover:border-primary-500/40 hover:shadow-sm transition-all"
+      className="group rounded-xl border border-border/60 bg-card p-4 hover:border-primary/40 hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between gap-2">
         <div
@@ -209,7 +209,7 @@ function GridView({
             </button>
           )}
           <button
-            className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary-500/10 transition-colors"
+            className="p-1.5 rounded-md text-muted-foreground hover:text-primary-emphasis hover:bg-primary/10 transition-colors"
             aria-label="Download"
             onClick={() => handleDownload(item.id)}
             disabled={isPending}
@@ -257,7 +257,7 @@ function ListView({
   });
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-white hover:bg-stone-50 transition-colors">
+    <div className="flex items-center gap-3 p-3 bg-card hover:bg-muted/50 transition-colors">
       <div
         className={`w-9 h-9 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 ${typeTone(typeLabel)}`}
       >
@@ -284,7 +284,7 @@ function ListView({
           </button>
         )}
         <button
-          className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary-500/10 transition-colors"
+          className="p-1.5 rounded-md text-muted-foreground hover:text-primary-emphasis hover:bg-primary/10 transition-colors"
           aria-label="Download"
           onClick={() => handleDownload(item.id)}
           disabled={isPending}

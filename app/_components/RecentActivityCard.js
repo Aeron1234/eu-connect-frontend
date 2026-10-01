@@ -3,9 +3,9 @@ import { Sparkles } from "lucide-react";
 
 function RecentActivityCard({ activities = [], title = "Recent Activity" }) {
   return (
-    <div className="h-full rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
-        <Sparkles className="w-4 h-4 text-primary-500" />
+    <div className="h-full rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4">
+        <Sparkles className="w-4 h-4 text-primary-emphasis" />
         {title}
       </h3>
 
@@ -14,7 +14,7 @@ function RecentActivityCard({ activities = [], title = "Recent Activity" }) {
           No recent activity yet.
         </p>
       ) : (
-        <ul className="divide-y divide-stone-300">
+        <ul className="divide-y divide-border">
           {activities.map((a, i) => (
             <li
               key={i}
@@ -22,7 +22,7 @@ function RecentActivityCard({ activities = [], title = "Recent Activity" }) {
             >
               <a.icon className={`w-4 h-4 mt-0.5 ${a.color}`} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-stone-800 line-clamp-2">{a.title}</p>
+                <p className="text-sm text-foreground line-clamp-2">{a.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{a.time}</p>
               </div>
             </li>

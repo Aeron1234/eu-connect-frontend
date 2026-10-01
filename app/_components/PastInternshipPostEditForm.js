@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/select";
 
 const inputClass =
-  "mt-1 px-3 py-2 border border-stone-300 bg-white rounded-md text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+  "mt-1 px-3 py-2 border border-border bg-card rounded-md text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
 const selectTriggerClass =
-  "mt-1 flex h-10 w-full items-center justify-between rounded-md border border-stone-300 bg-white px-3 py-2 text-sm shadow-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed";
+  "mt-1 flex h-10 w-full items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-sm shadow-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed";
 
 function SectionLabel({ children }) {
   return (
-    <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 mb-3">
+    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
       {children}
     </p>
   );
@@ -41,12 +41,12 @@ function PastInternshipPostEditForm({
   return (
     <form action={handleAction} className="flex-1 flex flex-col gap-6">
       {/* Required fields */}
-      <div className="rounded-xl border border-stone-300 bg-stone-50 p-4 sm:p-5">
+      <div className="rounded-xl border border-border bg-muted/50 p-4 sm:p-5">
         <SectionLabel>Required Information</SectionLabel>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4 max-sm:flex-col">
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Alumni Name
               </span>
               <input
@@ -62,7 +62,7 @@ function PastInternshipPostEditForm({
             </label>
 
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Company Name
               </span>
               <input
@@ -80,7 +80,7 @@ function PastInternshipPostEditForm({
 
           <div className="flex gap-4 max-sm:flex-col">
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Industry
               </span>
               <input
@@ -96,7 +96,7 @@ function PastInternshipPostEditForm({
             </label>
 
             <div className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">Course</span>
+              <span className="text-sm font-medium text-foreground-soft">Course</span>
 
               <input
                 type="hidden"
@@ -131,7 +131,7 @@ function PastInternshipPostEditForm({
           </div>
 
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-stone-600">
+            <span className="text-sm font-medium text-foreground-soft">
               Company Address
             </span>
             <input
@@ -148,7 +148,7 @@ function PastInternshipPostEditForm({
 
           <div className="flex gap-4 max-sm:flex-col">
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Batch Year
               </span>
               <input
@@ -165,7 +165,7 @@ function PastInternshipPostEditForm({
             </label>
 
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Academic Year
               </span>
               <input
@@ -186,11 +186,11 @@ function PastInternshipPostEditForm({
       </div>
 
       {/* Optional fields */}
-      <div className="rounded-xl border border-dashed border-stone-300 p-4 sm:p-5">
+      <div className="rounded-xl border border-dashed border-border p-4 sm:p-5">
         <SectionLabel>Optional Information</SectionLabel>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-stone-600">
+            <span className="text-sm font-medium text-foreground-soft">
               Internship Position
             </span>
             <input
@@ -206,7 +206,7 @@ function PastInternshipPostEditForm({
 
           <div className="flex gap-4 max-sm:flex-col">
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Total Hours
               </span>
               <input
@@ -222,7 +222,7 @@ function PastInternshipPostEditForm({
             </label>
 
             <label className="flex flex-col flex-1">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-foreground-soft">
                 Accumulated Hours
               </span>
               <input
@@ -239,7 +239,7 @@ function PastInternshipPostEditForm({
           </div>
 
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-stone-600">
+            <span className="text-sm font-medium text-foreground-soft">
               Supervisor Name
             </span>
             <input
@@ -254,7 +254,7 @@ function PastInternshipPostEditForm({
           </label>
 
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-stone-600">Notes</span>
+            <span className="text-sm font-medium text-foreground-soft">Notes</span>
             <textarea
               name="notes"
               placeholder="e.g. Completed with strong performance in leadership."
@@ -277,7 +277,7 @@ function PastInternshipPostEditForm({
 
           <DialogClose asChild>
             <Button
-              className={`bg-primary-500 hover:bg-primary-600 w-fit ${isPending ? "pointer-events-none opacity-50" : ""}`}
+              className={`bg-primary hover:bg-primary-600 w-fit ${isPending ? "pointer-events-none opacity-50" : ""}`}
               type="submit"
               disabled={isPending}
             >

@@ -10,7 +10,7 @@ function InboxApprovalItem({ notificationData, handleMarkAsRead }) {
       onClick={() => handleMarkAsRead(notificationData.notification_id)}
       title={"Internship Record Submission"}
       titleIcon={
-        <span className="text-primary-500 bg-red-100 p-1 rounded-full">
+        <span className="text-primary-emphasis bg-red-100 p-1 rounded-full">
           <FileCheck className="h-5 w-5" />
         </span>
       }
@@ -18,18 +18,18 @@ function InboxApprovalItem({ notificationData, handleMarkAsRead }) {
       description={`Approval • ${format(new Date(notificationData.created_at), "MM/dd/yyyy")}`}
       trigger={
         <>
-          <span className="text-primary-500 bg-red-100 p-1 rounded-full self-start">
+          <span className="text-primary-emphasis bg-red-100 p-1 rounded-full self-start">
             <FileCheck className="h-5 w-5" />
           </span>
 
-          <div className="items-start justify-self-start flex flex-col gap-1 text-stone-500">
+          <div className="items-start justify-self-start flex flex-col gap-1 text-muted-foreground">
             <div className="flex gap-2 items-center">
-              <h3 className="font-semibold text-stone-800">
+              <h3 className="font-semibold text-foreground">
                 Internship Record Request
               </h3>
 
               {notificationData.is_read ? null : (
-                <span className="p-1 rounded bg-primary-500 h-fit"></span>
+                <span className="p-1 rounded bg-primary h-fit"></span>
               )}
 
               <p className="text-xs flex items-center gap-1 text-yellow-900 bg-yellow-100 px-2 py-0.5 rounded-full tracking-wider">
@@ -52,12 +52,12 @@ function InboxApprovalItem({ notificationData, handleMarkAsRead }) {
             </p>
           </div>
 
-          <span className="text-stone-600 p-1 rounded-full self-start">
+          <span className="text-foreground-soft p-1 rounded-full self-start">
             <Eye className="h-4 w-4" />
           </span>
         </>
       }
-      triggerStyles={`${!notificationData.is_read ? "bg-stone-100" : ""} w-full border border-stone-300 px-4 py-2 rounded-sm grid grid-cols-[auto_1fr_auto] gap-4 hover:bg-stone-100 transition-colors cursor-pointer`}
+      triggerStyles={`${!notificationData.is_read ? "bg-muted" : ""} w-full border border-border px-4 py-2 rounded-sm grid grid-cols-[auto_1fr_auto] gap-4 hover:bg-muted transition-colors cursor-pointer`}
     >
       <InternshipApprovalForm approvalData={notificationData} />
     </Modal>

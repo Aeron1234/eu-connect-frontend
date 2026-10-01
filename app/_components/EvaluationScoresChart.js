@@ -11,14 +11,14 @@ import {
 const chartConfig = {
   score: {
     label: "Avg Score",
-    color: "var(--color-primary-500)",
+    color: "var(--chart-maroon)",
   },
 };
 
 function IndexAxisTick({ x, y, index }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <text textAnchor="middle" fontSize={11} fill="#78716c" dy={14}>
+      <text textAnchor="middle" fontSize={11} fill="var(--muted-foreground)" dy={14}>
         {index + 1}
       </text>
     </g>
@@ -27,9 +27,9 @@ function IndexAxisTick({ x, y, index }) {
 
 function EvaluationScoresChart({ title, description, icon: Icon, data = [] }) {
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="mb-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           {Icon && Icon}
           {title}
         </h3>
@@ -37,13 +37,13 @@ function EvaluationScoresChart({ title, description, icon: Icon, data = [] }) {
       </div>
 
       {data.length === 0 ? (
-        <div className="h-64 w-full bg-stone-100 rounded-lg flex items-center justify-center">
+        <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No evaluations yet.</p>
         </div>
       ) : (
         <ChartContainer
           config={chartConfig}
-          className="h-72 w-full bg-stone-100 rounded-lg p-3"
+          className="h-72 w-full bg-muted rounded-lg p-3"
         >
           <BarChart
             data={data}
@@ -52,7 +52,7 @@ function EvaluationScoresChart({ title, description, icon: Icon, data = [] }) {
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="#d6d3d1"
+              stroke="var(--border)"
             />
             <XAxis
               dataKey="category"
@@ -66,7 +66,7 @@ function EvaluationScoresChart({ title, description, icon: Icon, data = [] }) {
               domain={[0, 5]}
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 11, fill: "#78716c" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar

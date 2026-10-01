@@ -37,7 +37,7 @@ function MapFilter({
       <li onClick={handleClick}>
         <Link
           href={`/department_head/map?filter=all`}
-          className={`h-full flex items-center px-2 py-1 rounded-full ${filteredBy.toLowerCase() === "all" ? "bg-primary-500 text-white" : "bg-white "} border border-stone-300 `}
+          className={`h-full flex items-center px-2 py-1 rounded-full ${filteredBy.toLowerCase() === "all" ? "bg-primary text-white" : "bg-card "} border border-border `}
         >
           All
         </Link>
@@ -46,7 +46,7 @@ function MapFilter({
         <li key={i} onClick={handleClick}>
           <Link
             href={`/department_head/map?filter=${state}`}
-            className={`h-full flex items-center px-2 py-1 rounded-full ${filteredBy.toLowerCase() === state.toLowerCase() ? "bg-primary-500 text-white" : "bg-white border border-stone-300"} `}
+            className={`h-full flex items-center px-2 py-1 rounded-full ${filteredBy.toLowerCase() === state.toLowerCase() ? "bg-primary text-white" : "bg-card border border-border"} `}
           >
             {formatStateName(state)}
           </Link>

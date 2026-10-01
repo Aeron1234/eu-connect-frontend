@@ -11,10 +11,10 @@ async function DashboardLayout({ stats, children }) {
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-800">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Dashboard
           </h1>
-          <p className="text-sm text-stone-600 mt-1">
+          <p className="text-sm text-foreground-soft mt-1">
             Here&apos;s your OJT overview for today
           </p>
         </div>

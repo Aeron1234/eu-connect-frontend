@@ -1,9 +1,7 @@
-import { Check } from "lucide-react";
-
 function RequirementsBefore() {
   return (
     <>
-      <h3 className="font-bold text-stone-600">Before Internship</h3>
+      <h3 className="font-bold text-foreground-soft">Before Internship</h3>
 
       <ul className="pl-2 flex flex-col gap-0.5">
         <li className="flex gap-1 items-center">
@@ -16,7 +14,7 @@ function RequirementsBefore() {
         <li className="flex gap-1 items-center">
           {/* <Check strokeWidth={3} color="var(--color-primary-500)" /> */}
 
-          <p>Student's Registration</p>
+          <p>Student&apos;s Registration</p>
         </li>
         <li className="flex gap-1 items-center">
           {/* <Check strokeWidth={3} color="var(--color-primary-500)" /> */}
@@ -31,7 +29,7 @@ function RequirementsBefore() {
         <li className="flex gap-1 items-center">
           {/* <Check strokeWidth={3} color="var(--color-primary-500)" /> */}
 
-          <p>Parent's Consent with valid ID - notarize</p>
+          <p>Parent&apos;s Consent with valid ID - notarize</p>
         </li>
         <li className="flex gap-1 items-center">
           {/* <Check strokeWidth={3} color="var(--color-primary-500)" /> */}

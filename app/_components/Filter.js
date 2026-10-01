@@ -53,7 +53,7 @@ function Filter() {
   const filterItems = filter();
 
   return (
-    <ul className="flex items-center py-2 px-1 gap-0.5 rounded-2xl bg-primary-500 w-fit text-primary-50 font-bold text-xs">
+    <ul className="flex items-center py-2 px-1 gap-0.5 rounded-2xl bg-primary w-fit text-primary-50 font-bold text-xs">
       {filterItems.map((item) => (
         <li key={item.value}>
           <Button href={item.href} filter={item.value} pathName={pathName}>
@@ -80,7 +80,7 @@ function Button({ href, children, filter, pathName }) {
   return (
     <Link
       href={href}
-      className={`${active() === filter ? "bg-primary-50 text-primary-500" : ""} flex-1 rounded-xl px-4 py-1 hover:bg-primary-50 hover:text-primary-500 transition-colors`}
+      className={`${active() === filter ? "bg-primary-50 text-primary-emphasis" : ""} flex-1 rounded-xl px-4 py-1 hover:bg-primary-50 hover:text-primary-emphasis transition-colors`}
     >
       {children}
     </Link>

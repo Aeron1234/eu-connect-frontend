@@ -3,10 +3,10 @@ import { TrendingUp } from "lucide-react";
 
 function UserGrowthChartSkeleton() {
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="mb-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-          <TrendingUp className="w-4 h-4 text-primary-500" />
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <TrendingUp className="w-4 h-4 text-primary-emphasis" />
           User Growth Over Time
         </h3>
         <p className="text-xs text-muted-foreground mt-1">

@@ -71,8 +71,8 @@ function MapSmall({
         {(label || address) && (
           <Popup>
             <div className="text-sm">
-              {label && <p className="font-semibold text-stone-800">{label}</p>}
-              {address && <p className="text-stone-600">{address}</p>}
+              {label && <p className="font-semibold text-foreground">{label}</p>}
+              {address && <p className="text-foreground-soft">{address}</p>}
             </div>
           </Popup>
         )}

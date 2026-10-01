@@ -1,11 +1,11 @@
 function PageTitle({ Icon = null, title, description }) {
   return (
     <div>
-      <h1 className="text-xl lg:text-3xl font-bold text-stone-800 flex items-center gap-2">
-        {Icon && <Icon className="w-5 h-5 md:w-7 md:h-7 text-primary-500" />}
+      <h1 className="text-xl lg:text-3xl font-bold text-foreground flex items-center gap-2">
+        {Icon && <Icon className="w-5 h-5 md:w-7 md:h-7 text-primary-emphasis" />}
         {title}
       </h1>
-      <p className="text-xs sm:text-sm text-stone-600 mt-1">{description}</p>
+      <p className="text-xs sm:text-sm text-foreground-soft mt-1">{description}</p>
     </div>
   );
 }

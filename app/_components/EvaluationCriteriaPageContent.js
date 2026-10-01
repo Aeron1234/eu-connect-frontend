@@ -284,8 +284,8 @@ export default function EvaluationCriteriaPageContent({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-stone-300 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex rounded-lg bg-stone-200 p-1">
+      <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex rounded-lg bg-secondary p-1">
           {FORM_TYPES.map((t) => (
             <button
               key={t.value}
@@ -293,8 +293,8 @@ export default function EvaluationCriteriaPageContent({
               onClick={() => setFormType(t.value)}
               className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-1 text-center ${
                 formType === t.value
-                  ? "bg-primary-500 text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-primary-500"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-primary-emphasis"
               }`}
             >
               {t.label}
@@ -317,8 +317,8 @@ export default function EvaluationCriteriaPageContent({
             className={cx(
               "rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors",
               filter === f.value
-                ? "bg-primary-500 text-primary-foreground"
-                : "bg-stone-200 text-muted-foreground hover:text-primary-500",
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-muted-foreground hover:text-primary-emphasis",
             )}
           >
             {f.label}
@@ -354,9 +354,9 @@ export default function EvaluationCriteriaPageContent({
             ))}
 
             {visibleSections.length === 0 && (
-              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-                <ClipboardList className="size-8 text-stone-300" />
-                <p className="text-sm text-stone-500">
+              <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
+                <ClipboardList className="size-8 text-foreground-faint" />
+                <p className="text-sm text-muted-foreground">
                   {filter === "all"
                     ? "No criteria yet. Add your first section below."
                     : `No ${filter} criteria found.`}
@@ -366,23 +366,23 @@ export default function EvaluationCriteriaPageContent({
           </div>
 
           {/* Add section (local placeholder — persists once its first criterion is added) */}
-          <div className="flex flex-col gap-3 rounded-xl border border-stone-300 bg-white p-4 shadow-sm sm:flex-row">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row">
             <input
               value={newSection}
               onChange={(e) => setNewSection(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addSection()}
               placeholder="New section title (e.g. Communication Skills)"
-              className="flex-1 rounded-lg border border-stone-300 bg-white px-3 sm:px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+              className="flex-1 rounded-lg border border-border bg-card px-3 sm:px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
             />
             <button
               type="button"
               onClick={addSection}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 sm:px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 sm:px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
               <Plus className="h-4 w-4" /> Add Section
             </button>
           </div>
-          <p className="-mt-3 text-xs text-stone-500">
+          <p className="-mt-3 text-xs text-muted-foreground">
             A new section is only saved once you add its first criterion below.
           </p>
         </>
@@ -394,8 +394,8 @@ export default function EvaluationCriteriaPageContent({
 function Stat({ label, value }) {
   return (
     <div>
-      <p className="text-xs text-stone-500">{label}</p>
-      <p className="text-xl font-bold text-primary-500">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xl font-bold text-primary-emphasis">{value}</p>
     </div>
   );
 }
@@ -424,14 +424,14 @@ function SectionCard({
   };
 
   return (
-    <section className="rounded-xl border border-stone-300 bg-white shadow-sm">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 px-4 sm:px-5 py-3.5">
+    <section className="rounded-xl border border-border bg-card shadow-sm">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 sm:px-5 py-3.5">
         <div className="flex flex-wrap items-center gap-2 min-w-0">
-          <ClipboardList className="h-4 w-4 flex-shrink-0 text-primary-500" />
-          <h2 className="text-sm sm:text-base font-bold text-stone-800 truncate">
+          <ClipboardList className="h-4 w-4 flex-shrink-0 text-primary-emphasis" />
+          <h2 className="text-sm sm:text-base font-bold text-foreground truncate">
             {section.title}
           </h2>
-          <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-primary-500 whitespace-nowrap">
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-primary-emphasis whitespace-nowrap">
             {activeCount} active criteria
           </span>
           {!isPersisted && (
@@ -468,7 +468,7 @@ function SectionCard({
         )}
       </header>
 
-      <ul className="divide-y divide-stone-200">
+      <ul className="divide-y divide-border">
         {section.items.map((item) => {
           const key = `criterion:${item.id}`;
           return (
@@ -478,11 +478,11 @@ function SectionCard({
                 item.is_active ? "" : "opacity-50"
               }`}
             >
-              <span className="flex-1 min-w-0 text-sm text-stone-700 line-clamp-2">
+              <span className="flex-1 min-w-0 text-sm text-foreground line-clamp-2">
                 {item.label}
               </span>
               {!item.is_active && (
-                <span className="flex-shrink-0 rounded-md bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500">
+                <span className="flex-shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   Inactive
                 </span>
               )}
@@ -511,7 +511,7 @@ function SectionCard({
         })}
 
         {section.items.length === 0 && !adding && (
-          <li className="px-4 sm:px-5 py-4 text-sm text-stone-500">
+          <li className="px-4 sm:px-5 py-4 text-sm text-muted-foreground">
             No criteria in this section yet.
           </li>
         )}
@@ -524,14 +524,14 @@ function SectionCard({
               onChange={(e) => setNewLabel(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitNewCriterion()}
               placeholder="Criterion description"
-              className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+              className="flex-1 rounded-lg border border-border bg-card px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
             />
             <div className="flex items-center gap-2 justify-end">
               <button
                 type="button"
                 onClick={submitNewCriterion}
                 disabled={isKeyPending(`add:${section.title}`)}
-                className="rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
               >
                 {isKeyPending(`add:${section.title}`) ? "Saving…" : "Save"}
               </button>
@@ -550,11 +550,11 @@ function SectionCard({
       </ul>
 
       {!adding && (
-        <div className="border-t border-stone-200 px-4 sm:px-5 py-3">
+        <div className="border-t border-border px-4 sm:px-5 py-3">
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500 hover:underline"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary-emphasis hover:underline"
           >
             <Plus className="h-4 w-4" /> Add criterion
           </button>
@@ -574,8 +574,8 @@ function IconBtn({ children, onClick, title, danger, disabled, pending }) {
       disabled={disabled}
       className={`rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
         danger
-          ? "text-stone-400 hover:bg-red-50 hover:text-red-600"
-          : "text-stone-400 hover:bg-stone-100 hover:text-primary-500"
+          ? "text-foreground-subtle hover:bg-red-50 hover:text-red-600"
+          : "text-foreground-subtle hover:bg-muted hover:text-primary-emphasis"
       }`}
     >
       {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : children}

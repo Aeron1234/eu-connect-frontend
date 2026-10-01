@@ -1,6 +1,8 @@
 import "@/app/_styles/globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DM_Sans } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 
 const DmSans = DM_Sans({
   subsets: ["latin"],
@@ -18,11 +20,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="overflow-x-hidden">
+    <html lang="en" className="overflow-x-hidden" suppressHydrationWarning>
       <body className={`${DmSans.className} `}>
-        {children}
-
-        <Toaster position="top-center" className="shadow-lg" />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SidebarProvider>{children}</SidebarProvider>
+          <Toaster position="top-center" className="shadow-lg" />
+        </ThemeProvider>
       </body>
     </html>
   );

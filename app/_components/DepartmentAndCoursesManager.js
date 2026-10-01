@@ -207,7 +207,7 @@ export default function DepartmentsAndCoursesManager({
           className="rounded-xl border border-border bg-card p-6 shadow-sm"
         >
           <div className="mb-5 flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Building2 className="size-4 text-primary-500" /> Add Department
+            <Building2 className="size-4 text-primary-emphasis" /> Add Department
           </div>
           <div className="space-y-4">
             <div>
@@ -242,7 +242,7 @@ export default function DepartmentsAndCoursesManager({
             <button
               type="submit"
               disabled={isAddingDept}
-              className="inline-flex items-center gap-2 rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-500/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {isAddingDept ? "Adding..." : "+ Add Department"}
             </button>
@@ -254,7 +254,7 @@ export default function DepartmentsAndCoursesManager({
           className="rounded-xl border border-border bg-card p-6 shadow-sm"
         >
           <div className="mb-5 flex items-center gap-2 text-sm font-semibold text-foreground">
-            <GraduationCap className="size-4 text-primary-500" /> Add Course
+            <GraduationCap className="size-4 text-primary-emphasis" /> Add Course
           </div>
           <div className="space-y-4">
             <div>
@@ -309,7 +309,7 @@ export default function DepartmentsAndCoursesManager({
             <button
               type="submit"
               disabled={isAddingCourse}
-              className="inline-flex items-center gap-2 rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-500/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {isAddingCourse ? "Adding..." : "+ Add Course"}
             </button>
@@ -328,7 +328,7 @@ export default function DepartmentsAndCoursesManager({
                 className={cx(
                   "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                   view === "departments"
-                    ? "bg-primary-500 text-primary-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -340,7 +340,7 @@ export default function DepartmentsAndCoursesManager({
                 className={cx(
                   "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                   view === "courses"
-                    ? "bg-primary-500 text-primary-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -366,7 +366,7 @@ export default function DepartmentsAndCoursesManager({
                 className={cx(
                   "rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors",
                   status === s
-                    ? "bg-primary-500 text-primary-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground",
                 )}
               >

@@ -17,7 +17,7 @@ const actions = [
 
 function QuickActionsCard() {
   return (
-    <div className="rounded-xl bg-primary-500 text-white p-5">
+    <div className="rounded-xl bg-primary text-white p-5">
       <h3 className="text-sm font-semibold mb-4">Quick Actions</h3>
       <div className="space-y-2">
         {actions.map((a) => (

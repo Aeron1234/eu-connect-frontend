@@ -50,38 +50,38 @@ function StorageUploadForm({ fileRequirementTypes = [] }) {
   return (
     <form action={handleAction} className="flex w-full flex-col gap-4 text-sm">
       <div className="flex-1 flex gap-1 flex-col">
-        <span className="font-semibold text-stone-600">Company Name</span>
+        <span className="font-semibold text-foreground-soft">Company Name</span>
         <input
           type="text"
           name="company_name"
-          className="w-full px-4 py-2 rounded-md border border-stone-300 text-sm block"
+          className="w-full px-4 py-2 rounded-md border border-border text-sm block"
           disabled={isPending}
         />
       </div>
 
       <div className="flex-1 flex gap-1 flex-col">
-        <span className="font-semibold text-stone-600">File Name</span>
+        <span className="font-semibold text-foreground-soft">File Name</span>
         <input
           type="text"
           name="file_name"
-          className="w-full px-4 py-2 rounded-md border border-stone-300 text-sm block"
+          className="w-full px-4 py-2 rounded-md border border-border text-sm block"
           disabled={isPending}
         />
       </div>
 
       <div className="flex-1 flex gap-1 flex-col">
-        <span className="font-semibold text-stone-600">File</span>
+        <span className="font-semibold text-foreground-soft">File</span>
         <input
           type="file"
           name="file"
           accept=".pdf,.txt,.doc,.docx,.xls,.xlsx"
-          className="w-full px-4 py-2 rounded-md border border-stone-300 text-sm block file:mr-4 file:text-sm file:font-semibold"
+          className="w-full px-4 py-2 rounded-md border border-border text-sm block file:mr-4 file:text-sm file:font-semibold"
           disabled={isPending}
         />
       </div>
 
       <div className="flex-1 flex gap-1 flex-col relative" ref={wrapperRef}>
-        <span className="font-semibold text-stone-600">Category</span>
+        <span className="font-semibold text-foreground-soft">Category</span>
 
         {/* Hidden field to submit with FormData */}
         <input
@@ -94,7 +94,7 @@ function StorageUploadForm({ fileRequirementTypes = [] }) {
         <input
           type="text"
           placeholder="Select a requirement category"
-          className="w-full px-4 py-3 rounded-sm border border-stone-300 text-sm block"
+          className="w-full px-4 py-3 rounded-sm border border-border text-sm block"
           disabled={isPending}
           value={query}
           onFocus={() => setIsOpen(true)}
@@ -109,22 +109,22 @@ function StorageUploadForm({ fileRequirementTypes = [] }) {
         />
 
         {isOpen && (
-          <ul className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-auto rounded-md border border-stone-300 bg-white shadow-md z-10">
+          <ul className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-card shadow-md z-10">
             {filteredTypes.length === 0 ? (
-              <li className="px-4 py-2 text-stone-400">No items found.</li>
+              <li className="px-4 py-2 text-foreground-subtle">No items found.</li>
             ) : (
               filteredTypes.map((reqType) => (
                 <li
                   key={reqType.id}
                   onClick={() => handleSelectRequirement(reqType)}
-                  className={`px-4 py-2 cursor-pointer hover:bg-stone-100 ${
+                  className={`px-4 py-2 cursor-pointer hover:bg-muted ${
                     reqType.id === selectedRequirementId
-                      ? "bg-stone-100 font-semibold"
+                      ? "bg-muted font-semibold"
                       : ""
                   }`}
                 >
                   {reqType.name}{" "}
-                  <span className="text-stone-400 text-sm">
+                  <span className="text-foreground-subtle text-sm">
                     ({reqType.category})
                   </span>
                 </li>
@@ -144,7 +144,7 @@ function StorageUploadForm({ fileRequirementTypes = [] }) {
 
           <DialogClose asChild>
             <Button
-              className="bg-primary-500 hover:bg-primary-400 w-fit"
+              className="bg-primary hover:bg-primary-400 w-fit"
               type="submit"
               disabled={isPending}
             >

@@ -26,7 +26,7 @@ function DeleteForm({
 
           <DialogClose asChild>
             <Button
-              className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+              className={"bg-primary hover:bg-primary-400 w-fit "}
               type="submit"
               disabled={isPending}
               // onClick={() => toast.success("Event has been created")}

@@ -6,9 +6,9 @@ function AnnualReportSkeleton({ departmentRow = 3, feedbackRow = 3 }) {
       {Array.from({ length: departmentRow }).map((_, i) => (
         <section
           key={i}
-          className="overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm"
+          className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
         >
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 px-4 sm:px-5 py-4">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 sm:px-5 py-4">
             <div className="flex items-center gap-3 min-w-0">
               <Skeleton className="size-9 flex-shrink-0 rounded-lg" />
               <div className="space-y-2">

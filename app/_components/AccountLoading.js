@@ -8,7 +8,7 @@ import AccountSummaryCardSkeleton from "@/app/_components/AccountSummaryCardSkel
 function AccountLoading() {
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-      <span className="inline-flex items-center gap-2 text-sm text-stone-400 mb-4">
+      <span className="inline-flex items-center gap-2 text-sm text-foreground-subtle mb-4">
         <ArrowLeft className="h-4 w-4" /> Back to Home
       </span>
 

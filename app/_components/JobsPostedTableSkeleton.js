@@ -3,16 +3,16 @@ import { Briefcase } from "lucide-react";
 
 function JobsPostedTableSkeleton({ rows = 5 }) {
   return (
-    <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
-        <Briefcase className="w-4 h-4 text-primary-500" />
+    <section className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4">
+        <Briefcase className="w-4 h-4 text-primary-emphasis" />
         Jobs You Posted
       </h3>
 
       <div className="overflow-x-auto">
         <table className="w-2xl md:w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-300">
+            <tr className="border-b border-border">
               <th className="text-left py-2">
                 <Skeleton className="h-2.5 w-16" />
               </th>
@@ -32,7 +32,7 @@ function JobsPostedTableSkeleton({ rows = 5 }) {
           </thead>
           <tbody>
             {Array.from({ length: rows }).map((_, i) => (
-              <tr key={i} className="border-b border-stone-300 last:border-b-0">
+              <tr key={i} className="border-b border-border last:border-b-0">
                 <td className="py-3">
                   <Skeleton className="h-3.5 w-32" />
                 </td>

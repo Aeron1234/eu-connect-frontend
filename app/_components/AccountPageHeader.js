@@ -27,7 +27,7 @@ export default function AccountPageHeader({
             <button
               type="button"
               onClick={onEdit}
-              className="inline-flex items-center justify-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
             >
               <Pencil className="h-4 w-4" />
               <span className="text-sm font-semibold">Edit Profile</span>
@@ -47,7 +47,7 @@ export default function AccountPageHeader({
                 type="button"
                 onClick={onSave}
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
               >
                 <Check className="h-4 w-4" />
                 {isSaving ? "Saving..." : "Save Changes"}

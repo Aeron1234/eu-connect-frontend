@@ -8,7 +8,7 @@ function InternshipRecordFormHeader({ showForm, setShowForm }) {
           <Plus className="h-5 w-5 flex-shrink-0" />
           New Internship Record
         </h2>
-        <p className="text-xs text-stone-600 line-clamp-2 lg:text-sm">
+        <p className="text-xs text-foreground-soft line-clamp-2 lg:text-sm">
           Provide your placement details for review by your department head
         </p>
       </div>
@@ -17,7 +17,7 @@ function InternshipRecordFormHeader({ showForm, setShowForm }) {
         type="button"
         title={showForm ? "Hide" : "Show"}
         onClick={() => setShowForm((val) => !val)}
-        className="flex flex-shrink-0 items-center gap-1 rounded-sm px-2 py-1 text-sm font-semibold transition-all hover:bg-red-100 hover:text-primary-500 lg:text-base"
+        className="flex flex-shrink-0 items-center gap-1 rounded-sm px-2 py-1 text-sm font-semibold transition-all hover:bg-red-100 hover:text-primary-emphasis lg:text-base"
       >
         <ChevronDown
           className={`h-5 w-5 transition-transform ${showForm ? "rotate-180" : ""}`}

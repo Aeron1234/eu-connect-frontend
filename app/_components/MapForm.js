@@ -13,7 +13,7 @@ import {
   Circle,
 } from "react-leaflet";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { OpenStreetMapProvider, GeoSearchControl } from "leaflet-geosearch";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -54,6 +54,15 @@ function hasValidCoords(coords) {
   );
 }
 
+function toPosition(coords) {
+  if (!hasValidCoords(coords)) return null;
+  const lat = Number(coords[0]);
+  const lon = Number(coords[1]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+  return [lat, lon];
+}
+
 const MIN_RADIUS = 10;
 const MAX_RADIUS = 500;
 
@@ -65,18 +74,14 @@ function MapForm({
   radius = null,
   setRadius = null,
 }) {
-  const [selectedPosition, setSelectedPosition] = useState(() =>
-    hasValidCoords(defaultCoords) ? defaultCoords : null,
-  );
+  // Both callers store coordinates in their form data. The pin follows that
+  // source of truth, including when a form resets or clears the location.
+  const selectedPosition = toPosition([data?.lat, data?.lon]);
+  const initialCenter = selectedPosition || toPosition(defaultCoords) || [13.931, 121.423];
+  const selectionVersionRef = useRef(0);
 
-  useEffect(() => {
-    if (hasValidCoords(defaultCoords)) {
-      setSelectedPosition([defaultCoords[0], defaultCoords[1]]);
-    }
-  }, [defaultCoords[0], defaultCoords[1]]);
-
-  const handleLocationSelect = (location) => {
-    setSelectedPosition([location.y, location.x]);
+  const handleLocationSelect = useCallback((location) => {
+    const version = ++selectionVersionRef.current;
 
     if (formType === "internshipRecord") {
       setData((prev) => ({
@@ -96,7 +101,26 @@ function MapForm({
         radius,
       }));
     }
-  };
+
+    return version;
+  }, [formType, radius, setData]);
+
+  const handleResolvedAddress = useCallback(({ version, label, lat, lon }) => {
+    if (version !== selectionVersionRef.current) return;
+    setData((prev) => {
+      if (Number(prev.lat) !== lat || Number(prev.lon) !== lon) return prev;
+      const coordinateLabel = `${lat}, ${lon}`;
+      if (formType === "internshipRecord") {
+        if (prev.company_address !== coordinateLabel) return prev;
+        return { ...prev, company_address: label };
+      }
+      if (formType === "setDtrLocation") {
+        if (prev.address !== coordinateLabel) return prev;
+        return { ...prev, address: label };
+      }
+      return prev;
+    });
+  }, [formType, setData]);
 
   const handleRadiusChange = (value) => {
     if (!setRadius) return;
@@ -115,9 +139,7 @@ function MapForm({
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       <MapContainer
-        center={
-          hasValidCoords(defaultCoords) ? defaultCoords : [13.931, 121.423]
-        }
+        center={initialCenter}
         zoom={14}
         scrollWheelZoom={true}
         style={{
@@ -132,13 +154,14 @@ function MapForm({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <MapViewSync position={selectedPosition} />
+
         <SearchField onLocationSelect={handleLocationSelect} />
 
         {/* Click-to-pin is now enabled for every form type, including internshipRecord */}
         <ClickMarker
-          formType={formType}
           onLocationSelect={handleLocationSelect}
-          defaultCoords={defaultCoords}
+          onAddressResolved={handleResolvedAddress}
         />
 
         {selectedPosition && (
@@ -213,6 +236,22 @@ function MapForm({
   );
 }
 
+function MapViewSync({ position }) {
+  const map = useMap();
+  const lat = position?.[0];
+  const lon = position?.[1];
+
+  useEffect(() => {
+    if (lat === undefined || lon === undefined) return;
+    const nextPosition = [lat, lon];
+    if (!map.getBounds().contains(nextPosition)) {
+      map.setView(nextPosition, map.getZoom());
+    }
+  }, [map, lat, lon]);
+
+  return null;
+}
+
 function SearchField({ onLocationSelect }) {
   const map = useMap();
 
@@ -258,37 +297,38 @@ function SearchField({ onLocationSelect }) {
   return null;
 }
 
-function ClickMarker({ onLocationSelect, formType, defaultCoords }) {
-  const provider = new OpenStreetMapProvider({
-    params: {
-      "accept-language": "en",
-      countrycodes: "ph",
-    },
-  });
+function ClickMarker({ onLocationSelect, onAddressResolved }) {
+  const provider = useMemo(
+    () =>
+      new OpenStreetMapProvider({
+        params: {
+          "accept-language": "en",
+          countrycodes: "ph",
+        },
+      }),
+    [],
+  );
 
   useMapEvents({
     async click(e) {
       const { lat, lng } = e.latlng;
-
-      let label = `${lat || defaultCoords[0]}, ${lng || defaultCoords[1]}`;
+      const version = onLocationSelect({
+        label: `${lat}, ${lng}`,
+        x: lng,
+        y: lat,
+      });
 
       try {
         const results = await provider.search({
-          query: `${lat || defaultCoords[0]},${lng || defaultCoords[1]}`,
+          query: `${lat},${lng}`,
         });
 
         if (results.length > 0) {
-          label = results[0].label;
+          onAddressResolved({ version, label: results[0].label, lat, lon: lng });
         }
       } catch (err) {
         console.error(err);
       }
-
-      onLocationSelect({
-        label,
-        x: lng || defaultCoords[0],
-        y: lat || defaultCoords[1],
-      });
     },
   });
 

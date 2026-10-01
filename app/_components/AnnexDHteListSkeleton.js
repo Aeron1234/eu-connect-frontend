@@ -19,7 +19,7 @@ export default function AnnexDHteListSkeleton() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 sm:gap-4 rounded-xl border border-stone-300 bg-white px-4 sm:px-5 py-4 sm:py-5 shadow-sm"
+            className="flex items-center gap-3 sm:gap-4 rounded-xl border border-border bg-card px-4 sm:px-5 py-4 sm:py-5 shadow-sm"
           >
             <Skeleton className="size-5 rounded" />
             <div className="space-y-2">

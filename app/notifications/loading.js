@@ -11,14 +11,14 @@ function NotificationsLoading() {
 
       <div className="space-y-6">
         <div className="grid gap-3 sm:gap-4 grid-cols-2">
-          <div className="flex items-center gap-3 sm:gap-4 rounded-xl border border-primary-500 bg-primary-500 px-4 sm:px-5 py-4 sm:py-5 shadow-sm">
+          <div className="flex items-center gap-3 sm:gap-4 rounded-xl border border-primary bg-primary px-4 sm:px-5 py-4 sm:py-5 shadow-sm">
             <Skeleton className="size-5 rounded bg-white/30" />
             <div className="space-y-1.5">
               <Skeleton className="h-6 w-10 bg-white/30" />
               <Skeleton className="h-2.5 w-24 bg-white/25" />
             </div>
           </div>
-          <div className="flex items-center gap-3 sm:gap-4 rounded-xl border border-stone-300 bg-white px-4 sm:px-5 py-4 sm:py-5 shadow-sm">
+          <div className="flex items-center gap-3 sm:gap-4 rounded-xl border border-border bg-card px-4 sm:px-5 py-4 sm:py-5 shadow-sm">
             <Skeleton className="size-5 rounded" />
             <div className="space-y-1.5">
               <Skeleton className="h-6 w-10" />

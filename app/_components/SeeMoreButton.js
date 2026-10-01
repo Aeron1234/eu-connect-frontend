@@ -13,7 +13,7 @@ function SeeMoreButton({ onClick, isPending, currentPage, totalPages, label }) {
       <button
         onClick={onClick}
         disabled={isPending}
-        className="flex items-center gap-2 px-6 py-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-stone-600 hover:text-primary-500 font-semibold"
+        className="flex items-center gap-2 px-6 py-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-foreground-soft hover:text-primary-emphasis font-semibold"
       >
         {isPending ? (
           <>

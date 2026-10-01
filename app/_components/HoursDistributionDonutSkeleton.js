@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function HoursDistributionDonutSkeleton() {
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6 h-full flex flex-col">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full flex flex-col">
       <div className="mb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="w-4 h-4 rounded" />
@@ -11,7 +11,7 @@ function HoursDistributionDonutSkeleton() {
         <Skeleton className="h-3 w-56 mt-2" />
       </div>
 
-      <div className="flex-1 min-h-[220px] w-full bg-stone-100 rounded-lg p-3 flex flex-col items-center justify-center gap-4">
+      <div className="flex-1 min-h-[220px] w-full bg-muted rounded-lg p-3 flex flex-col items-center justify-center gap-4">
         <Skeleton className="w-32 h-32 sm:w-36 sm:h-36 rounded-full" />
         <div className="flex flex-wrap items-center justify-center gap-3">
           {Array.from({ length: 3 }).map((_, i) => (

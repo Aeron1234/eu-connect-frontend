@@ -9,6 +9,7 @@ import RecordsDocuments from "./RecordsDocuments";
 import SetDtrLocation from "./SetDtrLocation";
 import TabBar from "./TabBar";
 import RecordsTabContentSkeleton from "./RecordsTabContentSkeleton";
+import ProgressBar from "./ProgressBar";
 import { getInternshipRecordDocuments } from "@/lib/server-actions/internship-docs-actions";
 import {
   getInternshipRecordDtr,
@@ -135,8 +136,8 @@ function RecordsDetailsPageContent({ record, internshipId }) {
         <>
           {filter === "overview" && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-stone-300 shadow-sm bg-white p-4 sm:p-5">
-                <h3 className="text-base sm:text-lg font-bold text-primary-500">
+              <div className="rounded-xl border border-border shadow-sm bg-card p-4 sm:p-5">
+                <h3 className="text-base sm:text-lg font-bold text-primary-emphasis">
                   Internship Details
                 </h3>
                 <dl className="mt-3 space-y-2 text-sm">
@@ -159,29 +160,28 @@ function RecordsDetailsPageContent({ record, internshipId }) {
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between gap-4">
                       <dt className="text-muted-foreground">{k}</dt>
-                      <dd className="text-right font-medium text-stone-800">
+                      <dd className="text-right font-medium text-foreground">
                         {v}
                       </dd>
                     </div>
                   ))}
                 </dl>
               </div>
-              <div className="rounded-xl border border-stone-300 shadow-sm bg-white p-4 sm:p-5">
-                <h3 className="text-base sm:text-lg font-bold text-primary-500">
+              <div className="rounded-xl border border-border shadow-sm bg-card p-4 sm:p-5">
+                <h3 className="text-base sm:text-lg font-bold text-primary-emphasis">
                   Hours Rendered
                 </h3>
-                <p className="mt-3 text-2xl sm:text-3xl font-bold text-primary-500">
+                <p className="mt-3 text-2xl sm:text-3xl font-bold text-primary-emphasis">
                   {record.accumulated_hours.toFixed(1)}
                   <span className="text-sm sm:text-base font-normal text-muted-foreground">
                     /{record.total_hours} hrs
                   </span>
                 </p>
-                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-stone-200">
-                  <div
-                    className="h-full rounded-full bg-primary-500"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  value={pct}
+                  label="Required internship hours completed"
+                  className="mt-3"
+                />
                 <p className="mt-2 text-xs text-muted-foreground">
                   {pct}% of required hours completed
                 </p>
@@ -196,7 +196,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
 
           {filter === "dtr" && (
             <>
-              <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-4 sm:p-6">
+              <div className="rounded-xl bg-card border border-border shadow-sm p-4 sm:p-6">
                 <RecordsDtrTable dtrs={data?.dtrs || []} />
               </div>
               <div className="mt-6">
@@ -218,8 +218,8 @@ function RecordsDetailsPageContent({ record, internshipId }) {
               ))}
 
               {(!data?.narratives || data.narratives.length === 0) && (
-                <li className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-                  <p className="text-sm text-stone-500">No narratives yet.</p>
+                <li className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
+                  <p className="text-sm text-muted-foreground">No narratives yet.</p>
                 </li>
               )}
             </ul>
@@ -244,8 +244,8 @@ function RecordsDetailsPageContent({ record, internshipId }) {
 
 function Stat({ label, value }) {
   return (
-    <div className="rounded-lg bg-stone-100 py-2">
-      <p className="text-base sm:text-lg font-bold text-primary-500">{value}</p>
+    <div className="rounded-lg bg-muted py-2">
+      <p className="text-base sm:text-lg font-bold text-primary-emphasis">{value}</p>
       <p className="text-muted-foreground">{label}</p>
     </div>
   );

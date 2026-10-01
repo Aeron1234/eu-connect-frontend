@@ -8,6 +8,7 @@ import ExistingAccountList from "./ExistingAccountList";
 import ExistingAccountListSkeleton from "./ExistingAccountListSkeleton";
 import SearchBar from "./SearchBar";
 import AccountDropdownFilter from "./AccountDropdownFilter";
+import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const tabs = ["Form", "Accounts"];
 
@@ -38,12 +39,15 @@ function AccountsManager({
   const isFirstRun = useRef(true);
 
   async function refreshList() {
+    const thisRequestId = ++requestIdRef.current;
+    setIsLoadingMore(false);
     const newData = await getAllAccounts({ filter, search, page: 1 });
-    if (newData?.error) {
-      console.error(newData.error);
+    if (thisRequestId !== requestIdRef.current) return;
+    if (!hasValidPage(newData, "accounts", null)) {
+      console.error(newData?.error || "Invalid accounts response");
       return;
     }
-    setAccounts(newData.accounts || []);
+    setAccounts(newData.accounts);
     setPage(1);
     setTotalPages(newData.totalPages || 1);
   }
@@ -55,23 +59,21 @@ function AccountsManager({
     }
 
     const thisRequestId = ++requestIdRef.current;
+    setIsLoadingMore(false);
+    setIsFiltering(true);
 
     const timeout = setTimeout(async () => {
-      setIsFiltering(true);
       try {
         const newData = await getAllAccounts({ filter, search, page: 1 });
 
         if (thisRequestId !== requestIdRef.current) return;
 
-        if (newData?.error) {
-          console.error("Error loading accounts:", newData.error);
-          setAccounts([]);
-          setTotalPages(1);
-          setPage(1);
+        if (!hasValidPage(newData, "accounts", null)) {
+          console.error("Error loading accounts:", newData?.error || "Invalid response from the server");
           return;
         }
 
-        setAccounts(newData.accounts || []);
+        setAccounts(newData.accounts);
         setPage(1);
         setTotalPages(newData.totalPages || 1);
       } catch (error) {
@@ -97,14 +99,14 @@ function AccountsManager({
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more accounts:", newData.error);
+      if (!hasValidPage(newData, "accounts", null, nextPage)) {
+        console.error("Error loading more accounts:", newData?.error || "Invalid response from the server");
         return;
       }
 
       setAccounts((prev) => {
         const existingIds = new Set(prev.map((a) => a.id));
-        const filteredNew = (newData.accounts || []).filter(
+        const filteredNew = newData.accounts.filter(
           (a) => !existingIds.has(a.id),
         );
         return [...prev, ...filteredNew];
@@ -123,7 +125,7 @@ function AccountsManager({
 
   return (
     <div className="space-y-6">
-      <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
+      <div className="flex rounded-lg bg-secondary p-1 w-fit">
         {tabs.map((t) => (
           <button
             key={t}
@@ -131,8 +133,8 @@ function AccountsManager({
             onClick={() => setTab(t)}
             className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
               tab === t
-                ? "bg-primary-500 text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-primary-500"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-primary-emphasis"
             }`}
           >
             {t}
@@ -141,7 +143,7 @@ function AccountsManager({
       </div>
 
       {tab === "Form" ? (
-        <div className="rounded-xl border border-stone-300 bg-white shadow-sm p-5 sm:p-6">
+        <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-6">
           <CreateAccountForm
             roles={roles}
             courses={courses}
@@ -159,7 +161,7 @@ function AccountsManager({
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or email..."
                 aria-label="Search accounts"
-                className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
+                className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
               />
             </div>
 
@@ -178,9 +180,9 @@ function AccountsManager({
               onActionSuccess={refreshList}
             />
           ) : (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-white border-stone-300 py-16 text-center">
-              <UserPlus className="size-8 text-stone-300" />
-              <p className="text-sm text-stone-500">No accounts found.</p>
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
+              <UserPlus className="size-8 text-foreground-faint" />
+              <p className="text-sm text-muted-foreground">No accounts found.</p>
             </div>
           )}
 
@@ -188,7 +190,7 @@ function AccountsManager({
             <button
               onClick={handleSeeMore}
               disabled={isLoadingMore}
-              className="w-full text-center text-lg font-semibold text-stone-600 transition hover:text-primary-500 disabled:opacity-50"
+              className="w-full text-center text-lg font-semibold text-foreground-soft transition hover:text-primary-emphasis disabled:opacity-50"
             >
               {isLoadingMore ? "Loading..." : "See more"}
             </button>

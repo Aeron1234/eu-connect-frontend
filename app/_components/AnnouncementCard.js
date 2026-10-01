@@ -37,13 +37,13 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
     <div
       className={`rounded-xl border shadow-sm p-5 ${
         isPinned
-          ? "bg-primary-500 border-primary-500"
-          : "bg-white border-border"
+          ? "bg-primary border-primary"
+          : "bg-card border-border"
       }`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`flex size-9 flex-shrink-0 items-center justify-center rounded-lg ${isPinned ? "bg-white text-primary-500" : "bg-primary-500/10 text-primary-500/50"}`}
+          className={`flex size-9 flex-shrink-0 items-center justify-center rounded-lg ${isPinned ? "bg-card text-primary-emphasis" : "bg-primary/10 text-primary-emphasis/50"}`}
         >
           <Pin className="size-4" />
         </div>
@@ -70,17 +70,17 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
           </p>
 
           <div
-            className={`mt-3 flex flex-wrap items-center gap-2 text-xs ${isPinned ? "text-white" : "text-stone-600"}`}
+            className={`mt-3 flex flex-wrap items-center gap-2 text-xs ${isPinned ? "text-white" : "text-foreground-soft"}`}
           >
             <span>Posted by</span>
             <Link
               href={`/users/${author_id}`}
-              className={`inline font-bold hover:underline ${isPinned ? "text-white" : "text-primary-500"}`}
+              className={`inline font-bold hover:underline ${isPinned ? "text-white" : "text-primary-emphasis"}`}
             >
               {first_name} {last_name}
             </Link>
             {(role === "admin" || role === "department_head") && (
-              <span className="rounded-full bg-primary-500 px-2 py-0.5 text-[10px] font-bold text-white">
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
                 {role === "admin" ? "Admin" : "Department Head"}
               </span>
             )}
@@ -97,20 +97,20 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
         {(isPinned || canManage) && (
           <div className="flex flex-shrink-0 flex-col items-end gap-2">
             {isPinned && (
-              <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-500">
+              <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-emphasis">
                 Pinned
               </span>
             )}
 
             {canManage && (
               <div
-                className={`flex items-center gap-2.5 ${isPinned ? "text-white" : "text-foreground-muted"}`}
+                className={`flex items-center gap-2.5 ${isPinned ? "text-white" : "text-muted-foreground"}`}
               >
                 <Modal
                   trigger={
                     <div
                       title="pin announcement"
-                      className={`${isPinned ? "hover:text-primary-200" : "hover:text-primary-500"} transition-all`}
+                      className={`${isPinned ? "hover:text-primary-200" : "hover:text-primary-emphasis"} transition-all`}
                     >
                       <Pin className="h-4 w-4" />
                     </div>
@@ -130,7 +130,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
                     trigger={
                       <div
                         title="update announcement"
-                        className={`${isPinned ? "hover:text-primary-200" : "hover:text-primary-500"} transition-all`}
+                        className={`${isPinned ? "hover:text-primary-200" : "hover:text-primary-emphasis"} transition-all`}
                       >
                         <Pencil className="h-4 w-4" />
                       </div>
@@ -150,7 +150,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
                   trigger={
                     <div
                       title="delete announcement"
-                      className={`${isPinned ? "hover:text-destructive" : "hover:text-primary-500"} transition-all`}
+                      className={`${isPinned ? "hover:text-destructive" : "hover:text-primary-emphasis"} transition-all`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </div>

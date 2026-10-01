@@ -7,6 +7,7 @@ import ExportPdfButton from "./ExportPdfButton";
 import { getHteCompanyList } from "@/lib/server-actions/sipp-hte-actions";
 import SearchBar from "./SearchBar";
 import HTEListSkeleton from "./HTEListSkeleton";
+import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -40,9 +41,9 @@ export function AnnexDHteList({
     }
 
     const thisRequestId = ++requestIdRef.current;
+    setIsPending(true);
 
     const timeout = setTimeout(async () => {
-      setIsPending(true);
       try {
         const newData = await getHteCompanyList({
           academicYear: year,
@@ -52,16 +53,12 @@ export function AnnexDHteList({
 
         if (thisRequestId !== requestIdRef.current) return;
 
-        if (newData?.error) {
-          console.error("Error loading HTE companies:", newData.error);
-          setCompanies([]);
-          setTotalPages(1);
-          setTotal(0);
-          setCurrentPage(1);
+        if (!hasValidPage(newData, "companies")) {
+          console.error("Error loading HTE companies:", newData?.error || "Invalid response from the server");
           return;
         }
 
-        setCompanies(newData?.companies || []);
+        setCompanies(newData.companies);
         setCurrentPage(1);
         setTotalPages(newData?.pagination?.totalPages || 1);
         setTotal(newData?.pagination?.total || 0);
@@ -92,12 +89,12 @@ export function AnnexDHteList({
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more HTE companies:", newData.error);
+      if (!hasValidPage(newData, "companies", "pagination", nextPage)) {
+        console.error("Error loading more HTE companies:", newData?.error || "Invalid response from the server");
         return;
       }
 
-      const incoming = newData?.companies || [];
+      const incoming = newData.companies;
 
       setCompanies((prev) => {
         const existingKeys = new Set(prev.map((c) => c.company_key));
@@ -142,8 +139,8 @@ export function AnnexDHteList({
               className={cx(
                 "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                 (ay === "All" && !year) || year === ay
-                  ? "bg-primary-500 text-primary-foreground"
-                  : "bg-stone-200 text-muted-foreground hover:text-primary-500",
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:text-primary-emphasis",
               )}
             >
               {ay}
@@ -160,12 +157,12 @@ export function AnnexDHteList({
           highlight
         />
         <StatCard
-          icon={<Users className="size-5 text-stone-400" />}
+          icon={<Users className="size-5 text-foreground-subtle" />}
           value={String(totalInterns)}
           label="Total Interns (loaded)"
         />
         <StatCard
-          icon={<FileText className="size-5 text-stone-400" />}
+          icon={<FileText className="size-5 text-foreground-subtle" />}
           value={year || "All"}
           label="Academic Year"
         />
@@ -174,10 +171,10 @@ export function AnnexDHteList({
       {isPending ? (
         <HTEListSkeleton />
       ) : companies.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-          <FileText className="size-8 text-stone-300" />
-          <p className="text-sm text-stone-500">No placements found</p>
-          <p className="max-w-sm text-xs text-stone-400">
+        <div className="mt-6 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
+          <FileText className="size-8 text-foreground-faint" />
+          <p className="text-sm text-muted-foreground">No placements found</p>
+          <p className="max-w-sm text-xs text-foreground-subtle">
             Try a different academic year or clear the search filter.
           </p>
         </div>
@@ -186,24 +183,24 @@ export function AnnexDHteList({
           {companies.map((c) => (
             <section
               key={c.company_key}
-              className="overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm"
+              className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
             >
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 px-4 sm:px-5 py-4">
+              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 sm:px-5 py-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-500">
+                  <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-emphasis">
                     {c.company_name.slice(0, 2).toUpperCase()}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-stone-800 truncate">
+                    <p className="text-sm font-semibold text-foreground truncate">
                       {c.company_name}
                     </p>
-                    <p className="text-xs text-stone-500 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {c.company_address}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-500">
+                  <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-emphasis">
                     {c.intern_count}{" "}
                     {c.intern_count === 1 ? "intern" : "interns"}
                   </span>
@@ -219,7 +216,7 @@ export function AnnexDHteList({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] text-sm">
                   <thead>
-                    <tr className="border-b border-stone-200 text-left text-[0.7rem] uppercase tracking-wider text-stone-500">
+                    <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
                       <th className="w-12 px-4 sm:px-5 py-3 font-medium">#</th>
                       <th className="px-4 sm:px-5 py-3 font-medium">
                         Name of Student Intern
@@ -235,21 +232,21 @@ export function AnnexDHteList({
                     {c.interns.map((intern, i) => (
                       <tr
                         key={`${c.company_key}-${i}`}
-                        className="border-b border-stone-200 last:border-0"
+                        className="border-b border-border last:border-0"
                       >
-                        <td className="px-4 sm:px-5 py-3 text-stone-500">
+                        <td className="px-4 sm:px-5 py-3 text-muted-foreground">
                           {i + 1}
                         </td>
-                        <td className="px-4 sm:px-5 py-3 font-medium text-stone-800">
+                        <td className="px-4 sm:px-5 py-3 font-medium text-foreground">
                           {intern.name}
                         </td>
-                        <td className="px-4 sm:px-5 py-3 text-stone-600">
+                        <td className="px-4 sm:px-5 py-3 text-foreground-soft">
                           {intern.course}
                         </td>
-                        <td className="px-4 sm:px-5 py-3 text-stone-600">
+                        <td className="px-4 sm:px-5 py-3 text-foreground-soft">
                           {intern.gender || "—"}
                         </td>
-                        <td className="px-4 sm:px-5 py-3 text-stone-600">
+                        <td className="px-4 sm:px-5 py-3 text-foreground-soft">
                           {intern.date_started?.slice(0, 10)} –{" "}
                           {intern.date_ended?.slice(0, 10) || "Present"}
                         </td>
@@ -267,7 +264,7 @@ export function AnnexDHteList({
         <div className="mt-5 text-center">
           <button
             onClick={handleSeeMore}
-            className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition-colors"
+            className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition-colors"
           >
             See more
           </button>
@@ -283,8 +280,8 @@ function StatCard({ icon, value, label, highlight }) {
       className={cx(
         "flex items-center gap-3 sm:gap-4 rounded-xl border px-4 sm:px-5 py-4 sm:py-5 shadow-sm",
         highlight
-          ? "border-primary-500 bg-primary-500 text-primary-foreground"
-          : "border-stone-300 bg-white text-stone-800",
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-card text-foreground",
       )}
     >
       {icon}
@@ -293,7 +290,7 @@ function StatCard({ icon, value, label, highlight }) {
         <p
           className={cx(
             "mt-1.5 text-xs",
-            highlight ? "opacity-80" : "text-stone-500",
+            highlight ? "opacity-80" : "text-muted-foreground",
           )}
         >
           {label}

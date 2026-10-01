@@ -3,7 +3,7 @@ import { MapPin, Mail, Phone } from "lucide-react";
 
 function EmployerProfileLoading() {
   return (
-    <section className="rounded-xl bg-primary-500 p-5 sm:p-6 shadow-sm overflow-hidden">
+    <section className="rounded-xl bg-primary p-5 sm:p-6 shadow-sm overflow-hidden">
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
           <Skeleton className="w-12 h-12 flex-shrink-0 rounded-xl bg-white/70" />

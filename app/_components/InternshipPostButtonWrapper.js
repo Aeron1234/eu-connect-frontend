@@ -19,7 +19,7 @@ function InternshipPostButtonWrapper({ courses }) {
           <Plus className="w-4 h-4" /> Post Job
         </TitleButton>
       }
-      title={<span className={`text-primary-500`}>Post Internship</span>}
+      title={<span className={`text-primary-emphasis`}>Post Internship</span>}
       description={`Do you need an intern? Post the job here.`}
     >
       <InternshipPostButton courses={courses || []} />

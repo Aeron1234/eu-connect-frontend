@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 function RequirementsAfter() {
   return (
     <>
-      <h3 className="font-bold text-stone-600">After Internship</h3>
+      <h3 className="font-bold text-foreground-soft">After Internship</h3>
 
       <ul className="pl-2 flex flex-col gap-0.5">
         <li className="flex gap-1 items-center">

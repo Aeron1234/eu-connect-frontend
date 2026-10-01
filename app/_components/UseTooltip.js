@@ -18,7 +18,7 @@ function UseTooltip({ children, side, label, className }) {
       </TooltipTrigger>
       <TooltipContent
         side={side}
-        className="bg-white text-stone-800 shadow-lg font-semibold"
+        className="bg-card text-foreground shadow-lg font-semibold"
       >
         <p>{label}</p>
       </TooltipContent>

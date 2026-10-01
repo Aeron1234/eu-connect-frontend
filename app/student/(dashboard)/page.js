@@ -1,6 +1,7 @@
 import MapSmallContainer from "@/app/_components/MapSmallContainer";
 import DtrTodayCard from "@/app/_components/DtrTodayCard";
 import RecentActivityCard from "@/app/_components/RecentActivityCard";
+import ProgressBar from "@/app/_components/ProgressBar";
 import { getStudentDashboardData } from "@/lib/server-actions/dashboard-actions";
 import { getDtrs } from "@/lib/server-actions/dtr-actions";
 
@@ -40,7 +41,7 @@ function getActivityVisual(action = "") {
     if (action.includes("deleted"))
       return { icon: Trash2, color: "text-red-600" };
     if (action.includes("pinned"))
-      return { icon: Pin, color: "text-primary-500" };
+      return { icon: Pin, color: "text-primary-emphasis" };
     return { icon: Bell, color: "text-blue-600" };
   }
   if (action.includes("evaluation")) {
@@ -89,9 +90,9 @@ async function StudentDashboardPage({ searchParams }) {
       {/* Recent Time Records */}
 
       <Suspense fallback={<DtrRecordsSkeleton />}>
-        <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
-            <span className="w-4 h-4 rounded-full border-2 border-primary-500 flex-shrink-0" />
+        <section className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4">
+            <span className="w-4 h-4 rounded-full border-2 border-primary flex-shrink-0" />
             Recent Time Records
           </h3>
           <div className="">
@@ -116,7 +117,7 @@ async function StudentDashboardPage({ searchParams }) {
             total_hours={internshipData?.total_hours || 0}
           />
 
-          <div className="rounded-xl bg-white border border-stone-300 shadow-sm h-64 lg:h-full min-h-64">
+          <div className="rounded-xl bg-card border border-border shadow-sm h-64 lg:h-full min-h-64">
             <MapSmallContainer
               latitude={locationData?.lat || 0}
               longitude={locationData?.lon || 0}
@@ -137,7 +138,7 @@ function InternshipProgress({ accumulated_hours = 0, total_hours = 0 }) {
     Math.round((accumulated_hours / total_hours) * 100),
   );
   return (
-    <div className="rounded-xl bg-primary-500 text-white p-5">
+    <div className="rounded-xl bg-primary text-white p-5">
       <h3 className="text-sm font-semibold mb-4">Internship Progress</h3>
       <div className="space-y-4">
         <div>
@@ -147,12 +148,7 @@ function InternshipProgress({ accumulated_hours = 0, total_hours = 0 }) {
               {accumulated_hours.toFixed(1)}/{total_hours}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-primary-50/50 overflow-hidden">
-            <div
-              className="h-full bg-primary-50 rounded-full transition-all"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+          <ProgressBar value={pct} label="Internship hours completed" onBrand />
         </div>
       </div>
     </div>

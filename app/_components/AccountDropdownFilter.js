@@ -24,7 +24,7 @@ function AccountDropdownFilter({ roles = [], value, onChange }) {
       onValueChange={onChange}
       options={options}
       placeholder="Filter"
-      className="bg-white p-2"
+      className="bg-card p-2"
     />
   );
 }

@@ -1,9 +1,8 @@
 import Image from "next/image";
 import logo from "@/public/logo.png";
 
-function Logo({ size = "default" }) {
-  const dimensions =
-    size === "small" ? "w-10 h-10" : "w-16 h-16 md:w-20 md:h-20";
+function Logo({ compactOnDesktop = false }) {
+  const dimensions = `w-16 h-16 md:w-20 md:h-20 ${compactOnDesktop ? "lg:w-10 lg:h-10" : ""}`;
 
   return (
     <div

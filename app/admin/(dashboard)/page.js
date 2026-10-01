@@ -29,7 +29,7 @@ function getActivityVisual(action = "") {
     if (action.includes("deleted"))
       return { icon: Trash2, color: "text-red-600" };
     if (action.includes("pinned"))
-      return { icon: Pin, color: "text-primary-500" };
+      return { icon: Pin, color: "text-primary-emphasis" };
     return { icon: Bell, color: "text-blue-600" };
   }
   if (action.includes("finished")) {

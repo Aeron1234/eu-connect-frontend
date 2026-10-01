@@ -69,7 +69,7 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
       {studentEvaluationCriterias.map((group) => (
         <div
           key={group.category}
-          className="flex-1 flex flex-col rounded-sm border border-stone-300"
+          className="flex-1 flex flex-col rounded-sm border border-border"
         >
           <Category>{group.category}</Category>
 
@@ -94,13 +94,13 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
           value={remarks}
           onChange={(e) => setRemarks(e.target.value)}
           placeholder="Additional comments, observations, or remarks..."
-          className="rounded-sm border border-stone-300 w-full px-4 py-2 bg-stone-100 min-h-20 overflow-y-auto resize-none outline-primary-500"
+          className="rounded-sm border border-border w-full px-4 py-2 bg-muted min-h-20 overflow-y-auto resize-none outline-primary-500"
           disabled={isPending}
         />
       </label>
 
       <button
-        className="p-2 rounded-sm bg-primary-500 w-fit self-end text-white font-semibold cursor-pointer hover:bg-primary-600 transition-colors"
+        className="p-2 rounded-sm bg-primary w-fit self-end text-white font-semibold cursor-pointer hover:bg-primary-600 transition-colors"
         disabled={isPending}
       >
         Submit Evaluation
@@ -118,7 +118,7 @@ function Criteria({
   evaluationGrades,
 }) {
   return (
-    <div className="flex-1 gap-2 flex items-center px-4 py-3 rounded-b-sm border-t border-stone-300 xs:justify-between flex-col xs:flex-row">
+    <div className="flex-1 gap-2 flex items-center px-4 py-3 rounded-b-sm border-t border-border xs:justify-between flex-col xs:flex-row">
       <p>{description}</p>
       <ul className="flex gap-1">
         {grades.map((grade) => (
@@ -145,8 +145,8 @@ function GradeButton({ grade, setEvaluationGrades, evaluationGrades, name }) {
 
   const isSelected =
     grade === evaluationGrades[name]
-      ? "bg-primary-500 text-white"
-      : "bg-stone-100";
+      ? "bg-primary text-white"
+      : "bg-muted";
 
   return (
     <li
@@ -161,7 +161,7 @@ function GradeButton({ grade, setEvaluationGrades, evaluationGrades, name }) {
 function Category({ children, className }) {
   return (
     <h4
-      className={`flex-1 py-2 px-4 bg-stone-100 font-semibold ${className} rounded-t-sm`}
+      className={`flex-1 py-2 px-4 bg-muted font-semibold ${className} rounded-t-sm`}
     >
       {children}
     </h4>

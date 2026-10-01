@@ -7,7 +7,7 @@ function DepartmentsAndCoursesLayout({ children }) {
     <Suspense
       fallback={
         <div className="self-center justify-self-center p-5">
-          <Spinner className={"size-8 stroke-4 stroke-primary-500"} />
+          <Spinner className={"size-8 stroke-4 stroke-primary-emphasis"} />
         </div>
       }
     >

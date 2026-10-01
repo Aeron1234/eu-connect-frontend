@@ -2,7 +2,7 @@ import { History } from "lucide-react";
 
 function HistoryLoadingCard() {
   return (
-    <div className="w-full flex flex-col items-center gap-4 px-4 py-8 rounded-xl border border-stone-200 bg-white text-stone-400 shadow-sm">
+    <div className="w-full flex flex-col items-center gap-4 px-4 py-8 rounded-xl border border-border bg-card text-foreground-subtle shadow-sm">
       <span className="">
         <History className="h-12 w-12" />
       </span>

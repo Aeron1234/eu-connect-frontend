@@ -2,10 +2,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function DtrRecordsSkeleton({ rows = 5, pagination = true }) {
   return (
-    <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 overflow-x-scroll">
       <table className="w-xl md:w-full text-sm">
         <thead>
-          <tr className="border-b border-stone-300">
+          <tr className="border-b border-border">
             <th className="text-left py-2">
               <Skeleton className="h-2.5 w-14" />
             </th>
@@ -25,7 +25,7 @@ function DtrRecordsSkeleton({ rows = 5, pagination = true }) {
         </thead>
         <tbody>
           {Array.from({ length: rows }).map((_, i) => (
-            <tr key={i} className="border-b border-stone-300 last:border-b-0">
+            <tr key={i} className="border-b border-border last:border-b-0">
               <td className="py-3">
                 <Skeleton className="h-3.5 w-20" />
               </td>

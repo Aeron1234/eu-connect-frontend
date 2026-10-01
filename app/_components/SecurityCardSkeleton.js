@@ -9,7 +9,7 @@ function SecurityCardSkeleton() {
       <div className="mt-4 rounded-lg bg-secondary/70 px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Lock className="h-4 w-4 text-stone-300" />
+            <Lock className="h-4 w-4 text-foreground-faint" />
             <Skeleton className="h-3 w-16" />
           </span>
           <Skeleton className="h-3 w-12" />

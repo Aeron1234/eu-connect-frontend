@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function StudentHoursTrackerSkeleton({ rows = 4 }) {
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6 h-full">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full">
       <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -18,7 +18,7 @@ function StudentHoursTrackerSkeleton({ rows = 4 }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="rounded-lg border border-stone-200 p-3 sm:p-4"
+            className="rounded-lg border border-border p-3 sm:p-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0 space-y-1.5">

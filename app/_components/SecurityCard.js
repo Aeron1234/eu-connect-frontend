@@ -79,7 +79,7 @@ export default function SecurityCard() {
             <button
               type="button"
               onClick={() => setIsChangingPassword(true)}
-              className="text-xs font-semibold text-primary-500 hover:underline"
+              className="text-xs font-semibold text-primary-emphasis hover:underline"
             >
               Update
             </button>
@@ -134,7 +134,7 @@ export default function SecurityCard() {
               type="button"
               onClick={handleUpdate}
               disabled={isSaving}
-              className="w-full rounded-md bg-primary-500 px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              className="w-full rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Save New Password"}
             </button>

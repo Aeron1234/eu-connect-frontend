@@ -6,7 +6,7 @@ function NarrativesSkeleton({ rows = 3 }) {
       {Array.from({ length: rows }).map((_, i) => (
         <li
           key={i}
-          className="border border-stone-300 rounded-xl p-4 sm:p-5 bg-white shadow-sm"
+          className="border border-border rounded-xl p-4 sm:p-5 bg-card shadow-sm"
         >
           <div className="flex items-center justify-between mb-2">
             <Skeleton className="h-3 w-16" />

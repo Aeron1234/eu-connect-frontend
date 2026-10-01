@@ -13,7 +13,7 @@ export default function InfoCard({
 
   return (
     <section className="rounded-xl border border-border bg-background p-6 shadow-sm">
-      <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary-500">
+      <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary-emphasis">
         <Icon className="h-4 w-4" /> {card.title}
       </h3>
       <dl className="mt-5 space-y-4">

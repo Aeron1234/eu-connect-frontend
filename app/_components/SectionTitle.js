@@ -6,7 +6,7 @@ function SectionTitle({ Icon = null, title, description = "" }) {
         {title}
       </h2>
       {description && (
-        <p className="text-xs text-stone-600 line-clamp-2 lg:text-sm">
+        <p className="text-xs text-foreground-soft line-clamp-2 lg:text-sm">
           {description}
         </p>
       )}

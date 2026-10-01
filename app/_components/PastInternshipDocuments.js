@@ -14,7 +14,7 @@ import { getFileTypeLabel, typeTone } from "@/lib/utils";
 const STATUS_STYLES = {
   finished: "bg-green-50 text-green-700",
   ongoing: "bg-amber-50 text-amber-700",
-  withdrawn: "bg-stone-100 text-stone-600",
+  withdrawn: "bg-muted text-foreground-soft",
 };
 
 function StatusPill({ status }) {
@@ -50,7 +50,7 @@ function RecordRow({ record, currentUserId }) {
         className="w-full flex items-center justify-between gap-3 p-4 hover:bg-muted/40 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary-500/10 text-primary-500">
+          <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary-emphasis">
             <Building2 className="size-4" />
           </div>
           <div className="min-w-0 text-left">
@@ -112,7 +112,7 @@ function PastInternshipDocuments({ records = [], currentUserId = "" }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="flex items-center gap-2 font-display text-lg font-bold text-primary-500">
+      <h3 className="flex items-center gap-2 font-display text-lg font-bold text-primary-emphasis">
         <Building2 className="size-4" />
         Past Internship Records
         <span className="text-sm font-normal text-muted-foreground">

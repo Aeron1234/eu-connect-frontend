@@ -14,7 +14,7 @@ export default function SetPasswordPageClient() {
   );
 
   return (
-    <main className="flex items-center justify-center bg-cream px-6 py-16">
+    <main className="flex items-center justify-center bg-canvas px-6 py-16">
       <div className="w-full max-w-md">
         <h2 className="font-display text-3xl font-bold">Set a new password</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -24,7 +24,7 @@ export default function SetPasswordPageClient() {
 
         <div className="mt-7 rounded-xl border border-border bg-card p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-            <KeyRound className="size-4 text-primary-500" /> New Password
+            <KeyRound className="size-4 text-primary-emphasis" /> New Password
           </div>
 
           <form action={formAction} className="space-y-4">
@@ -66,7 +66,7 @@ export default function SetPasswordPageClient() {
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary-500 text-sm font-medium text-primary-foreground hover:bg-primary-500/90 disabled:opacity-50"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {isPending ? (
                 <Spinner className={"size-5 stroke-3 stroke-primary-50"} />

@@ -25,7 +25,7 @@ function FileCard({ item }) {
       return <Table size={24} className="text-green-600" />;
     if (type.includes("word") || type.includes("officedocument"))
       return <FileBox size={24} className="text-blue-500" />;
-    return <File size={24} className="text-stone-400" />;
+    return <File size={24} className="text-foreground-subtle" />;
   };
 
   function handleDownload() {
@@ -49,26 +49,26 @@ function FileCard({ item }) {
 
   return (
     <>
-      <div className="w-fit flex justify-center rounded-md text-stone-600 mb-2 p-2 bg-stone-100">
+      <div className="w-fit flex justify-center rounded-md text-foreground-soft mb-2 p-2 bg-muted">
         <span className="shrink-0">{renderIcon()}</span>
       </div>
       <div className="flex-1 flex flex-col gap-2 rounded-b-md wrap-break-word items-center mt-2">
         <div className="flex flex-col items-center flex-1 w-full">
-          <span className="text-stone-500">File Name</span>
+          <span className="text-muted-foreground">File Name</span>
           <p>{file_name}</p>
         </div>
 
         <div className="flex flex-col items-center flex-1 w-full max-xs:hidden">
-          <span className="text-stone-500">Company Name</span>
+          <span className="text-muted-foreground">Company Name</span>
           <p>{company_name}</p>
         </div>
 
-        <div className="w-full text-stone-600 flex items-center gap-1 justify-center text-right mt-2">
+        <div className="w-full text-foreground-soft flex items-center gap-1 justify-center text-right mt-2">
           <button
             type="button"
             onClick={handleDownload}
             disabled={isPending}
-            className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm disabled:opacity-50"
+            className="p-1 cursor-pointer hover:bg-secondary transition-colors rounded-sm disabled:opacity-50"
             aria-label="Download file"
           >
             {isPending ? (
@@ -84,7 +84,7 @@ function FileCard({ item }) {
                 <Trash2 className="h-5 w-5" />
               </span>
             }
-            title={<span className="text-primary-500">Delete File</span>}
+            title={<span className="text-primary-emphasis">Delete File</span>}
             description="Are you sure you want to delete this file?"
           >
             <StorageDeleteFile fileId={id} />

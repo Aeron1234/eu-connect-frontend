@@ -15,7 +15,7 @@ function ActivityLogsLoading() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-stone-300 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <ActivityLogsTableSkeleton />
       </div>
     </main>

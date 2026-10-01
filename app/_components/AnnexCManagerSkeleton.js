@@ -5,7 +5,7 @@ export default function AnnexCManagerSkeleton() {
   return (
     <div>
       {/* Inner tab bar (Form / Reports) */}
-      <div className="mb-6 rounded-xl bg-stone-200 p-1.5 sm:w-fit">
+      <div className="mb-6 rounded-xl bg-secondary p-1.5 sm:w-fit">
         <div className="flex gap-1.5">
           <Skeleton className="h-8 w-20 rounded-lg" />
           <Skeleton className="h-8 w-24 rounded-lg" />

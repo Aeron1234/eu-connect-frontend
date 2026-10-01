@@ -8,7 +8,7 @@ import Modal from "./Modal";
 const statusStyles = {
   present: "text-emerald-700 bg-emerald-50",
   "Half Day": "text-amber-700 bg-amber-50",
-  absent: "text-primary bg-accent",
+  absent: "text-primary-emphasis bg-accent",
 };
 
 function formatDate(dateString, formatString = "MM/dd/yyyy") {
@@ -20,7 +20,7 @@ function RecordsDtrTable({ dtrs = [] }) {
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="border-b border-stone-300 text-[11px] uppercase tracking-wide text-muted-foreground">
+        <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
           <th className="text-left py-2 font-medium">Date</th>
           <th className="text-left py-2 font-medium">Clock In</th>
           <th className="text-left py-2 font-medium">Clock Out</th>
@@ -33,14 +33,14 @@ function RecordsDtrTable({ dtrs = [] }) {
         {dtrs.map((dtr) => (
           <tr
             key={dtr.id}
-            className="border-b border-stone-300 last:border-b-0"
+            className="border-b border-border last:border-b-0"
           >
-            <td className="py-3 text-stone-800">
+            <td className="py-3 text-foreground">
               {formatDate(dtr.created_at, "MMM d, yyyy")}
             </td>
             <td className="py-3">
               {dtr.clock_in === "—" ? (
-                <span className="text-stone-600">—</span>
+                <span className="text-foreground-soft">—</span>
               ) : (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-medium">
                   <LogIn className="w-3 h-3" />
@@ -50,15 +50,15 @@ function RecordsDtrTable({ dtrs = [] }) {
             </td>
             <td className="py-3">
               {!dtr.clock_out ? (
-                <span className="text-stone-600">—</span>
+                <span className="text-foreground-soft">—</span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent text-primary text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent text-primary-emphasis text-xs font-medium">
                   <LogOut className="w-3 h-3" />
                   {formatDate(dtr.clock_out, "h:mm a")}
                 </span>
               )}
             </td>
-            <td className="py-3 text-right text-stone-800 font-medium">
+            <td className="py-3 text-right text-foreground font-medium">
               {dtr.total_hours ? dtr.total_hours.toFixed(1) : "—"}
             </td>
             <td className="py-3 text-right">
@@ -74,13 +74,13 @@ function RecordsDtrTable({ dtrs = [] }) {
                   trigger={
                     <div
                       title="Delete record"
-                      className="text-stone-400 hover:text-primary-500 transition-colors"
+                      className="text-foreground-subtle hover:text-primary-emphasis transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </div>
                   }
                   title={
-                    <span className={`text-primary-500`}>
+                    <span className={`text-primary-emphasis`}>
                       Delete Daily Time Record
                     </span>
                   }
@@ -95,7 +95,7 @@ function RecordsDtrTable({ dtrs = [] }) {
         ))}
         {dtrs.length === 0 && (
           <tr>
-            <td colSpan={6} className="py-6 text-center text-sm text-stone-600">
+            <td colSpan={6} className="py-6 text-center text-sm text-foreground-soft">
               No time records.
             </td>
           </tr>

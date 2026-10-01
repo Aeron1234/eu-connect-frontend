@@ -93,9 +93,9 @@ function StudentDashboardDtrTable({
       {isPending ? (
         <DtrRecordsSkeleton />
       ) : (
-        <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
-            <span className="w-4 h-4 rounded-full border-2 border-primary-500 flex-shrink-0" />
+        <section className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4">
+            <span className="w-4 h-4 rounded-full border-2 border-primary flex-shrink-0" />
             Recent Time Records
           </h3>
           <div className="overflow-x-auto">

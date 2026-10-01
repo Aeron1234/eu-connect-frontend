@@ -22,7 +22,7 @@ function StudentEvaluationCriteria({
         <h3 className="text-base font-semibold">Student Evaluation Form</h3>
 
         <button
-          className="flex gap-1 items-center transition-all hover:bg-stone-50 p-1 rounded-lg"
+          className="flex gap-1 items-center transition-all hover:bg-muted/50 p-1 rounded-lg"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {isOpen ? "Hide" : "Show"}

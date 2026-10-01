@@ -55,7 +55,7 @@ export default function Map({ sites, selectedId, onSelect }) {
         >
           <Popup>
             <div className="min-w-[220px]">
-              <p className="font-display text-base font-bold text-maroon">
+              <p className="font-display text-base font-bold text-primary-emphasis">
                 {s.company}
               </p>
               <p className="text-xs text-muted-foreground">

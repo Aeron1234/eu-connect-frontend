@@ -8,14 +8,14 @@ async function Dtr() {
   if (!dtrData?.dtrs)
     return (
       <div className="flex justify-center w-full h-full">
-        <span className="text-stone-400 text-base">No existing record</span>
+        <span className="text-foreground-subtle text-base">No existing record</span>
       </div>
     );
 
   return (
     <>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-stone-700">
+        <h2 className="text-lg font-semibold text-foreground">
           Your Daily Time Record
         </h2>
 

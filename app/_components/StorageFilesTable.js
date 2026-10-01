@@ -36,7 +36,7 @@ function StorageFilesTable({ filteredFiles = [] }) {
       <TableBody>
         {filteredFiles.length > 0 &&
           filteredFiles.map((item) => (
-            <TableRow className={`hover:bg-stone-50`} key={item.id}>
+            <TableRow className={`hover:bg-muted/50`} key={item.id}>
               <RowCells item={item} />
             </TableRow>
           ))}
@@ -73,7 +73,7 @@ function RowCells({ item }) {
       return <Table className="text-green-600 h-5 w-5" />;
     if (type.includes("word") || type.includes("officedocument"))
       return <FileBox className="text-blue-500 h-5 w-5" />;
-    return <File className="text-stone-400 h-5 w-5" />;
+    return <File className="text-foreground-subtle h-5 w-5" />;
   };
 
   function handleDownload() {
@@ -109,12 +109,12 @@ function RowCells({ item }) {
         {formatDate(new Date(created_at), "MM/dd/yyyy")}
       </TableCell>
       <TableCell>
-        <div className="text-stone-600 flex items-center gap-1 justify-end text-right">
+        <div className="text-foreground-soft flex items-center gap-1 justify-end text-right">
           <button
             type="button"
             onClick={handleDownload}
             disabled={isPending}
-            className="p-1 cursor-pointer hover:bg-stone-200 transition-colors rounded-sm disabled:opacity-50"
+            className="p-1 cursor-pointer hover:bg-secondary transition-colors rounded-sm disabled:opacity-50"
             aria-label="Download file"
           >
             {isPending ? (
@@ -130,7 +130,7 @@ function RowCells({ item }) {
                 <Trash2 className="h-5 w-5" />
               </span>
             }
-            title={<span className={`text-primary-500`}>Delete File</span>}
+            title={<span className={`text-primary-emphasis`}>Delete File</span>}
             // title={<span className="text-red-600">Clock-out?</span>}
             description={`Are you sure you want to delete this file?`}
           >

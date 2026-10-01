@@ -39,7 +39,7 @@ async function InternshipRecordsDetailsPage({ params }) {
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <Link
         href={`/internship-records`}
-        className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-800 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronLeft className="h-4 w-4" /> Back to records
       </Link>

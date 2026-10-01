@@ -14,8 +14,8 @@ import {
   LayoutGrid,
   CheckCircle2,
   XCircle,
-  RotateCcw,
   ClipboardList,
+  FolderOpen,
 } from "lucide-react";
 
 const iconMap = {
@@ -37,6 +37,7 @@ const iconMap = {
   "annex-d": ClipboardCheck,
   form: FileText,
   reports: ClipboardList,
+  documents: FolderOpen,
 };
 
 // `onSelect` (click-based, e.g. client-state tabs) and `getHref` (Link-based,
@@ -79,8 +80,8 @@ function TabBar({ tabs, selectedTab, onSelect, getHref, getBadge }) {
 
         const className = `flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
           isActive
-            ? "bg-primary-500 text-primary-foreground shadow-sm"
-            : "text-stone-600 hover:bg-stone-100"
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "text-foreground-soft hover:bg-muted"
         }`;
 
         return (

@@ -23,7 +23,7 @@ function DailyNarrativeDropdown({ trigger, narrative }) {
               title={"Update your narrative"}
               description="Do you want to change something?"
               trigger={
-                <div className="flex gap-2 items-center py-1 px-2 text-sm text-stone-600 font-semibold rounded-sm hover:bg-stone-100 transition-colors">
+                <div className="flex gap-2 items-center py-1 px-2 text-sm text-foreground-soft font-semibold rounded-sm hover:bg-muted transition-colors">
                   <SquarePen size={16} /> Edit
                 </div>
               }
@@ -33,7 +33,7 @@ function DailyNarrativeDropdown({ trigger, narrative }) {
             <Modal
               title={<span className={`text-red-600`}>Delete Narrative</span>}
               trigger={
-                <div className="flex gap-2 items-center py-1 px-2 text-sm text-stone-600 font-semibold rounded-sm hover:bg-stone-100 transition-colors">
+                <div className="flex gap-2 items-center py-1 px-2 text-sm text-foreground-soft font-semibold rounded-sm hover:bg-muted transition-colors">
                   <Trash2 size={16} /> Delete
                 </div>
               }

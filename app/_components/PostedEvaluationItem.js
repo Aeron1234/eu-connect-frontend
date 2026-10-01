@@ -14,6 +14,7 @@ import { useState, useTransition } from "react";
 import Modal from "./Modal";
 import ExportPdfButton from "./ExportPdfButton";
 import StudentEvaluationDeleteForm from "./StudentEvaluationDeleteForm";
+import ProgressBar from "./ProgressBar";
 import {
   respondToStudentEvaluation,
   restoreDisputedEvaluation,
@@ -51,7 +52,7 @@ function PostedEvaluationItem({
       : status === "Pending"
         ? "bg-amber-100 text-amber-700"
         : status === "Disputed"
-          ? "bg-stone-100 text-stone-700"
+          ? "bg-muted text-foreground"
           : "bg-blue-100 text-blue-700";
 
   function handleResponse(res) {
@@ -128,9 +129,9 @@ function PostedEvaluationItem({
 
   return (
     <div
-      className={`border border-stone-300 rounded-xl bg-white overflow-hidden mb-3`}
+      className={`border border-border rounded-xl bg-card overflow-hidden mb-3`}
     >
-      <div className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors">
+      <div className="w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
         <button
           onClick={() => setOpen((o) => !o)}
           className="contents text-left"
@@ -139,7 +140,7 @@ function PostedEvaluationItem({
           <CircularScore score={total} max={totalMax} />
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-500">
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-emphasis">
                 {ev.type}
               </span>
               <span
@@ -148,7 +149,7 @@ function PostedEvaluationItem({
                 {ev.status}
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-stone-800">
+            <h3 className="text-sm font-semibold text-foreground">
               {ev.period}
             </h3>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
@@ -180,7 +181,7 @@ function PostedEvaluationItem({
               </div>
             }
             title={
-              <span className={`text-primary-500`}>Delete Evaluation</span>
+              <span className={`text-primary-emphasis`}>Delete Evaluation</span>
             }
             description={`Are you sure you want to delete this evaluation?`}
           >
@@ -193,9 +194,9 @@ function PostedEvaluationItem({
       </div>
 
       {open && (
-        <div className="border-t border-stone-200 px-4 sm:px-5 py-4 space-y-4 bg-stone-50/50">
+        <div className="border-t border-border px-4 sm:px-5 py-4 space-y-4 bg-muted/50">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle mb-3">
               Score Breakdown
             </p>
             <div className="space-y-3">
@@ -204,17 +205,15 @@ function PostedEvaluationItem({
                 return (
                   <div key={b.label}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-stone-700">{b.label}</span>
-                      <span className="text-xs font-medium text-stone-500">
+                      <span className="text-sm text-foreground">{b.label}</span>
+                      <span className="text-xs font-medium text-muted-foreground">
                         {b.score}/{b.max}
                       </span>
                     </div>
-                    <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary-500 rounded-full transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+                    <ProgressBar
+                      value={pct}
+                      label={`${b.label} score`}
+                    />
                   </div>
                 );
               })}
@@ -222,30 +221,30 @@ function PostedEvaluationItem({
           </div>
 
           {ev.comments && (
-            <div className="rounded-lg bg-white border border-stone-200 p-4 ">
-              <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-stone-800">
-                <Star className="w-4 h-4 text-primary-500" />
+            <div className="rounded-lg bg-card border border-border p-4 ">
+              <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-foreground">
+                <Star className="w-4 h-4 text-primary-emphasis" />
                 Supervisor Comments
               </div>
-              <p className="text-sm text-stone-600 italic leading-relaxed">
+              <p className="text-sm text-foreground-soft italic leading-relaxed">
                 &quot;{ev.comments}&quot;
               </p>
-              <p className="text-xs text-stone-400 mt-2">
+              <p className="text-xs text-foreground-subtle mt-2">
                 — {ev.evaluator}, {ev.company}
               </p>
             </div>
           )}
 
           {ev.status === "Disputed" && ev?.review_notes && (
-            <div className="rounded-lg bg-white border border-stone-200 p-4 ">
-              <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-stone-800">
-                <MessageSquareQuote className="w-4 h-4 text-primary-500" />
+            <div className="rounded-lg bg-card border border-border p-4 ">
+              <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-foreground">
+                <MessageSquareQuote className="w-4 h-4 text-primary-emphasis" />
                 Review notes
               </div>
-              <p className="text-sm text-stone-600 italic leading-relaxed">
+              <p className="text-sm text-foreground-soft italic leading-relaxed">
                 &quot;{ev?.review_notes}&quot;
               </p>
-              <p className="text-xs text-stone-400 mt-2">
+              <p className="text-xs text-foreground-subtle mt-2">
                 — {ev?.reviewer_name}
               </p>
             </div>
@@ -254,19 +253,19 @@ function PostedEvaluationItem({
       )}
 
       {type === "confirmation" && ev.status === "Pending" && (
-        <div className="bg-white px-5 py-4 border-t border-stone-200">
+        <div className="bg-card px-5 py-4 border-t border-border">
           <div className="flex w-full justify-end gap-2">
             <button
               onClick={() => handleResponse("disputed")}
               disabled={isPending}
-              className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold transition-colors hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Dispute
             </button>
             <button
               onClick={() => handleResponse("completed")}
               disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="h-4 w-4" />
               Accept &amp; Confirm
@@ -276,7 +275,7 @@ function PostedEvaluationItem({
       )}
 
       {canPrint && (
-        <div className="bg-white px-5 py-4 border-t border-stone-200">
+        <div className="bg-card px-5 py-4 border-t border-border">
           <div className="flex w-full justify-end">
             <ExportPdfButton
               endpoint="/api/reports/student-evaluation"
@@ -288,12 +287,12 @@ function PostedEvaluationItem({
       )}
 
       {type === "disputed" && ev.status === "Disputed" && (
-        <div className="bg-white px-5 py-4 border-t border-stone-200">
+        <div className="bg-card px-5 py-4 border-t border-border">
           <div className="flex w-full justify-end gap-2">
             <button
               onClick={handleRestore}
               disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RotateCcw className="h-4 w-4" /> Restore
             </button>
@@ -302,13 +301,13 @@ function PostedEvaluationItem({
       )}
 
       {isStaff && ev.status === "Disputed" && (
-        <div className="bg-white px-5 py-4 border-t border-stone-200">
+        <div className="bg-card px-5 py-4 border-t border-border">
           <form
             className="flex w-full justify-end gap-2"
             action={handleStaffReview}
           >
             <textarea
-              className="text-sm text-stone-600 italic leading-relaxed border border-stone-300 rounded-lg w-full outline-none bg-stone-100 px-4 max-w-100 resize-none focus:border-primary-500"
+              className="text-sm text-foreground-soft italic leading-relaxed border border-border rounded-lg w-full outline-none bg-muted px-4 max-w-100 resize-none focus:border-primary"
               name="review_notes"
               defaultValue={ev?.review_notes || ""}
               disabled={isPending}
@@ -317,7 +316,7 @@ function PostedEvaluationItem({
             <button
               type="submitt"
               disabled={isPending}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <MessageSquareQuote className="h-4 w-4" /> Submitt Review
             </button>
@@ -348,14 +347,14 @@ const CircularScore = ({ score, max }) => {
           r={r}
           strokeWidth="5"
           strokeLinecap="round"
-          className="stroke-primary-500 fill-none transition-all"
+          className="stroke-primary-emphasis fill-none transition-all"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - pct)}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-        <span className="text-base font-bold text-stone-800">{score}</span>
-        <span className="text-[10px] text-stone-400">/{max}</span>
+        <span className="text-base font-bold text-foreground">{score}</span>
+        <span className="text-[10px] text-foreground-subtle">/{max}</span>
       </div>
     </div>
   );

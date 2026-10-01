@@ -22,7 +22,7 @@ function InternshipRequirementsType({ requirementTypes, docs }) {
                 return (
                   <li key={r.id} className="flex items-start gap-2.5">
                     {done ? (
-                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-primary-500" />
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-primary-emphasis" />
                     ) : (
                       <Circle className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground/40" />
                     )}

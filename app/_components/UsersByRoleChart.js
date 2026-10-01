@@ -18,20 +18,20 @@ const roleLabels = {
 };
 
 const roleColors = {
-  student: "var(--color-primary-500)",
-  employer: "var(--color-amber-500)",
-  department_head: "var(--color-blue-500)",
-  admin: "var(--color-emerald-500)",
+  student: "var(--chart-maroon)",
+  employer: "var(--admin-chart-employer)",
+  department_head: "var(--admin-chart-department-head)",
+  admin: "var(--admin-chart-admin)",
 };
 
 const chartConfig = {
-  student: { label: "Students", color: "var(--color-primary-500)" },
-  employer: { label: "Employers", color: "var(--color-amber-500)" },
+  student: { label: "Students", color: "var(--chart-maroon)" },
+  employer: { label: "Employers", color: "var(--admin-chart-employer)" },
   department_head: {
     label: "Department Heads",
-    color: "var(--color-blue-500)",
+    color: "var(--admin-chart-department-head)",
   },
-  admin: { label: "Admins", color: "var(--color-emerald-500)" },
+  admin: { label: "Admins", color: "var(--admin-chart-admin)" },
 };
 
 function UsersByRoleChart({ data = [] }) {
@@ -43,10 +43,10 @@ function UsersByRoleChart({ data = [] }) {
   }));
 
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="mb-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-          <PieChartIcon className="w-4 h-4 text-primary-500" />
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <PieChartIcon className="w-4 h-4 text-primary-emphasis" />
           Users by Role
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
@@ -55,13 +55,13 @@ function UsersByRoleChart({ data = [] }) {
       </div>
 
       {chartData.length === 0 ? (
-        <div className="h-64 w-full bg-stone-100 rounded-lg flex items-center justify-center">
+        <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No user data yet.</p>
         </div>
       ) : (
         <ChartContainer
           config={chartConfig}
-          className="h-64 w-full bg-stone-100 rounded-lg p-3 flex items-center justify-center"
+          className="h-64 w-full bg-muted rounded-lg p-3 flex items-center justify-center"
         >
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent hideLabel />} />
@@ -72,7 +72,7 @@ function UsersByRoleChart({ data = [] }) {
               innerRadius={60}
               outerRadius={90}
               strokeWidth={2}
-              stroke="#f5f5f4"
+              stroke="var(--card)"
             >
               {chartData.map((entry) => (
                 <Cell key={entry.role} fill={entry.fill} />

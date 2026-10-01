@@ -13,6 +13,7 @@ import Modal from "./Modal";
 import DeleteForm from "./DeleteForm";
 import { toastAndAction } from "../../lib/helpers";
 import ActivityLogsTableSkeleton from "./ActivityLogsTableSkeleton";
+import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const ROLE_LABELS = {
   student: "Student",
@@ -107,9 +108,9 @@ export default function ActivityLogsManager({
     }
 
     const thisRequestId = ++requestIdRef.current;
+    setIsPending(true);
 
     const timeout = setTimeout(async () => {
-      setIsPending(true);
       try {
         const newData = await getAllActivityLogs({
           actorRole,
@@ -120,16 +121,12 @@ export default function ActivityLogsManager({
 
         if (thisRequestId !== requestIdRef.current) return;
 
-        if (newData?.error) {
-          console.error("Error loading activity logs:", newData.error);
-          setLogs([]);
-          setTotalPages(1);
-          setTotal(0);
-          setCurrentPage(1);
+        if (!hasValidPage(newData, "data")) {
+          console.error("Error loading activity logs:", newData?.error || "Invalid response from the server");
           return;
         }
 
-        setLogs(newData?.data || []);
+        setLogs(newData.data);
         setCurrentPage(1);
         setTotalPages(newData?.pagination?.totalPages || 1);
         setTotal(newData?.pagination?.total || 0);
@@ -161,12 +158,12 @@ export default function ActivityLogsManager({
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more activity logs:", newData.error);
+      if (!hasValidPage(newData, "data", "pagination", nextPage)) {
+        console.error("Error loading more activity logs:", newData?.error || "Invalid response from the server");
         return;
       }
 
-      const incoming = newData?.data || [];
+      const incoming = newData.data;
 
       setLogs((prev) => {
         const existingIds = new Set(prev.map((l) => l.id));
@@ -208,6 +205,28 @@ export default function ActivityLogsManager({
         // Roll back on failure
         setLogs(previousLogs);
         setTotal((prev) => prev + 1);
+        return;
+      }
+
+      // Deleting a row shifts every later offset page. Reload the first page
+      // before allowing another See more request.
+      const thisRequestId = ++requestIdRef.current;
+      setIsPending(true);
+      try {
+        const fresh = await getAllActivityLogs({ actorRole, targetType, search: query, page: 1 });
+        if (thisRequestId !== requestIdRef.current) return;
+        if (!hasValidPage(fresh, "data")) {
+          console.error("Error refreshing activity logs:", fresh?.error || "Invalid response from the server");
+          return;
+        }
+        setLogs(fresh.data);
+        setCurrentPage(1);
+        setTotalPages(fresh.pagination.totalPages || 1);
+        setTotal(fresh.pagination.total || 0);
+      } catch (error) {
+        if (thisRequestId === requestIdRef.current) console.error("Error refreshing activity logs:", error);
+      } finally {
+        if (thisRequestId === requestIdRef.current) setIsPending(false);
       }
     });
   }
@@ -238,37 +257,37 @@ export default function ActivityLogsManager({
             onValueChange={setActorRole}
             options={actorRoleOptions}
             placeholder="Role"
-            className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+            className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
           />
           <DropdownFilter
             value={targetType}
             onValueChange={setTargetType}
             options={targetTypeOptions}
             placeholder="Module"
-            className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+            className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
           />
         </div>
       </div>
 
       {/* Table */}
       {logs.length === 0 && !isPending ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-24 text-center shadow-sm">
-          <ScrollText className="size-8 text-stone-300" />
-          <p className="text-sm font-medium text-stone-500">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-24 text-center shadow-sm">
+          <ScrollText className="size-8 text-foreground-faint" />
+          <p className="text-sm font-medium text-muted-foreground">
             No activity found
           </p>
-          <p className="max-w-sm text-xs text-stone-400">
+          <p className="max-w-sm text-xs text-foreground-subtle">
             Try a different filter or clear the search.
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-stone-300 bg-white shadow-sm">
-          {isPending ? (
+        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+          {isPending && logs.length === 0 ? (
             <ActivityLogsTableSkeleton />
           ) : (
             <table className="w-full min-w-[720px] text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 sm:px-5 py-3 font-medium">User</th>
                   <th className="px-4 sm:px-5 py-3 font-medium">Action</th>
                   <th className="px-4 sm:px-5 py-3 font-medium">Module</th>
@@ -286,10 +305,10 @@ export default function ActivityLogsManager({
                   return (
                     <tr
                       key={log.id}
-                      className="border-b border-stone-200 last:border-0"
+                      className="border-b border-border last:border-0"
                     >
                       <td className="px-4 sm:px-5 py-3 max-w-[180px]">
-                        <p className="font-medium text-stone-800 truncate">
+                        <p className="font-medium text-foreground truncate">
                           {log.actor_name}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
@@ -299,7 +318,7 @@ export default function ActivityLogsManager({
                         </p>
                       </td>
                       <td className="px-4 sm:px-5 py-3 max-w-[280px]">
-                        <p className="font-medium text-stone-800">
+                        <p className="font-medium text-foreground">
                           {toSentenceCase(log.action)}
                         </p>
                         {log.description && (
@@ -319,13 +338,13 @@ export default function ActivityLogsManager({
                           trigger={
                             <div
                               title="Delete log entry"
-                              className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                              className="rounded-md p-2 text-foreground-subtle hover:bg-red-50 hover:text-red-600 transition-colors"
                             >
                               <Trash2 className="size-4" />
                             </div>
                           }
                           title={
-                            <span className={`text-primary-500`}>
+                            <span className={`text-primary-emphasis`}>
                               Delete Daily Time Record
                             </span>
                           }
@@ -352,9 +371,10 @@ export default function ActivityLogsManager({
       {currentPage < totalPages && (
         <div className="text-center">
           <button
+            type="button"
             onClick={handleSeeMore}
             disabled={isPending}
-            className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >
             {isPending ? "Loading..." : "See more"}
           </button>

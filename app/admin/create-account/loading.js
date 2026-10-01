@@ -8,12 +8,12 @@ function CreateAccountLoading() {
       <PageTitleSkeleton />
 
       <div className="space-y-6">
-        <div className="flex rounded-lg bg-stone-200 p-1 w-fit gap-1">
+        <div className="flex rounded-lg bg-secondary p-1 w-fit gap-1">
           <Skeleton className="h-9 w-16 rounded-md" />
           <Skeleton className="h-9 w-20 rounded-md" />
         </div>
 
-        <div className="rounded-xl border border-stone-300 bg-white shadow-sm p-5 sm:p-6">
+        <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-6">
           <CreateAccountFormSkeleton />
         </div>
       </div>

@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { isStudentAtRisk } from "@/lib/internshipRisk";
+import ProgressBar from "./ProgressBar";
 
 function StudentHoursTracker({ students = [], courses = [] }) {
   const [courseFilter, setCourseFilter] = useState("all");
@@ -20,11 +21,11 @@ function StudentHoursTracker({ students = [], courses = [] }) {
   }, [students, courseFilter]);
 
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6 h-full">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full">
       <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-            <Clock className="w-4 h-4 text-primary-500" />
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Clock className="w-4 h-4 text-primary-emphasis" />
             Student Hours Tracker
           </h3>
           <p className="text-xs text-muted-foreground mt-1">
@@ -62,15 +63,15 @@ function StudentHoursTracker({ students = [], courses = [] }) {
             return (
               <div
                 key={s.id}
-                className="rounded-lg border border-stone-200 p-3 sm:p-4"
+                className="rounded-lg border border-border p-3 sm:p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-stone-800 truncate">
+                      <p className="text-sm font-semibold text-foreground truncate">
                         {s.name}
                       </p>
-                      <span className="rounded-full bg-stone-100 border border-stone-300 px-2 py-0.5 text-[11px] font-medium text-stone-600">
+                      <span className="rounded-full bg-muted border border-border px-2 py-0.5 text-[11px] font-medium text-foreground-soft">
                         {s.course}
                       </span>
                       {atRisk && (
@@ -86,13 +87,12 @@ function StudentHoursTracker({ students = [], courses = [] }) {
                   </div>
 
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="w-28 sm:w-36 h-2 rounded-full bg-stone-200 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-semibold text-stone-800 w-9 text-right">
+                    <ProgressBar
+                      value={pct}
+                      label={`${s.name} internship hours completed`}
+                      className="w-28 sm:w-36"
+                    />
+                    <span className="text-xs font-semibold text-foreground w-9 text-right">
                       {pct}%
                     </span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">

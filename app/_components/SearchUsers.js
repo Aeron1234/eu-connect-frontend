@@ -10,6 +10,18 @@ import SearchedUserList from "./SearchedUserList";
 
 function SearchUsers({ historyData = [] }) {
   const [inputValue, setInputValue] = useState("");
+  const [historyState, setHistoryState] = useState({
+    source: historyData,
+    items: historyData,
+  });
+
+  // A server refresh can bring newer history after a save or another mutation.
+  if (historyState.source !== historyData) {
+    setHistoryState({ source: historyData, items: historyData });
+  }
+
+  const history =
+    historyState.source === historyData ? historyState.items : historyData;
 
   const trimmed = inputValue.trim();
   const isSearching = trimmed.length > 2;
@@ -29,7 +41,18 @@ function SearchUsers({ historyData = [] }) {
   const hasResults =
     isSearching && !loading && !error && searchedUsers.length > 0;
 
-  const isHistoryEmpty = historyData.length === 0;
+  const isHistoryEmpty = history.length === 0;
+
+  function handleHistoryDelete(historyId) {
+    setHistoryState((current) => ({
+      ...current,
+      items: current.items.filter((item) => item.history_id !== historyId),
+    }));
+  }
+
+  function handleHistoryClear() {
+    setHistoryState((current) => ({ ...current, items: [] }));
+  }
 
   return (
     <>
@@ -40,12 +63,16 @@ function SearchUsers({ historyData = [] }) {
 
       {/* Not searching yet, but history exists -> show history */}
       {!isSearching && !isHistoryEmpty && (
-        <SearchedUsersHistoryList historyData={historyData} />
+        <SearchedUsersHistoryList
+          historyData={history}
+          onDelete={handleHistoryDelete}
+          onClear={handleHistoryClear}
+        />
       )}
 
       {/* Actively searching (covers debounce wait + fetch) */}
       {isSearching && loading && (
-        <p className="text-sm text-stone-400 text-center py-8">Searching…</p>
+        <p className="text-sm text-foreground-subtle text-center py-8">Searching…</p>
       )}
 
       {isSearching && !loading && error && (

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function ShiftHoursChartSkeleton() {
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
         <div>
           <div className="flex items-center gap-2">

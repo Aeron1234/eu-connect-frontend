@@ -103,16 +103,16 @@ function DailyNarrativeContent({
             key={`${n.id}-${n.updated_at || n.created_at}`}
             className="relative pl-12 md:pl-16"
           >
-            <div className="absolute left-0 md:left-2 top-4 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-background">
+            <div className="absolute left-0 md:left-2 top-4 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold shadow-md ring-4 ring-background">
               {n.day_number}
             </div>
             <article className="rounded-xl bg-card border p-4 sm:p-5 hover:shadow-md transition-shadow">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-lg font-semibold text-stone-800">
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground">
                     {n.title}
                   </h2>
-                  <p className="flex items-center gap-1.5 text-xs text-stone-600 mt-0.5">
+                  <p className="flex items-center gap-1.5 text-xs text-foreground-soft mt-0.5">
                     <Calendar className="w-3.5 h-3.5" />{" "}
                     {format(new Date(n.created_at), "MMMM-dd-yyyy")} · Day{" "}
                     {n.day_number}
@@ -126,7 +126,7 @@ function DailyNarrativeContent({
                     trigger={
                       <div
                         aria-label="View"
-                        className="p-1.5 rounded hover:bg-accent text-stone-600 hover:text-stone-800 transition cursor-pointer"
+                        className="p-1.5 rounded hover:bg-accent text-foreground-soft hover:text-foreground transition cursor-pointer"
                       >
                         <Edit2 className="w-4 h-4" />
                       </div>
@@ -146,7 +146,7 @@ function DailyNarrativeContent({
                     trigger={
                       <div
                         aria-label="Delete"
-                        className="p-1.5 rounded hover:bg-accent text-stone-600 hover:text-primary-500 transition cursor-pointer"
+                        className="p-1.5 rounded hover:bg-accent text-foreground-soft hover:text-primary-emphasis transition cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </div>
@@ -162,7 +162,7 @@ function DailyNarrativeContent({
                   </Modal>
                 </div>
               </div>
-              <p className="text-sm text-stone-600 leading-relaxed mt-3 line-clamp-3">
+              <p className="text-sm text-foreground-soft leading-relaxed mt-3 line-clamp-3">
                 {n.narrative}
               </p>
 
@@ -174,12 +174,12 @@ function DailyNarrativeContent({
                   </p>
                 }
                 description={
-                  <span className="text-lg font-bold text-stone-900 block">
+                  <span className="text-lg font-bold text-foreground block">
                     {n.title || "Untitled"}
                   </span>
                 }
                 trigger={
-                  <div className="text-xs font-semibold text-primary-500 hover:underline mt-3 cursor-pointer">
+                  <div className="text-xs font-semibold text-primary-emphasis hover:underline mt-3 cursor-pointer">
                     Read more →
                   </div>
                 }
@@ -195,7 +195,7 @@ function DailyNarrativeContent({
         ))}
 
         {narratives.length === 0 && (
-          <li className="pl-12 md:pl-16 py-10 text-center text-sm text-stone-600">
+          <li className="pl-12 md:pl-16 py-10 text-center text-sm text-foreground-soft">
             No narratives yet.
           </li>
         )}
@@ -205,7 +205,7 @@ function DailyNarrativeContent({
             <button
               onClick={handleSeeMore}
               disabled={isPending}
-              className="w-full pl-12 md:pl-16 text-center text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+              className="w-full pl-12 md:pl-16 text-center text-lg font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
             >
               {isPending ? "Loading..." : "See more"}
             </button>

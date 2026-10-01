@@ -8,6 +8,12 @@ import DropdownFilter from "./DropdownFilter";
 import { getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
 import { useUser } from "@/contexts/UserContext";
 import InternshipPostsListSkeleton from "./InternshipPostsListSkeleton";
+import {
+  canKeepLoadedPostingPages,
+  pageAfterPostingRefresh,
+  reconcilePostingPageOne,
+} from "@/lib/internship-posts-pagination.mjs";
+import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const scopeTabs = [
   { label: "All Companies", value: "" },
@@ -49,6 +55,7 @@ function InternshipPosts({
   const [courseId, setCourseId] = useState("");
   const [scope, setScope] = useState("");
   const [favorite, setFavorite] = useState("");
+  const [favoriteRefresh, setFavoriteRefresh] = useState(0);
   const [isPending, setIsPending] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
 
@@ -58,7 +65,14 @@ function InternshipPosts({
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
-  const prevPage1KeysRef = useRef(new Set((initialData || []).map(keyOf)));
+  const prevPage1IdsRef = useRef(initialData.map(keyOf));
+  const prevTotalRef = useRef(initialTotal);
+  const lastServerSnapshotRef = useRef({
+    data: initialData,
+    page: initialPage,
+    total: initialTotal,
+    totalPages: initialTotalPages,
+  });
 
   const workTypeOptions = workTypeTabs.map((wt) => ({
     value: wt.workType,
@@ -71,34 +85,56 @@ function InternshipPosts({
   ];
 
   useEffect(() => {
-    const freshMap = new Map((initialData || []).map((p) => [keyOf(p), p]));
-    const prevPage1Keys = prevPage1KeysRef.current;
+    const previousSnapshot = lastServerSnapshotRef.current;
+    if (
+      previousSnapshot.data === initialData &&
+      previousSnapshot.page === initialPage &&
+      previousSnapshot.total === initialTotal &&
+      previousSnapshot.totalPages === initialTotalPages
+    ) {
+      return;
+    }
+    lastServerSnapshotRef.current = {
+      data: initialData,
+      page: initialPage,
+      total: initialTotal,
+      totalPages: initialTotalPages,
+    };
 
-    setInternshipPosts((prev) => {
-      if (prev.length === 0) return initialData;
+    const keepLoadedPages = canKeepLoadedPostingPages(
+      prevPage1IdsRef.current,
+      prevTotalRef.current,
+      initialData,
+      initialTotal,
+    );
+    prevPage1IdsRef.current = initialData.map(keyOf);
+    prevTotalRef.current = initialTotal;
 
-      const updatedList = prev
-        .map((p) => freshMap.get(keyOf(p)) || p)
-        .filter((p) => {
-          const wasOnPage1Before = prevPage1Keys.has(keyOf(p));
-          const isStillFresh = freshMap.has(keyOf(p));
-          return !wasOnPage1Before || isStillFresh;
-        });
+    // Server props describe the unfiltered first page. An active client-side
+    // filter owns its own list and must not merge those unfiltered rows in.
+    if (query || workType || courseId || scope || favorite) return;
 
-      const existingKeys = new Set(updatedList.map(keyOf));
-      const brandNew = (initialData || []).filter(
-        (p) => !existingKeys.has(keyOf(p)),
-      );
-
-      return [...brandNew, ...updatedList];
-    });
-
-    setCurrentPage(initialPage);
+    if (!keepLoadedPages) {
+      requestIdRef.current += 1;
+      setIsPending(false);
+    }
+    setCurrentPage((page) => pageAfterPostingRefresh(page, keepLoadedPages));
+    setInternshipPosts((prev) =>
+      reconcilePostingPageOne(prev, initialData, keepLoadedPages),
+    );
     setTotalPages(initialTotalPages || 1);
     setTotal(initialTotal || 0);
-
-    prevPage1KeysRef.current = new Set((initialData || []).map(keyOf));
-  }, [initialData, initialPage, initialTotalPages, initialTotal]);
+  }, [
+    initialData,
+    initialPage,
+    initialTotalPages,
+    initialTotal,
+    query,
+    workType,
+    courseId,
+    scope,
+    favorite,
+  ]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -107,9 +143,9 @@ function InternshipPosts({
     }
 
     const thisRequestId = ++requestIdRef.current;
+    setIsPending(true);
 
     const timeout = setTimeout(async () => {
-      setIsPending(true);
       try {
         const newData = await getInternshipPosts({
           workType,
@@ -122,22 +158,18 @@ function InternshipPosts({
 
         if (thisRequestId !== requestIdRef.current) return;
 
-        if (newData?.error) {
+        if (!hasValidPage(newData, "data", "pagination", 1)) {
           console.error(
             "Error loading filtered internship posts:",
-            newData.error,
+            newData?.error || "Invalid response from the server",
           );
-          setInternshipPosts([]);
-          setTotalPages(1);
-          setTotal(0);
-          setCurrentPage(1);
           return;
         }
 
-        setInternshipPosts(newData?.data || []);
+        setInternshipPosts(newData.data);
         setCurrentPage(1);
-        setTotalPages(newData?.pagination?.totalPages || 1);
-        setTotal(newData?.pagination?.total || 0);
+        setTotalPages(newData.pagination.totalPages || 1);
+        setTotal(newData.pagination.total || 0);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
           console.error("Error loading filtered internship posts:", error);
@@ -148,7 +180,21 @@ function InternshipPosts({
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [query, workType, courseId, scope, favorite]);
+  }, [query, workType, courseId, scope, favorite, favoriteRefresh]);
+
+  function handleFavoriteSettled(postingId, isFavorited) {
+    setInternshipPosts((prev) =>
+      prev.map((post) =>
+        post.id === postingId ? { ...post, isFavorited } : post,
+      ),
+    );
+    if (favorite) {
+      // Favorited / not-favorited membership and page boundaries can change.
+      requestIdRef.current += 1;
+      setIsPending(true);
+      setFavoriteRefresh((value) => value + 1);
+    }
+  }
 
   async function handleSeeMore() {
     if (isPending || currentPage >= totalPages) return;
@@ -168,12 +214,15 @@ function InternshipPosts({
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more internship posts:", newData.error);
+      if (!hasValidPage(newData, "data", "pagination", nextPage)) {
+        console.error(
+          "Error loading more internship posts:",
+          newData?.error || "Invalid response from the server",
+        );
         return;
       }
 
-      const incoming = newData?.data || [];
+      const incoming = newData.data;
 
       setInternshipPosts((prev) => {
         const existingIds = new Set(prev.map(keyOf));
@@ -210,7 +259,7 @@ function InternshipPosts({
     <>
       {userRole === "employer" && (
         <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
+          <div className="flex rounded-lg bg-secondary p-1 w-fit">
             {scopeTabs.map((s) => (
               <button
                 key={s.value}
@@ -218,8 +267,8 @@ function InternshipPosts({
                 onClick={() => setScope(s.value)}
                 className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   scope === s.value
-                    ? "bg-primary-500 text-primary-foreground"
-                    : "bg-stone-200 text-muted-foreground hover:text-primary-500"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:text-primary-emphasis"
                 }`}
               >
                 {s.label}
@@ -244,7 +293,7 @@ function InternshipPosts({
             onValueChange={setWorkType}
             options={workTypeOptions}
             placeholder="Work Type"
-            className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+            className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
           />
           {courses.length > 0 && (
             <DropdownFilter
@@ -252,7 +301,7 @@ function InternshipPosts({
               onValueChange={setCourseId}
               options={courseOptions}
               placeholder="Course"
-              className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+              className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
             />
           )}
           {userRole === "student" && (
@@ -261,7 +310,7 @@ function InternshipPosts({
               onValueChange={setFavorite}
               options={favoriteOptions}
               placeholder="All Posts"
-              className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+              className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
             />
           )}
         </div>
@@ -292,14 +341,15 @@ function InternshipPosts({
                 courses={courses}
                 onUpdate={handleItemUpdate}
                 onDelete={() => handleItemDelete(item.id)}
+                onFavoriteSettled={handleFavoriteSettled}
               />
             );
           })}
 
           {internshipPosts.length === 0 && !isPending && (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-              <BriefcaseBusiness className="size-8 text-stone-300" />
-              <p className="text-sm text-stone-500">
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
+              <BriefcaseBusiness className="size-8 text-foreground-faint" />
+              <p className="text-sm text-muted-foreground">
                 No internship listings found.
               </p>
             </div>
@@ -312,7 +362,7 @@ function InternshipPosts({
           <button
             onClick={handleSeeMore}
             disabled={isPending}
-            className="w-full text-center text-sm sm:text-lg font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="w-full text-center text-sm sm:text-lg font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >
             {isPending ? "Loading..." : "See more"}
           </button>

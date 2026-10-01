@@ -6,7 +6,7 @@ function StudentDashboardLoading() {
   return (
     <div className="space-y-6">
       {/* Today card */}
-      <section className="rounded-xl bg-primary-500 p-5 sm:p-6 shadow-sm overflow-hidden">
+      <section className="rounded-xl bg-primary p-5 sm:p-6 shadow-sm overflow-hidden">
         <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
           <div className="min-w-0 flex-1">
             <Skeleton className="h-3 w-12 bg-white/25" />
@@ -32,16 +32,16 @@ function StudentDashboardLoading() {
       </section>
 
       {/* Recent Time Records */}
-      <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+      <section className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <span className="w-4 h-4 rounded-full border-2 border-primary-500 flex-shrink-0" />
+          <span className="w-4 h-4 rounded-full border-2 border-primary flex-shrink-0" />
           <Skeleton className="h-3.5 w-40" />
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-xl md:w-full text-sm">
             <thead>
-              <tr className="border-b border-stone-300">
+              <tr className="border-b border-border">
                 <th className="text-left py-2">
                   <Skeleton className="h-2.5 w-14" />
                 </th>
@@ -64,7 +64,7 @@ function StudentDashboardLoading() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <tr
                   key={i}
-                  className="border-b border-stone-300 last:border-b-0"
+                  className="border-b border-border last:border-b-0"
                 >
                   <td className="py-3">
                     <Skeleton className="h-3.5 w-20" />
@@ -105,7 +105,7 @@ function StudentDashboardLoading() {
 
         <div className="flex flex-col gap-5">
           {/* Internship progress */}
-          <div className="rounded-xl bg-primary-500 p-5">
+          <div className="rounded-xl bg-primary p-5">
             <Skeleton className="h-3.5 w-32 bg-white/25" />
             <div className="mt-4">
               <div className="flex items-center justify-between mb-1.5">
@@ -119,7 +119,7 @@ function StudentDashboardLoading() {
           </div>
 
           {/* Map */}
-          <div className="rounded-xl bg-white border border-stone-300 shadow-sm h-64 lg:h-full min-h-64 overflow-hidden">
+          <div className="rounded-xl bg-card border border-border shadow-sm h-64 lg:h-full min-h-64 overflow-hidden">
             <Skeleton className="h-full w-full rounded-xl" />
           </div>
         </div>

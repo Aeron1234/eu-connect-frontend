@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
+import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -20,12 +20,18 @@ import {
 } from "lucide-react";
 import { cx } from "@/lib/utils";
 import { socket } from "./SocketProvider";
+import { toast } from "sonner";
 import { toastAndAction } from "../../lib/helpers";
 import {
+  getInbox,
   markAsRead,
   markAllAsRead,
   deleteNotification,
 } from "@/lib/server-actions/notifications-actions";
+import {
+  NOTIFICATIONS_CHANGED,
+  notifyNotificationsChanged,
+} from "@/lib/notification-events";
 
 const TYPE_META = {
   announcement: { icon: Megaphone, tone: "violet" },
@@ -49,58 +55,117 @@ const TONE_STYLES = {
   violet: "bg-violet-100 text-violet-600",
   emerald: "bg-emerald-100 text-emerald-600",
   red: "bg-red-100 text-red-600",
-  stone: "bg-stone-100 text-stone-500",
+  stone: "bg-muted text-muted-foreground",
 };
 
-function NotificationsButton({
-  inboxData: { data = [], unreadCount: initialCount = 0 } = {},
-}) {
-  const [notifications, setNotifications] = useState(data);
-  const [unreadCount, setUnreadCount] = useState(initialCount);
+const EMPTY_NOTIFICATIONS = [];
+
+function NotificationBell({ unreadCount, isOpen = false }) {
+  return (
+    <>
+      <Bell
+        className={`h-5 w-5 transition-colors ${isOpen ? "fill-primary-emphasis text-primary-emphasis" : ""}`}
+        strokeWidth={isOpen ? 2.5 : 2}
+      />
+      {unreadCount > 0 && (
+        <span className="pointer-events-none absolute right-0 top-0 -translate-x-1/3 translate-y-1/3 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-white shadow-sm">
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+    </>
+  );
+}
+
+function NotificationsButton({ inboxData }) {
+  const serverNotifications = Array.isArray(inboxData?.data)
+    ? inboxData.data
+    : EMPTY_NOTIFICATIONS;
+  const serverUnreadCount = Math.max(0, Number(inboxData?.unreadCount) || 0);
+  const [inbox, setInbox] = useState(() => ({
+    notifications: serverNotifications,
+    unreadCount: serverUnreadCount,
+  }));
+  const { notifications, unreadCount } = inbox;
   const [showNotifications, setShowNotifications] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [markingId, setMarkingId] = useState(null);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
   const dropdownRef = useRef(null);
+  const requestIdRef = useRef(0);
   const [, startDeleteTransition] = useTransition();
 
-  // 1. Sync state cleanly if server-side props re-fetch or change
-  useEffect(() => {
-    setNotifications(data);
-    setUnreadCount(initialCount);
-  }, [data, initialCount]);
-
-  // 2. ISOLATED SOCKET LIFECYCLE: Set up listener exactly once on mount
-  useEffect(() => {
-    const handleNewNotification = (incoming) => {
-      // NOTE: no socket.emit("new_notification", ...) call on the backend
-      // currently sends the notification's own row id — only title/message/
-      // type/link(_uuid). Falling back to link/link_uuid as the key here,
-      // but that means "Mark read"/"Delete" on a live-arrived item (before
-      // the next real fetch) has no guaranteed-correct id to send.
-      const fallbackId =
-        incoming.link_uuid || incoming.link || `live-${Date.now()}`;
-
-      const newNotif = {
-        id: fallbackId,
-        type: incoming.type,
-        title: incoming.title,
-        message: incoming.message,
-        is_read: false,
-        created_at: new Date().toISOString(),
-        ui_key: `${incoming.type}-${fallbackId}-${Date.now()}`,
-      };
-
-      setNotifications((prev) => [newNotif, ...prev]);
-      setUnreadCount((prev) => prev + 1);
-    };
-
-    socket.on("new_notification", handleNewNotification);
-
-    return () => {
-      socket.off("new_notification", handleNewNotification);
-    };
+  const refreshInbox = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    try {
+      const fresh = await getInbox({ scope: "all", page: 1 });
+      if (requestId !== requestIdRef.current || !Array.isArray(fresh?.data)) {
+        return false;
+      }
+      setInbox({
+        notifications: fresh.data,
+        unreadCount: Math.max(0, Number(fresh.unreadCount) || 0),
+      });
+      return true;
+    } catch (error) {
+      // Keep the last known inbox and let the event listener retry briefly.
+      console.error("Could not refresh notification inbox:", error);
+      return false;
+    }
   }, []);
 
-  // 3. SEPARATED UI LIFECYCLE: Handle click outside clicks only when open
+  // Accept valid server snapshots, and retry once if the initial read failed.
+  useEffect(() => {
+    if (serverNotifications === EMPTY_NOTIFICATIONS) {
+      void refreshInbox();
+      return;
+    }
+    requestIdRef.current += 1;
+    setInbox({
+      notifications: serverNotifications,
+      unreadCount: serverUnreadCount,
+    });
+  }, [serverNotifications, serverUnreadCount, refreshInbox]);
+
+  // Socket payloads have no notification row ID. Re-fetch before rendering
+  // actionable entries, and reconcile the count after reconnects and writes.
+  useEffect(() => {
+    let timer;
+    let active = true;
+    let sequence = 0;
+    const runRefresh = async (current, attempt) => {
+      const succeeded = await refreshInbox();
+      if (active && current === sequence && !succeeded && attempt < 2) {
+        timer = setTimeout(
+          () => runRefresh(current, attempt + 1),
+          1000 * (attempt + 1),
+        );
+      }
+    };
+    const scheduleRefresh = () => {
+      const current = ++sequence;
+      clearTimeout(timer);
+      timer = setTimeout(() => runRefresh(current, 0), 150);
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") scheduleRefresh();
+    };
+    socket.on("new_notification", scheduleRefresh);
+    socket.on("connect", scheduleRefresh);
+    window.addEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      requestIdRef.current += 1;
+      socket.off("new_notification", scheduleRefresh);
+      socket.off("connect", scheduleRefresh);
+      window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [refreshInbox]);
+
+  // Close the dropdown when clicking outside it.
   useEffect(() => {
     if (!showNotifications) return;
 
@@ -116,75 +181,149 @@ function NotificationsButton({
     };
   }, [showNotifications]);
 
-  function handleMarkRead(id) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
-    );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
-    markAsRead(id);
+  useEffect(() => {
+    const tabletBreakpoint = window.matchMedia("(min-width: 768px)");
+    const closeOnBreakpointChange = () => setShowNotifications(false);
+    tabletBreakpoint.addEventListener("change", closeOnBreakpointChange);
+    return () => {
+      tabletBreakpoint.removeEventListener("change", closeOnBreakpointChange);
+    };
+  }, []);
+
+  async function handleMarkRead(id) {
+    if (markingId !== null) return;
+    setMarkingId(id);
+    try {
+      const result = await markAsRead(id);
+      if (!result?.success) {
+        toast.error(result?.error || "Could not mark notification as read.");
+        return;
+      }
+      requestIdRef.current += 1;
+      setInbox((current) => {
+        const target = current.notifications.find(
+          (notification) => String(notification.id) === String(id),
+        );
+        if (!target || target.is_read) return current;
+        return {
+          notifications: current.notifications.map((notification) =>
+            String(notification.id) === String(id)
+              ? { ...notification, is_read: true }
+              : notification,
+          ),
+          unreadCount: Math.max(0, current.unreadCount - 1),
+        };
+      });
+      notifyNotificationsChanged();
+    } catch (error) {
+      console.error("Could not mark notification as read:", error);
+      toast.error("Could not mark notification as read.");
+    } finally {
+      setMarkingId(null);
+    }
   }
 
-  function handleMarkAllRead() {
-    if (unreadCount === 0) return;
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnreadCount(0);
-    markAllAsRead();
+  async function handleMarkAllRead() {
+    if (unreadCount === 0 || isMarkingAll) return;
+    setIsMarkingAll(true);
+    try {
+      const result = await markAllAsRead();
+      if (!result?.success) {
+        toast.error(result?.error || "Could not mark notifications as read.");
+        return;
+      }
+      requestIdRef.current += 1;
+      setInbox((current) => ({
+        notifications: current.notifications.map((notification) =>
+          notification.is_read
+            ? notification
+            : { ...notification, is_read: true },
+        ),
+        unreadCount: 0,
+      }));
+      notifyNotificationsChanged();
+    } catch (error) {
+      console.error("Could not mark notifications as read:", error);
+      toast.error("Could not mark notifications as read.");
+    } finally {
+      setIsMarkingAll(false);
+    }
   }
 
   function handleDismiss(id) {
     const formData = new FormData();
     formData.append("notificationId", id);
 
-    const previousNotifications = notifications;
-    const target = notifications.find((n) => n.id === id);
-    const wasUnread = target && !target.is_read;
-
-    // Optimistic: remove immediately, restore the exact prior state on failure.
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    if (wasUnread) setUnreadCount((prev) => Math.max(0, prev - 1));
     setDeletingId(id);
 
     startDeleteTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel: "Deleting notification...",
-        successLabel: "Notification deleted.",
-        errorLabel: "Failed to delete notification.",
-        action: deleteNotification,
-        formData,
-      });
-
-      if (!result?.success) {
-        setNotifications(previousNotifications);
-        if (wasUnread) setUnreadCount((prev) => prev + 1);
+      try {
+        const result = await toastAndAction({
+          loadingLabel: "Deleting notification...",
+          successLabel: "Notification deleted.",
+          errorLabel: "Failed to delete notification.",
+          action: deleteNotification,
+          formData,
+        });
+        if (!result?.success) return;
+        requestIdRef.current += 1;
+        setInbox((current) => {
+          const target = current.notifications.find(
+            (notification) => String(notification.id) === String(id),
+          );
+          if (!target) return current;
+          return {
+            notifications: current.notifications.filter(
+              (notification) => String(notification.id) !== String(id),
+            ),
+            unreadCount: Math.max(
+              0,
+              current.unreadCount - (target.is_read ? 0 : 1),
+            ),
+          };
+        });
+        notifyNotificationsChanged();
+      } catch (error) {
+        console.error("Could not delete notification:", error);
+        toast.error("Could not delete notification.");
+      } finally {
+        setDeletingId(null);
       }
-      setDeletingId(null);
     });
   }
 
   return (
-    <div className="relative inline-block h-full z-50" ref={dropdownRef}>
+    <div className="relative z-50 flex items-center" ref={dropdownRef}>
+      <Link
+        href="/notifications"
+        onClick={() => setShowNotifications(false)}
+        aria-label="View notifications"
+        title="Notifications"
+        className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-foreground-soft transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
+      >
+        <NotificationBell unreadCount={unreadCount} />
+      </Link>
+
       <button
-        className="group relative flex h-fit cursor-pointer hover:text-primary-500 transition-all"
+        type="button"
+        className="group relative hidden size-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground-soft transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:inline-flex"
         onClick={() => setShowNotifications((prev) => !prev)}
+        aria-label="Toggle notifications menu"
+        aria-expanded={showNotifications}
+        aria-controls={showNotifications ? "notifications-menu" : undefined}
         title="Notifications"
       >
-        <Bell
-          className="h-6 w-6 transition-all"
-          fill={showNotifications ? "#800000" : "#57534d"}
-          stroke={showNotifications ? "#800000" : "#57534d"}
-          strokeWidth={showNotifications ? 2.5 : 2}
+        <NotificationBell
+          unreadCount={unreadCount}
+          isOpen={showNotifications}
         />
-
-        {/* Badge */}
-        {unreadCount > 0 && (
-          <span className="absolute bg-primary-500 px-1.5 py-0.5 rounded-full text-white font-bold text-[10px] top-0 right-0 translate-y-[-40%] translate-x-[30%] shadow-sm pointer-events-none">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
       </button>
 
       {showNotifications && (
-        <div className="absolute right-0 z-50 mt-2.5 w-96 rounded-xl border border-border bg-white shadow-2xl">
+        <div
+          id="notifications-menu"
+          className="absolute top-full right-0 z-50 mt-2.5 hidden w-96 rounded-xl border border-border bg-card shadow-2xl md:block"
+        >
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-sm font-semibold text-foreground">
               Notifications
@@ -194,7 +333,8 @@ function NotificationsButton({
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="text-xs font-semibold text-primary-500 hover:underline"
+                  disabled={isMarkingAll}
+                  className="text-xs font-semibold text-primary-emphasis hover:underline"
                 >
                   Mark all read
                 </button>
@@ -224,7 +364,7 @@ function NotificationsButton({
                     key={notif.ui_key || notif.id}
                     className={cx(
                       "relative flex gap-3 border-b border-border/60 px-4 py-3 last:border-0 transition-colors",
-                      notif.is_read ? "bg-white" : "bg-primary-50/40",
+                      notif.is_read ? "bg-card" : "bg-primary/10",
                     )}
                   >
                     <span
@@ -240,7 +380,7 @@ function NotificationsButton({
                       <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                         {notif.title}
                         {!notif.is_read && (
-                          <span className="size-1.5 rounded-full bg-primary-500" />
+                          <span className="size-1.5 rounded-full bg-primary" />
                         )}
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
@@ -256,7 +396,8 @@ function NotificationsButton({
                           <button
                             type="button"
                             onClick={() => handleMarkRead(notif.id)}
-                            className="font-semibold text-primary-500 hover:underline"
+                            disabled={markingId === notif.id}
+                            className="font-semibold text-primary-emphasis hover:underline"
                           >
                             Mark read
                           </button>
@@ -287,7 +428,7 @@ function NotificationsButton({
           <Link
             href="/notifications"
             onClick={() => setShowNotifications(false)}
-            className="block w-full border-t border-border px-4 py-3 text-center text-xs font-semibold text-primary-500 hover:underline"
+            className="block w-full border-t border-border px-4 py-3 text-center text-xs font-semibold text-primary-emphasis hover:underline"
           >
             View all notifications
           </Link>

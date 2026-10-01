@@ -11,30 +11,26 @@ import { toastAndAction } from "../../lib/helpers";
 function MarkAllAsReadButton({
   data,
   unreadCount,
-  notifications,
-  setNotifications,
+  onChanged,
 }) {
   const [isPending, startTransition] = useTransition();
 
   if (data.length === 0 || unreadCount === 0) return null;
 
-  function handleAction(formData) {
-    const updatedNotifications = notifications.map((item) => {
-      return { ...item, is_read: 1 };
-    });
-
-    setNotifications(updatedNotifications);
-
-    startTransition(
-      async () =>
+  function handleAction() {
+    startTransition(async () => {
+      try {
         await toastAndAction({
           loadingLabel: "Marking all as read...",
           successLabel: "All notifications marked as read.",
           errorLabel: "Failed to mark all as read.",
           action: markAllAsRead,
           formData: null,
-        }),
-    );
+        });
+      } finally {
+        onChanged?.();
+      }
+    });
   }
 
   return (
@@ -46,7 +42,7 @@ function MarkAllAsReadButton({
         </>
       }
       title={"Mark all as read"}
-      triggerStyles="h-fit text-sm text-stone-800 font-semibold hover:bg-stone-100 hover:text-primary-500 cursor-pointer px-2 py-1 rounded transition-colors flex items-center gap-1"
+      triggerStyles="h-fit text-sm text-foreground font-semibold hover:bg-muted hover:text-primary-emphasis cursor-pointer px-2 py-1 rounded transition-colors flex items-center gap-1"
       description={"Are you sure?"}
     >
       <form action={handleAction}>
@@ -60,7 +56,7 @@ function MarkAllAsReadButton({
 
             <DialogClose asChild>
               <Button
-                className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+                className={"bg-primary hover:bg-primary-400 w-fit "}
                 type="submit"
                 disabled={isPending}
                 // onClick={() => toast.success("Event has been created")}

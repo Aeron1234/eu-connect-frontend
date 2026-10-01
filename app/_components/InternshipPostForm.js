@@ -21,14 +21,14 @@ function InternshipPostForm({
     <form action={handleAction} className="flex-1 flex flex-col gap-4">
       <div className="flex gap-4 max-sm:flex-col">
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             Company Name
           </span>
           <input
             type="text"
             name="company_name"
             placeholder="e.g. Accenture Philippines"
-            className="px-2 py-1 border border-stone-300 rounded-md"
+            className="px-2 py-1 border border-border rounded-md"
             defaultValue={type === "edit" ? data.company_name : ""}
             disabled={isPending}
             maxLength={150}
@@ -37,14 +37,14 @@ function InternshipPostForm({
         </label>
 
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             Position Title
           </span>
           <input
             type="text"
             name="position"
             placeholder="e.g. Software Developer Intern"
-            className="px-2 py-1 border border-stone-300 rounded-md"
+            className="px-2 py-1 border border-border rounded-md"
             defaultValue={type === "edit" ? data.position : ""}
             disabled={isPending}
             maxLength={150}
@@ -55,14 +55,14 @@ function InternshipPostForm({
 
       <div className="flex gap-4 max-sm:flex-col">
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             Vacancies
           </span>
           <input
             type="number"
             name="vacancies"
             placeholder="1"
-            className="px-2 py-1 border border-stone-300 rounded-md"
+            className="px-2 py-1 border border-border rounded-md"
             defaultValue={type === "edit" ? data.vacancies : ""}
             disabled={isPending}
             min={1}
@@ -71,12 +71,12 @@ function InternshipPostForm({
         </label>
 
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">Location</span>
+          <span className="text-sm font-semibold text-muted-foreground">Location</span>
           <input
             type="text"
             name="location"
             placeholder="e.g. Makati City"
-            className="px-2 py-1 border border-stone-300 rounded-md"
+            className="px-2 py-1 border border-border rounded-md"
             defaultValue={type === "edit" ? data.location : ""}
             disabled={isPending}
             maxLength={150}
@@ -87,12 +87,12 @@ function InternshipPostForm({
 
       <div className="flex gap-4 max-sm:flex-col">
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             Work Type
           </span>
           <select
             name="work_type"
-            className="px-2 py-1.5 border border-stone-300 rounded-md bg-white"
+            className="px-2 py-1.5 border border-border rounded-md bg-card"
             defaultValue={type === "edit" ? data.work_type : "on-site"}
             disabled={isPending}
             required
@@ -106,14 +106,14 @@ function InternshipPostForm({
         </label>
 
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             Duration (hours)
           </span>
           <input
             type="number"
             name="duration_hours"
             placeholder="e.g. 486"
-            className="px-2 py-1 border border-stone-300 rounded-md"
+            className="px-2 py-1 border border-border rounded-md"
             defaultValue={type === "edit" ? data.duration_hours : ""}
             disabled={isPending}
             min={1}
@@ -122,13 +122,13 @@ function InternshipPostForm({
       </div>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-semibold text-stone-500">
+        <span className="text-sm font-semibold text-muted-foreground">
           Description
         </span>
         <textarea
           name="description"
           placeholder="Describe the internship role and responsibilities..."
-          className="px-2 py-1 border border-stone-300 rounded-md min-h-24 overflow-y-auto resize-none"
+          className="px-2 py-1 border border-border rounded-md min-h-24 overflow-y-auto resize-none"
           defaultValue={type === "edit" ? data.description : ""}
           disabled={isPending}
           maxLength={2000}
@@ -137,7 +137,7 @@ function InternshipPostForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-semibold text-stone-500">
+        <span className="text-sm font-semibold text-muted-foreground">
           Requirements
         </span>
         <textarea
@@ -145,7 +145,7 @@ function InternshipPostForm({
           placeholder={
             "3rd or 4th year student\nBasic programming skills\nWilling to learn"
           }
-          className="px-2 py-1 border border-stone-300 rounded-md min-h-24 overflow-y-auto resize-none"
+          className="px-2 py-1 border border-border rounded-md min-h-24 overflow-y-auto resize-none"
           defaultValue={type === "edit" ? data.requirements : ""}
           disabled={isPending}
           maxLength={2000}
@@ -153,7 +153,7 @@ function InternshipPostForm({
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-semibold text-stone-500">
+        <span className="text-sm font-semibold text-muted-foreground">
           Eligible Courses
         </span>
         <div className="flex flex-wrap gap-1.5">
@@ -170,7 +170,7 @@ function InternshipPostForm({
                   disabled={isPending}
                   className="peer sr-only"
                 />
-                <span className="block px-3 py-1.5 rounded-full text-xs font-medium border border-stone-300 text-stone-500 bg-white transition-colors peer-checked:bg-primary-500 peer-checked:text-white peer-checked:border-primary-500 peer-disabled:opacity-50">
+                <span className="block px-3 py-1.5 rounded-full text-xs font-medium border border-border text-muted-foreground bg-card transition-colors peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-disabled:opacity-50">
                   {course.short_name || course.course_name}
                 </span>
               </label>
@@ -179,21 +179,21 @@ function InternshipPostForm({
         </div>
       </div>
 
-      <div className="border-t border-stone-200 pt-4 flex flex-col gap-4">
-        <p className="text-sm font-semibold text-stone-600">
+      <div className="border-t border-border pt-4 flex flex-col gap-4">
+        <p className="text-sm font-semibold text-foreground-soft">
           Contact Information
         </p>
 
         <div className="flex gap-4 max-sm:flex-col">
           <label className="flex flex-col gap-1 flex-1">
-            <span className="text-sm font-semibold text-stone-500">
+            <span className="text-sm font-semibold text-muted-foreground">
               Contact Person
             </span>
             <input
               type="text"
               name="contact_name"
               placeholder="e.g. HR Department"
-              className="px-2 py-1 border border-stone-300 rounded-md"
+              className="px-2 py-1 border border-border rounded-md"
               defaultValue={type === "edit" ? data.contact_name : ""}
               disabled={isPending}
               maxLength={150}
@@ -201,12 +201,12 @@ function InternshipPostForm({
           </label>
 
           <label className="flex flex-col gap-1 flex-1">
-            <span className="text-sm font-semibold text-stone-500">Email</span>
+            <span className="text-sm font-semibold text-muted-foreground">Email</span>
             <input
               type="email"
               name="contact_email"
               placeholder="e.g. hr@company.ph"
-              className="px-2 py-1 border border-stone-300 rounded-md"
+              className="px-2 py-1 border border-border rounded-md"
               defaultValue={type === "edit" ? data.contact_email : ""}
               disabled={isPending}
               maxLength={150}
@@ -217,12 +217,12 @@ function InternshipPostForm({
 
         <div className="flex gap-4 max-sm:flex-col">
           <label className="flex flex-col gap-1 flex-1">
-            <span className="text-sm font-semibold text-stone-500">Phone</span>
+            <span className="text-sm font-semibold text-muted-foreground">Phone</span>
             <input
               type="text"
               name="contact_phone"
               placeholder="e.g. (02) 8123-4567"
-              className="px-2 py-1 border border-stone-300 rounded-md"
+              className="px-2 py-1 border border-border rounded-md"
               defaultValue={type === "edit" ? data.contact_phone : ""}
               disabled={isPending}
               maxLength={50}
@@ -230,14 +230,14 @@ function InternshipPostForm({
           </label>
 
           <label className="flex flex-col gap-1 flex-1">
-            <span className="text-sm font-semibold text-stone-500">
+            <span className="text-sm font-semibold text-muted-foreground">
               Website
             </span>
             <input
               type="text"
               name="contact_website"
               placeholder="e.g. company.ph"
-              className="px-2 py-1 border border-stone-300 rounded-md"
+              className="px-2 py-1 border border-border rounded-md"
               defaultValue={type === "edit" ? data.contact_website : ""}
               disabled={isPending}
               maxLength={150}
@@ -256,7 +256,7 @@ function InternshipPostForm({
 
           <DialogClose asChild>
             <Button
-              className={`bg-primary-500 hover:bg-primary-400 w-fit ${isPending ? "pointer-events-none opacity-50" : ""} `}
+              className={`bg-primary hover:bg-primary-400 w-fit ${isPending ? "pointer-events-none opacity-50" : ""} `}
               type="submit"
               disabled={isPending}
             >

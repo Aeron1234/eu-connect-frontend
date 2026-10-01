@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import InternshipRequirementsType from "./InternshipRequirementsType";
 import SearchedStudentFiles from "./SearchedStudentFiles";
+import ProgressBar from "./ProgressBar";
 import { getFileTypeLabel, typeTone } from "@/lib/utils";
 
 function StudentDocuments({
@@ -47,7 +48,7 @@ function StudentDocuments({
       <div className="rounded-xl border border-border/60 bg-card p-5">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <div>
-            <h3 className="text-base font-semibold text-primary-500">
+            <h3 className="text-base font-semibold text-primary-emphasis">
               Requirement Completion
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -55,7 +56,7 @@ function StudentDocuments({
               {docs?.company_name ? (
                 <>
                   ·{" "}
-                  <span className="font-semibold text-primary-500">
+                  <span className="font-semibold text-primary-emphasis">
                     {docs.company_name}
                   </span>
                 </>
@@ -67,7 +68,7 @@ function StudentDocuments({
             {hide && (
               <button
                 onClick={() => setHide((h) => !h)}
-                className="text-xs text-primary hover:underline"
+                className="text-xs text-primary-emphasis hover:underline"
               >
                 View Details{" "}
                 <ChevronDown className="w-3.5 h-3.5 inline-block ml-1" />
@@ -79,12 +80,12 @@ function StudentDocuments({
             </p>
           </div>
         </div>
-        <div className="mt-4 h-1.5 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full rounded-full bg-primary-500 transition-all"
-            style={{ width: `${docs.completionPercent}%` }}
-          />
-        </div>
+        <ProgressBar
+          value={docs.completionPercent}
+          label="Document requirements completed"
+          size="sm"
+          className="mt-4 bg-muted"
+        />
 
         <InternshipRequirementsType
           requirementTypes={requirementTypes || []}
@@ -103,7 +104,7 @@ function StudentDocuments({
                 onClick={() => setFilter(key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                   key === filter
-                    ? "bg-primary-500 text-primary-foreground border-primary-500"
+                    ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card text-muted-foreground border-border/60 hover:bg-muted"
                 }`}
                 key={key}

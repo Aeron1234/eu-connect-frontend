@@ -9,14 +9,14 @@ function UsersLoading() {
       <PageTitleSkeleton hasIcon={false} />
 
       <div className="w-full flex items-center gap-4">
-        <div className="flex-1 flex items-center gap-2 border border-stone-200 bg-white rounded-lg px-2 py-2.5">
-          <Search className="w-4 h-4 text-stone-300" />
+        <div className="flex-1 flex items-center gap-2 border border-border bg-card rounded-lg px-2 py-2.5">
+          <Search className="w-4 h-4 text-foreground-faint" />
           <Skeleton className="h-4 w-40" />
         </div>
       </div>
 
       <div className="w-full">
-        <div className="flex items-center gap-2 justify-between text-stone-500 mb-2">
+        <div className="flex items-center gap-2 justify-between text-muted-foreground mb-2">
           <span className="flex items-center gap-1">
             <History className="h-4 w-4 text-primary-300" />
             <Skeleton className="h-3.5 w-28" />

@@ -7,7 +7,7 @@ import { useFormStatus } from "react-dom";
 function SubmitButton({ text }) {
   return (
     <Button
-      className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+      className={"bg-primary hover:bg-primary-400 w-fit "}
       type="submit"
       disabled={isPending}
     >

@@ -40,15 +40,15 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
   const hrefNext = `/employer?j_page=${currentJobPage + 1}`;
 
   return (
-    <section className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 mb-4">
-        <Briefcase className="w-4 h-4 text-primary-500" />
+    <section className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-4">
+        <Briefcase className="w-4 h-4 text-primary-emphasis" />
         Jobs You Posted
       </h3>
       <div className="overflow-x-auto">
         <table className="w-2xl md:w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-300 text-[11px] uppercase tracking-wide text-muted-foreground">
+            <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="text-left py-2 font-medium">Position</th>
               <th className="text-left py-2 font-medium">Location</th>
               <th className="text-left py-2 font-medium">Type</th>
@@ -60,14 +60,14 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
             {jobs.map((job) => (
               <tr
                 key={job.id}
-                className="border-b border-stone-300 last:border-b-0"
+                className="border-b border-border last:border-b-0"
               >
-                <td className="py-3 text-stone-800 font-medium">
+                <td className="py-3 text-foreground font-medium">
                   {job.position}
                 </td>
                 <td className="py-3">
-                  <span className="flex items-center gap-1 text-stone-600">
-                    <MapPin className="w-3.5 h-3.5 text-primary-500" />
+                  <span className="flex items-center gap-1 text-foreground-soft">
+                    <MapPin className="w-3.5 h-3.5 text-primary-emphasis" />
                     {job.location}
                   </span>
                 </td>
@@ -75,7 +75,7 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
                   <span
                     className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       workTypeBadgeStyles[job.typeKey] ||
-                      "text-stone-600 bg-stone-100 border border-stone-200"
+                      "text-foreground-soft bg-muted border border-border"
                     }`}
                   >
                     {job.type}
@@ -83,7 +83,7 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
                 </td>
                 <td
                   className={`py-3 text-right font-medium ${
-                    job.vacancies === 0 ? "text-blue-600" : "text-stone-800"
+                    job.vacancies === 0 ? "text-blue-600" : "text-foreground"
                   }`}
                 >
                   {job.vacancies}
@@ -97,7 +97,7 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
               <tr>
                 <td
                   colSpan={5}
-                  className="py-6 text-center text-sm text-stone-600"
+                  className="py-6 text-center text-sm text-foreground-soft"
                 >
                   No jobs posted yet.
                 </td>
@@ -107,7 +107,7 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
         </table>
       </div>
 
-      <div className="mt-6 w-full flex justify-end text-sm text-stone-600">
+      <div className="mt-6 w-full flex justify-end text-sm text-foreground-soft">
         <Pagination
           hrefPrev={hrefPrev}
           hrefNext={hrefNext}

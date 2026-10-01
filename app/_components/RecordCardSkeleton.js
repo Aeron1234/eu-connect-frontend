@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function RecordCardSkeleton() {
   return (
-    <article className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm">
+    <article className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-3">

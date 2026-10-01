@@ -3,10 +3,10 @@ import { Calendar, Clock, Mail, Users } from "lucide-react";
 
 function InternsSupervisedCardSkeleton({ rows = 4 }) {
   return (
-    <div className="h-full rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="h-full rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-          <Users className="w-4 h-4 text-primary-500" />
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Users className="w-4 h-4 text-primary-emphasis" />
           Interns You Supervised
         </h3>
         <div className="flex items-center gap-1.5">
@@ -20,7 +20,7 @@ function InternsSupervisedCardSkeleton({ rows = 4 }) {
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center justify-between gap-4 rounded-lg border border-stone-200 p-4"
+            className="flex items-center justify-between gap-4 rounded-lg border border-border p-4"
           >
             <div className="flex items-start gap-3 min-w-0">
               <Skeleton className="w-10 h-10 flex-shrink-0 rounded-full" />
@@ -32,15 +32,15 @@ function InternsSupervisedCardSkeleton({ rows = 4 }) {
                 <Skeleton className="h-3 w-40" />
                 <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-1.5">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-stone-300" />
+                    <Calendar className="w-3.5 h-3.5 text-foreground-faint" />
                     <Skeleton className="h-2.5 w-14" />
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-stone-300" />
+                    <Clock className="w-3.5 h-3.5 text-foreground-faint" />
                     <Skeleton className="h-2.5 w-16" />
                   </span>
                   <span className="flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5 text-stone-300" />
+                    <Mail className="w-3.5 h-3.5 text-foreground-faint" />
                     <Skeleton className="h-2.5 w-24" />
                   </span>
                 </div>

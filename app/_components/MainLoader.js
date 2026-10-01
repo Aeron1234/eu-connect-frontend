@@ -3,7 +3,7 @@ import logo from "@/public/logo.png";
 
 function MainLoader() {
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center bg-white px-6">
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-card px-6">
       {/* Dark maroon-tinted glass panel, floating on the white base layer */}
       <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-white/10 bg-[#2b0a10]/75 px-8 py-10 shadow-2xl backdrop-blur-xl sm:px-12 sm:py-14">
         {/* Subtle top sheen — the one glass "tell", kept restrained */}

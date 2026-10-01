@@ -10,6 +10,7 @@ import SearchBar from "./SearchBar";
 import { useUser } from "@/contexts/UserContext";
 import PageTitle from "./PageTitle";
 import AnnouncementCardSkeleton from "./AnnouncementCardSkeleton";
+import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 function AnnouncementBoard({
   categories = [],
@@ -34,13 +35,16 @@ function AnnouncementBoard({
   const isFirstRun = useRef(true);
 
   async function refreshList() {
+    const thisRequestId = ++requestIdRef.current;
+    setIsLoadingMore(false);
     const newData = await getAllAnnouncements({ category, search, page: 1 });
-    if (newData?.error) {
-      console.error(newData.error);
+    if (thisRequestId !== requestIdRef.current) return;
+    if (!hasValidPage(newData, "regular", null) || !Array.isArray(newData.pinned)) {
+      console.error(newData?.error || "Invalid announcements response");
       return;
     }
-    setPinned(newData.pinned || []);
-    setRegular(newData.regular || []);
+    setPinned(newData.pinned);
+    setRegular(newData.regular);
     setPage(1);
     setTotalPages(newData.totalPages || 1);
   }
@@ -52,9 +56,10 @@ function AnnouncementBoard({
     }
 
     const thisRequestId = ++requestIdRef.current;
+    setIsLoadingMore(false);
+    setIsSearching(true);
 
     const timeout = setTimeout(async () => {
-      setIsSearching(true);
       try {
         const newData = await getAllAnnouncements({
           category,
@@ -64,17 +69,13 @@ function AnnouncementBoard({
 
         if (thisRequestId !== requestIdRef.current) return;
 
-        if (newData?.error) {
-          console.error("Error loading announcements:", newData.error);
-          setPinned([]);
-          setRegular([]);
-          setTotalPages(1);
-          setPage(1);
+        if (!hasValidPage(newData, "regular", null) || !Array.isArray(newData.pinned)) {
+          console.error("Error loading announcements:", newData?.error || "Invalid response from the server");
           return;
         }
 
-        setPinned(newData.pinned || []);
-        setRegular(newData.regular || []);
+        setPinned(newData.pinned);
+        setRegular(newData.regular);
         setPage(1);
         setTotalPages(newData.totalPages || 1);
       } catch (error) {
@@ -104,14 +105,14 @@ function AnnouncementBoard({
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more announcements:", newData.error);
+      if (!hasValidPage(newData, "regular", null, nextPage)) {
+        console.error("Error loading more announcements:", newData?.error || "Invalid response from the server");
         return;
       }
 
       setRegular((prev) => {
         const existingIds = new Set(prev.map((a) => a.id));
-        const filteredNew = (newData.regular || []).filter(
+        const filteredNew = newData.regular.filter(
           (a) => !existingIds.has(a.id),
         );
         return [...prev, ...filteredNew];
@@ -175,7 +176,7 @@ function AnnouncementBoard({
         <div className="space-y-6">
           {isPinnedExist && (
             <div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary-500">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary-emphasis">
                 Pinned
               </p>
               <ul className="flex flex-col gap-3">
@@ -195,7 +196,7 @@ function AnnouncementBoard({
           {filteredRegular.length > 0 ? (
             <div>
               {isPinnedExist && (
-                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-stone-400">
+                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-foreground-subtle">
                   Earlier
                 </p>
               )}
@@ -213,9 +214,9 @@ function AnnouncementBoard({
             </div>
           ) : (
             page === 1 && (
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-white border-stone-200 py-16 text-center">
-                <Megaphone className="size-8 text-stone-300" />
-                <p className="text-sm text-stone-500">
+              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
+                <Megaphone className="size-8 text-foreground-faint" />
+                <p className="text-sm text-muted-foreground">
                   No announcements found.
                 </p>
               </div>
@@ -228,7 +229,7 @@ function AnnouncementBoard({
         <button
           onClick={handleSeeMore}
           disabled={isLoadingMore}
-          className="w-full text-center text-lg font-semibold text-stone-600 transition hover:text-primary-500 disabled:opacity-50"
+          className="w-full text-center text-lg font-semibold text-foreground-soft transition hover:text-primary-emphasis disabled:opacity-50"
         >
           {isLoadingMore ? "Loading..." : "See more"}
         </button>

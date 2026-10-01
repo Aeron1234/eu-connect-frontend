@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, BellRing, Inbox } from "lucide-react";
 import MarkAllAsReadButton from "./MarkAllAsReadButton";
 import NotificationItem from "./NotificationItem";
 import { getInbox } from "@/lib/server-actions/notifications-actions";
 import { useUser } from "@/contexts/UserContext";
+import { socket } from "./SocketProvider";
+import {
+  NOTIFICATIONS_CHANGED,
+  notifyNotificationsChanged,
+} from "@/lib/notification-events";
+import { canKeepLoadedPages, hasValidPage, pageAfterRefresh, reconcilePageOne } from "@/lib/see-more-pagination.mjs";
 
 const scopeTabs = [
   { label: "All", value: "all" },
@@ -33,10 +39,43 @@ function NotificationList({ inboxData: initialData }) {
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
-  const isFirstReconcile = useRef(true);
-  const prevPage1KeysRef = useRef(
-    new Set((initialData?.data || []).map(keyOf)),
-  );
+  const lastInitialDataRef = useRef(initialData);
+  const firstPageIdsRef = useRef((initialData?.data || []).map(keyOf));
+  const firstPageTotalRef = useRef(initialData?.totalRecords || 0);
+  const loadedScopeRef = useRef("all");
+
+  const refreshPageOne = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    setIsPending(true);
+    try {
+      const fresh = await getInbox({ scope, page: 1 });
+      if (requestId !== requestIdRef.current || !hasValidPage(fresh, "data", null)) {
+        return false;
+      }
+
+      const keepLoadedPages = loadedScopeRef.current === scope && canKeepLoadedPages(
+        firstPageIdsRef.current,
+        firstPageTotalRef.current,
+        fresh.data,
+        fresh.totalRecords,
+        keyOf,
+      );
+      firstPageIdsRef.current = fresh.data.map(keyOf);
+      firstPageTotalRef.current = fresh.totalRecords;
+      loadedScopeRef.current = scope;
+      setNotifications((current) => reconcilePageOne(current, fresh.data, keepLoadedPages, keyOf));
+      setPage((current) => pageAfterRefresh(current, keepLoadedPages));
+      setTotalPages(fresh.totalPages || 1);
+      setTotalRecords(fresh.totalRecords || 0);
+      setUnreadCount(fresh.unreadCount || 0);
+      return true;
+    } catch (error) {
+      console.error("Could not refresh notifications:", error);
+      return false;
+    } finally {
+      if (requestId === requestIdRef.current) setIsPending(false);
+    }
+  }, [scope]);
 
   useEffect(() => {
     if (!isEmployer && scope !== "all") {
@@ -45,43 +84,27 @@ function NotificationList({ inboxData: initialData }) {
   }, [isEmployer, scope]);
 
   useEffect(() => {
-    if (scope !== "all") return;
+    if (lastInitialDataRef.current === initialData) return;
+    lastInitialDataRef.current = initialData;
+    if (scope !== "all" || !hasValidPage(initialData, "data", null)) return;
 
-    if (isFirstReconcile.current) {
-      isFirstReconcile.current = false;
-      return;
-    }
-
-    const freshMap = new Map(
-      (initialData?.data || []).map((n) => [keyOf(n), n]),
+    const keepLoadedPages = loadedScopeRef.current === "all" && canKeepLoadedPages(
+      firstPageIdsRef.current,
+      firstPageTotalRef.current,
+      initialData.data,
+      initialData.totalRecords,
+      keyOf,
     );
-    const prevPage1Keys = prevPage1KeysRef.current;
-
-    setNotifications((prev) => {
-      if (prev.length === 0) return initialData?.data || [];
-
-      const updatedList = prev
-        .map((n) => freshMap.get(keyOf(n)) || n)
-        .filter((n) => {
-          const wasOnPage1Before = prevPage1Keys.has(keyOf(n));
-          const isStillFresh = freshMap.has(keyOf(n));
-          return !wasOnPage1Before || isStillFresh;
-        });
-
-      const existingKeys = new Set(updatedList.map(keyOf));
-      const brandNew = (initialData?.data || []).filter(
-        (n) => !existingKeys.has(keyOf(n)),
-      );
-
-      return [...brandNew, ...updatedList];
-    });
-
-    setPage(initialData?.currentPage || 1);
+    firstPageIdsRef.current = initialData.data.map(keyOf);
+    firstPageTotalRef.current = initialData.totalRecords;
+    loadedScopeRef.current = "all";
+    requestIdRef.current += 1;
+    setIsPending(false);
+    setNotifications((current) => reconcilePageOne(current, initialData.data, keepLoadedPages, keyOf));
+    setPage((current) => pageAfterRefresh(current, keepLoadedPages));
     setTotalPages(initialData?.totalPages || 1);
     setTotalRecords(initialData?.totalRecords || 0);
     setUnreadCount(initialData?.unreadCount || 0);
-
-    prevPage1KeysRef.current = new Set((initialData?.data || []).map(keyOf));
   }, [initialData, scope]);
 
   useEffect(() => {
@@ -90,41 +113,50 @@ function NotificationList({ inboxData: initialData }) {
       return;
     }
 
-    const thisRequestId = ++requestIdRef.current;
-
-    const timeout = setTimeout(async () => {
-      setIsPending(true);
-      try {
-        const newData = await getInbox({ scope, page: 1 });
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (newData?.error) {
-          console.error("Error loading notifications:", newData.error);
-          setNotifications([]);
-          setTotalPages(1);
-          setTotalRecords(0);
-          setPage(1);
-          return;
-        }
-
-        setNotifications(newData?.data || []);
-        setPage(1);
-        setTotalPages(newData?.totalPages || 1);
-        setTotalRecords(newData?.totalRecords || 0);
-        setUnreadCount(newData?.unreadCount || 0);
-        prevPage1KeysRef.current = new Set((newData?.data || []).map(keyOf));
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading notifications:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 500);
+    // Invalidate a read for the previous scope before it can update this tab.
+    requestIdRef.current += 1;
+    const timeout = setTimeout(refreshPageOne, 500);
 
     return () => clearTimeout(timeout);
-  }, [scope]);
+  }, [scope, refreshPageOne]);
+
+  useEffect(() => {
+    let timer;
+    let active = true;
+    let sequence = 0;
+    const runRefresh = async (current, attempt) => {
+      const succeeded = await refreshPageOne();
+      if (active && current === sequence && !succeeded && attempt < 2) {
+        timer = setTimeout(
+          () => runRefresh(current, attempt + 1),
+          1000 * (attempt + 1),
+        );
+      }
+    };
+    const scheduleRefresh = () => {
+      const current = ++sequence;
+      clearTimeout(timer);
+      timer = setTimeout(() => runRefresh(current, 0), 150);
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") scheduleRefresh();
+    };
+
+    socket.on("new_notification", scheduleRefresh);
+    socket.on("connect", scheduleRefresh);
+    window.addEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      requestIdRef.current += 1;
+      socket.off("new_notification", scheduleRefresh);
+      socket.off("connect", scheduleRefresh);
+      window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [refreshPageOne]);
 
   async function handleSeeMore() {
     if (isPending || page >= totalPages) return;
@@ -137,12 +169,12 @@ function NotificationList({ inboxData: initialData }) {
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more notifications:", newData.error);
+      if (!hasValidPage(newData, "data", null, nextPage)) {
+        console.error("Error loading more notifications:", newData?.error || "Invalid response from the server");
         return;
       }
 
-      const incoming = newData?.data || [];
+      const incoming = newData.data;
 
       setNotifications((prev) => {
         const existingKeys = new Set(prev.map(keyOf));
@@ -166,7 +198,7 @@ function NotificationList({ inboxData: initialData }) {
       {/* Filter bar */}
       <div className="flex w-full flex-wrap items-center gap-3">
         {isEmployer && (
-          <div className="flex rounded-lg bg-stone-200 p-1 w-fit">
+          <div className="flex rounded-lg bg-secondary p-1 w-fit">
             {scopeTabs.map((tab) => (
               <button
                 key={tab.value}
@@ -174,8 +206,8 @@ function NotificationList({ inboxData: initialData }) {
                 onClick={() => setScope(tab.value)}
                 className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                   scope === tab.value
-                    ? "bg-primary-500 text-primary-foreground"
-                    : "bg-stone-200 text-muted-foreground hover:text-primary-500"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:text-primary-emphasis"
                 }`}
               >
                 {tab.label}
@@ -188,8 +220,7 @@ function NotificationList({ inboxData: initialData }) {
           <MarkAllAsReadButton
             data={notifications}
             unreadCount={unreadCount}
-            notifications={notifications}
-            setNotifications={setNotifications}
+            onChanged={notifyNotificationsChanged}
           />
         </div>
       </div>
@@ -213,14 +244,14 @@ function NotificationList({ inboxData: initialData }) {
 
       {/* List */}
       {notifications.length === 0 && !isPending ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-          <Inbox className="size-8 text-stone-300" />
-          <p className="text-sm font-medium text-stone-500">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
+          <Inbox className="size-8 text-foreground-faint" />
+          <p className="text-sm font-medium text-muted-foreground">
             {scope === "requests"
               ? "No supervisor requests right now"
               : "You're all caught up"}
           </p>
-          <p className="max-w-sm text-xs text-stone-400">
+          <p className="max-w-sm text-xs text-foreground-subtle">
             {scope === "requests"
               ? "New requests from students will show up here."
               : "New approvals, announcements, and updates will show up here."}
@@ -229,11 +260,10 @@ function NotificationList({ inboxData: initialData }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {notifications.map((item) => (
-            <li key={item.ui_key} className="flex-1">
+            <li key={item.ui_key || item.id} className="flex-1">
               <NotificationItem
                 item={item}
-                notifications={notifications}
-                setNotifications={setNotifications}
+                onChanged={notifyNotificationsChanged}
               />
             </li>
           ))}
@@ -245,7 +275,7 @@ function NotificationList({ inboxData: initialData }) {
           <button
             onClick={handleSeeMore}
             disabled={isPending}
-            className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition disabled:opacity-50"
+            className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >
             {isPending ? "Loading..." : "See more"}
           </button>
@@ -260,8 +290,8 @@ function StatCard({ icon, value, label, highlight }) {
     <div
       className={`flex items-center gap-3 sm:gap-4 rounded-xl border px-4 sm:px-5 py-4 sm:py-5 shadow-sm ${
         highlight
-          ? "border-primary-500 bg-primary-500 text-primary-foreground"
-          : "border-stone-300 bg-white text-stone-800"
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-card text-foreground"
       }`}
     >
       {icon}

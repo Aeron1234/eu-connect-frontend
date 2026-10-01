@@ -64,7 +64,7 @@ const features = [
 const roles = [
   {
     role: "Student",
-    tone: "bg-primary-500",
+    tone: "bg-primary",
     steps: [
       "Apply for OJT endorsement",
       "Submit required documents",
@@ -86,7 +86,7 @@ const roles = [
   },
   {
     role: "Company",
-    tone: "bg-primary-500",
+    tone: "bg-primary",
     steps: [
       "Receive intern profiles",
       "Confirm intern placements",
@@ -120,7 +120,7 @@ async function HomePage() {
               height={36}
               className="h-9 w-9 object-contain"
             />
-            <span className="font-display text-xl font-bold text-primary-500">
+            <span className="font-display text-xl font-bold text-primary-emphasis">
               EU-Connect
             </span>
           </a>
@@ -129,7 +129,7 @@ async function HomePage() {
               <a
                 key={l.href}
                 href={l.href}
-                className="text-sm text-muted-foreground transition-colors hover:text-primary-500"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary-emphasis"
               >
                 {l.label}
               </a>
@@ -137,7 +137,7 @@ async function HomePage() {
           </nav>
           <Link
             href={"/login"}
-            className="rounded-md bg-primary-500 px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-700"
+            className="rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-700"
           >
             Login
           </Link>
@@ -146,7 +146,7 @@ async function HomePage() {
 
       <main id="top">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-primary-500 pb-40 pt-24 text-primary-foreground">
+        <section className="relative overflow-hidden bg-primary pb-40 pt-24 text-primary-foreground">
           <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-6 lg:grid-cols-2">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-4 py-1.5 text-sm">
@@ -163,7 +163,7 @@ async function HomePage() {
               <div className="mt-10 flex items-center gap-6">
                 <Link
                   href={"/login"}
-                  className="inline-flex items-center gap-2 rounded-md bg-background px-6 py-3.5 text-sm font-semibold text-primary-500 transition-transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 rounded-md bg-background px-6 py-3.5 text-sm font-semibold text-primary-emphasis transition-transform hover:-translate-y-0.5"
                 >
                   Get Started <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -178,7 +178,7 @@ async function HomePage() {
             </div>
 
             <div className="relative mx-auto hidden h-96 w-full max-w-md lg:block">
-              <div className="absolute left-1/2 top-1/2 flex h-55 w-55 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-xl">
+              <div className="absolute left-1/2 top-1/2 flex h-55 w-55 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl">
                 <Image
                   src={logo}
                   alt="Manuel S. Enverga University Foundation seal"
@@ -189,7 +189,7 @@ async function HomePage() {
               </div>
               <div className="absolute left-0 top-8 rounded-xl bg-background px-5 py-3 shadow-lg">
                 <p className="text-xs text-muted-foreground">Active Interns</p>
-                <p className="font-display text-2xl font-bold text-primary-500">
+                <p className="font-display text-2xl font-bold text-primary-emphasis">
                   124
                 </p>
               </div>
@@ -201,7 +201,7 @@ async function HomePage() {
               </div>
               <div className="absolute -right-2 bottom-16 rounded-xl bg-background px-5 py-3 shadow-lg">
                 <p className="text-xs text-muted-foreground">Hours Logged</p>
-                <p className="font-display text-2xl font-bold text-primary-500">
+                <p className="font-display text-2xl font-bold text-primary-emphasis">
                   12,400+
                 </p>
               </div>
@@ -241,7 +241,7 @@ function Stats({ stats }) {
       <div className="mx-auto grid max-w-4xl grid-cols-2 gap-10 px-6 text-center md:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label}>
-            <p className="font-display text-4xl font-bold text-primary-500">
+            <p className="font-display text-4xl font-bold text-primary-emphasis">
               {s.value}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
@@ -254,10 +254,10 @@ function Stats({ stats }) {
 
 function About({ logo }) {
   return (
-    <section id="about" className="bg-[#FAF9F7] py-14">
+    <section id="about" className="bg-canvas py-14">
       <div className="mx-auto grid max-w-6xl items-center gap-16 px-6 lg:grid-cols-2">
-        <div className="relative overflow-hidden rounded-2xl bg-primary-500 p-10 text-primary-foreground">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background">
+        <div className="relative overflow-hidden rounded-2xl bg-primary p-10 text-primary-foreground">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white">
             <Image
               src={logo}
               alt="MSEUF-CI seal"
@@ -290,13 +290,13 @@ function About({ logo }) {
         </div>
 
         <div className="">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500 ">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-emphasis ">
             About the System
           </p>
           <h2 className="mt-4 font-display text-4xl font-bold leading-tight">
             A smarter way to manage student internships
           </h2>
-          <div className="mt-6 h-1 w-14 rounded bg-primary-500" />
+          <div className="mt-6 h-1 w-14 rounded bg-primary" />
           <p className="mt-8 text-lg leading-relaxed text-muted-foreground">
             EU-Connect is a streamlined digital platform designed to efficiently
             manage internship processes in MSEUF-CI between the students,
@@ -316,7 +316,7 @@ function About({ logo }) {
             ].map((item) => (
               <li key={item} className="flex items-center gap-3 text-sm">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent">
-                  <Check className="h-3 w-3 text-primary-500" />
+                  <Check className="h-3 w-3 text-primary-emphasis" />
                 </span>
                 {item}
               </li>
@@ -333,7 +333,7 @@ function Features({ features }) {
     <section id="features" className="bg-background py-14">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-emphasis">
             Features
           </p>
           <h2 className="mt-4 font-display text-4xl font-bold">
@@ -350,7 +350,7 @@ function Features({ features }) {
               className="rounded-xl border border-border p-7 transition-shadow hover:shadow-md"
             >
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-accent">
-                <f.icon className="h-5 w-5 text-primary-500" />
+                <f.icon className="h-5 w-5 text-primary-emphasis" />
               </span>
               <h3 className="mt-6 font-display text-lg font-bold">{f.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -366,10 +366,10 @@ function Features({ features }) {
 
 function HowItWorks({ roles }) {
   return (
-    <section id="how-it-works" className="bg-[#FAF9F7] py-14">
+    <section id="how-it-works" className="bg-canvas py-14">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-emphasis">
             Workflow
           </p>
           <h2 className="mt-4 font-display text-4xl font-bold">
@@ -397,7 +397,7 @@ function HowItWorks({ roles }) {
               <ol className="space-y-4 px-7 py-7">
                 {r.steps.map((step, i) => (
                   <li key={step} className="flex items-center gap-3 text-sm">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-500">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary-emphasis">
                       {i + 1}
                     </span>
                     {step}
@@ -416,7 +416,7 @@ function CTA() {
   return (
     <section
       id="cta"
-      className="bg-primary-500 py-14 text-center text-primary-foreground"
+      className="bg-primary py-14 text-center text-primary-foreground"
     >
       <div className="mx-auto max-w-2xl px-6">
         <h2 className="font-display text-4xl font-bold">
@@ -428,7 +428,7 @@ function CTA() {
         </p>
         <Link
           href={"/login"}
-          className="mt-10 inline-flex rounded-md bg-background px-8 py-4 text-sm font-semibold text-primary-500 transition-transform hover:-translate-y-0.5"
+          className="mt-10 inline-flex rounded-md bg-background px-8 py-4 text-sm font-semibold text-primary-emphasis transition-transform hover:-translate-y-0.5"
         >
           Access EU-Connect
         </Link>

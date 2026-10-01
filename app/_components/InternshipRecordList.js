@@ -48,16 +48,16 @@ function Record({ record }) {
   } = record;
 
   return (
-    <div className="flex-1 flex gap-4 border border-stone-300 p-4 rounded-lg">
-      <div className="flex-1 flex flex-col gap-1 text-stone-500">
+    <div className="flex-1 flex gap-4 border border-border p-4 rounded-lg">
+      <div className="flex-1 flex flex-col gap-1 text-muted-foreground">
         <div className="mb-1 flex flex-col">
           <div className="flex gap-2 items-center">
-            <h3 className="font-semibold text-stone-800">{company_name}</h3>
+            <h3 className="font-semibold text-foreground">{company_name}</h3>
             <Tag status={status} />
           </div>
           <span className="text-xs">{internship_position}</span>
         </div>
-        <div className="flex items-center gap-1 text-stone-500 text-xs">
+        <div className="flex items-center gap-1 text-muted-foreground text-xs">
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             {format(new Date(date_started), "MM/dd/yyyy")}
@@ -102,7 +102,7 @@ function Record({ record }) {
       </div>
 
       <div
-        className="relative cursor-pointer p-2 self-center hover:bg-red-200 hover:text-primary-500 rounded-sm transition-colors"
+        className="relative cursor-pointer p-2 self-center hover:bg-red-200 hover:text-primary-emphasis rounded-sm transition-colors"
         title="Delete record"
       >
         <Trash2 className="h-5 w-5" />
@@ -125,7 +125,7 @@ function Tag({ status }) {
 
   if (status === "rejected") {
     return (
-      <div className="text-[10px] flex items-center gap-1 text-stone-800 bg-stone-100 w-fit px-2 py-0.5 rounded-full tracking-wider font-bold">
+      <div className="text-[10px] flex items-center gap-1 text-foreground bg-muted w-fit px-2 py-0.5 rounded-full tracking-wider font-bold">
         <span>
           <Clock className="h-3 w-3" />
         </span>

@@ -101,7 +101,7 @@ const toneStyles = {
   red: { bg: "bg-red-50", text: "text-red-600", ring: "ring-red-100" },
   amber: { bg: "bg-amber-50", text: "text-amber-600", ring: "ring-amber-100" },
   blue: { bg: "bg-blue-50", text: "text-blue-600", ring: "ring-blue-100" },
-  stone: { bg: "bg-stone-100", text: "text-stone-500", ring: "ring-stone-200" },
+  stone: { bg: "bg-muted", text: "text-muted-foreground", ring: "ring-ring" },
 };
 
 export default function ErrorBoundary({ error, reset }) {
@@ -120,18 +120,18 @@ export default function ErrorBoundary({ error, reset }) {
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md rounded-xl border border-stone-300 bg-white p-6 sm:p-8 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 sm:p-8 text-center shadow-sm">
         <div
           className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${styles.bg} ring-8 ${styles.ring}`}
         >
           <Icon className={`h-7 w-7 ${styles.text}`} />
         </div>
 
-        <h1 className="mt-5 text-lg font-semibold text-stone-800">{title}</h1>
-        <p className="mt-2 text-sm text-stone-500">{description}</p>
+        <h1 className="mt-5 text-lg font-semibold text-foreground">{title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
 
         {process.env.NODE_ENV === "development" && error?.message && (
-          <pre className="mt-4 max-h-32 overflow-auto rounded-md bg-stone-100 p-3 text-left text-[11px] text-stone-600">
+          <pre className="mt-4 max-h-32 overflow-auto rounded-md bg-muted p-3 text-left text-[11px] text-foreground-soft">
             {error.message}
           </pre>
         )}
@@ -140,7 +140,7 @@ export default function ErrorBoundary({ error, reset }) {
           <button
             type="button"
             onClick={() => reset()}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             <RefreshCw className="h-4 w-4" />
             Try Again
@@ -148,7 +148,7 @@ export default function ErrorBoundary({ error, reset }) {
 
           <Link
             href={showLogin ? "/login" : "/"}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-600 transition-colors hover:bg-stone-100"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-4 py-2.5 text-sm font-semibold text-foreground-soft transition-colors hover:bg-muted"
           >
             <Home className="h-4 w-4" />
             {showLogin ? "Log In" : "Go Home"}

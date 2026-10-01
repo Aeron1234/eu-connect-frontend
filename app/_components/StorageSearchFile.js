@@ -24,11 +24,11 @@ function StorageSearchFile({ search, setSearch, setQuery }) {
 
   return (
     <div
-      className={`flex-1 border border-stone-300 bg-white rounded-sm flex items-center self-end px-2 gap-2  ${isFocused ? "ring-2 ring-stone-300" : ""} `}
+      className={`flex-1 border border-border bg-card rounded-sm flex items-center self-end px-2 gap-2  ${isFocused ? "ring-2 ring-ring" : ""} `}
     >
       <form onSubmit={handleSearch} className="">
         <label className="flex gap-1 items-center ">
-          <span className="text-stone-600">
+          <span className="text-foreground-soft">
             <Search className="w-5 h-5" />
           </span>
           <input
@@ -43,7 +43,7 @@ function StorageSearchFile({ search, setSearch, setQuery }) {
         </label>
       </form>
       {search.trim() && (
-        <button className="text-stone-400 cursor-pointer" onClick={handleClear}>
+        <button className="text-foreground-subtle cursor-pointer" onClick={handleClear}>
           <X className="w-4 h-4" />
         </button>
       )}

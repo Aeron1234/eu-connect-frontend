@@ -10,7 +10,7 @@ function ForgotPasswordPageClient() {
   const [state, formAction, isPending] = useActionState(forgotPassword, null);
 
   return (
-    <main className="flex items-center justify-center bg-cream px-6 py-16">
+    <main className="flex items-center justify-center bg-canvas px-6 py-16">
       <div className="w-full max-w-md">
         <h2 className="font-display text-3xl font-bold">Reset your password</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -20,7 +20,7 @@ function ForgotPasswordPageClient() {
         {state?.success ? (
           <div className="mt-7 rounded-xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary-500" />
+              <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary-emphasis" />
               <div>
                 <p className="text-sm font-semibold text-foreground">
                   Check your email
@@ -54,7 +54,7 @@ function ForgotPasswordPageClient() {
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-700"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-700"
             >
               {isPending ? (
                 <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
@@ -76,7 +76,7 @@ function ForgotPasswordPageClient() {
         <p className="mt-6 text-center text-sm">
           <Link
             href="/login"
-            className="font-semibold text-primary-500 hover:underline"
+            className="font-semibold text-primary-emphasis hover:underline"
           >
             Back to sign in
           </Link>

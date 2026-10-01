@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function QuickActionsCardSkeleton() {
   return (
-    <div className="rounded-xl bg-primary-500 p-5">
+    <div className="rounded-xl bg-primary p-5">
       <Skeleton className="h-3.5 w-28 bg-white/25" />
       <div className="space-y-2 mt-4">
         {Array.from({ length: 3 }).map((_, i) => (

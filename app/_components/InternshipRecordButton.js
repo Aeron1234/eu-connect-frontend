@@ -27,7 +27,7 @@ async function InternshipRecordButton() {
   return (
     <Modal
       trigger={
-        <div className="bg-primary-500 hover:bg-primary-400 cursor-pointer rounded-md text-primary-50 font-semibold p-2 transition-colors">
+        <div className="bg-primary hover:bg-primary-400 cursor-pointer rounded-md text-primary-50 font-semibold p-2 transition-colors">
           {theme.buttonText}
         </div>
       }

@@ -88,7 +88,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
 
       {status && (
         <p className="flex items-start sm:items-center gap-2 rounded-md border border-border bg-secondary/70 px-3 sm:px-4 py-3 text-xs sm:text-sm text-muted-foreground my-5 line-clamp-1">
-          <span className="text-primary-500 flex-shrink-0">
+          <span className="text-primary-emphasis flex-shrink-0">
             <CircleAlert className="h-5 w-5" />
           </span>
           The form is locked because you currently have an ongoing or pending
@@ -338,7 +338,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
           </div>
 
           <button
-            className="mt-2 inline-flex items-center justify-center gap-2 w-full sm:w-auto sm:self-end rounded-md bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            className="mt-2 inline-flex items-center justify-center gap-2 w-full sm:w-auto sm:self-end rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             disabled={isPending || status}
           >
             {isPending ? (

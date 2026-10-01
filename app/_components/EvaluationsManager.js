@@ -111,7 +111,7 @@ function EvaluationsManager({ initialCriteria = [] }) {
         ) : (
           <>
             {filter === "evaluate-supervisor" && (
-              <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 mb-8">
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mb-8">
                 <EmployerEvaluations
                   employerEvaluationCriterias={data?.criteria || []}
                 />

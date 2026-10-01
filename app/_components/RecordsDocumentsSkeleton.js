@@ -5,7 +5,7 @@ import DocumentCardSkeleton from "./DocumentCardSkeleton";
 function RecordsDocumentsSkeleton({ items = 6 }) {
   return (
     <>
-      <div className="rounded-xl bg-white border border-stone-200 p-5 sm:p-6">
+      <div className="rounded-xl bg-card border border-border p-5 sm:p-6">
         <InternshipRequirementsTypeSkeleton />
       </div>
 

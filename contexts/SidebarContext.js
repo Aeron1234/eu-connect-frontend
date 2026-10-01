@@ -10,6 +10,10 @@ export function SidebarProvider({ children }) {
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
   const toggleMobile = () => setIsMobileOpen((prev) => !prev);
   const closeMobile = () => setIsMobileOpen(false);
+  const resetSidebar = () => {
+    setIsCollapsed(false);
+    setIsMobileOpen(false);
+  };
 
   return (
     <SidebarContext.Provider
@@ -19,6 +23,7 @@ export function SidebarProvider({ children }) {
         isMobileOpen,
         toggleMobile,
         closeMobile,
+        resetSidebar,
       }}
     >
       {children}

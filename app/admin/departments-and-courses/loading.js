@@ -20,7 +20,7 @@ function DepartmentsAndCoursesLoading() {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
-            <Building2 className="size-4 text-stone-300" />
+            <Building2 className="size-4 text-foreground-faint" />
             <Skeleton className="h-3.5 w-32" />
           </div>
           <div className="space-y-4">
@@ -32,7 +32,7 @@ function DepartmentsAndCoursesLoading() {
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
-            <GraduationCap className="size-4 text-stone-300" />
+            <GraduationCap className="size-4 text-foreground-faint" />
             <Skeleton className="h-3.5 w-28" />
           </div>
           <div className="space-y-4">

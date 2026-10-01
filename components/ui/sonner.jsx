@@ -22,21 +22,21 @@ const Toaster = ({ ...props }) => {
         info: <InfoIcon className="size-4" />,
         warning: <TriangleAlertIcon className="size-4" />,
         error: <OctagonXIcon className="size-4 text-red-600" />,
-        loading: <Loader2Icon className="size-4 animate-spin text-stone-600" />,
+        loading: <Loader2Icon className="size-4 animate-spin text-foreground-soft" />,
       }}
       style={{
-        "--normal-bg": "#fff",
-        "--normal-text": "#292524",
+        "--normal-bg": "var(--popover)",
+        "--normal-text": "var(--popover-foreground)",
         "--normal-border": "var(--border)",
         "--border-radius": "var(--radius)",
-        "--success-bg": "#DCFCE7",
-        "--success-text": "#166534",
-        "--success-border": "#4ADE80",
-        "--error-bg": "#FEE2E2",
-        "--error-text": "#991B1B",
-        "--error-border": "#FCA5A5",
-        "--warning-bg": "#FFFDD0",
-        "--warning-text": "#854D0E",
+        "--success-bg": "var(--toast-success-bg)",
+        "--success-text": "var(--toast-success-text)",
+        "--success-border": "var(--toast-success-border)",
+        "--error-bg": "var(--toast-error-bg)",
+        "--error-text": "var(--toast-error-text)",
+        "--error-border": "var(--toast-error-border)",
+        "--warning-bg": "var(--toast-warning-bg)",
+        "--warning-text": "var(--toast-warning-text)",
       }}
       {...props}
     />

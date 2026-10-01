@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import SupervisorRequestButton from "./SupervisorRequestButton";
+import ProgressBar from "./ProgressBar";
 
 const roleConfig = {
   student: {
@@ -30,7 +31,7 @@ const roleConfig = {
   admin: {
     label: "Admin",
     icon: ShieldCheck,
-    tone: "bg-stone-100 text-stone-700",
+    tone: "bg-muted text-foreground",
   },
 };
 
@@ -87,8 +88,7 @@ function UserCard({
 
   return (
     <div
-      onClick={onClick}
-      className={`group relative w-full bg-white rounded-xl border border-stone-300 shadow-sm hover:shadow-md hover:border-primary-300 transition-all ${className}`}
+      className={`group relative w-full bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary-300 transition-all ${className}`}
     >
       <div
         className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 ${
@@ -97,9 +97,10 @@ function UserCard({
       >
         <Link
           href={`/users/${userId}`}
+          onClick={onClick}
           className="flex items-start sm:items-center gap-3 flex-1 min-w-0"
         >
-          <div className="w-12 h-12 sm:w-15 sm:h-15 rounded-xl bg-stone-100 border-2 border-primary-100 overflow-hidden flex items-center justify-center text-stone-400">
+          <div className="w-12 h-12 sm:w-15 sm:h-15 rounded-xl bg-muted border-2 border-primary-100 overflow-hidden flex items-center justify-center text-foreground-subtle">
             {avatar ? (
               <img
                 src={`/avatars/${avatar}`}
@@ -113,13 +114,13 @@ function UserCard({
 
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-semibold text-stone-800 truncate">
+              <h3 className="font-semibold text-foreground truncate">
                 {firstName} {lastName}
               </h3>
               <RoleTag role={role} />
             </div>
 
-            <div className="flex flex-col text-sm text-stone-500 mt-0.5">
+            <div className="flex flex-col text-sm text-muted-foreground mt-0.5">
               {course && <span>{course}</span>}
               {role === "employer" && companyName && <span>{companyName}</span>}
               {["student", "department_head"].includes(role) && (
@@ -129,13 +130,13 @@ function UserCard({
 
             {percentComplete !== null && (
               <div className="flex items-center gap-2 mt-2 max-w-xs">
-                <div className="flex-1 h-1.5 rounded-full bg-stone-200 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-primary-500"
-                    style={{ width: `${percentComplete}%` }}
-                  />
-                </div>
-                <span className="text-xs font-medium text-stone-600 whitespace-nowrap">
+                <ProgressBar
+                  value={percentComplete}
+                  label="Internship hours completed"
+                  size="sm"
+                  className="flex-1"
+                />
+                <span className="text-xs font-medium text-foreground-soft whitespace-nowrap">
                   {rendered.toFixed(1)}/{total} hrs
                 </span>
               </div>

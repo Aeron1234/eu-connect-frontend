@@ -9,7 +9,7 @@ const gradeScale = [
 
 function EvaluationsCriteria() {
   return (
-    <div className="p-4 w-full bg-stone-100 rounded-lg border border-stone-300 mb-2">
+    <div className="p-4 w-full bg-muted rounded-lg border border-border mb-2">
       <p className="mb-4 text-base font-semibold">Numerical Grade Scale</p>
 
       <div className="grid sm:grid-cols-3 gap-2 lg:grid-cols-6  grid-cols-2">
@@ -28,10 +28,10 @@ function EvaluationsCriteria() {
 
 function GradeScaleCard({ points, label, equivalent }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-2 bg-white border border-stone-300 rounded-lg">
-      <span className="text-lg text-primary-500 font-bold">{points}</span>
+    <div className="flex-1 flex flex-col items-center justify-center p-2 bg-card border border-border rounded-lg">
+      <span className="text-lg text-primary-emphasis font-bold">{points}</span>
       <span className="text-xs font-medium">{label}</span>
-      <span className="text-stone-500 text-xs font-medium">{equivalent}</span>
+      <span className="text-muted-foreground text-xs font-medium">{equivalent}</span>
     </div>
   );
 }

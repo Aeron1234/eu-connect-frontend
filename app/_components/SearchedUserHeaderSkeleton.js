@@ -4,16 +4,16 @@ import { ChevronLeft, User } from "lucide-react";
 function SearchedUserHeaderSkeleton() {
   return (
     <div className="w-full">
-      <span className="flex items-center gap-1 text-sm text-stone-400 mb-4">
+      <span className="flex items-center gap-1 text-sm text-foreground-subtle mb-4">
         <ChevronLeft className="w-4 h-4" /> Back to search
       </span>
 
-      <div className="bg-primary-500 rounded-xl border border-stone-300 shadow-sm overflow-hidden">
-        <div className="h-16 sm:h-20 bg-primary-500" />
+      <div className="bg-primary rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="h-16 sm:h-20 bg-primary" />
 
         <div className="px-4 sm:px-6 pb-4 sm:pb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-8 sm:-mt-10">
-            <div className="shadow-lg w-14 h-14 sm:w-20 sm:h-20 rounded-xl bg-stone-100 border-2 border-white flex items-center justify-center text-stone-300 flex-shrink-0">
+            <div className="shadow-lg w-14 h-14 sm:w-20 sm:h-20 rounded-xl bg-muted border-2 border-white flex items-center justify-center text-foreground-faint flex-shrink-0">
               <User className="w-7 h-7 sm:w-9 sm:h-9" />
             </div>
 

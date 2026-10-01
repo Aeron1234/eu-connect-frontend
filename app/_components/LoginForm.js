@@ -11,7 +11,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <main className="flex items-center justify-center bg-cream px-6 py-16">
+    <main className="flex items-center justify-center bg-canvas px-6 py-16">
       <div className="w-full max-w-md">
         <h2 className="font-display text-3xl font-bold">
           Sign in to your account
@@ -70,7 +70,7 @@ function LoginForm() {
             <div className="mt-2 text-right">
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold text-primary-500 hover:underline"
+                className="text-xs font-semibold text-primary-emphasis hover:underline"
               >
                 Forgot password?
               </Link>
@@ -80,7 +80,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-700"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-700"
           >
             {isPending ? (
               <Spinner className={"size-6 stroke-3 stroke-primary-50"} />

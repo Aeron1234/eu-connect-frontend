@@ -91,12 +91,12 @@ function CreateUpdateAnnouncementForm({
 
       <div className="flex gap-4 flex-1 max-sm:flex-col">
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">Title</span>
+          <span className="text-sm font-semibold text-muted-foreground">Title</span>
           <input
             type="text"
             name="title"
             placeholder="Title of your announcement..."
-            className="p-2 border border-stone-300 rounded-sm text-sm"
+            className="p-2 border border-border rounded-sm text-sm"
             defaultValue={isEdit ? data.title : ""}
             disabled={isPending}
             required
@@ -104,7 +104,7 @@ function CreateUpdateAnnouncementForm({
         </label>
 
         <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-stone-500">
+          <span className="text-sm font-semibold text-muted-foreground">
             Categories
           </span>
           <input
@@ -118,7 +118,7 @@ function CreateUpdateAnnouncementForm({
           {isAdmin ? (
             // Admin has no department, so Department-category is never a
             // valid choice — no picker at all, just a locked display.
-            <div className="h-9.5 px-3 flex items-center text-sm w-full rounded-sm border border-stone-200 bg-stone-50 text-stone-500">
+            <div className="h-9.5 px-3 flex items-center text-sm w-full rounded-sm border border-border bg-muted/50 text-muted-foreground">
               General
             </div>
           ) : (
@@ -128,7 +128,7 @@ function CreateUpdateAnnouncementForm({
               disabled={isPending}
               defaultValue={isEdit ? `${data.category_id}` : undefined}
             >
-              <SelectTrigger className="h-9.5 px-3 text-sm w-full rounded-sm border border-stone-300 focus:ring-2 focus:ring-stone-300 focus:border-transparent">
+              <SelectTrigger className="h-9.5 px-3 text-sm w-full rounded-sm border border-border focus:ring-2 focus:ring-ring focus:border-transparent">
                 <SelectValue placeholder={"Select category"} />
               </SelectTrigger>
               <SelectContent>
@@ -149,11 +149,11 @@ function CreateUpdateAnnouncementForm({
       </div>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-semibold text-stone-500">Content</span>
+        <span className="text-sm font-semibold text-muted-foreground">Content</span>
         <textarea
           name="content"
           placeholder="Write your announcement here..."
-          className="px-2 py-1 border border-stone-300 rounded-sm min-h-40 overflow-y-auto resize-none text-sm"
+          className="px-2 py-1 border border-border rounded-sm min-h-40 overflow-y-auto resize-none text-sm"
           defaultValue={isEdit ? data.content : ""}
           disabled={isPending}
           required
@@ -170,7 +170,7 @@ function CreateUpdateAnnouncementForm({
 
           <DialogClose asChild>
             <Button
-              className={`bg-primary-500 hover:bg-primary-400 w-fit ${isPending ? "pointer-events-none opacity-50" : ""} `}
+              className={`bg-primary hover:bg-primary-400 w-fit ${isPending ? "pointer-events-none opacity-50" : ""} `}
               type="submit"
               disabled={isPending}
             >
@@ -221,7 +221,7 @@ function TogglePinAnnouncementForm({
 
           <DialogClose asChild>
             <Button
-              className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+              className={"bg-primary hover:bg-primary-400 w-fit "}
               type="submit"
               disabled={isPending}
             >

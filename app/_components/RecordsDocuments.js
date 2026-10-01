@@ -48,7 +48,7 @@ function RecordsDocuments({
 
   return (
     <>
-      <div className="rounded-xl bg-white border border-stone-200 p-5 sm:p-6">
+      <div className="rounded-xl bg-card border border-border p-5 sm:p-6">
         <InternshipRequirementsType
           requirementTypes={requirementTypes || []}
           docs={docs}
@@ -66,7 +66,7 @@ function RecordsDocuments({
               onClick={() => setFilter(key)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 key === filter
-                  ? "bg-primary-500 text-primary-foreground border-primary-500"
+                  ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-muted-foreground border-border/60 hover:bg-muted"
               }`}
               key={key}
@@ -83,21 +83,21 @@ function RecordsDocuments({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search documents..."
-              className="h-9 w-full lg:w-56 pl-9 pr-3 rounded-lg bg-white border border-stone-200 focus:border-primary-500/40 focus:outline-none text-sm placeholder:text-muted-foreground"
+              className="h-9 w-full lg:w-56 pl-9 pr-3 rounded-lg bg-card border border-border focus:border-primary/40 focus:outline-none text-sm placeholder:text-muted-foreground"
             />
           </div>
-          <div className="flex rounded-lg border border-stone-200 overflow-hidden shrink-0 bg-white">
+          <div className="flex rounded-lg border border-border overflow-hidden shrink-0 bg-card">
             <button
               onClick={() => setView("grid")}
               aria-label="Grid view"
-              className={`p-2 transition-colors ${view === "grid" ? "bg-primary-500 text-white" : "text-muted-foreground hover:bg-muted"}`}
+              className={`p-2 transition-colors ${view === "grid" ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"}`}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setView("list")}
               aria-label="List view"
-              className={`p-2 transition-colors ${view === "list" ? "bg-primary-500 text-white" : "text-muted-foreground hover:bg-muted"}`}
+              className={`p-2 transition-colors ${view === "list" ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"}`}
             >
               <ListIcon className="w-4 h-4" />
             </button>

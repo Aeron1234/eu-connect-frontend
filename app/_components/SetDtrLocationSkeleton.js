@@ -3,9 +3,9 @@ import { MapPin } from "lucide-react";
 
 function SetDtrLocationSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6 mt-4 space-y-4">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mt-4 space-y-4">
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-primary-500/10 text-primary-500">
+        <div className="p-2 rounded-lg bg-primary/10 text-primary-emphasis">
           <MapPin className="w-5 h-5 opacity-30" />
         </div>
         <div className="flex-1 min-w-0 space-y-1.5">
@@ -17,14 +17,14 @@ function SetDtrLocationSkeleton() {
 
       <Skeleton className="h-[400px] w-full rounded-xl" />
 
-      <div className="bg-stone-100 rounded-xl p-3 space-y-1.5">
+      <div className="bg-muted rounded-xl p-3 space-y-1.5">
         <Skeleton className="h-2.5 w-14" />
         <Skeleton className="h-3.5 w-48" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="bg-stone-100 rounded-xl p-3 space-y-1.5">
+          <div key={i} className="bg-muted rounded-xl p-3 space-y-1.5">
             <Skeleton className="h-2.5 w-16" />
             <Skeleton className="h-3.5 w-20" />
           </div>

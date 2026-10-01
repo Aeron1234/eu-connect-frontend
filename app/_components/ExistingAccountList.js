@@ -14,10 +14,10 @@ import { format } from "date-fns";
 function ExistingAccountList({ filteredAccounts = [], onActionSuccess }) {
   if (filteredAccounts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center">
-        <Users className="size-8 text-stone-300" />
-        <p className="text-sm font-medium text-stone-500">No accounts found</p>
-        <p className="max-w-sm text-xs text-stone-400">
+      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
+        <Users className="size-8 text-foreground-faint" />
+        <p className="text-sm font-medium text-muted-foreground">No accounts found</p>
+        <p className="max-w-sm text-xs text-foreground-subtle">
           Try a different search term or filter.
         </p>
       </div>
@@ -55,12 +55,12 @@ function AccountCard({ account, onActionSuccess }) {
 
   return (
     <div
-      className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm transition-colors hover:bg-stone-50 ${
+      className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm transition-colors hover:bg-muted/50 ${
         isInactive || isSuspended ? "opacity-70 hover:opacity-100" : ""
       }`}
     >
       <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-stone-400">
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground-subtle">
           {avatar ? (
             <img
               src={`/avatars/${avatar}`}
@@ -74,14 +74,14 @@ function AccountCard({ account, onActionSuccess }) {
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-stone-800">
+            <h3 className="text-sm font-semibold text-foreground">
               {last_name}, {first_name}
             </h3>
             <RoleTag role={role} />
             {isSuspended && <StatusTag label="Suspended" tone="red" />}
             {isInactive && <StatusTag label="Inactive" tone="stone" />}
           </div>
-          <div className="mt-0.5 flex flex-col text-xs text-stone-500">
+          <div className="mt-0.5 flex flex-col text-xs text-muted-foreground">
             {email && <span className="truncate">{email}</span>}
             {course_name && <span>Course: {course_name}</span>}
             {department_name && <span>Dept: {department_name}</span>}
@@ -91,7 +91,7 @@ function AccountCard({ account, onActionSuccess }) {
       </div>
 
       <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
-        <p className="text-[11px] text-stone-500 tracking-wide">
+        <p className="text-[11px] text-muted-foreground tracking-wide">
           Created: {format(new Date(created_at), "MMM d, yyyy")}
         </p>
         {status === "active" && (
@@ -139,7 +139,7 @@ function RoleTag({ role }) {
 
 function StatusTag({ label, tone }) {
   const toneClass =
-    tone === "red" ? "bg-red-50 text-red-700" : "bg-stone-100 text-stone-600";
+    tone === "red" ? "bg-red-50 text-red-700" : "bg-muted text-foreground-soft";
   const Icon = tone === "red" ? ShieldAlert : ShieldBan;
 
   return (

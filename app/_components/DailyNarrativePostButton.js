@@ -27,7 +27,7 @@ function DailyNarrativePostButton() {
       trigger={
         <div
           // onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition"
+          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition"
         >
           <Plus className="w-4 h-4" /> New Narrative
         </div>

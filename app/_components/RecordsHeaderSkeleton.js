@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function RecordsHeaderSkeleton() {
   return (
-    <div className="rounded-xl bg-primary-500 p-6">
+    <div className="rounded-xl bg-primary p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <Skeleton className="h-6 w-48 bg-white/25" />

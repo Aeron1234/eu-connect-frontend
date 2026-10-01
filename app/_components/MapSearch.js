@@ -43,7 +43,7 @@ function MapSearch({ setQuery, search, setSearch }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-87 bg-white border rounded-sm flex items-center gap-1 self-start justify-self-center px-2"
+      className="w-full max-w-87 bg-card border rounded-sm flex items-center gap-1 self-start justify-self-center px-2"
     >
       <label htmlFor="search-location">
         <Search size={20} />
@@ -59,7 +59,7 @@ function MapSearch({ setQuery, search, setSearch }) {
       />
 
       {search.trim() && (
-        <div className="text-stone-500" onClick={handleClear}>
+        <div className="text-muted-foreground" onClick={handleClear}>
           <span>
             <X className="h4 w-4" />
           </span>

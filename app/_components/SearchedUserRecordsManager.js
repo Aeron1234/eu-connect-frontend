@@ -200,7 +200,7 @@ function SearchedUserRecordsManager({
           <>
             {filter === "dtr" && (
               <>
-                <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 overflow-x-scroll">
+                <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 overflow-x-scroll">
                   <DtrTable
                     searchedUserId={searchedUserId}
                     dtrs={data?.dtrData?.dtrs}
@@ -225,6 +225,7 @@ function SearchedUserRecordsManager({
               <StudentNarratives
                 narratives={data?.narrativeData?.narratives || []}
                 totalPages={data?.narrativeData?.totalPages || 1}
+                totalRecords={data?.narrativeData?.totalRecords || 0}
                 searchedUserId={searchedUserId}
               />
             )}
@@ -232,7 +233,7 @@ function SearchedUserRecordsManager({
             {filter === "evaluations" && (
               <>
                 {userRole === "employer" && (
-                  <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 mb-6">
+                  <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mb-6">
                     <StudentEvaluationCriteria
                       studentEvaluationCriterias={
                         data?.studentEvaluationCriterias
@@ -250,7 +251,7 @@ function SearchedUserRecordsManager({
             )}
 
             {filter === "certificates" && (
-              <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6">
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <EmployerCertificateUploads
                   searchedUserId={searchedUserId}
                   uploadedFiles={data?.uploadedFiles}
@@ -259,7 +260,7 @@ function SearchedUserRecordsManager({
             )}
 
             {filter === "info" && (
-              <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6">
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <ProfileInfoGrid info={info} />
               </div>
             )}

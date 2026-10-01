@@ -12,7 +12,7 @@ import {
 const chartConfig = {
   interns: {
     label: "Interns",
-    color: "var(--color-primary-500)",
+    color: "var(--chart-maroon)",
   },
 };
 
@@ -48,10 +48,10 @@ function InternshipsPerCourseChart({ data = [] }) {
   const chartData = buildChartData(data);
 
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="mb-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-          <Briefcase className="w-4 h-4 text-primary-500" />
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Briefcase className="w-4 h-4 text-primary-emphasis" />
           Ongoing Internships per Course
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
@@ -60,7 +60,7 @@ function InternshipsPerCourseChart({ data = [] }) {
       </div>
 
       {data.length === 0 ? (
-        <div className="h-64 w-full bg-stone-100 rounded-lg flex items-center justify-center">
+        <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
           <p className="text-sm text-muted-foreground">
             No ongoing internships yet.
           </p>
@@ -68,7 +68,7 @@ function InternshipsPerCourseChart({ data = [] }) {
       ) : (
         <ChartContainer
           config={chartConfig}
-          className="h-64 w-full bg-stone-100 rounded-lg p-3"
+          className="h-64 w-full bg-muted rounded-lg p-3"
         >
           <BarChart
             data={chartData}
@@ -77,13 +77,13 @@ function InternshipsPerCourseChart({ data = [] }) {
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="#d6d3d1"
+              stroke="var(--border)"
             />
             <XAxis
               dataKey="course"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 11, fill: "#78716c" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               tickFormatter={(value) =>
                 value.startsWith("__placeholder_") ? "" : value
               }
@@ -93,7 +93,7 @@ function InternshipsPerCourseChart({ data = [] }) {
               allowDecimals={false}
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 11, fill: "#78716c" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
             />
             <ChartTooltip content={<CustomTooltip />} />
             <Bar

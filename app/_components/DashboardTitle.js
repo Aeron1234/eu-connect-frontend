@@ -14,7 +14,7 @@ function DashboardTitle() {
   return (
     <header className="flex items-start justify-between gap-4 mt-4">
       <h1
-        className={`flex items-center gap-2 text-xl self-start font-bold text-stone-800 max-md:text-lg max-xs:text-base`}
+        className={`flex items-center gap-2 text-xl self-start font-bold text-foreground max-md:text-lg max-xs:text-base`}
       >
         Welcome back, {profileData?.first_name}
       </h1>

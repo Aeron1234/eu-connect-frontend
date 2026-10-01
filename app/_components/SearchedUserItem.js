@@ -1,10 +1,25 @@
 "use client";
 
 import { saveSearchHistory } from "@/lib/server-actions/history-actions";
+import { useRouter } from "next/navigation";
 import UserCard from "./UserCard";
 
 function SearchedUserItem({ searchedUser }) {
-  async function handleSaveHistory() {
+  const router = useRouter();
+
+  async function handleSaveHistory(event) {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
     try {
       await saveSearchHistory({
         type: "user",
@@ -12,6 +27,8 @@ function SearchedUserItem({ searchedUser }) {
       });
     } catch (err) {
       console.error(err);
+    } finally {
+      router.push(`/users/${searchedUser.user_id}`);
     }
   }
 

@@ -2,14 +2,9 @@
 
 import { ChevronLeft, User, UserCheck, Clock3, Check } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
-import { toastAndAction } from "../../lib/helpers";
-import {
-  cancelSupervisorRequest,
-  requestSupervisor,
-  getSupervisorStatus,
-} from "@/lib/server-actions/supervisor-actions";
 import { Spinner } from "@/components/ui/spinner";
+import useSupervisorRequestStatus from "./useSupervisorRequestStatus";
+import ProgressBar from "./ProgressBar";
 
 // Keyed by direction first, then status — the same "accepted" reads
 // differently depending on which side of the relationship is looking.
@@ -40,69 +35,13 @@ function SupervisionTag({ supervision }) {
 }
 
 function SupervisorButton({ searchedUserId }) {
-  const [supervisorStatus, setSupervisorStatus] = useState(null);
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
-  const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoadingStatus(true);
-
-    getSupervisorStatus(searchedUserId).then((result) => {
-      if (!cancelled) {
-        setSupervisorStatus(result);
-        setIsLoadingStatus(false);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [searchedUserId]);
-
-  function handleSetSupervisor() {
-    const formData = new FormData();
-    formData.append("employerId", searchedUserId);
-
-    startTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel: "Sending request...",
-        successLabel: "Supervisor request sent.",
-        errorLabel: "Failed to send request.",
-        action: requestSupervisor,
-        formData,
-      });
-
-      if (result?.success) {
-        setSupervisorStatus({
-          status: "pending",
-          hasOngoingInternship: true,
-          requestId: result.id,
-        });
-      }
-    });
-  }
-
-  function handleCancelRequest() {
-    if (!supervisorStatus?.requestId) return;
-
-    const formData = new FormData();
-    formData.append("requestId", supervisorStatus.requestId);
-
-    startTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel: "Cancelling request...",
-        successLabel: "Request cancelled.",
-        errorLabel: "Failed to cancel request.",
-        action: cancelSupervisorRequest,
-        formData,
-      });
-
-      if (result?.success) {
-        setSupervisorStatus({ status: null, hasOngoingInternship: true });
-      }
-    });
-  }
+  const {
+    supervisorStatus,
+    isLoadingStatus,
+    isPending,
+    sendRequest,
+    cancelRequest,
+  } = useSupervisorRequestStatus(searchedUserId);
 
   if (isLoadingStatus) {
     return (
@@ -132,7 +71,7 @@ function SupervisorButton({ searchedUserId }) {
   if (supervisorStatus.status === "pending") {
     return (
       <button
-        onClick={handleCancelRequest}
+        onClick={cancelRequest}
         disabled={isPending}
         className="inline-flex items-center gap-2 bg-white/15 text-white ring-1 ring-white/30 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-white/25 transition cursor-pointer shrink-0 disabled:opacity-50"
       >
@@ -144,9 +83,9 @@ function SupervisorButton({ searchedUserId }) {
 
   return (
     <button
-      onClick={handleSetSupervisor}
+      onClick={sendRequest}
       disabled={isPending}
-      className="inline-flex items-center gap-2 bg-white text-primary-500 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary-50 transition cursor-pointer shrink-0 disabled:opacity-50"
+      className="inline-flex items-center gap-2 bg-card text-primary-emphasis px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary-50 transition cursor-pointer shrink-0 disabled:opacity-50"
     >
       <UserCheck className="w-3.5 h-3.5" />
       Set as Supervisor
@@ -179,19 +118,19 @@ function SearchedUserHeader({
       {/* Back button */}
       <Link
         href={"/users"}
-        className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800 mb-4 transition-colors"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
       >
         <ChevronLeft className="w-4 h-4" /> Back to search
       </Link>
 
       {/* Student header card */}
-      <div className="bg-primary-500 rounded-xl border border-stone-300 shadow-sm overflow-hidden">
+      <div className="bg-primary rounded-xl border border-border shadow-sm overflow-hidden">
         {/* Banner */}
-        <div className="h-16 sm:h-20 bg-primary-500" />
+        <div className="h-16 sm:h-20 bg-primary" />
 
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 ">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-8 sm:-mt-10">
-            <div className="shadow-lg w-14 h-14 sm:w-20 sm:h-20 rounded-xl bg-stone-100 border-2 border-white overflow-hidden flex items-center justify-center text-stone-400">
+            <div className="shadow-lg w-14 h-14 sm:w-20 sm:h-20 rounded-xl bg-muted border-2 border-white overflow-hidden flex items-center justify-center text-foreground-subtle">
               {userProfile.avatar ? (
                 <img
                   src={`/avatars/${userProfile.avatar}`}
@@ -240,7 +179,10 @@ function SearchedUserHeader({
 
             {showSupervisorButton && (
               <div className="shrink-0 pb-1">
-                <SupervisorButton searchedUserId={searchedUserId} />
+                <SupervisorButton
+                  key={searchedUserId}
+                  searchedUserId={searchedUserId}
+                />
               </div>
             )}
 
@@ -251,12 +193,12 @@ function SearchedUserHeader({
                   <span className="text-sm font-normal">/{totalHours} hrs</span>
                 </p>
 
-                <div className="w-full sm:w-32 h-2 bg-primary-300 rounded-full mt-1">
-                  <div
-                    className="h-full bg-white rounded-full"
-                    style={{ width: `${percentComplete}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  value={percentComplete}
+                  label="Internship hours completed"
+                  onBrand
+                  className="mt-1 sm:w-32"
+                />
 
                 <p className="text-xs text-white mt-1">
                   {percentComplete.toFixed(1)}% completed

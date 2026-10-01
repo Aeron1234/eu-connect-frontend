@@ -22,7 +22,7 @@ function RecordsPageHeader({ query, setQuery, isPending }) {
           disabled={isPending}
           placeholder="Search student, company or course..."
           aria-label="Search internship records"
-          className="w-full rounded-lg border border-stone-200 bg-background py-3 pl-9 pr-3 text-sm outline-none focus:border-primary-500"
+          className="w-full rounded-lg border border-border bg-background py-3 pl-9 pr-3 text-sm outline-none focus:border-primary"
         />
       </div>
     </div>

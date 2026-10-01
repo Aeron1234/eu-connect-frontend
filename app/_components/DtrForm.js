@@ -18,11 +18,11 @@ function DtrForm({ isOut }) {
 
   function handleAction(formData) {
     // FOR TESTING ONLY
-    // const tempLat = 13.92301387;
-    // const tempLon = 121.43426039;
+    const tempLat = 13.92301387;
+    const tempLon = 121.43426039;
 
-    formData.append(isOut ? "lat_in" : "lat_out", latitude);
-    formData.append(isOut ? "lon_in" : "lon_out", longitude);
+    formData.append(isOut ? "lat_in" : "lat_out", tempLat);
+    formData.append(isOut ? "lon_in" : "lon_out", tempLon);
 
     const handler = {
       loadingLabel: isOut ? "Clocking in..." : "Clocking out...",
@@ -47,7 +47,7 @@ function DtrForm({ isOut }) {
 
           <DialogClose asChild>
             <Button
-              className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+              className={"bg-primary hover:bg-primary-400 w-fit "}
               type="submit"
               disabled={isPending}
             >

@@ -17,7 +17,8 @@ function Pagination({
       <Link
         href={hrefNext}
         scroll={false}
-        className={`flex justify-center w-full rounded-sm px-4 py-1 tracking-wide font-bold hover:bg-stone-200 transition-colors`}
+        className={`flex justify-center w-full rounded-sm px-4 py-1 tracking-wide font-bold hover:bg-secondary transition-colors`}
+        prefetch={true}
       >
         See more
       </Link>
@@ -25,7 +26,7 @@ function Pagination({
 
   if (type === "default")
     return (
-      <div className="flex items-center gap-4 font-semibold text-stone-500">
+      <div className="flex items-center gap-4 font-semibold text-muted-foreground">
         {onPrev ? (
           <button onClick={onPrev} disabled={currentPage <= 1} className="...">
             <ChevronLeft size={16} />

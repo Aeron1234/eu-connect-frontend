@@ -3,10 +3,10 @@ import { Pin } from "lucide-react";
 
 function AnnouncementCardSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-white shadow-sm p-5">
+    <div className="rounded-xl border border-border bg-card shadow-sm p-5">
       <div className="flex items-start gap-3">
-        <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary-500/10">
-          <Pin className="size-4 text-primary-500/30" />
+        <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+          <Pin className="size-4 text-primary-emphasis/30" />
         </div>
 
         <div className="min-w-0 flex-1 space-y-2">

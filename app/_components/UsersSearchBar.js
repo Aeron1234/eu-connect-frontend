@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 function UsersSearchBar({ inputValue, setInputValue }) {
   return (
     <div className="w-full flex items-center gap-4 mb-6 relative">
-      <div className="flex-1 flex items-center gap-2 border border-stone-200 bg-white rounded-lg px-2">
+      <div className="flex-1 flex items-center gap-2 border border-border bg-card rounded-lg px-2">
         <Search className="w-4 h-4" />
         <input
           placeholder="Search by name, course, or company..."

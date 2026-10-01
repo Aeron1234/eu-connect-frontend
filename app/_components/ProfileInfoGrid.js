@@ -2,13 +2,13 @@ import { Phone, MapPin, Briefcase, Building2, IdCard } from "lucide-react";
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-start gap-3 bg-stone-50 rounded-lg p-4">
-      <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center shrink-0">
+    <div className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
+      <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-emphasis flex items-center justify-center shrink-0">
         <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs text-stone-500">{label}</p>
-        <p className="text-sm font-medium text-stone-800 break-words">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium text-foreground break-words">
           {value || "—"}
         </p>
       </div>

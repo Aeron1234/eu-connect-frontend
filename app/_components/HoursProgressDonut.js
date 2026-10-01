@@ -29,12 +29,12 @@ export default function HoursProgressDonut({ internshipData }) {
       {
         status: "completed",
         hours: internshipData?.accumulated_hours,
-        fill: "var(--color-primary-500)",
+        fill: "var(--chart-maroon)",
       },
       {
         status: "remaining",
         hours: remaining > 0 ? remaining : 0,
-        fill: "var(--color-primary-100)",
+        fill: "var(--chart-maroon-soft)",
       },
     ];
   }, [internshipData]);
@@ -59,13 +59,13 @@ export default function HoursProgressDonut({ internshipData }) {
 
   return (
     <div className="w-full h-full shadow-sm rounded-sm max-lg:w-fit max-lg:h-fit max-sm:w-full max-sm:h-full">
-      <Card className="flex flex-col h-full max-sm:w-full text-stone-800 rounded-md border-none shadow-none ">
+      <Card className="flex flex-col h-full max-sm:w-full text-foreground rounded-md border-none shadow-none ">
         <CardHeader className="items-center">
           {/* <CardTitle className="font-bold text-base">Hours Progress</CardTitle> */}
           <CardTitle className="font-bold text-base max-xs:text-sm">
             Hours Progress
           </CardTitle>
-          <p className="text-sm text-stone-500 font-medium max-xs:text-sm">
+          <p className="text-sm text-muted-foreground font-medium max-xs:text-sm">
             {internshipData.company_name}
           </p>
         </CardHeader>
@@ -120,10 +120,10 @@ export default function HoursProgressDonut({ internshipData }) {
           </ChartContainer>
         </CardContent>
         <CardFooter className="flex-col gap-1 text-center">
-          <div className="text-sm font-bold text-stone-700 max-xs:text-xs">
+          <div className="text-sm font-bold text-foreground max-xs:text-xs">
             {percentage}% Progress
           </div>
-          <p className="text-stone-400 text-[10px] uppercase tracking-wider font-bold max-xs:text-xs">
+          <p className="text-foreground-subtle text-[10px] uppercase tracking-wider font-bold max-xs:text-xs">
             Status: {internshipData.status}
           </p>
         </CardFooter>

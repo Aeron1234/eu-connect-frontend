@@ -18,9 +18,11 @@ import {
   UserPlus,
   Users,
   CircleUserRound,
+  User,
 } from "lucide-react";
 import SignoutButton from "./SignoutButton";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { useUser } from "@/contexts/UserContext";
@@ -149,7 +151,22 @@ const publicRoutes = [
   },
 ];
 
-function SideNavigationList({ firstName = "" }) {
+function getFormattedRole(role) {
+  switch (role) {
+    case "student":
+      return "Student";
+    case "employer":
+      return "Employer";
+    case "department_head":
+      return "Department Head";
+    case "admin":
+      return "Administrator";
+    default:
+      return "User";
+  }
+}
+
+function SideNavigationList({ firstName = "", fullName = "", avatar = null }) {
   const pathName = usePathname();
   const { user } = useUser();
   const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobile } =
@@ -164,6 +181,7 @@ function SideNavigationList({ firstName = "" }) {
   if (!role) return null;
 
   const homeHref = `/${userRole}`;
+  const accountHref = `/${userRole}/account`;
   const routes = roleRoutes(userRole, userDepartment) || [];
 
   return (
@@ -178,14 +196,14 @@ function SideNavigationList({ firstName = "" }) {
       )}
 
       <aside
-        className={`fixed lg:sticky inset-y-0 lg:inset-auto left-0 top-0 z-50 lg:h-screen h-full bg-primary-500 text-sm text-white font-semibold py-4 px-4 flex flex-col transition-all duration-300 ease-in-out
+        className={`fixed lg:sticky inset-y-0 lg:inset-auto left-0 top-0 z-50 lg:h-screen h-full border-r border-primary-300 dark:border-white/25 bg-primary dark:bg-card text-sm text-white font-semibold py-4 px-4 flex flex-col transition-all duration-300 ease-in-out
   ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
   w-64 ${isCollapsed ? "lg:w-20" : "lg:w-64"}`}
       >
         {/* Collapse toggle - desktop only */}
         <button
           onClick={toggleCollapsed}
-          className="hidden lg:flex items-center justify-center absolute -right-3 top-8 h-6 w-6 rounded-full bg-white text-primary-500 shadow-md hover:scale-110 transition-transform"
+          className="hidden lg:flex items-center justify-center absolute -right-3 top-8 h-6 w-6 rounded-full bg-card text-primary-emphasis shadow-md hover:scale-110 transition-transform"
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -203,7 +221,7 @@ function SideNavigationList({ firstName = "" }) {
           className="flex items-center gap-2 flex-col w-full mb-4 group cursor-pointer"
         >
           <div className="p-1 bg-white rounded-full group-hover:scale-105 transition-transform">
-            <Logo size={isCollapsed ? "small" : "default"} />
+            <Logo compactOnDesktop={isCollapsed} />
           </div>
 
           <h2
@@ -213,14 +231,39 @@ function SideNavigationList({ firstName = "" }) {
           </h2>
         </Link>
 
-        {firstName && (
-          <div
-            className={`bg-white/10 px-5 py-1 mb-4 w-full flex flex-col rounded-lg border border-white/10 ${isCollapsed ? "lg:hidden" : ""}`}
-          >
-            <span className="text-white/80 font-normal">Welcome back,</span>{" "}
-            <span className="text-lg">{firstName}</span>
-          </div>
-        )}
+        <Link
+          href={accountHref}
+          scroll={false}
+          onClick={closeMobile}
+          title="View account"
+          aria-label={`View account for ${fullName || "your profile"}`}
+          aria-current={pathName === accountHref ? "page" : undefined}
+          className={`group mb-4 flex w-full min-w-0 items-center gap-3 border border-white/15 bg-white/10 py-2.5 px-5 text-left transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+            isCollapsed
+              ? "lg:justify-center lg:p-0.5 rounded-full"
+              : "rounded-xl"
+          } ${pathName === accountHref ? "bg-white/20 border-white/30" : ""}`}
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-card text-primary-emphasis ring-2 ring-white/20 transition-transform group-hover:scale-105">
+            {avatar ? (
+              <img
+                src={`/avatars/${avatar}`}
+                alt="avatar"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <User className="w-6 h-6" />
+            )}
+          </span>
+          <span className={`min-w-0 flex-1 ${isCollapsed ? "lg:hidden" : ""}`}>
+            <span className="block truncate text-sm font-semibold text-white">
+              {fullName || "My account"}
+            </span>
+            <span className="block truncate text-xs font-normal text-white/80">
+              {getFormattedRole(userRole) || "User"}
+            </span>
+          </span>
+        </Link>
 
         <ul className="flex flex-col gap-1 flex-1 w-full overflow-y-auto">
           {userDepartment !== "REG" && (
@@ -249,7 +292,7 @@ function SideNavigationList({ firstName = "" }) {
           ))}
 
           <div
-            className={`flex flex-col gap-1 w-full ${routes.length > 0 ? "mt-2 pt-2 border-t border-primary-400" : ""}`}
+            className={`flex flex-col gap-1 w-full ${routes.length > 0 ? "mt-2 pt-2 border-t border-primary-400 dark:border-border" : ""}`}
           >
             {publicRoutes.map((item) => (
               <li key={item.name}>
@@ -265,18 +308,7 @@ function SideNavigationList({ firstName = "" }) {
             ))}
           </div>
 
-          <li className="lg:hidden">
-            <NavLink
-              href={`/${userRole}/account`}
-              name="Account"
-              icon={<CircleUserRound className="h-5 w-5 shrink-0" />}
-              pathName={pathName}
-              isCollapsed={isCollapsed}
-              onClick={closeMobile}
-            />
-          </li>
-
-          <div className="mt-auto pt-2 border-t border-primary-400">
+          <div className="mt-auto pt-2 border-t border-primary-400 dark:border-border">
             <li title="Sign out">
               <SignoutButton isCollapsed={isCollapsed} />
             </li>
@@ -304,7 +336,7 @@ function NavLink({
       href={href}
       title={name}
       onClick={onClick}
-      className={`${isActive ? "bg-white text-primary-500" : ""} font-normal w-full flex items-center gap-2 px-5 py-2 hover:text-primary-500 hover:bg-white transition-colors rounded-sm ${isCollapsed ? "lg:justify-center lg:px-0" : ""}`}
+      className={`${isActive ? "bg-white text-primary" : ""} font-normal w-full flex items-center gap-2 px-5 py-2 hover:text-primary hover:bg-white transition-colors rounded-sm ${isCollapsed ? "lg:justify-center lg:px-0" : ""}`}
     >
       {icon}
       <span className={isCollapsed ? "lg:hidden" : ""}>{name}</span>

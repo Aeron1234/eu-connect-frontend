@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function PostedEvaluationItemSkeleton() {
   return (
-    <div className="border border-stone-300 rounded-xl bg-white overflow-hidden">
+    <div className="border border-border rounded-xl bg-card overflow-hidden">
       <div className="w-full flex items-center gap-4 p-4">
         <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
         <div className="flex-1 min-w-0 space-y-1.5">

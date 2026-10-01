@@ -3,9 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 function WeeklyNarrativeItemSkeleton() {
   return (
     <li className="relative pl-10 sm:pl-14">
-      <div className="absolute left-0 sm:left-1 top-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-stone-200 ring-4 ring-[#f5f5f4]" />
+      <div className="absolute left-0 sm:left-1 top-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary ring-4 ring-canvas" />
 
-      <article className="rounded-xl bg-white border border-stone-300 shadow-sm p-4 sm:p-5">
+      <article className="rounded-xl bg-card border border-border shadow-sm p-4 sm:p-5">
         <div className="min-w-0 space-y-1.5">
           <Skeleton className="h-4 w-48" />
           <Skeleton className="h-3 w-56" />

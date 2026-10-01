@@ -70,7 +70,7 @@ async function CurrentInternshipDocs({
 }) {
   if (!ongoing) {
     return (
-      <div className="rounded-xl border border-dashed border-stone-200 p-10 text-center text-sm text-stone-500">
+      <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
         You don&apos;t currently have an ongoing internship.
       </div>
     );

@@ -5,7 +5,7 @@ function InfoCardSkeleton({ fields = 4 }) {
   return (
     <section className="rounded-xl border border-border bg-background p-6 shadow-sm">
       <span className="flex items-center gap-2">
-        <User className="h-4 w-4 text-stone-300" />
+        <User className="h-4 w-4 text-foreground-faint" />
         <Skeleton className="h-3 w-28" />
       </span>
 

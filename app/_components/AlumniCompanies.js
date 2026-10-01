@@ -33,28 +33,28 @@ function AlumniCompanies({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex w-full items-center justify-between gap-3 px-4 sm:px-5 py-4 text-left"
       >
         <div className="min-w-0">
-          <p className="text-sm sm:text-base font-semibold text-stone-800 truncate">
+          <p className="text-sm sm:text-base font-semibold text-foreground truncate">
             {company.company_name}
           </p>
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-muted-foreground">
             {company.company_address} · {company.industry}
           </p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
+          <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground-soft">
             {company.alumni_count}{" "}
             {company.alumni_count === 1 ? "alumnus" : "alumni"}
           </span>
           <ChevronDown
             className={cx(
-              "size-4 text-stone-400 transition-transform",
+              "size-4 text-foreground-subtle transition-transform",
               isOpen && "rotate-180",
             )}
           />
@@ -62,7 +62,7 @@ function AlumniCompanies({
       </button>
 
       {isOpen && (
-        <div className="border-t border-stone-200">
+        <div className="border-t border-border">
           {company.alumni.map((a) => (
             <AlumniRow
               key={a.id}
@@ -138,17 +138,17 @@ function AlumniRow({
   }
 
   return (
-    <div className="border-t border-stone-200 first:border-t-0">
+    <div className="border-t border-border first:border-t-0">
       <div className="flex w-full items-center justify-between gap-3 px-4 sm:px-5 py-3">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-500">
+          <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-emphasis">
             {initialsOf(alumni.alumni_name)}
           </span>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-stone-800 truncate">
+            <p className="text-sm font-semibold text-foreground truncate">
               {alumni.alumni_name}
             </p>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-muted-foreground">
               {alumni.course_name}
               {batch ? ` · Batch ${batch}` : ""}
             </p>
@@ -158,12 +158,12 @@ function AlumniRow({
         {isAuthorizedStaff ? (
           <div className="flex gap-3 flex-shrink-0">
             <Modal
-              title={<span className="text-primary-500">Update Record</span>}
+              title={<span className="text-primary-emphasis">Update Record</span>}
               trigger={
                 <div
                   aria-label="Edit record"
                   title="Edit record"
-                  className="text-stone-400 hover:text-primary-500 transition-colors cursor-pointer"
+                  className="text-foreground-subtle hover:text-primary-emphasis transition-colors cursor-pointer"
                 >
                   <Pencil className="h-4 w-4" />
                 </div>
@@ -190,7 +190,7 @@ function AlumniRow({
                 <div
                   title="Delete record"
                   aria-label="Delete record"
-                  className="text-stone-400 hover:text-red-600 transition-colors cursor-pointer"
+                  className="text-foreground-subtle hover:text-red-600 transition-colors cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                 </div>

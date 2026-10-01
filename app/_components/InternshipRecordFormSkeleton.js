@@ -45,7 +45,7 @@ function InternshipRecordFormSkeleton() {
         <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-1">
             <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 flex-shrink-0 text-stone-300" />
+              <MapPin className="h-4 w-4 flex-shrink-0 text-foreground-faint" />
               <Skeleton className="h-3 w-40" />
             </span>
             <Skeleton className="h-3 w-full max-w-md" />

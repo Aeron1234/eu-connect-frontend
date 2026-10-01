@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 // Adjust this import path to wherever this server action actually lives.
@@ -21,6 +22,7 @@ import AccountSummaryCard from "./AccountSummaryCard";
 import { useUser } from "@/contexts/UserContext";
 
 export default function AccountProfile({ roleLabel, userData = {} }) {
+  const router = useRouter();
   const { user } = useUser();
   const role = user.role;
 
@@ -100,6 +102,7 @@ export default function AccountProfile({ roleLabel, userData = {} }) {
       }
 
       setIsEditing(false);
+      router.refresh();
     });
   };
 
@@ -112,7 +115,7 @@ export default function AccountProfile({ roleLabel, userData = {} }) {
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary-500 mb-4 hover:underline"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary-emphasis mb-4 hover:underline"
       >
         <ArrowLeft className="h-4 w-4" /> Back to Home
       </Link>

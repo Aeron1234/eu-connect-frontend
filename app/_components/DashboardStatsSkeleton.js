@@ -11,8 +11,8 @@ function DashboardStatsSkeleton() {
             key={i}
             className={`flex h-30 flex-col justify-between rounded-xl border p-4 shadow-sm sm:h-22 ${
               isPrimary
-                ? "border-primary-500 bg-primary-500"
-                : "border-stone-300 bg-white"
+                ? "border-primary bg-primary"
+                : "border-border bg-card"
             }`}
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

@@ -174,11 +174,11 @@ const EmployerCertificateUploads = ({
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary-emphasis flex items-center justify-center shrink-0">
           <Building2 className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-stone-800">
+          <h3 className="text-sm font-semibold text-foreground">
             Certificate of Completion
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -189,16 +189,16 @@ const EmployerCertificateUploads = ({
       </div>
 
       {/* Upload panel */}
-      <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4 sm:p-5 space-y-4">
+      <div className="rounded-xl border border-dashed border-border bg-muted/50 p-4 sm:p-5 space-y-4">
         <div
           {...getRootProps()}
           className={`w-full flex flex-col items-center justify-center gap-2 py-6 rounded-lg transition-colors cursor-pointer ${
-            isDragActive ? "bg-primary-50" : "hover:bg-stone-100"
+            isDragActive ? "bg-primary-50" : "hover:bg-muted"
           }`}
         >
           <input {...getInputProps()} disabled={isUploading} />
-          <Upload className="w-6 h-6 text-primary-500" />
-          <span className="text-sm font-medium text-stone-800">
+          <Upload className="w-6 h-6 text-primary-emphasis" />
+          <span className="text-sm font-medium text-foreground">
             {pending
               ? pending.name
               : isDragActive
@@ -220,7 +220,7 @@ const EmployerCertificateUploads = ({
               onChange={(e) => setFileName(e.target.value)}
               placeholder="e.g. Certificate of Completion"
               disabled={isUploading}
-              className="mt-1 w-full rounded-md border border-stone-300 bg-white text-stone-800 text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+              className="mt-1 w-full rounded-md border border-border bg-card text-foreground text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
             />
           </div>
           <div>
@@ -232,7 +232,7 @@ const EmployerCertificateUploads = ({
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="e.g. Accenture"
               disabled={isUploading}
-              className="mt-1 w-full rounded-md border border-stone-300 bg-white text-stone-800 text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+              className="mt-1 w-full rounded-md border border-border bg-card text-foreground text-sm px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
             />
           </div>
         </div>
@@ -241,7 +241,7 @@ const EmployerCertificateUploads = ({
           <button
             onClick={handleUpload}
             disabled={!pending || isUploading}
-            className="inline-flex items-center gap-1.5 bg-primary-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Upload className="w-4 h-4" />{" "}
             {isUploading ? "Uploading..." : "Upload file"}
@@ -252,7 +252,7 @@ const EmployerCertificateUploads = ({
                 setPending(null);
                 setFileName("");
               }}
-              className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" /> Clear
             </button>
@@ -266,9 +266,9 @@ const EmployerCertificateUploads = ({
           Uploaded files ({files.length})
         </p>
         {files.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-10 text-center">
-            <Paperclip className="w-8 h-8 text-stone-300" />
-            <p className="text-sm text-stone-500">
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
+            <Paperclip className="w-8 h-8 text-foreground-faint" />
+            <p className="text-sm text-muted-foreground">
               No certificate uploaded yet
             </p>
           </div>
@@ -276,14 +276,14 @@ const EmployerCertificateUploads = ({
           files.map((f) => (
             <div
               key={f.id}
-              className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3"
+              className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
             >
-              <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-emphasis flex items-center justify-center shrink-0">
                 <FileText className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-stone-800 truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {f.file_name}
                   </p>
                   <StatusBadge status={f.verification_status} />
@@ -297,7 +297,7 @@ const EmployerCertificateUploads = ({
               <button
                 onClick={() => handleDownload(f.id)}
                 disabled={isUploading}
-                className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-stone-800 transition-colors disabled:opacity-40"
+                className="p-1.5 rounded-md text-foreground-subtle hover:bg-muted hover:text-foreground transition-colors disabled:opacity-40"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -305,7 +305,7 @@ const EmployerCertificateUploads = ({
                 <button
                   onClick={() => handleDelete(f.id)}
                   disabled={isUploading}
-                  className="p-1.5 rounded-md text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
+                  className="p-1.5 rounded-md text-foreground-subtle hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

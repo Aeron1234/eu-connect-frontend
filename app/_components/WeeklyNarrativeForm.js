@@ -5,7 +5,7 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 
 const inputClass =
-  "mt-1 px-3 py-2 border border-stone-300 bg-white rounded-md text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+  "mt-1 px-3 py-2 border border-border bg-card rounded-md text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
 
 function WeeklyNarrativeForm({
   handleAction,
@@ -21,7 +21,7 @@ function WeeklyNarrativeForm({
 
       <div className="flex flex-col sm:flex-row gap-4">
         <label className="flex flex-col flex-1">
-          <span className="text-sm font-semibold text-stone-600">
+          <span className="text-sm font-semibold text-foreground-soft">
             Week number
           </span>
           <input
@@ -38,7 +38,7 @@ function WeeklyNarrativeForm({
         </label>
 
         <label className="flex flex-col flex-1">
-          <span className="text-sm font-semibold text-stone-600">Title</span>
+          <span className="text-sm font-semibold text-foreground-soft">Title</span>
           <input
             type="text"
             name="title"
@@ -53,7 +53,7 @@ function WeeklyNarrativeForm({
       </div>
 
       <label className="flex flex-col">
-        <span className="text-sm font-semibold text-stone-600">Narrative</span>
+        <span className="text-sm font-semibold text-foreground-soft">Narrative</span>
         <textarea
           name="narrative"
           placeholder="How was your week?"
@@ -75,7 +75,7 @@ function WeeklyNarrativeForm({
 
           <DialogClose asChild>
             <Button
-              className={`bg-primary-500 hover:bg-primary-600 w-fit ${isPending ? "pointer-events-none opacity-50" : ""}`}
+              className={`bg-primary hover:bg-primary-600 w-fit ${isPending ? "pointer-events-none opacity-50" : ""}`}
               type="submit"
               disabled={isPending}
             >

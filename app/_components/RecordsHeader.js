@@ -71,7 +71,7 @@ function RecordsHeader({ record, internshipId }) {
   }
 
   return (
-    <div className="rounded-xl bg-primary-500 p-6 text-primary-foreground">
+    <div className="rounded-xl bg-primary p-6 text-primary-foreground">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">
@@ -95,7 +95,7 @@ function RecordsHeader({ record, internshipId }) {
                 type="button"
                 onClick={() => handleStatus("ongoing")}
                 disabled={isPending}
-                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-500"
+                className="rounded-lg bg-card px-4 py-2 text-sm font-semibold text-primary-emphasis"
               >
                 Approve
               </button>
@@ -113,7 +113,7 @@ function RecordsHeader({ record, internshipId }) {
             <button
               type="button"
               onClick={() => handleStatus("restore")}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-500"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-card px-4 py-2 text-sm font-semibold text-primary-emphasis"
             >
               <RotateCcw className="h-4 w-4" /> Restore
             </button>

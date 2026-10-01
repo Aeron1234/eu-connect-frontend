@@ -25,7 +25,7 @@ function SIPPReportsManager({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-stone-200 shadow-sm p-1.5 sm:w-fit">
+      <div className="rounded-xl bg-secondary shadow-sm p-1.5 sm:w-fit">
         <TabBar tabs={scopeTabs} selectedTab={scope} onSelect={setScope} />
       </div>
 

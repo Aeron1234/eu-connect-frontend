@@ -38,7 +38,7 @@ function PastInternshipPostButton({ courses = [] }) {
         </TitleButton>
       }
       title={
-        <span className={`text-primary-500`}>
+        <span className={`text-primary-emphasis`}>
           Post alumni internship records
         </span>
       }

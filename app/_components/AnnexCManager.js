@@ -11,6 +11,7 @@ import ExportPdfButton from "./ExportPdfButton";
 import SearchBar from "./SearchBar";
 import TabBar from "./TabBar";
 import AnnualReportSkeleton from "./AnnualReportSkeleton";
+import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const emptyRow = () => ({ issue: "", solution: "", recommendation: "" });
 
@@ -59,6 +60,27 @@ export default function AnnexCManager({
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
 
+  async function refreshReports() {
+    const thisRequestId = ++requestIdRef.current;
+    setIsPending(true);
+    try {
+      const fresh = await getAnnexCReports({ academicYear: reportsYear, search: query, page: 1 });
+      if (thisRequestId !== requestIdRef.current) return;
+      if (!hasValidPage(fresh, "reports")) {
+        console.error("Error refreshing Annex C reports:", fresh?.error || "Invalid response from the server");
+        return;
+      }
+      setReports(fresh.reports);
+      setCurrentPage(1);
+      setTotalPages(fresh.pagination.totalPages || 1);
+      setTotal(fresh.pagination.total || 0);
+    } catch (error) {
+      if (thisRequestId === requestIdRef.current) console.error("Error refreshing Annex C reports:", error);
+    } finally {
+      if (thisRequestId === requestIdRef.current) setIsPending(false);
+    }
+  }
+
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
@@ -66,9 +88,9 @@ export default function AnnexCManager({
     }
 
     const thisRequestId = ++requestIdRef.current;
+    setIsPending(true);
 
     const timeout = setTimeout(async () => {
-      setIsPending(true);
       try {
         const newData = await getAnnexCReports({
           academicYear: reportsYear,
@@ -78,16 +100,12 @@ export default function AnnexCManager({
 
         if (thisRequestId !== requestIdRef.current) return;
 
-        if (newData?.error) {
-          console.error("Error loading Annex C reports:", newData.error);
-          setReports([]);
-          setTotalPages(1);
-          setTotal(0);
-          setCurrentPage(1);
+        if (!hasValidPage(newData, "reports")) {
+          console.error("Error loading Annex C reports:", newData?.error || "Invalid response from the server");
           return;
         }
 
-        setReports(newData?.reports || []);
+        setReports(newData.reports);
         setCurrentPage(1);
         setTotalPages(newData?.pagination?.totalPages || 1);
         setTotal(newData?.pagination?.total || 0);
@@ -118,12 +136,12 @@ export default function AnnexCManager({
 
       if (thisRequestId !== requestIdRef.current) return;
 
-      if (newData?.error) {
-        console.error("Error loading more Annex C reports:", newData.error);
+      if (!hasValidPage(newData, "reports", "pagination", nextPage)) {
+        console.error("Error loading more Annex C reports:", newData?.error || "Invalid response from the server");
         return;
       }
 
-      const incoming = newData?.reports || [];
+      const incoming = newData.reports;
 
       setReports((prev) => {
         const existingIds = new Set(prev.map((r) => r.id));
@@ -202,6 +220,7 @@ export default function AnnexCManager({
           setTotal((prev) => prev + 1);
         }
         setTab("reports");
+        await refreshReports();
       }
     } finally {
       setIsSaving(false);
@@ -217,78 +236,79 @@ export default function AnnexCManager({
     }
     setReports((prev) => prev.filter((r) => r.id !== reportId));
     setTotal((prev) => Math.max(0, prev - 1));
+    await refreshReports();
   }
 
   return (
     <div>
-      <div className="mb-6 rounded-xl bg-stone-200 p-1.5 sm:w-fit">
+      <div className="mb-6 rounded-xl bg-secondary p-1.5 sm:w-fit">
         <TabBar tabs={innerTabs} selectedTab={tab} onSelect={setTab} />
       </div>
 
       {tab === "form" ? (
         <div className="space-y-5">
-          <section className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm">
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-stone-800">
-              <FileText className="size-4 text-primary-500" /> Annex
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <FileText className="size-4 text-primary-emphasis" /> Annex
               &quot;C&quot; — Header Information
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Academic Year (AY) <span className="text-red-600">*</span>
                 </label>
                 <input
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
                   placeholder="e.g. 2026-2027"
-                  className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Degree Program <span className="text-red-600">*</span>
                 </label>
                 <input
                   value={degreeProgram}
                   onChange={(e) => setDegreeProgram(e.target.value)}
                   placeholder="e.g. BS Computer Science"
-                  className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                 />
               </div>
             </div>
-            <div className="mt-4 grid gap-4 rounded-lg bg-stone-50 px-4 py-3 md:grid-cols-2">
+            <div className="mt-4 grid gap-4 rounded-lg bg-muted/50 px-4 py-3 md:grid-cols-2">
               <div>
-                <p className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
+                <p className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
                   HEI
                 </p>
-                <p className="text-sm text-stone-800">{hei}</p>
+                <p className="text-sm text-foreground">{hei}</p>
               </div>
               <div>
-                <p className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
+                <p className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
                   Address
                 </p>
-                <p className="text-sm text-stone-800">{address}</p>
+                <p className="text-sm text-foreground">{address}</p>
               </div>
             </div>
           </section>
 
-          <section className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm">
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-                <FileText className="size-4 text-primary-500" /> Issues,
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <FileText className="size-4 text-primary-emphasis" /> Issues,
                 Solutions &amp; Recommendations
               </h3>
               <button
                 type="button"
                 onClick={addRow}
-                className="inline-flex items-center gap-1.5 rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-100 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground-soft hover:bg-muted transition-colors"
               >
                 <Plus className="size-3.5" /> Add Row
               </button>
             </div>
 
             {/* Column headers — only shown at sm+, where the 3-column layout applies */}
-            <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_auto] gap-3 border-b border-stone-200 pb-2 text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
+            <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_auto] gap-3 border-b border-border pb-2 text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
               <span>Issues and Concerns Encountered</span>
               <span>Solutions</span>
               <span>Recommendations</span>
@@ -299,10 +319,10 @@ export default function AnnexCManager({
               {rows.map((row, i) => (
                 <div
                   key={i}
-                  className="rounded-lg border border-stone-200 p-3 sm:border-0 sm:p-0 sm:rounded-none grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3"
+                  className="rounded-lg border border-border p-3 sm:border-0 sm:p-0 sm:rounded-none grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3"
                 >
                   <div className="flex flex-col gap-1 sm:contents">
-                    <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500 sm:hidden">
+                    <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground sm:hidden">
                       Issues and Concerns Encountered
                     </span>
                     <textarea
@@ -310,12 +330,12 @@ export default function AnnexCManager({
                       onChange={(e) => updateRow(i, "issue", e.target.value)}
                       placeholder="Describe the issue or concern..."
                       rows={2}
-                      className="rounded-md border border-stone-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                      className="rounded-md border border-border bg-card p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1 sm:contents">
-                    <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500 sm:hidden">
+                    <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground sm:hidden">
                       Solutions
                     </span>
                     <textarea
@@ -323,12 +343,12 @@ export default function AnnexCManager({
                       onChange={(e) => updateRow(i, "solution", e.target.value)}
                       placeholder="Describe the solution applied..."
                       rows={2}
-                      className="rounded-md border border-stone-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                      className="rounded-md border border-border bg-card p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1 sm:contents">
-                    <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500 sm:hidden">
+                    <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground sm:hidden">
                       Recommendations
                     </span>
                     <textarea
@@ -338,14 +358,14 @@ export default function AnnexCManager({
                       }
                       placeholder="Recommendations for improvement..."
                       rows={2}
-                      className="rounded-md border border-stone-300 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                      className="rounded-md border border-border bg-card p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                     />
                   </div>
 
                   <button
                     type="button"
                     onClick={() => removeRow(i)}
-                    className="self-start sm:self-start text-stone-400 hover:text-red-600 transition-colors justify-self-end sm:justify-self-auto"
+                    className="self-start sm:self-start text-foreground-subtle hover:text-red-600 transition-colors justify-self-end sm:justify-self-auto"
                     title="Remove row"
                   >
                     <Trash2 className="size-4" />
@@ -355,13 +375,13 @@ export default function AnnexCManager({
             </div>
           </section>
 
-          <section className="rounded-xl border border-stone-300 bg-white p-4 sm:p-5 shadow-sm">
-            <h3 className="mb-4 text-sm font-semibold text-stone-800">
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm">
+            <h3 className="mb-4 text-sm font-semibold text-foreground">
               Signatories
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Prepared By (Name &amp; Position){" "}
                   <span className="text-red-600">*</span>
                 </label>
@@ -369,18 +389,18 @@ export default function AnnexCManager({
                   value={preparedBy}
                   onChange={(e) => setPreparedBy(e.target.value)}
                   placeholder="Full name of the preparer"
-                  className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500">
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Certified Correct (Name &amp; Position)
                 </label>
                 <input
                   value={certifiedBy}
                   onChange={(e) => setCertifiedBy(e.target.value)}
                   placeholder="Full name of the certifier"
-                  className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                 />
               </div>
             </div>
@@ -397,7 +417,7 @@ export default function AnnexCManager({
               type="button"
               onClick={() => handleSubmit("draft")}
               disabled={isSaving}
-              className="rounded-md border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors disabled:opacity-50"
+              className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground-soft hover:bg-muted transition-colors disabled:opacity-50"
             >
               Save Draft
             </button>
@@ -405,7 +425,7 @@ export default function AnnexCManager({
               type="button"
               onClick={() => handleSubmit("submitted")}
               disabled={isSaving}
-              className="inline-flex items-center gap-2 rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Submit Annex C"}
             </button>
@@ -429,8 +449,8 @@ export default function AnnexCManager({
                   onClick={() => setReportsYear(ay === "All" ? "" : ay)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                     (ay === "All" && !reportsYear) || reportsYear === ay
-                      ? "bg-primary-500 text-primary-foreground"
-                      : "bg-stone-200 text-muted-foreground hover:text-primary-500"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-muted-foreground hover:text-primary-emphasis"
                   }`}
                 >
                   {ay}
@@ -442,26 +462,26 @@ export default function AnnexCManager({
           {isPending ? (
             <AnnualReportSkeleton />
           ) : reports.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 sm:py-20 text-center">
-              <ClipboardList className="size-8 text-stone-300" />
-              <p className="text-sm text-stone-500">No reports found</p>
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
+              <ClipboardList className="size-8 text-foreground-faint" />
+              <p className="text-sm text-muted-foreground">No reports found</p>
             </div>
           ) : (
             reports.map((r) => (
               <section
                 key={r.id}
-                className="overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm"
+                className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
               >
-                <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 px-4 sm:px-5 py-4">
+                <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 sm:px-5 py-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-primary-500">
+                    <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-primary-emphasis">
                       <FileText className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-stone-800">
+                      <p className="text-sm font-semibold text-foreground">
                         Annex &quot;C&quot; — SIPP Annual Report
                       </p>
-                      <p className="text-xs text-stone-500 truncate">
+                      <p className="text-xs text-muted-foreground truncate">
                         AY {r.academic_year} · {r.degree_program} ·{" "}
                         {r.submitted_at
                           ? `Submitted ${new Date(r.submitted_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`
@@ -479,7 +499,7 @@ export default function AnnexCManager({
                     />
                     <button
                       onClick={() => handleDelete(r.id)}
-                      className="rounded-md p-2 text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="rounded-md p-2 text-foreground-subtle hover:bg-red-50 hover:text-red-600 transition-colors"
                       title="Delete report"
                     >
                       <Trash2 className="size-4" />
@@ -489,15 +509,15 @@ export default function AnnexCManager({
 
                 <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 text-sm">
                   <p>
-                    <span className="text-stone-500">Degree Program: </span>
-                    <span className="font-semibold text-stone-800">
+                    <span className="text-muted-foreground">Degree Program: </span>
+                    <span className="font-semibold text-foreground">
                       {r.degree_program}
                     </span>
                   </p>
                   {r.prepared_by && (
-                    <p className="text-stone-500">
+                    <p className="text-muted-foreground">
                       Prepared By:{" "}
-                      <span className="text-stone-800">{r.prepared_by}</span>
+                      <span className="text-foreground">{r.prepared_by}</span>
                     </p>
                   )}
                 </div>
@@ -506,7 +526,7 @@ export default function AnnexCManager({
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[560px] text-sm">
                       <thead>
-                        <tr className="border-t border-b border-stone-200 text-left text-[0.65rem] uppercase tracking-wider text-stone-500">
+                        <tr className="border-t border-b border-border text-left text-[0.65rem] uppercase tracking-wider text-muted-foreground">
                           <th className="px-4 sm:px-5 py-3 font-medium">
                             Issues &amp; Concerns
                           </th>
@@ -522,15 +542,15 @@ export default function AnnexCManager({
                         {r.entries.map((e, i) => (
                           <tr
                             key={i}
-                            className="border-b border-stone-200 last:border-0"
+                            className="border-b border-border last:border-0"
                           >
-                            <td className="px-4 sm:px-5 py-3 text-stone-700">
+                            <td className="px-4 sm:px-5 py-3 text-foreground">
                               {e.issue}
                             </td>
-                            <td className="px-4 sm:px-5 py-3 text-stone-700">
+                            <td className="px-4 sm:px-5 py-3 text-foreground">
                               {e.solution}
                             </td>
-                            <td className="px-4 sm:px-5 py-3 text-stone-700">
+                            <td className="px-4 sm:px-5 py-3 text-foreground">
                               {e.recommendation}
                             </td>
                           </tr>
@@ -547,7 +567,7 @@ export default function AnnexCManager({
             <div className="text-center">
               <button
                 onClick={handleSeeMore}
-                className="text-sm font-semibold text-stone-600 hover:text-primary-500 transition-colors"
+                className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition-colors"
               >
                 See more
               </button>

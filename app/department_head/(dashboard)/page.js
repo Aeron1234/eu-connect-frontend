@@ -37,7 +37,7 @@ function getActivityVisual(action = "") {
     if (action.includes("deleted"))
       return { icon: Trash2, color: "text-red-600" };
     if (action.includes("pinned"))
-      return { icon: Pin, color: "text-primary-500" };
+      return { icon: Pin, color: "text-primary-emphasis" };
     return { icon: Bell, color: "text-blue-600" };
   }
   if (action.includes("evaluation")) {
@@ -102,13 +102,13 @@ async function DepartmentHeadDashboardPage() {
         <EvaluationScoresChart
           title="Student Evaluations"
           description="Average score per category, rated by employers/supervisors"
-          icon={<UserCheck className="w-4 h-4 text-primary-500" />}
+          icon={<UserCheck className="w-4 h-4 text-primary-emphasis" />}
           data={studentEvalScores}
         />
         <EvaluationScoresChart
           title="Employer Evaluations"
           description="Average score per category, rated by students"
-          icon={<Building2 className="w-4 h-4 text-primary-500" />}
+          icon={<Building2 className="w-4 h-4 text-primary-emphasis" />}
           data={employerEvalScores}
         />
       </div>

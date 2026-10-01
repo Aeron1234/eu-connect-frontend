@@ -390,7 +390,7 @@ function CreateAccountForm({ roles, courses, departments, onCreated }) {
 
       <div className="h-full flex items-end justify-end mt-4">
         <button
-          className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
           disabled={isPending}
         >
           {isPending ? (

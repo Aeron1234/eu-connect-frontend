@@ -48,14 +48,14 @@ function InternshipApprovalForm({ approvalData }) {
   return (
     <form className="w-full" action={handleAction}>
       <div className="flex flex-col gap-4 text-xs h-full max-h-125 overflow-y-auto pr-2">
-        <div className="flex-1 flex flex-col px-4 py-2 border border-stone-300 rounded-sm">
+        <div className="flex-1 flex flex-col px-4 py-2 border border-border rounded-sm">
           <h3 className="flex items-center gap-4 py-2">
-            <span className="text-primary-500">
+            <span className="text-primary-emphasis">
               <User className="h-5 w-5" />
             </span>
             <span className="text-sm">{`${first_name} ${last_name}`}</span>
           </h3>
-          <p className="text-stone-500 font-medium tracking-wide">
+          <p className="text-muted-foreground font-medium tracking-wide">
             {course_name}
           </p>
         </div>
@@ -106,7 +106,7 @@ function InternshipApprovalForm({ approvalData }) {
           </Button>
 
           <Button
-            className={"bg-primary-500 hover:bg-primary-400 w-fit "}
+            className={"bg-primary hover:bg-primary-400 w-fit "}
             type="submit"
             onClick={() => setStatus("ongoing")}
             disabled={isPending}
@@ -131,8 +131,8 @@ function InternshipApprovalForm({ approvalData }) {
 
 function NotificationInfo({ label, text }) {
   return (
-    <div className="flex-1 flex flex-col px-4 py-2 border border-stone-300 rounded-sm">
-      <span className="text-stone-500 tracking-wide">{label}</span>
+    <div className="flex-1 flex flex-col px-4 py-2 border border-border rounded-sm">
+      <span className="text-muted-foreground tracking-wide">{label}</span>
       <p className="font-medium">{text}</p>
     </div>
   );

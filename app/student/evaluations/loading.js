@@ -10,7 +10,7 @@ function EvaluationsLoading() {
       <div className="space-y-2">
         <TabBarSkeleton tabs={4} />
 
-        <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 mt-2 mb-8">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mt-2 mb-8">
           <EvaluationCriteriaSkeleton />
         </div>
       </div>

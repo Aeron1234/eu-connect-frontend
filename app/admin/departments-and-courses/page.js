@@ -18,8 +18,8 @@ async function DepartmentsAndCoursesPage() {
 
   return (
     <DepartmentsAndCoursesManager
-      initialCourses={courses}
-      initialDepartments={departments}
+      initialCourses={courses || []}
+      initialDepartments={departments || []}
     />
   );
 }

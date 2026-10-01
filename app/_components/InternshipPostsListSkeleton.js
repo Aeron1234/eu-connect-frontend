@@ -3,7 +3,7 @@ import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
 
 function InternshipPostsListSkeleton() {
   return (
-    <article className="rounded-xl border border-stone-300 bg-white p-4 sm:p-6 shadow-sm">
+    <article className="rounded-xl border border-border bg-card p-4 sm:p-6 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 gap-3 sm:gap-4">
           <Skeleton className="h-10 w-10 flex-shrink-0 rounded-lg" />
@@ -26,11 +26,11 @@ function InternshipPostsListSkeleton() {
 
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
         <span className="flex items-center gap-1.5">
-          <MapPin className="h-3.5 w-3.5 text-stone-300" />
+          <MapPin className="h-3.5 w-3.5 text-foreground-faint" />
           <Skeleton className="h-2.5 w-20" />
         </span>
         <span className="flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5 text-stone-300" />
+          <Clock className="h-3.5 w-3.5 text-foreground-faint" />
           <Skeleton className="h-2.5 w-16" />
         </span>
         <Skeleton className="h-4 w-14 rounded-md" />
@@ -45,20 +45,20 @@ function InternshipPostsListSkeleton() {
         </div>
       </div>
 
-      <div className="mt-5 border-t border-stone-200 pt-4">
+      <div className="mt-5 border-t border-border pt-4">
         <Skeleton className="h-2.5 w-28" />
         <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2">
           <Skeleton className="h-3 w-28" />
           <span className="flex items-center gap-1.5">
-            <Mail className="h-3.5 w-3.5 text-stone-300" />
+            <Mail className="h-3.5 w-3.5 text-foreground-faint" />
             <Skeleton className="h-2.5 w-32" />
           </span>
           <span className="flex items-center gap-1.5">
-            <Phone className="h-3.5 w-3.5 text-stone-300" />
+            <Phone className="h-3.5 w-3.5 text-foreground-faint" />
             <Skeleton className="h-2.5 w-24" />
           </span>
           <span className="flex items-center gap-1.5">
-            <Globe className="h-3.5 w-3.5 text-stone-300" />
+            <Globe className="h-3.5 w-3.5 text-foreground-faint" />
             <Skeleton className="h-2.5 w-28" />
           </span>
         </div>

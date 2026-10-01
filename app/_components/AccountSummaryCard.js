@@ -13,7 +13,7 @@ export default function AccountSummaryCard({ roleLabel, status, email }) {
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-muted-foreground">Status</dt>
-          <dd className="font-medium text-primary-500">{status}</dd>
+          <dd className="font-medium text-primary-emphasis">{status}</dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-muted-foreground">Email</dt>

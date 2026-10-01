@@ -31,10 +31,10 @@ function InternsSupervisedCard({ interns = [] }) {
         );
 
   return (
-    <div className="h-full rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="h-full rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-          <Users className="w-4 h-4 text-primary-500" />
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Users className="w-4 h-4 text-primary-emphasis" />
           Interns You Supervised
         </h3>
         <div className="flex items-center gap-1.5">
@@ -44,8 +44,8 @@ function InternsSupervisedCard({ interns = [] }) {
               onClick={() => setActiveFilter(f)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 activeFilter === f
-                  ? "bg-primary-500 text-white"
-                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  ? "bg-primary text-white"
+                  : "bg-muted text-foreground-soft hover:bg-secondary"
               }`}
             >
               {f}
@@ -63,7 +63,7 @@ function InternsSupervisedCard({ interns = [] }) {
           filteredInterns.map((intern, i) => (
             <div
               key={i}
-              className="flex items-center justify-between gap-4 rounded-lg border border-stone-200 p-4 w-xl md:w-full"
+              className="flex items-center justify-between gap-4 rounded-lg border border-border p-4 w-xl md:w-full"
             >
               <div className="flex items-start gap-3 min-w-0">
                 <div className="w-10 h-10 flex-shrink-0 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center text-xs font-semibold">
@@ -75,7 +75,7 @@ function InternsSupervisedCard({ interns = [] }) {
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-stone-800">
+                    <p className="text-sm font-semibold text-foreground">
                       {intern.name}
                     </p>
                     <span
@@ -90,7 +90,7 @@ function InternsSupervisedCard({ interns = [] }) {
                   >
                     {intern.role} · {intern.program}
                   </p>
-                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-stone-600">
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-foreground-soft">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
                       {formatDate(intern.startDate)}
@@ -108,7 +108,7 @@ function InternsSupervisedCard({ interns = [] }) {
               </div>
               <Link
                 href={`/users/${intern.id}`}
-                className="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-primary-500 hover:text-primary-600 transition-colors"
+                className="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-primary-emphasis hover:text-primary-600 transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" />
                 View profile

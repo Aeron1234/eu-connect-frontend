@@ -38,12 +38,13 @@ function companyNameInitials(companyName) {
     : initials.slice(0, 3).toLocaleUpperCase();
 }
 
-function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
+function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete, onFavoriteSettled }) {
   const [isPending, startTransition] = useTransition();
   const { isFavorited, toggle: toggleFavorite } = useFavoriteToggle(
     item.id,
     item.isFavorited,
     toggleInternshipFavorite,
+    onFavoriteSettled,
   );
 
   function handleDelete(formData) {
@@ -84,16 +85,16 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
   const canEdit = item.isOwner;
 
   return (
-    <article className="rounded-xl border border-stone-300 bg-white p-4 sm:p-6 shadow-sm">
+    <article className="rounded-xl border border-border bg-card p-4 sm:p-6 shadow-sm">
       {/* Header row: avatar + title/company, edit/delete pinned top-right */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 gap-3 sm:gap-4">
-          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-500 text-xs font-bold">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-emphasis text-xs font-bold">
             {companyNameInitials(item.company_name)}
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base sm:text-lg font-semibold sm:font-bold text-stone-800">
+              <h2 className="text-base sm:text-lg font-semibold sm:font-bold text-foreground">
                 {item.position}
               </h2>
               {item.isOwner && (
@@ -102,7 +103,7 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-sm text-stone-500">{item.company_name}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{item.company_name}</p>
           </div>
         </div>
 
@@ -113,13 +114,13 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
                 trigger={
                   <div
                     aria-label={`Edit ${item.position}`}
-                    className="p-1.5 rounded-md text-stone-400 hover:bg-stone-100 hover:text-primary-500 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md text-foreground-subtle hover:bg-muted hover:text-primary-emphasis transition-colors cursor-pointer"
                   >
                     <Pencil className="h-4 w-4" />
                   </div>
                 }
                 title={
-                  <span className="text-primary-500">
+                  <span className="text-primary-emphasis">
                     Update internship post
                   </span>
                 }
@@ -139,13 +140,13 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
                 trigger={
                   <div
                     aria-label={`Delete ${item.position}`}
-                    className="p-1.5 rounded-md text-stone-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md text-foreground-subtle hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </div>
                 }
                 title={
-                  <span className="text-primary-500">
+                  <span className="text-primary-emphasis">
                     Delete internship post
                   </span>
                 }
@@ -170,8 +171,8 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
         >
           {item.work_type}
         </span>
-        <span className="flex items-center gap-1.5 text-sm text-stone-600">
-          <Users className="h-4 w-4 text-stone-400" /> {item.vacancies}{" "}
+        <span className="flex items-center gap-1.5 text-sm text-foreground-soft">
+          <Users className="h-4 w-4 text-foreground-subtle" /> {item.vacancies}{" "}
           vacancies
         </span>
 
@@ -182,7 +183,7 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
               isFavorited
                 ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                : "bg-primary-500 text-white hover:bg-primary-600"
+                : "bg-primary text-white hover:bg-primary-600"
             }`}
           >
             {isFavorited && <Check className="h-3.5 w-3.5" />}
@@ -191,9 +192,9 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
         )}
       </div>
 
-      <p className="mt-4 text-sm text-stone-700">{item.description}</p>
+      <p className="mt-4 text-sm text-foreground">{item.description}</p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-stone-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5" /> {item.location}
         </span>
@@ -202,11 +203,11 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
         </span>
         {item.courses.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="font-medium text-stone-600">Course:</span>
+            <span className="font-medium text-foreground-soft">Course:</span>
             {item.courses.map((c) => (
               <span
                 key={c.id}
-                className="rounded-md bg-stone-100 px-2 py-0.5 text-stone-700"
+                className="rounded-md bg-muted px-2 py-0.5 text-foreground"
               >
                 {c.shortName}
               </span>
@@ -219,12 +220,12 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
       </div>
 
       <div className="mt-4">
-        <p className="text-xs font-semibold text-stone-600">Requirements:</p>
+        <p className="text-xs font-semibold text-foreground-soft">Requirements:</p>
         <ul className="mt-2 space-y-1.5">
           {item.requirements.split("\n").map((r, i) => (
             <li
               key={i}
-              className="flex items-start gap-2 text-sm text-stone-700"
+              className="flex items-start gap-2 text-sm text-foreground"
             >
               <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-stone-400" />
               {r}
@@ -233,21 +234,21 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
         </ul>
       </div>
 
-      <div className="mt-5 border-t border-stone-200 pt-4">
-        <p className="text-xs font-semibold text-stone-500">Contact Details:</p>
+      <div className="mt-5 border-t border-border pt-4">
+        <p className="text-xs font-semibold text-muted-foreground">Contact Details:</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-          <span className="font-medium text-stone-800">
+          <span className="font-medium text-foreground">
             {item.contact_name}
           </span>
           <a
             href={`mailto:${item.contact_email}`}
-            className="flex items-center gap-1.5 text-stone-500 hover:text-primary-500 transition-colors"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-emphasis transition-colors"
           >
             <Mail className="h-3.5 w-3.5" /> {item.contact_email}
           </a>
           <a
             href={`tel:${item.contact_phone.replace(/[^\d+]/g, "")}`}
-            className="flex items-center gap-1.5 text-stone-500 hover:text-primary-500 transition-colors"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-emphasis transition-colors"
           >
             <Phone className="h-3.5 w-3.5" /> {item.contact_phone}
           </a>
@@ -256,7 +257,7 @@ function InternshipPostsList({ item, userRole, courses, onUpdate, onDelete }) {
             href={`https://${item.contact_website}`}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 text-stone-500 hover:text-primary-500 transition-colors"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-emphasis transition-colors"
           >
             <Globe className="h-3.5 w-3.5" /> {item.contact_website}
           </a>

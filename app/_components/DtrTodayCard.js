@@ -14,7 +14,7 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
   return (
-    <section className="rounded-xl bg-primary-500 text-white p-5 sm:p-6 shadow-sm overflow-hidden">
+    <section className="rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm overflow-hidden">
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] uppercase tracking-widest text-primary-foreground/70">
@@ -76,14 +76,14 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
             <Modal
               trigger={
                 <div
-                  className="self-start md:self-auto flex-shrink-0 flex items-center gap-2 px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90 whitespace-nowrap"
+                  className="self-start md:self-auto flex-shrink-0 flex items-center gap-2 px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-emphasis bg-card hover:bg-primary/15 whitespace-nowrap"
                   title={"Finish this internship record."}
                 >
                   Finish Internship Record
                 </div>
               }
               title={
-                <span className={`text-primary-500`}>
+                <span className={`text-primary-emphasis`}>
                   Finish this internship record?
                 </span>
               }
@@ -100,7 +100,7 @@ function DtrTodayCard({ internshipData, status, dtrToday = {} }) {
           )
         ) : (
           <Link
-            className="self-start md:self-auto flex-shrink-0 flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-500 bg-white hover:bg-primary-50/90"
+            className="self-start md:self-auto flex-shrink-0 flex items-center gap-2  px-3 py-2.5 xl:py-2.5 xl:px-5 rounded-md text-sm font-semibold transition-colors text-primary-emphasis bg-card hover:bg-primary/15"
             href="/student/internship-record"
             title="Create internship record"
           >

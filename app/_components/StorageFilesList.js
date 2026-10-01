@@ -65,9 +65,9 @@ function StorageFilesList({ params, internshipFiles }) {
         </div>
       </div>
 
-      <h3 className="flex items-center gap-1 text-stone-500 font-semibold">
+      <h3 className="flex items-center gap-1 text-muted-foreground font-semibold">
         <span>
-          <FolderOpen className="h-5 w-5 text-primary-500" />
+          <FolderOpen className="h-5 w-5 text-primary-emphasis" />
         </span>
         My Documents
       </h3>

@@ -2,12 +2,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function RecentActivityCardSkeleton({ rows = 5 }) {
   return (
-    <div className="h-full rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6">
+    <div className="h-full rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Skeleton className="w-4 h-4 rounded" />
         <Skeleton className="h-3.5 w-32" />
       </div>
-      <ul className="divide-y divide-stone-300">
+      <ul className="divide-y divide-border">
         {Array.from({ length: rows }).map((_, i) => (
           <li
             key={i}

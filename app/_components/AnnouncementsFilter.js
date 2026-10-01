@@ -21,8 +21,8 @@ function AnnouncementsFilter({ categories, category, setCategory }) {
           className={cx(
             "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
             category === "all"
-              ? "text-white bg-primary-500"
-              : "hover:bg-stone-200",
+              ? "text-white bg-primary"
+              : "hover:bg-secondary",
           )}
         >
           All
@@ -39,8 +39,8 @@ function AnnouncementsFilter({ categories, category, setCategory }) {
                   className={cx(
                     "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                     category === value
-                      ? "text-white bg-primary-500"
-                      : "hover:bg-stone-200",
+                      ? "text-white bg-primary"
+                      : "hover:bg-secondary",
                   )}
                 >
                   {cat.name}

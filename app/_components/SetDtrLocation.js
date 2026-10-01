@@ -72,14 +72,14 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
   const defaultCoords = useMemo(() => [loc.lat, loc.lon], [loc.lat, loc.lon]);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 sm:p-6 mt-4 space-y-4">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mt-4 space-y-4">
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-primary-500/10 text-primary-500">
+        <div className="p-2 rounded-lg bg-primary/10 text-primary-emphasis">
           <MapPin className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-stone-800">DTR Location</h3>
-          <p className="text-xs text-stone-600 mt-0.5">
+          <h3 className="text-sm font-semibold text-foreground">DTR Location</h3>
+          <p className="text-xs text-foreground-soft mt-0.5">
             Set the on-site location where the student is allowed to record
             their DTR — both clock-in and clock-out must be done within the
             allowed radius. Tap the map to drop a pin, then adjust the radius.
@@ -99,28 +99,28 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
         />
       </div>
 
-      <div className="bg-stone-100 rounded-xl p-3">
-        <p className="text-xs text-stone-600">Address</p>
-        <p className="mt-0.5 text-sm font-medium text-stone-800">
+      <div className="bg-muted rounded-xl p-3">
+        <p className="text-xs text-foreground-soft">Address</p>
+        <p className="mt-0.5 text-sm font-medium text-foreground">
           {loc.address ? loc.address : "—"}
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-stone-100 rounded-xl p-3">
-          <p className="text-xs text-stone-600">Latitude</p>
-          <p className="text-sm font-medium text-stone-800 mt-0.5">
+        <div className="bg-muted rounded-xl p-3">
+          <p className="text-xs text-foreground-soft">Latitude</p>
+          <p className="text-sm font-medium text-foreground mt-0.5">
             {loc.lat ? loc.lat : "—"}
           </p>
         </div>
-        <div className="bg-stone-100 rounded-xl p-3">
-          <p className="text-xs text-stone-600">Longitude</p>
-          <p className="text-sm font-medium text-stone-800 mt-0.5">
+        <div className="bg-muted rounded-xl p-3">
+          <p className="text-xs text-foreground-soft">Longitude</p>
+          <p className="text-sm font-medium text-foreground mt-0.5">
             {loc.lon ? loc.lon : "—"}
           </p>
         </div>
-        <div className="bg-stone-100 rounded-xl p-3">
-          <label className="text-xs text-stone-600" htmlFor="radius">
+        <div className="bg-muted rounded-xl p-3">
+          <label className="text-xs text-foreground-soft" htmlFor="radius">
             Allowed radius (m)
           </label>
           <input
@@ -132,13 +132,13 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
             disabled={(!loc.lat && !loc.lon) || isPending}
             defaultValue={radius || 150}
             onChange={(e) => loc.lat && loc.lon && setRadius(e.target.value)}
-            className="mt-0.5 w-full bg-transparent text-sm font-medium text-stone-800 focus:outline-none disabled:opacity-50"
+            className="mt-0.5 w-full bg-transparent text-sm font-medium text-foreground focus:outline-none disabled:opacity-50"
           />
         </div>
       </div>
 
       <div>
-        <label className="text-xs text-stone-600">Location label</label>
+        <label className="text-xs text-foreground-soft">Location label</label>
         <input
           type="text"
           disabled={(!loc.lat && !loc.lon) || isPending}
@@ -147,12 +147,12 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
             loc.lat && loc.lon && setLoc({ ...loc, label: e.target.value })
           }
           placeholder="e.g. Main Office - 3rd Floor"
-          className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:opacity-50"
+          className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary disabled:opacity-50"
         />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-        <div className="flex items-center gap-2 text-xs text-stone-600">
+        <div className="flex items-center gap-2 text-xs text-foreground-soft">
           <Crosshair className="w-3.5 h-3.5" />
           {loc ? (
             <span>
@@ -174,7 +174,7 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
           <button
             onClick={handleSetLocation}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium bg-primary-500 text-white hover:bg-primary-500/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" /> Save location
           </button>

@@ -39,22 +39,22 @@ const CalendarWidget = () => {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
-    <div className="w-full max-w-sm bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+    <div className="w-full max-w-sm bg-card rounded-lg border border-border shadow-sm p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 px-1">
-        <h3 className="text-sm font-bold text-slate-800 tracking-tight">
+        <h3 className="text-sm font-bold text-foreground tracking-tight">
           {monthName} {year}
         </h3>
         <div className="flex gap-1">
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 transition-colors"
+            className="p-1.5 rounded-md hover:bg-accent text-muted-foreground transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 transition-colors"
+            className="p-1.5 rounded-md hover:bg-accent text-muted-foreground transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -65,7 +65,7 @@ const CalendarWidget = () => {
         {DAYS.map((d) => (
           <div
             key={d}
-            className="text-[11px] font-semibold text-slate-400 text-center uppercase tracking-wider py-2"
+            className="text-[11px] font-semibold text-foreground-subtle text-center uppercase tracking-wider py-2"
           >
             {d}
           </div>
@@ -84,8 +84,8 @@ const CalendarWidget = () => {
                   ${!day ? "pointer-events-none" : ""}
                   ${
                     isToday
-                      ? "bg-primary-500 text-white font-bold"
-                      : "text-slate-600"
+                      ? "bg-primary text-white font-bold"
+                      : "text-foreground-soft"
                   }
                 `}
               >

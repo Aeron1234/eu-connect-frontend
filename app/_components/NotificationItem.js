@@ -43,7 +43,7 @@ const TYPE_META = {
 };
 
 const TONE_STYLES = {
-  primary: "bg-primary-500/10 text-primary-500",
+  primary: "bg-primary/10 text-primary-emphasis",
   success: "bg-emerald-50 text-emerald-600",
   destructive: "bg-red-50 text-red-600",
   muted: "bg-secondary text-muted-foreground",
@@ -69,7 +69,7 @@ function getTargetPath(item, route) {
   return route;
 }
 
-function NotificationItem({ item, notifications, setNotifications }) {
+function NotificationItem({ item, onChanged }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -97,12 +97,6 @@ function NotificationItem({ item, notifications, setNotifications }) {
   const route = TYPE_ROUTES[item.type];
   const isClickable = !isActionable && (!item.is_read || Boolean(route));
 
-  function updateItem(patch) {
-    setNotifications(
-      notifications.map((n) => (n.id === item.id ? { ...n, ...patch } : n)),
-    );
-  }
-
   function handleOpen() {
     if (isActionable) return;
 
@@ -116,18 +110,15 @@ function NotificationItem({ item, notifications, setNotifications }) {
       // read properties of undefined (reading 'startTime')" crash — a
       // known web-vitals/INP timing bug when the clicked element gets
       // removed before its interaction entry finishes being read.
-      if (!item.is_read) markAsRead(item.id);
+      if (!item.is_read) {
+        void markAsRead(item.id).then(() => onChanged?.());
+      }
       router.push(targetPath);
       return;
     }
 
     if (!item.is_read) {
-      // Optimistic — don't block the UI on this, and don't toast it; marking
-      // read is background housekeeping, not an action worth interrupting
-      // for. markAsRead already calls revalidatePath("/notifications") on
-      // success, which the list's merge effect will pick up on its own.
-      updateItem({ is_read: true });
-      markAsRead(item.id);
+      void markAsRead(item.id).then(() => onChanged?.());
     }
   }
 
@@ -151,8 +142,8 @@ function NotificationItem({ item, notifications, setNotifications }) {
 
       if (result?.success) {
         setRespondedOverride(false);
-        updateItem({ is_read: true });
       }
+      onChanged?.();
     });
   }
 
@@ -162,23 +153,17 @@ function NotificationItem({ item, notifications, setNotifications }) {
     const formData = new FormData();
     formData.append("notificationId", item.id);
 
-    // Optimistic: remove immediately, keep the full previous list so a
-    // failed delete can be rolled back exactly, not just re-inserted
-    // somewhere approximate.
-    const previousNotifications = notifications;
-    setNotifications(notifications.filter((n) => n.id !== item.id));
-
     startDeleteTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel: "Deleting notification...",
-        successLabel: "Notification deleted.",
-        errorLabel: "Failed to delete notification.",
-        action: deleteNotification,
-        formData,
-      });
-
-      if (!result?.success) {
-        setNotifications(previousNotifications);
+      try {
+        await toastAndAction({
+          loadingLabel: "Deleting notification...",
+          successLabel: "Notification deleted.",
+          errorLabel: "Failed to delete notification.",
+          action: deleteNotification,
+          formData,
+        });
+      } finally {
+        onChanged?.();
       }
     });
   }
@@ -207,7 +192,7 @@ function NotificationItem({ item, notifications, setNotifications }) {
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-semibold text-foreground">{item.title}</p>
           {!item.is_read && (
-            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary-500" />
+            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
           )}
         </div>
 
@@ -228,7 +213,7 @@ function NotificationItem({ item, notifications, setNotifications }) {
               type="button"
               onClick={() => handleRespond("accept")}
               disabled={isPending}
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
               <Check className="size-3.5" /> Accept
             </button>

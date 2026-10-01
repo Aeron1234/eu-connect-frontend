@@ -9,14 +9,14 @@ const tabs = [
 
 function EmployerEvaluationsFilter({ filter }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-xl border border-stone-200 bg-white shadow-sm p-1.5">
+    <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border bg-card shadow-sm p-1.5">
       {tabs.map((t) => (
         <Link
           key={t.label}
           href={`/student/evaluations?filter=${t.value}`}
           className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
             filter === t.value
-              ? "bg-primary-500 text-primary-foreground"
+              ? "bg-primary text-primary-foreground"
               : "text-foreground/70 hover:bg-accent"
           }`}
         >

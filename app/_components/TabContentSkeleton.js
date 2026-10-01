@@ -29,7 +29,7 @@ function TabContentSkeleton({ tab, userRole }) {
     return (
       <>
         {userRole === "employer" && (
-          <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6 mb-6">
+          <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mb-6">
             <EvaluationCriteriaSkeleton />
           </div>
         )}
@@ -45,7 +45,7 @@ function TabContentSkeleton({ tab, userRole }) {
   // "info" — included for completeness, though the real manager never
   // sets isPending for this tab since info is already resolved up front.
   return (
-    <div className="bg-white rounded-xl border border-stone-300 shadow-sm p-4 sm:p-6">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
       <ProfileInfoGridSkeleton />
     </div>
   );

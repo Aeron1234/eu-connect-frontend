@@ -18,7 +18,7 @@ function AcademicYearFilter({ academicYears = [], value, onChange }) {
       onValueChange={onChange}
       options={options}
       placeholder="Academic Year"
-      className="bg-white p-2 flex-1 sm:flex-0 rounded-md"
+      className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
     />
   );
 }

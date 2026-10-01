@@ -7,10 +7,11 @@ import {
 } from "@/lib/server-actions/history-actions";
 import UserCard from "./UserCard";
 
-function SearchedUsersHistoryList({ historyData = [] }) {
+function SearchedUsersHistoryList({ historyData = [], onDelete, onClear }) {
   async function handleClearHistory() {
     try {
-      await clearSearchHistory({ type: "user" });
+      const result = await clearSearchHistory({ type: "user" });
+      if (result.success) onClear();
     } catch (err) {
       console.error(err);
     }
@@ -18,13 +19,13 @@ function SearchedUsersHistoryList({ historyData = [] }) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-2 justify-between text-stone-500 mb-2">
+      <div className="flex items-center gap-2 justify-between text-muted-foreground mb-2">
         <h3 className="flex items-center gap-1">
-          <History className="h-4 w-4 text-primary-500" /> Recently Viewed
+          <History className="h-4 w-4 text-primary-emphasis" /> Recently Viewed
         </h3>
 
         <button
-          className="hover:text-stone-800 cursor-pointer text-sm"
+          className="hover:text-foreground cursor-pointer text-sm"
           onClick={handleClearHistory}
         >
           clear all
@@ -34,7 +35,7 @@ function SearchedUsersHistoryList({ historyData = [] }) {
         <ul className="w-full flex flex-col gap-2">
           {historyData.map((history) => (
             <li className="w-full" key={history.history_id}>
-              <SearchedUserHistoryItem history={history} />
+              <SearchedUserHistoryItem history={history} onDelete={onDelete} />
             </li>
           ))}
         </ul>
@@ -43,13 +44,14 @@ function SearchedUsersHistoryList({ historyData = [] }) {
   );
 }
 
-function SearchedUserHistoryItem({ history }) {
+function SearchedUserHistoryItem({ history, onDelete }) {
   async function handleDelete() {
     try {
-      await deleteSearchHistoryItem({
+      const result = await deleteSearchHistoryItem({
         type: "user",
         historyId: history.history_id,
       });
+      if (result.success) onDelete(history.history_id);
     } catch (err) {
       console.error(err);
     }
@@ -73,7 +75,7 @@ function SearchedUserHistoryItem({ history }) {
             e.stopPropagation();
             handleDelete();
           }}
-          className="absolute top-3 right-3 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-stone-100 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-3 right-3 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
           aria-label="Remove from history"
         >
           <X className="w-4 h-4" />

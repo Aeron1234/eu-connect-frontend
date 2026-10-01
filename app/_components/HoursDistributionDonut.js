@@ -14,7 +14,7 @@ import { isStudentAtRisk } from "@/lib/internshipRisk";
 // Fixed palette, assigned to courses in sorted order so the same course
 // always gets the same color across renders/filters.
 const palette = [
-  "var(--color-primary-500)",
+  "var(--chart-maroon)",
   "var(--color-blue-500)",
   "var(--color-amber-500)",
   "var(--color-emerald-500)",
@@ -38,12 +38,12 @@ function CustomTooltip({ active, payload }) {
   if (!entry) return null;
 
   return (
-    <div className="rounded-lg border border-stone-300 bg-white px-3 py-2 shadow-sm text-xs">
-      <p className="font-semibold text-stone-800">{entry.course}</p>
-      <p className="text-stone-600 mt-0.5">
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm text-xs">
+      <p className="font-semibold text-foreground">{entry.course}</p>
+      <p className="text-foreground-soft mt-0.5">
         Avg. completion: {entry.avgCompletion}%
       </p>
-      <p className="text-stone-600 mt-0.5">
+      <p className="text-foreground-soft mt-0.5">
         {entry.studentCount} student{entry.studentCount === 1 ? "" : "s"}
       </p>
       {entry.atRiskCount > 0 && (
@@ -108,10 +108,10 @@ function HoursDistributionDonut({ students = [] }) {
   const totalAtRisk = chartData.reduce((sum, d) => sum + d.atRiskCount, 0);
 
   return (
-    <div className="rounded-xl bg-white border border-stone-300 shadow-sm p-5 sm:p-6 h-full flex flex-col">
+    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full flex flex-col">
       <div className="mb-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800">
-          <PieChartIcon className="w-4 h-4 text-primary-500" />
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <PieChartIcon className="w-4 h-4 text-primary-emphasis" />
           Hours Completion Distribution
         </h3>
         <p className="text-xs text-muted-foreground mt-1">
@@ -126,7 +126,7 @@ function HoursDistributionDonut({ students = [] }) {
       </div>
 
       {chartData.length === 0 ? (
-        <div className="flex-1 bg-stone-100 rounded-lg flex items-center justify-center">
+        <div className="flex-1 bg-muted rounded-lg flex items-center justify-center">
           <p className="text-sm text-muted-foreground">
             No active interns yet.
           </p>
@@ -134,7 +134,7 @@ function HoursDistributionDonut({ students = [] }) {
       ) : (
         <ChartContainer
           config={chartConfig}
-          className="flex-1 min-h-[220px] w-full bg-stone-100 rounded-lg p-3"
+          className="flex-1 min-h-[220px] w-full bg-muted rounded-lg p-3"
         >
           <PieChart>
             <ChartTooltip content={<CustomTooltip />} />
@@ -145,7 +145,7 @@ function HoursDistributionDonut({ students = [] }) {
               innerRadius={55}
               outerRadius={85}
               strokeWidth={2}
-              stroke="#f5f5f4"
+              stroke="var(--card)"
             >
               {chartData.map((entry) => (
                 <Cell key={entry.course} fill={entry.fill} />

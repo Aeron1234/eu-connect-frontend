@@ -40,7 +40,7 @@ function PostAnnouncementButton({ categories, onPosted }) {
       }
       title="Post Announcement"
       titleIcon={
-        <span className="text-primary-500">
+        <span className="text-primary-emphasis">
           <Megaphone className="h-5 w-5" />
         </span>
       }
