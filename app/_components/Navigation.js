@@ -5,7 +5,7 @@ import NotificationsButton from "./NotificationsButton";
 import ThemeToggle from "./ThemeToggle";
 import { useSidebar } from "@/contexts/SidebarContext";
 
-function Navigation({ inboxData }) {
+function Navigation() {
   const { toggleMobile } = useSidebar();
 
   return (
@@ -20,7 +20,7 @@ function Navigation({ inboxData }) {
       </button>
 
       <div className="flex items-center gap-1">
-        <NotificationsButton inboxData={inboxData || {}} />
+        <NotificationsButton />
         <ThemeToggle />
       </div>
     </div>

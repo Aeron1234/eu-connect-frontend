@@ -19,11 +19,13 @@ import {
   XCircle,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import { socket } from "./SocketProvider";
 import { toast } from "sonner";
 import { toastAndAction } from "../../lib/helpers";
 import {
   getInbox,
+  getUnreadNotificationCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
@@ -58,8 +60,6 @@ const TONE_STYLES = {
   stone: "bg-muted text-muted-foreground",
 };
 
-const EMPTY_NOTIFICATIONS = [];
-
 function NotificationBell({ unreadCount, isOpen = false }) {
   return (
     <>
@@ -76,75 +76,90 @@ function NotificationBell({ unreadCount, isOpen = false }) {
   );
 }
 
-function NotificationsButton({ inboxData }) {
-  const serverNotifications = Array.isArray(inboxData?.data)
-    ? inboxData.data
-    : EMPTY_NOTIFICATIONS;
-  const serverUnreadCount = Math.max(0, Number(inboxData?.unreadCount) || 0);
+function NotificationsButton() {
   const [inbox, setInbox] = useState(() => ({
-    notifications: serverNotifications,
-    unreadCount: serverUnreadCount,
+    notifications: [],
+    unreadCount: 0,
   }));
   const { notifications, unreadCount } = inbox;
   const [showNotifications, setShowNotifications] = useState(false);
+  const [inboxStatus, setInboxStatus] = useState("idle");
   const [deletingId, setDeletingId] = useState(null);
   const [markingId, setMarkingId] = useState(null);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const dropdownRef = useRef(null);
   const requestIdRef = useRef(0);
+  const countRequestIdRef = useRef(0);
   const [, startDeleteTransition] = useTransition();
 
-  const refreshInbox = useCallback(async () => {
+  const refreshUnreadCount = useCallback(async () => {
+    const requestId = ++countRequestIdRef.current;
+    try {
+      const fresh = await getUnreadNotificationCount();
+      if (
+        requestId !== countRequestIdRef.current ||
+        !Number.isFinite(Number(fresh?.unreadCount))
+      ) {
+        return;
+      }
+      setInbox((current) => ({
+        ...current,
+        unreadCount: Math.max(0, Number(fresh.unreadCount)),
+      }));
+    } catch (error) {
+      console.error("Could not refresh unread notification count:", error);
+    }
+  }, []);
+
+  const refreshInbox = useCallback(async (showLoading = false) => {
     const requestId = ++requestIdRef.current;
+    if (showLoading) setInboxStatus("loading");
     try {
       const fresh = await getInbox({ scope: "all", page: 1 });
-      if (requestId !== requestIdRef.current || !Array.isArray(fresh?.data)) {
+      if (requestId !== requestIdRef.current) return false;
+      if (!Array.isArray(fresh?.data)) {
+        setInboxStatus((current) => current === "loading" ? "error" : current);
         return false;
       }
+      countRequestIdRef.current += 1;
       setInbox({
         notifications: fresh.data,
         unreadCount: Math.max(0, Number(fresh.unreadCount) || 0),
       });
+      setInboxStatus("ready");
       return true;
     } catch (error) {
-      // Keep the last known inbox and let the event listener retry briefly.
       console.error("Could not refresh notification inbox:", error);
+      if (requestId === requestIdRef.current) {
+        setInboxStatus((current) => current === "loading" ? "error" : current);
+      }
       return false;
     }
   }, []);
 
-  // Accept valid server snapshots, and retry once if the initial read failed.
+  // The badge needs only a count. The full inbox is read when the menu opens.
   useEffect(() => {
-    if (serverNotifications === EMPTY_NOTIFICATIONS) {
-      void refreshInbox();
-      return;
-    }
-    requestIdRef.current += 1;
-    setInbox({
-      notifications: serverNotifications,
-      unreadCount: serverUnreadCount,
-    });
-  }, [serverNotifications, serverUnreadCount, refreshInbox]);
+    void refreshUnreadCount();
+    return () => {
+      countRequestIdRef.current += 1;
+      requestIdRef.current += 1;
+    };
+  }, [refreshUnreadCount]);
 
-  // Socket payloads have no notification row ID. Re-fetch before rendering
-  // actionable entries, and reconcile the count after reconnects and writes.
+  useEffect(() => {
+    if (showNotifications) void refreshInbox(true);
+  }, [showNotifications, refreshInbox]);
+
+  // Socket payloads have no row ID. Refresh the open menu; otherwise keep
+  // the badge current without querying the full notification list.
   useEffect(() => {
     let timer;
-    let active = true;
-    let sequence = 0;
-    const runRefresh = async (current, attempt) => {
-      const succeeded = await refreshInbox();
-      if (active && current === sequence && !succeeded && attempt < 2) {
-        timer = setTimeout(
-          () => runRefresh(current, attempt + 1),
-          1000 * (attempt + 1),
-        );
-      }
-    };
     const scheduleRefresh = () => {
-      const current = ++sequence;
       clearTimeout(timer);
-      timer = setTimeout(() => runRefresh(current, 0), 150);
+      timer = setTimeout(() => {
+        if (showNotifications) void refreshInbox();
+        else void refreshUnreadCount();
+      }, 150);
     };
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") scheduleRefresh();
@@ -155,15 +170,13 @@ function NotificationsButton({ inboxData }) {
     document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
-      active = false;
       clearTimeout(timer);
-      requestIdRef.current += 1;
       socket.off("new_notification", scheduleRefresh);
       socket.off("connect", scheduleRefresh);
       window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [refreshInbox]);
+  }, [showNotifications, refreshInbox, refreshUnreadCount]);
 
   // Close the dropdown when clicking outside it.
   useEffect(() => {
@@ -190,6 +203,11 @@ function NotificationsButton({ inboxData }) {
     };
   }, []);
 
+  function toggleNotifications() {
+    if (!showNotifications) setInboxStatus("loading");
+    setShowNotifications((current) => !current);
+  }
+
   async function handleMarkRead(id) {
     if (markingId !== null) return;
     setMarkingId(id);
@@ -200,6 +218,7 @@ function NotificationsButton({ inboxData }) {
         return;
       }
       requestIdRef.current += 1;
+      countRequestIdRef.current += 1;
       setInbox((current) => {
         const target = current.notifications.find(
           (notification) => String(notification.id) === String(id),
@@ -233,6 +252,7 @@ function NotificationsButton({ inboxData }) {
         return;
       }
       requestIdRef.current += 1;
+      countRequestIdRef.current += 1;
       setInbox((current) => ({
         notifications: current.notifications.map((notification) =>
           notification.is_read
@@ -267,6 +287,7 @@ function NotificationsButton({ inboxData }) {
         });
         if (!result?.success) return;
         requestIdRef.current += 1;
+        countRequestIdRef.current += 1;
         setInbox((current) => {
           const target = current.notifications.find(
             (notification) => String(notification.id) === String(id),
@@ -307,7 +328,7 @@ function NotificationsButton({ inboxData }) {
       <button
         type="button"
         className="group relative hidden size-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-foreground-soft transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:inline-flex"
-        onClick={() => setShowNotifications((prev) => !prev)}
+        onClick={toggleNotifications}
         aria-label="Toggle notifications menu"
         aria-expanded={showNotifications}
         aria-controls={showNotifications ? "notifications-menu" : undefined}
@@ -329,7 +350,7 @@ function NotificationsButton({ inboxData }) {
               Notifications
             </span>
             <div className="flex items-center gap-3">
-              {unreadCount > 0 && (
+              {inboxStatus === "ready" && unreadCount > 0 && (
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
@@ -350,8 +371,39 @@ function NotificationsButton({ inboxData }) {
             </div>
           </div>
 
-          <div className="max-h-96 overflow-y-auto custom-scrollbar">
-            {notifications.length > 0 ? (
+          <div
+            className="max-h-96 overflow-y-auto custom-scrollbar"
+            aria-busy={inboxStatus === "loading"}
+          >
+            {inboxStatus === "loading" ? (
+              <div role="status" aria-label="Loading notifications">
+                {[0, 1, 2].map((index) => (
+                  <div
+                    key={index}
+                    className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-0"
+                  >
+                    <Skeleton className="size-9 shrink-0 rounded-full" />
+                    <div className="flex-1 space-y-2 py-0.5">
+                      <Skeleton className="h-3.5 w-2/3" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-2.5 w-1/3" />
+                    </div>
+                  </div>
+                ))}
+                <span className="sr-only">Loading notifications...</span>
+              </div>
+            ) : inboxStatus === "error" ? (
+              <div className="p-6 text-center text-sm text-muted-foreground">
+                <p>Could not load notifications.</p>
+                <button
+                  type="button"
+                  onClick={() => void refreshInbox(true)}
+                  className="mt-2 font-semibold text-primary-emphasis hover:underline"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : notifications.length > 0 ? (
               notifications.map((notif) => {
                 const meta = TYPE_META[notif.type] ?? {
                   icon: FileText,
