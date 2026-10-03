@@ -1,7 +1,7 @@
-import SearchUsers from "../_components/SearchUsers";
+import SearchUsers from "../../components/search-user-ui/SearchUsers";
 import { getSearchHistory } from "@/lib/server-actions/history-actions";
 
-import PageTitle from "../_components/PageTitle";
+import PageTitle from "../../components/ui/PageTitle";
 
 export const metadata = {
   title: "Users",

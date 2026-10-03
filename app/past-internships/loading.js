@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import AlumniCompaniesSkeleton from "@/app/_components/AlumniCompaniesSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import AlumniCompaniesSkeleton from "@/components/skeletons/AlumniCompaniesSkeleton";
 
 function PastInternshipsLoading() {
   return (

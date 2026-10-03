@@ -1,7 +1,7 @@
-import WeeklyNarrativeContent from "@/app/_components/WeeklyNarrativeContent";
-import WeeklyNarrativePostButton from "@/app/_components/WeeklyNarrativePostButton";
-import WeeklyNarrativesStats from "@/app/_components/WeeklyNarrativesStats";
-import PageTitle from "@/app/_components/PageTitle";
+import WeeklyNarrativeContent from "@/components/weekly-narratives-ui/WeeklyNarrativeContent";
+import WeeklyNarrativePostButton from "@/components/weekly-narratives-ui/WeeklyNarrativePostButton";
+import WeeklyNarrativesStats from "@/components/weekly-narratives-ui/WeeklyNarrativesStats";
+import PageTitle from "@/components/ui/PageTitle";
 import { getWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 import { BookOpen } from "lucide-react";
 

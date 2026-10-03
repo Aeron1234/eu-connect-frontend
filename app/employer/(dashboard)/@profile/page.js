@@ -1,4 +1,4 @@
-import EmployerProfileCard from "@/app/_components/EmployerProfileCard";
+import EmployerProfileCard from "@/components/dashboard-ui/EmployerProfileCard";
 import { getUserProfile } from "@/lib/server-actions/account-actions";
 
 export const metadata = {

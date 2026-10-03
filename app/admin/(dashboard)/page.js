@@ -1,7 +1,7 @@
-import UserGrowthChart from "@/app/_components/UserGrowthChart";
-import UsersByRoleChart from "@/app/_components/UsersByRoleChart";
-import InternshipsByDepartmentChart from "@/app/_components/InternshipsByDepartmentChart";
-import RecentActivityCard from "@/app/_components/RecentActivityCard";
+import UserGrowthChart from "@/components/dashboard-ui/UserGrowthChart";
+import UsersByRoleChart from "@/components/dashboard-ui/UsersByRoleChart";
+import InternshipsByDepartmentChart from "@/components/dashboard-ui/InternshipsByDepartmentChart";
+import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
 import { getAdminDashboardData } from "@/lib/server-actions/dashboard-actions";
 import {
   ClipboardCheck,

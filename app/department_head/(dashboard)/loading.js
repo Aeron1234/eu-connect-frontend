@@ -1,9 +1,9 @@
-import RecentActivityCardSkeleton from "@/app/_components/RecentActivityCardSkeleton";
-import ShiftHoursChartSkeleton from "@/app/_components/ShiftHoursChartSkeleton";
-import InternshipsPerCourseChartSkeleton from "@/app/_components/InternshipsPerCourseChartSkeleton";
-import EvaluationScoresChartSkeleton from "@/app/_components/EvaluationScoresChartSkeleton";
-import HoursDistributionDonutSkeleton from "@/app/_components/HoursDistributionDonutSkeleton";
-import StudentHoursTrackerSkeleton from "@/app/_components/StudentHoursTrackerSkeleton";
+import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
+import ShiftHoursChartSkeleton from "@/components/skeletons/ShiftHoursChartSkeleton";
+import InternshipsPerCourseChartSkeleton from "@/components/skeletons/InternshipsPerCourseChartSkeleton";
+import EvaluationScoresChartSkeleton from "@/components/skeletons/EvaluationScoresChartSkeleton";
+import HoursDistributionDonutSkeleton from "@/components/skeletons/HoursDistributionDonutSkeleton";
+import StudentHoursTrackerSkeleton from "@/components/skeletons/StudentHoursTrackerSkeleton";
 
 function DepartmentHeadDashboardLoading() {
   return (

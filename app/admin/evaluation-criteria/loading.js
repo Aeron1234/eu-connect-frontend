@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import EvaluationCriteriaListSkeleton from "@/app/_components/EvaluationCriteriaListSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import EvaluationCriteriaListSkeleton from "@/components/skeletons/EvaluationCriteriaListSkeleton";
 
 function EvaluationCriteriaLoading() {
   return (

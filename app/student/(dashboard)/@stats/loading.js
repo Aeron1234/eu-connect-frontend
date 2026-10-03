@@ -1,4 +1,4 @@
-import DashboardStatsSkeleton from "@/app/_components/DashboardStatsSkeleton";
+import DashboardStatsSkeleton from "@/components/skeletons/DashboardStatsSkeleton";
 
 function Loading() {
   return <DashboardStatsSkeleton />;

@@ -1,6 +1,6 @@
 import { Briefcase, Megaphone, Users, FolderOpen } from "lucide-react";
 import { getEmployerDashboardStats } from "@/lib/server-actions/dashboard-actions";
-import DashboardStats from "@/app/_components/DashboardStats";
+import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
 export const metadata = {
   title: "Employer",

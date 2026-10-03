@@ -1,4 +1,4 @@
-import MainLoader from "./_components/MainLoader";
+import MainLoader from "../components/ui/MainLoader";
 
 function RootLoading() {
   return <MainLoader />;

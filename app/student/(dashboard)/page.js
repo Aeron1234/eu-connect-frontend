@@ -1,7 +1,7 @@
-import MapSmallContainer from "@/app/_components/MapSmallContainer";
-import DtrTodayCard from "@/app/_components/DtrTodayCard";
-import RecentActivityCard from "@/app/_components/RecentActivityCard";
-import ProgressBar from "@/app/_components/ProgressBar";
+import MapSmallContainer from "@/components/map-ui/MapSmallContainer";
+import DtrTodayCard from "@/components/dtr-ui/DtrTodayCard";
+import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
+import ProgressBar from "@/components/ui/ProgressBar";
 import { getStudentDashboardData } from "@/lib/server-actions/dashboard-actions";
 import { getDtrs } from "@/lib/server-actions/dtr-actions";
 
@@ -18,10 +18,9 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 // import StudentDashboardDtrTable from "@/app/_components/StudentDashboardDtrTable";
-import DtrTable from "@/app/_components/DtrTable";
+import DtrTable from "@/components/dtr-ui/DtrTable";
 import { Suspense } from "react";
-import DtrRecordsSkeleton from "@/app/_components/DtrRecordsSkeleton";
-import { ckb } from "date-fns/locale";
+import DtrRecordsSkeleton from "@/components/skeletons/DtrRecordsSkeleton";
 
 export const metadata = {
   title: "Student",
@@ -66,6 +65,7 @@ async function StudentDashboardPage({ searchParams }) {
   const internshipData = dashboardRes?.internshipData || {};
   const dtrToday = dashboardRes?.dtrToday || {};
   const dtrStatus = dashboardRes?.dtrStatus?.status;
+  const dtrRecord = dashboardRes?.dtrStatus?.record;
   const locationData = dashboardRes?.location || {};
 
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {
@@ -84,6 +84,7 @@ async function StudentDashboardPage({ searchParams }) {
       <DtrTodayCard
         internshipData={internshipData}
         status={dtrStatus}
+        dtrRecord={dtrRecord}
         dtrToday={dtrToday}
       />
 

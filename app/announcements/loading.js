@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import AnnouncementCardSkeleton from "@/app/_components/AnnouncementCardSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import AnnouncementCardSkeleton from "@/components/skeletons/AnnouncementCardSkeleton";
 
 function AnnouncementsLoading() {
   return (

@@ -1,11 +1,17 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import ActivityLogsTableSkeleton from "@/app/_components/ActivityLogsTableSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import ActivityLogsTableSkeleton from "@/components/skeletons/ActivityLogsTableSkeleton";
 
 function ActivityLogsLoading() {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
       <PageTitleSkeleton />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Skeleton key={index} className="h-32 rounded-xl" />
+        ))}
+      </div>
 
       <div className="flex gap-2 flex-col sm:flex-row">
         <Skeleton className="h-10 w-full sm:w-64 rounded-md" />

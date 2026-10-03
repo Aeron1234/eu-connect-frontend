@@ -1,5 +1,5 @@
-import AccountsManager from "@/app/_components/AccountsManager";
-import PageTitle from "@/app/_components/PageTitle";
+import AccountsManager from "@/components/account-ui/AccountsManager";
+import PageTitle from "@/components/ui/PageTitle";
 import {
   getAllAccounts,
   getCreateAccountFormData,

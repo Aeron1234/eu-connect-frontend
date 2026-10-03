@@ -1,11 +1,11 @@
 import { getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
 import { getCourses } from "@/lib/server-actions/course-and-department-actions";
 
-import InternshipPosts from "../_components/InternshipPosts";
+import InternshipPosts from "../../components/internship-posts-ui/InternshipPosts";
 import { BriefcaseBusiness } from "lucide-react";
 import { Suspense } from "react";
-import InternshipPostButtonWrapper from "../_components/InternshipPostButtonWrapper";
-import PageTitle from "../_components/PageTitle";
+import InternshipPostButtonWrapper from "@/components/internship-posts-ui/InternshipPostButtonWrapper";
+import PageTitle from "@/components/ui/PageTitle";
 
 export const metadata = {
   title: "Internships",

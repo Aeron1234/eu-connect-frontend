@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, GraduationCap } from "lucide-react";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
 
 function FormFieldSkeleton() {
   return (

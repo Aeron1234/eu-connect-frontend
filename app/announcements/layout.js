@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import Header from "../_components/Header";
-import SideNavigation from "../_components/SideNavigation";
+import Header from "../../components/ui/Header";
+import SideNavigation from "../../components/ui/SideNavigation";
 import { getUserSession } from "../../lib/server-actions/auth";
-import Alert from "../_components/Alert";
-import SocketProvider from "../_components/SocketProvider";
+import Alert from "../../components/ui/Alert";
+import SocketProvider from "../../components/ui/SocketProvider";
 import { UserProvider } from "@/contexts/UserContext";
 
 export const dynamic = "force-dynamic";

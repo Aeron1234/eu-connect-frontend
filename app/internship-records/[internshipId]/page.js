@@ -1,5 +1,5 @@
-import RecordsDetailsPageContent from "@/app/_components/RecordsDetailsPageContent";
-import RecordsHeader from "@/app/_components/RecordsHeader";
+import RecordsDetailsPageContent from "@/components/internship-records-ui/RecordsDetailsPageContent";
+import RecordsHeader from "@/components/internship-records-ui/RecordsHeader";
 import { getInternshipRecordOverview } from "@/lib/server-actions/internship-records-actions";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";

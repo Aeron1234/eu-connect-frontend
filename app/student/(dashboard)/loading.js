@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin } from "lucide-react";
-import RecentActivityCardSkeleton from "@/app/_components/RecentActivityCardSkeleton";
+import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
 
 function StudentDashboardLoading() {
   return (
@@ -62,10 +62,7 @@ function StudentDashboardLoading() {
             </thead>
             <tbody>
               {Array.from({ length: 5 }).map((_, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-border last:border-b-0"
-                >
+                <tr key={i} className="border-b border-border last:border-b-0">
                   <td className="py-3">
                     <Skeleton className="h-3.5 w-20" />
                   </td>

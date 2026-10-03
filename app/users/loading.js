@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { History, Search } from "lucide-react";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import UserCardSkeleton from "@/app/_components/UserCardSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import UserCardSkeleton from "@/components/skeletons/UserCardSkeleton";
 
 function UsersLoading() {
   return (

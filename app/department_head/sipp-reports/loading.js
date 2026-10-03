@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import SIPPReportsManagerSkeleton from "@/app/_components/SIPPReportsManagerSkeleton";
+import SIPPReportsManagerSkeleton from "@/components/skeletons/SIPPReportsManagerSkeleton";
 
 export default function Loading() {
   return (

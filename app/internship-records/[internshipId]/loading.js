@@ -1,7 +1,7 @@
 import { ChevronLeft } from "lucide-react";
-import RecordsHeaderSkeleton from "@/app/_components/RecordsHeaderSkeleton";
-import TabBarSkeleton from "@/app/_components/TabBarSkeleton";
-import RecordsOverviewSkeleton from "@/app/_components/RecordsOverviewSkeleton";
+import RecordsHeaderSkeleton from "@/components/skeletons/RecordsHeaderSkeleton";
+import TabBarSkeleton from "@/components/skeletons/TabBarSkeleton";
+import RecordsOverviewSkeleton from "@/components/skeletons/RecordsOverviewSkeleton";
 
 function InternshipRecordDetailLoading() {
   return (

@@ -1,4 +1,4 @@
-import RecordsPageContent from "@/app/_components/RecordsPageContent";
+import RecordsPageContent from "@/components/internship-records-ui/RecordsPageContent";
 import { getDepartmentInternshipRecords } from "@/lib/server-actions/internship-records-actions";
 
 export const metadata = {

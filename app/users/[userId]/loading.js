@@ -1,5 +1,5 @@
-import SearchedUserHeaderSkeleton from "@/app/_components/SearchedUserHeaderSkeleton";
-import SearchedUserFilterSkeleton from "@/app/_components/SearchedUserFilterSkeleton";
+import SearchedUserHeaderSkeleton from "@/components/skeletons/SearchedUserHeaderSkeleton";
+import SearchedUserFilterSkeleton from "@/components/skeletons/SearchedUserFilterSkeleton";
 
 function UserProfileLoading() {
   return (

@@ -1,4 +1,4 @@
-import ForgotPasswordPageClient from "../_components/ForgotPasswordPageClient";
+import ForgotPasswordPageClient from "../../components/auth-ui/ForgotPasswordPageClient";
 
 export const metadata = {
   title: "Forgot Password",

@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import CreateAccountFormSkeleton from "@/app/_components/CreateAccountFormSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import CreateAccountFormSkeleton from "@/components/skeletons/CreateAccountFormSkeleton";
 
 function CreateAccountLoading() {
   return (

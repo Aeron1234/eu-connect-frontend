@@ -1,7 +1,7 @@
-import Modal from "@/app/_components/Modal";
-import StorageUploadForm from "@/app/_components/StorageUploadForm";
-import RecordsDocuments from "@/app/_components/RecordsDocuments";
-import PastInternshipDocuments from "@/app/_components/PastInternshipDocuments";
+import Modal from "@/components/ui/Modal";
+import StorageUploadForm from "@/components/internship-docs-ui/StorageUploadForm";
+import RecordsDocuments from "@/components/internship-docs-ui/RecordsDocuments";
+import PastInternshipDocuments from "@/components/internship-docs-ui/PastInternshipDocuments";
 import {
   getOngoingInternshipRecord,
   getMyPastInternshipRecords,
@@ -14,8 +14,8 @@ import {
 
 import { getUserSession } from "@/lib/server-actions/auth";
 import { FolderOpen, Upload } from "lucide-react";
-import PageTitle from "@/app/_components/PageTitle";
-import TitleButton from "@/app/_components/TitleButton";
+import PageTitle from "@/components/ui/PageTitle";
+import TitleButton from "@/components/ui/TitleButton";
 
 export const metadata = {
   title: "Student's Storage",

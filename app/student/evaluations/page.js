@@ -1,5 +1,5 @@
-import EvaluationsManager from "@/app/_components/EvaluationsManager";
-import PageTitle from "@/app/_components/PageTitle";
+import EvaluationsManager from "@/components/evaluations-ui/EvaluationsManager";
+import PageTitle from "@/components/ui/PageTitle";
 import { getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
 import { ClipboardCheck } from "lucide-react";
 

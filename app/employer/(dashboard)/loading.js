@@ -1,7 +1,7 @@
-import RecentActivityCardSkeleton from "@/app/_components/RecentActivityCardSkeleton";
-import InternsSupervisedCardSkeleton from "@/app/_components/InternsSupervisedCardSkeleton";
-import QuickActionsCardSkeleton from "@/app/_components/QuickActionsCardSkeleton";
-import JobsPostedTableSkeleton from "@/app/_components/JobsPostedTableSkeleton";
+import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
+import InternsSupervisedCardSkeleton from "@/components/skeletons/InternsSupervisedCardSkeleton";
+import QuickActionsCardSkeleton from "@/components/skeletons/QuickActionsCardSkeleton";
+import JobsPostedTableSkeleton from "@/components/skeletons/JobsPostedTableSkeleton";
 
 function EmployerDashboardLoading() {
   return (

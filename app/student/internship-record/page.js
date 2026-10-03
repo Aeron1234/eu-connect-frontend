@@ -1,4 +1,4 @@
-import InternshipRecordsManager from "@/app/_components/InternshipRecordsManager";
+import InternshipRecordsManager from "@/components/internship-records-ui/InternshipRecordsManager";
 import { getRegions } from "@/lib/server-actions/map-actions";
 
 import {

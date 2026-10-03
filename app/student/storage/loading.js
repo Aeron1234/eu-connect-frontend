@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import RecordsDocumentsSkeleton from "@/app/_components/RecordsDocumentsSkeleton";
-import PastInternshipDocumentsSkeleton from "@/app/_components/PastInternshipDocumentsSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import RecordsDocumentsSkeleton from "@/components/skeletons/RecordsDocumentsSkeleton";
+import PastInternshipDocumentsSkeleton from "@/components/skeletons/PastInternshipDocumentsSkeleton";
 
 function StorageLoading() {
   return (

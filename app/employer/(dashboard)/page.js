@@ -1,7 +1,9 @@
-import InternsSupervisedCard from "@/app/_components/InternsSupervisedCard";
-import QuickActionsCard from "@/app/_components/QuickActionsCard";
-import JobsPostedTable, { mapJobRow } from "@/app/_components/JobsPostedTable";
-import RecentActivityCard from "@/app/_components/RecentActivityCard";
+import InternsSupervisedCard from "@/components/dashboard-ui/InternsSupervisedCard";
+import QuickActionsCard from "@/components/dashboard-ui/QuickActionsCard";
+import JobsPostedTable, {
+  mapJobRow,
+} from "@/components/dashboard-ui/JobsPostedTable";
+import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
 import {
   ClipboardCheck,
   CheckCircle2,
@@ -19,7 +21,7 @@ import {
 } from "@/lib/server-actions/dashboard-actions";
 import { formatDistanceToNow } from "date-fns";
 import { Suspense } from "react";
-import JobsPostedTableSkeleton from "@/app/_components/JobsPostedTableSkeleton";
+import JobsPostedTableSkeleton from "@/components/skeletons/JobsPostedTableSkeleton";
 
 export const dynamic = "force-dynamic";
 

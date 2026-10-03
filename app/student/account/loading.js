@@ -1,4 +1,4 @@
-import AccountLoading from "@/app/_components/AccountLoading";
+import AccountLoading from "@/components/account-ui/AccountLoading";
 
 function Loading() {
   return <AccountLoading />;

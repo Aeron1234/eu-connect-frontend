@@ -1,4 +1,4 @@
-import ActivityLogsManager from "@/app/_components/ActivityLogsManager";
+import ActivityLogsManager from "@/components/activity-logs-ui/ActivityLogsManager";
 import { getAllActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 
 export const metadata = {
@@ -13,6 +13,7 @@ async function ActivityLogsPage() {
   return (
     <ActivityLogsManager
       initialData={logsData?.data || []}
+      initialStats={logsData?.stats}
       filters={
         logsData?.filters || { actions: [], actorRoles: [], targetTypes: [] }
       }

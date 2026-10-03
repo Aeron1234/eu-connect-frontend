@@ -2,7 +2,7 @@ import {
   getAllAnnouncements,
   getAnnouncementCategories,
 } from "@/lib/server-actions/announcements-actions";
-import AnnouncementBoard from "../_components/AnnouncementBoard";
+import AnnouncementBoard from "../../components/announcements-ui/AnnouncementBoard";
 
 export const metadata = {
   title: "Announcements",

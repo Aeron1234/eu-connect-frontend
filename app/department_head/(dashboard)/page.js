@@ -1,9 +1,9 @@
-import ShiftHoursChart from "@/app/_components/ShiftHoursChart";
-import InternshipsPerCourseChart from "@/app/_components/InternshipsPerCourseChart";
-import RecentActivityCard from "@/app/_components/RecentActivityCard";
-import EvaluationScoresChart from "@/app/_components/EvaluationScoresChart";
-import HoursDistributionDonut from "@/app/_components/HoursDistributionDonut";
-import StudentHoursTracker from "@/app/_components/StudentHoursTracker";
+import ShiftHoursChart from "@/components/dashboard-ui/ShiftHoursChart";
+import InternshipsPerCourseChart from "@/components/dashboard-ui/InternshipsPerCourseChart";
+import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
+import EvaluationScoresChart from "@/components/dashboard-ui/EvaluationScoresChart";
+import HoursDistributionDonut from "@/components/dashboard-ui/HoursDistributionDonut";
+import StudentHoursTracker from "@/components/dashboard-ui/StudentHoursTracker";
 import {
   ClipboardCheck,
   CheckCircle2,

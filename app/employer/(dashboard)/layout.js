@@ -1,4 +1,4 @@
-import PageTitle from "@/app/_components/PageTitle";
+import PageTitle from "@/components/ui/PageTitle";
 import { getUserSession } from "@/lib/server-actions/auth";
 
 // import { getUserSession } from "../../_services/auth";

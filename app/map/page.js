@@ -1,4 +1,4 @@
-import MapWrapper from "@/app/_components/MapWrapper";
+import MapWrapper from "@/components/map-ui/MapWrapper";
 import { getMapLocations } from "@/lib/server-actions/map-actions";
 
 export const metadata = {

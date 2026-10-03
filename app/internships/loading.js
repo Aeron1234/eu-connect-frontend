@@ -1,5 +1,5 @@
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import InternshipPostsSkeleton from "@/app/_components/InternshipPostsSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import InternshipPostsSkeleton from "@/components/skeletons/InternshipPostsSkeleton";
 
 function InternshipsLoading() {
   return (

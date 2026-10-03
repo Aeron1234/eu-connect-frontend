@@ -1,4 +1,4 @@
-import AccountProfile from "@/app/_components/AccountProfile";
+import AccountProfile from "@/components/account-ui/AccountProfile";
 import { getUserProfile } from "@/lib/server-actions/account-actions";
 
 export const metadata = {

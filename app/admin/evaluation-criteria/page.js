@@ -1,5 +1,5 @@
-import EvaluationCriteriaPageContent from "@/app/_components/EvaluationCriteriaPageContent";
-import PageTitle from "@/app/_components/PageTitle";
+import EvaluationCriteriaPageContent from "@/components/evaluations-ui/EvaluationCriteriaPageContent";
+import PageTitle from "@/components/ui/PageTitle";
 import { getAllEvaluationCriteria } from "@/lib/server-actions/evaluations-actions";
 import { SlidersHorizontal } from "lucide-react";
 

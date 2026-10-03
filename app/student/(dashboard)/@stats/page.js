@@ -1,6 +1,6 @@
 import { Briefcase, ClipboardCheck, FolderOpen, Megaphone } from "lucide-react";
 import { getStudentDashboardStats } from "@/lib/server-actions/dashboard-actions";
-import DashboardStats from "@/app/_components/DashboardStats";
+import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
 async function StatsPage() {
   const getStats = await getStudentDashboardStats();

@@ -1,5 +1,5 @@
-import SearchedUserHeader from "@/app/_components/SearchedUserHeader";
-import SearchedUserRecordsManager from "@/app/_components/SearchedUserRecordsManager";
+import SearchedUserHeader from "@/components/search-user-ui/SearchedUserHeader";
+import SearchedUserRecordsManager from "@/components/search-user-ui/SearchedUserRecordsManager";
 import {
   getSearchedStudentDTRs,
   getSearchedStudentDtrLocation,

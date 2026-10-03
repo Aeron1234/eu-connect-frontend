@@ -1,7 +1,7 @@
-import RecentActivityCardSkeleton from "@/app/_components/RecentActivityCardSkeleton";
-import UserGrowthChartSkeleton from "@/app/_components/UserGrowthChartSkeleton";
-import UsersByRoleChartSkeleton from "@/app/_components/UsersByRoleChartSkeleton";
-import InternshipsByDepartmentChartSkeleton from "@/app/_components/InternshipsByDepartmentChartSkeleton";
+import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
+import UserGrowthChartSkeleton from "@/components/skeletons/UserGrowthChartSkeleton";
+import UsersByRoleChartSkeleton from "@/components/skeletons/UsersByRoleChartSkeleton";
+import InternshipsByDepartmentChartSkeleton from "@/components/skeletons/InternshipsByDepartmentChartSkeleton";
 
 function AdminDashboardLoading() {
   return (

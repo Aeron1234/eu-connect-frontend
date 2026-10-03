@@ -1,5 +1,5 @@
 import { Briefcase, Building2, Users, UserX } from "lucide-react";
-import DashboardStats from "@/app/_components/DashboardStats";
+import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 import { getAdminDashboardStats } from "@/lib/server-actions/dashboard-actions";
 
 export const metadata = {

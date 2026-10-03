@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import WeeklyNarrativesStatsSkeleton from "@/app/_components/WeeklyNarrativesStatsSkeleton";
-import WeeklyNarrativeListSkeleton from "@/app/_components/WeeklyNarrativeListSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import WeeklyNarrativesStatsSkeleton from "@/components/skeletons/WeeklyNarrativesStatsSkeleton";
+import WeeklyNarrativeListSkeleton from "@/components/skeletons/WeeklyNarrativeListSkeleton";
 
 function NarrativesLoading() {
   return (

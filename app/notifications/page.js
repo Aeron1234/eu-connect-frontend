@@ -1,7 +1,7 @@
 import { Bell } from "lucide-react";
 import { getInbox } from "@/lib/server-actions/notifications-actions";
-import NotificationList from "../_components/NotificationList";
-import PageTitle from "../_components/PageTitle";
+import NotificationList from "../../components/notifications-ui/NotificationList";
+import PageTitle from "../../components/ui/PageTitle";
 
 export const metadata = {
   title: "Notifications",

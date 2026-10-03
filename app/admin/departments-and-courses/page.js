@@ -1,4 +1,4 @@
-import DepartmentsAndCoursesManager from "@/app/_components/DepartmentAndCoursesManager";
+import DepartmentsAndCoursesManager from "@/components/departments-and-courses-ui/DepartmentAndCoursesManager";
 import {
   getCourses,
   getDepartments,

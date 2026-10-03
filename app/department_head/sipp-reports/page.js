@@ -1,6 +1,6 @@
 import { getUserSession } from "../../../lib/server-actions/auth";
 import { FileText } from "lucide-react";
-import SIPPReportsManager from "../../_components/SIPPReportsManager";
+import SIPPReportsManager from "../../../components/sipp-reports-ui/SIPPReportsManager";
 import {
   getAvailableAcademicYears,
   getAnnexCReports,

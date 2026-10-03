@@ -1,6 +1,6 @@
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import TabBarSkeleton from "@/app/_components/TabBarSkeleton";
-import EvaluationCriteriaSkeleton from "@/app/_components/EvaluationCriteriaSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import TabBarSkeleton from "@/components/skeletons/TabBarSkeleton";
+import EvaluationCriteriaSkeleton from "@/components/skeletons/EvaluationCriteriaSkeleton";
 
 function EvaluationsLoading() {
   return (

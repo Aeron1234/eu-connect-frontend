@@ -1,6 +1,6 @@
-import RecordsPageHeaderSkeleton from "@/app/_components/RecordsPageHeaderSkeleton";
-import RecordsPageFilterSkeleton from "@/app/_components/RecordsPageFilterSkeleton";
-import RecordCardSkeleton from "@/app/_components/RecordCardSkeleton";
+import RecordsPageHeaderSkeleton from "@/components/skeletons/RecordsPageHeaderSkeleton";
+import RecordsPageFilterSkeleton from "@/components/skeletons/RecordsPageFilterSkeleton";
+import RecordCardSkeleton from "@/components/skeletons/RecordCardSkeleton";
 
 function InternshipRecordsLoading() {
   return (

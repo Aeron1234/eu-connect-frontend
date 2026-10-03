@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import PageTitleSkeleton from "@/app/_components/PageTitleSkeleton";
-import NotificationItemSkeleton from "@/app/_components/NotificationItemSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import NotificationItemSkeleton from "@/components/skeletons/NotificationItemSkeleton";
 
 function NotificationsLoading() {
   return (
