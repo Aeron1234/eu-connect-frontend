@@ -15,7 +15,7 @@ const nextConfig = {
     },
     staleTimes: {
       dynamic: 60, // seconds dynamic routes stay fresh in Router Cache
-      static: 180,
+      static: 300,
     },
   },
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
@@ -38,21 +39,40 @@ const maroonIcon = L.divIcon({
   popupAnchor: [0, -42],
 });
 
+function CenterOnUser({ latitude, longitude }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (latitude == null || longitude == null) return;
+    map.setView([latitude, longitude], map.getZoom());
+  }, [latitude, longitude, map]);
+
+  return null;
+}
+
 function MapSmall({
   latitude,
   longitude,
   radius = 100,
   label = "",
   address = "",
+  userLatitude,
+  userLongitude,
 }) {
   const lat = parseFloat(latitude);
   const lon = parseFloat(longitude);
+  const userLat = Number(userLatitude);
+  const userLon = Number(userLongitude);
+  const hasUserLocation =
+    userLatitude != null && userLongitude != null &&
+    Number.isFinite(userLat) && Number.isFinite(userLon) &&
+    Math.abs(userLat) <= 90 && Math.abs(userLon) <= 180;
 
   if (isNaN(lat) || isNaN(lon)) return null;
 
   return (
     <MapContainer
-      center={[lat, lon]}
+      center={hasUserLocation ? [userLat, userLon] : [lat, lon]}
       zoom={16}
       scrollWheelZoom={true}
       style={{
@@ -65,6 +85,11 @@ function MapSmall({
       <TileLayer
         attribution="© OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+
+      <CenterOnUser
+        latitude={hasUserLocation ? userLat : null}
+        longitude={hasUserLocation ? userLon : null}
       />
 
       <Marker position={[lat, lon]} icon={maroonIcon}>
@@ -89,6 +114,11 @@ function MapSmall({
           }}
         />
       </Marker>
+      {hasUserLocation && (
+        <Marker position={[userLat, userLon]} zIndexOffset={1000}>
+          <Popup>Your current location</Popup>
+        </Marker>
+      )}
     </MapContainer>
   );
 }

@@ -6,17 +6,17 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { useEffect } from "react";
 
 function pinIcon(count, active) {
+  const label = String(count);
   return L.divIcon({
     className: "",
-    html: `<div style="position:relative;display:flex;align-items:center;justify-content:center">
-      <svg width="34" height="46" viewBox="0 0 24 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 0C5.4 0 0 5.4 0 12c0 8.5 12 22 12 22s12-13.5 12-22C24 5.4 18.6 0 12 0z" fill="${active ? "#7a1220" : "#9b1c2e"}"/>
-      </svg>
-      <span style="position:absolute;top:5px;left:0;right:0;text-align:center;color:#fff;font-size:12px;font-weight:700;font-family:inherit">${count}</span>
-    </div>`,
-    iconSize: [34, 46],
-    iconAnchor: [17, 46],
-    popupAnchor: [0, -42],
+    html: `<svg width="25" height="41" viewBox="0 0 25 41" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))">
+      <path d="M12.5 1C5.9 1 1 6.2 1 12.8c0 8.9 11.5 26.7 11.5 26.7S24 21.7 24 12.8C24 6.2 19.1 1 12.5 1Z" fill="${active ? "#710000" : "#800000"}" stroke="#4d0000" stroke-width="1.5" stroke-linejoin="round"/>
+      <circle cx="12.5" cy="12.5" r="8" fill="#fff"/>
+      <text x="12.5" y="16" text-anchor="middle" fill="#710000" font-size="${label.length > 2 ? 8 : 11}" font-weight="700" font-family="Arial, sans-serif">${label}</text>
+    </svg>`,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
   });
 }
 
