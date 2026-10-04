@@ -39,13 +39,30 @@ const maroonIcon = L.divIcon({
   popupAnchor: [0, -42],
 });
 
-function CenterOnUser({ latitude, longitude }) {
+function ShowBothLocations({
+  companyLatitude,
+  companyLongitude,
+  userLatitude,
+  userLongitude,
+}) {
   const map = useMap();
 
   useEffect(() => {
-    if (latitude == null || longitude == null) return;
-    map.setView([latitude, longitude], map.getZoom());
-  }, [latitude, longitude, map]);
+    if (userLatitude == null || userLongitude == null) {
+      if (companyLatitude != null && companyLongitude != null) {
+        map.setView([companyLatitude, companyLongitude], 16);
+      }
+      return;
+    }
+    if (companyLatitude != null && companyLongitude != null) {
+      map.fitBounds(
+        [[companyLatitude, companyLongitude], [userLatitude, userLongitude]],
+        { padding: [36, 36], maxZoom: 16 },
+      );
+    } else {
+      map.setView([userLatitude, userLongitude], 16);
+    }
+  }, [companyLatitude, companyLongitude, userLatitude, userLongitude, map]);
 
   return null;
 }
@@ -61,6 +78,10 @@ function MapSmall({
 }) {
   const lat = parseFloat(latitude);
   const lon = parseFloat(longitude);
+  const hasCompanyLocation =
+    Number.isFinite(lat) && Number.isFinite(lon) &&
+    Math.abs(lat) <= 90 && Math.abs(lon) <= 180 &&
+    !(lat === 0 && lon === 0);
   const userLat = Number(userLatitude);
   const userLon = Number(userLongitude);
   const hasUserLocation =
@@ -68,11 +89,12 @@ function MapSmall({
     Number.isFinite(userLat) && Number.isFinite(userLon) &&
     Math.abs(userLat) <= 90 && Math.abs(userLon) <= 180;
 
-  if (isNaN(lat) || isNaN(lon)) return null;
+  const companyLocation = hasCompanyLocation ? [lat, lon] : null;
+  const userLocation = hasUserLocation ? [userLat, userLon] : null;
 
   return (
     <MapContainer
-      center={hasUserLocation ? [userLat, userLon] : [lat, lon]}
+      center={companyLocation || userLocation || [12.5, 122]}
       zoom={16}
       scrollWheelZoom={true}
       style={{
@@ -87,33 +109,37 @@ function MapSmall({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      <CenterOnUser
-        latitude={hasUserLocation ? userLat : null}
-        longitude={hasUserLocation ? userLon : null}
+      <ShowBothLocations
+        companyLatitude={hasCompanyLocation ? lat : null}
+        companyLongitude={hasCompanyLocation ? lon : null}
+        userLatitude={hasUserLocation ? userLat : null}
+        userLongitude={hasUserLocation ? userLon : null}
       />
 
-      <Marker position={[lat, lon]} icon={maroonIcon}>
-        {(label || address) && (
-          <Popup>
-            <div className="text-sm">
-              {label && (
-                <p className="font-semibold text-foreground">{label}</p>
-              )}
-              {address && <p className="text-foreground-soft">{address}</p>}
-            </div>
-          </Popup>
-        )}
-        <Circle
-          center={[lat, lon]}
-          radius={Number(radius)}
-          pathOptions={{
-            color: "#800000",
-            fillColor: "#800000",
-            fillOpacity: 0.15,
-            weight: 2,
-          }}
-        />
-      </Marker>
+      {hasCompanyLocation && (
+        <Marker position={[lat, lon]} icon={maroonIcon}>
+          {(label || address) && (
+            <Popup>
+              <div className="text-sm">
+                {label && (
+                  <p className="font-semibold text-foreground">{label}</p>
+                )}
+                {address && <p className="text-foreground-soft">{address}</p>}
+              </div>
+            </Popup>
+          )}
+          <Circle
+            center={[lat, lon]}
+            radius={Number(radius)}
+            pathOptions={{
+              color: "#800000",
+              fillColor: "#800000",
+              fillOpacity: 0.15,
+              weight: 2,
+            }}
+          />
+        </Marker>
+      )}
       {hasUserLocation && (
         <Marker position={[userLat, userLon]} zIndexOffset={1000}>
           <Popup>Your current location</Popup>

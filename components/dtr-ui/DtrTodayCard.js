@@ -52,7 +52,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                 <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[11px] font-medium">
                   {dtrToday?.status === "on-break" || status === "ON_BREAK"
                     ? "On break"
-                    : dtrToday?.status || "Not started yet"}
+                    : dtrToday?.status || "No shift"}
                 </span>
               </div>
             </div>
