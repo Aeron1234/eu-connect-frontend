@@ -1,40 +1,36 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
-import { Briefcase, ClipboardCheck, FolderOpen, Megaphone } from "lucide-react";
-import { getStudentDashboardStats } from "@/lib/server-actions/dashboard-actions";
+import { Briefcase, Building2, Users, UserX } from "lucide-react";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
-async function StatsPage() {
-  const getStats = await getStudentDashboardStats();
-
+function AdminDashboardStats({ stats: dashboardStats }) {
   const stats = [
     {
-      label: "Favorite Internships",
-      value: getStats?.stats?.favoriteInternships ?? 0,
+      label: "Ongoing Internships",
+      value: dashboardStats?.ongoingInternships ?? 0,
       icon: Briefcase,
       accent: "bg-primary text-white border border-primary-400",
       valueClass: "text-primary-foreground",
       labelClass: "text-primary-foreground/80",
     },
     {
-      label: "Unread Announcements",
-      value: getStats?.stats?.unreadAnnouncements ?? 0,
-      icon: Megaphone,
+      label: "Employers",
+      value: dashboardStats?.employers ?? 0,
+      icon: Building2,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
     },
     {
-      label: "Pending Evaluations",
-      value: getStats?.stats?.pendingEvaluations ?? 0,
-      icon: ClipboardCheck,
+      label: "Students",
+      value: dashboardStats?.students ?? 0,
+      icon: Users,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
     },
     {
-      label: "Documents Stored",
-      value: getStats?.stats?.documentsStored ?? 0,
-      icon: FolderOpen,
+      label: "Inactive / Suspended",
+      value: dashboardStats?.inactiveOrSuspended ?? 0,
+      icon: UserX,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
@@ -44,4 +40,4 @@ async function StatsPage() {
   return <DashboardStats stats={stats} />;
 }
 
-export default withReadErrorPage(StatsPage);
+export default AdminDashboardStats;

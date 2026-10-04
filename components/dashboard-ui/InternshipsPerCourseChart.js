@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import useChartLabelVisibility from "./useChartLabelVisibility";
 
 const chartConfig = {
   interns: {
@@ -46,9 +47,19 @@ function CustomTooltip({ active, payload, label }) {
 
 function InternshipsPerCourseChart({ data = [] }) {
   const chartData = buildChartData(data);
+  const labelWidth = chartData.reduce(
+    (width, { course, isPlaceholder }) =>
+      width +
+      (isPlaceholder ? 64 : Math.max(64, course.length * 6 + 16)),
+    40,
+  );
+  const [chartRef, showCourseLabels] = useChartLabelVisibility(
+    labelWidth,
+    data.length > 0,
+  );
 
   return (
-    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+    <div className="min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="mb-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Briefcase className="w-4 h-4 text-primary-emphasis" />
@@ -67,8 +78,9 @@ function InternshipsPerCourseChart({ data = [] }) {
         </div>
       ) : (
         <ChartContainer
+          ref={chartRef}
           config={chartConfig}
-          className="h-64 w-full bg-muted rounded-lg p-3"
+          className="h-64 min-w-0 w-full bg-muted rounded-lg p-3"
         >
           <BarChart
             data={chartData}
@@ -83,7 +95,12 @@ function InternshipsPerCourseChart({ data = [] }) {
               dataKey="course"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              tick={
+                showCourseLabels
+                  ? { fontSize: 11, fill: "var(--muted-foreground)" }
+                  : false
+              }
+              height={showCourseLabels ? 30 : 8}
               tickFormatter={(value) =>
                 value.startsWith("__placeholder_") ? "" : value
               }

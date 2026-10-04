@@ -1,4 +1,6 @@
 import { withReadErrorPage } from "@/lib/page-read-error";
+import PageTitle from "@/components/ui/PageTitle";
+import DashboardStatsSection from "@/components/dashboard-ui/AdminDashboardStats";
 import UserGrowthChart from "@/components/dashboard-ui/UserGrowthChart";
 import UsersByRoleChart from "@/components/dashboard-ui/UsersByRoleChart";
 import InternshipsByDepartmentChart from "@/components/dashboard-ui/InternshipsByDepartmentChart";
@@ -17,6 +19,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Admin" };
 
 function getActivityVisual(action = "") {
   if (action.includes("document")) {
@@ -72,6 +75,13 @@ async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle
+        title="Dashboard"
+        description="System-wide overview of users, internships, and activity."
+      />
+
+      <DashboardStatsSection stats={dashboardRes.stats} />
+
       <UserGrowthChart data={growthData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

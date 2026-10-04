@@ -9,6 +9,7 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
+import chartPalette from "./chartPalette";
 
 const roleLabels = {
   student: "Students",
@@ -18,20 +19,20 @@ const roleLabels = {
 };
 
 const roleColors = {
-  student: "var(--chart-maroon)",
-  employer: "var(--admin-chart-employer)",
-  department_head: "var(--admin-chart-department-head)",
-  admin: "var(--admin-chart-admin)",
+  student: chartPalette[0],
+  employer: chartPalette[1],
+  department_head: chartPalette[2],
+  admin: chartPalette[3],
 };
 
 const chartConfig = {
-  student: { label: "Students", color: "var(--chart-maroon)" },
-  employer: { label: "Employers", color: "var(--admin-chart-employer)" },
+  student: { label: "Students", color: roleColors.student },
+  employer: { label: "Employers", color: roleColors.employer },
   department_head: {
     label: "Department Heads",
-    color: "var(--admin-chart-department-head)",
+    color: roleColors.department_head,
   },
-  admin: { label: "Admins", color: "var(--admin-chart-admin)" },
+  admin: { label: "Admins", color: roleColors.admin },
 };
 
 function UsersByRoleChart({ data = [] }) {

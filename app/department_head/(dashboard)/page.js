@@ -1,4 +1,6 @@
 import { withReadErrorPage } from "@/lib/page-read-error";
+import PageTitle from "@/components/ui/PageTitle";
+import DashboardStatsSection from "@/components/dashboard-ui/DepartmentHeadDashboardStats";
 import ShiftHoursChart from "@/components/dashboard-ui/ShiftHoursChart";
 import InternshipsPerCourseChart from "@/components/dashboard-ui/InternshipsPerCourseChart";
 import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
@@ -25,6 +27,7 @@ import { getMyActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 import { formatDistanceToNow } from "date-fns";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Department Head" };
 
 function getActivityVisual(action = "") {
   if (action.includes("document")) {
@@ -85,11 +88,17 @@ async function DepartmentHeadDashboardPage() {
 
   const studentEvalScores = dashboardRes?.studentEvaluationAverages || [];
   const employerEvalScores = dashboardRes?.employerEvaluationAverages || [];
-  const students = dashboardRes?.hoursTracker?.students || [];
   const courses = dashboardRes?.hoursTracker?.courses || [];
 
   return (
     <div className="space-y-6">
+      <PageTitle
+        title="Dashboard"
+        description="Overview of internships and student activity in your department."
+      />
+
+      <DashboardStatsSection stats={dashboardRes.stats} />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <ShiftHoursChart
           initialMonths={availableMonths}
@@ -115,8 +124,8 @@ async function DepartmentHeadDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <HoursDistributionDonut students={students} />
-        <StudentHoursTracker students={students} courses={courses} />
+        <HoursDistributionDonut summary={dashboardRes?.hoursDistribution || []} />
+        <StudentHoursTracker initialPage={dashboardRes?.hoursTracker} courses={courses} />
       </div>
 
       <RecentActivityCard activities={activities} />

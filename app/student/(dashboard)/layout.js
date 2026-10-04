@@ -1,6 +1,6 @@
 import { getUserSession } from "@/lib/server-actions/auth";
 
-async function DashboardLayout({ stats, children }) {
+async function DashboardLayout({ children }) {
   const session = await getUserSession();
   const user = session?.user;
   const role = session?.user?.role;
@@ -8,22 +8,7 @@ async function DashboardLayout({ stats, children }) {
   if (!user || role !== "student") return null;
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Dashboard
-          </h1>
-          <p className="text-sm text-foreground-soft mt-1">
-            Here&apos;s your OJT overview for today
-          </p>
-        </div>
-
-        {stats}
-
-        {children}
-      </div>
-    </main>
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">{children}</main>
   );
 }
 

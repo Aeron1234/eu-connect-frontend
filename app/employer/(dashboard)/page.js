@@ -1,4 +1,7 @@
 import { withReadErrorPage } from "@/lib/page-read-error";
+import PageTitle from "@/components/ui/PageTitle";
+import DashboardStatsSection from "@/components/dashboard-ui/EmployerDashboardStats";
+import DashboardProfileSection from "./profile";
 import InternsSupervisedCard from "@/components/dashboard-ui/InternsSupervisedCard";
 import QuickActionsCard from "@/components/dashboard-ui/QuickActionsCard";
 import JobsPostedTable, {
@@ -25,6 +28,7 @@ import { Suspense } from "react";
 import JobsPostedTableSkeleton from "@/components/skeletons/JobsPostedTableSkeleton";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Employer" };
 
 function getActivityVisual(action = "") {
   if (action.includes("document")) {
@@ -64,7 +68,8 @@ async function EmployerDashboardPage({ searchParams }) {
   // The aggregate endpoint only ever returns page 1 of posted jobs — if the
   // user navigated to a later page (j_page > 1), fetch that page directly
   // instead of relying on the aggregate.
-  const [activityLogs, dashboardRes, jobsPageRes] = await Promise.all([
+  const [profile, activityLogs, dashboardRes, jobsPageRes] = await Promise.all([
+    DashboardProfileSection(),
     getMyActivityLogs({ page: 1 }),
     getEmployerDashboardData(),
     currentJobPage > 1 ? getPostedJobs({ page: currentJobPage }) : null,
@@ -98,6 +103,14 @@ async function EmployerDashboardPage({ searchParams }) {
 
   return (
     <div className="space-y-6">
+      <PageTitle
+        title="Dashboard"
+        description="Overview of your internship program and posted opportunities."
+      />
+
+      {profile}
+      <DashboardStatsSection stats={dashboardRes.stats} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2">
           <InternsSupervisedCard interns={interns} />

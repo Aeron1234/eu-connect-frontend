@@ -9,19 +9,20 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
+import chartPalette from "./chartPalette";
 
 const chartConfig = {
-  students: { label: "Students", color: "var(--chart-maroon)" },
-  employers: { label: "Employers", color: "var(--admin-chart-employer)" },
+  students: { label: "Students", color: chartPalette[0] },
+  employers: { label: "Employers", color: chartPalette[1] },
   deptHeads: {
     label: "Department Heads",
-    color: "var(--admin-chart-department-head)",
+    color: chartPalette[2],
   },
 };
 
 function UserGrowthChart({ data = [] }) {
   return (
-    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+    <div className="min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="mb-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <TrendingUp className="w-4 h-4 text-primary-emphasis" />
@@ -34,7 +35,7 @@ function UserGrowthChart({ data = [] }) {
 
       <ChartContainer
         config={chartConfig}
-        className="h-72 w-full bg-muted rounded-lg p-3"
+        className="h-72 min-w-0 w-full bg-muted rounded-lg p-3"
       >
         <LineChart
           data={data}
@@ -58,7 +59,11 @@ function UserGrowthChart({ data = [] }) {
             tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
+          <ChartLegend
+            content={
+              <ChartLegendContent className="flex-wrap items-center justify-center gap-x-3 gap-y-2 [&>div]:shrink-0 [&>div]:whitespace-nowrap" />
+            }
+          />
           <Line
             type="monotone"
             dataKey="students"

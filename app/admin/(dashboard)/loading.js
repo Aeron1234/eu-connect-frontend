@@ -1,4 +1,6 @@
 import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import DashboardStatsSkeleton from "@/components/skeletons/DashboardStatsSkeleton";
 import UserGrowthChartSkeleton from "@/components/skeletons/UserGrowthChartSkeleton";
 import UsersByRoleChartSkeleton from "@/components/skeletons/UsersByRoleChartSkeleton";
 import InternshipsByDepartmentChartSkeleton from "@/components/skeletons/InternshipsByDepartmentChartSkeleton";
@@ -6,6 +8,9 @@ import InternshipsByDepartmentChartSkeleton from "@/components/skeletons/Interns
 function AdminDashboardLoading() {
   return (
     <div className="space-y-6">
+      <PageTitleSkeleton />
+      <DashboardStatsSkeleton />
+
       <UserGrowthChartSkeleton />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

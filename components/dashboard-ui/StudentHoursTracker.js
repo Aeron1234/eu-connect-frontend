@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Clock, AlertTriangle } from "lucide-react";
 import {
   Select,
@@ -9,19 +10,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { isStudentAtRisk } from "@/lib/internshipRisk";
+import { getDepartmentStudentHoursPageResult } from "@/lib/server-actions/dashboard-actions";
 import ProgressBar from "../ui/ProgressBar";
 
-function StudentHoursTracker({ students = [], courses = [] }) {
+function StudentHoursTracker({ initialPage, courses = [] }) {
+  const listRef = useRef(null);
   const [courseFilter, setCourseFilter] = useState("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [query, setQuery] = useState({ page: 1, courseId: "all", search: "" });
+  const [retryCount, setRetryCount] = useState(0);
+  const [result, setResult] = useState({ key: JSON.stringify([1, "all", "", 0]), data: initialPage });
+  const [failure, setFailure] = useState(null);
+  const requestKey = JSON.stringify([query.page, query.courseId, query.search, retryCount]);
+  const isLoading = result.key !== requestKey && failure?.key !== requestKey;
+  const pageData = result.data;
 
-  const filteredStudents = useMemo(() => {
-    if (courseFilter === "all") return students;
-    return students.filter((s) => s.course === courseFilter);
-  }, [students, courseFilter]);
+  useEffect(() => {
+    const search = searchInput.trim();
+    if (search === query.search) return;
+    const timer = setTimeout(() => {
+      setQuery((current) => ({ ...current, page: 1, search }));
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput, query.search]);
+
+  useEffect(() => {
+    if (requestKey === result.key) return;
+    let active = true;
+    getDepartmentStudentHoursPageResult({
+      page: query.page,
+      courseId: query.courseId === "all" ? undefined : query.courseId,
+      search: query.search,
+    }).then((response) => {
+      if (!active) return;
+      if (response?.error) {
+        setFailure({ key: requestKey, message: response.error });
+      } else {
+        setResult({ key: requestKey, data: response });
+        setFailure(null);
+        listRef.current?.scrollTo({ top: 0 });
+      }
+    }).catch(() => {
+      if (active) setFailure({ key: requestKey, message: "Could not load student hours. Please try again." });
+    });
+    return () => { active = false; };
+  }, [query, requestKey, result.key]);
+
+  function changeCourse(value) {
+    setCourseFilter(value);
+    setQuery({ page: 1, courseId: value, search: searchInput.trim() });
+  }
 
   return (
-    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full">
+    <div className="min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full">
       <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -33,7 +74,7 @@ function StudentHoursTracker({ students = [], courses = [] }) {
           </p>
         </div>
 
-        <Select value={courseFilter} onValueChange={setCourseFilter}>
+        <Select value={courseFilter} onValueChange={changeCourse}>
           <SelectTrigger className="h-8 w-[150px] text-xs px-2">
             <SelectValue placeholder="All Courses" />
           </SelectTrigger>
@@ -42,7 +83,7 @@ function StudentHoursTracker({ students = [], courses = [] }) {
               All Courses
             </SelectItem>
             {courses.map((c) => (
-              <SelectItem key={c.id} value={c.short_name} className="text-xs">
+              <SelectItem key={c.id} value={String(c.id)} className="text-xs">
                 {c.short_name}
               </SelectItem>
             ))}
@@ -50,54 +91,72 @@ function StudentHoursTracker({ students = [], courses = [] }) {
         </Select>
       </div>
 
-      <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-        {filteredStudents.length === 0 ? (
+      <input
+        type="search"
+        value={searchInput}
+        onChange={(event) => setSearchInput(event.target.value)}
+        placeholder="Search student name"
+        aria-label="Search student name"
+        maxLength={100}
+        className="mb-4 h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      />
+
+      <div ref={listRef} className="min-w-0 space-y-3 max-h-[420px] overflow-x-hidden overflow-y-auto pr-1" aria-live="polite">
+        {isLoading ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">Loading students...</p>
+        ) : failure?.key === requestKey ? (
+          <div className="py-6 text-center text-sm">
+            <p className="text-red-600">{failure.message}</p>
+            <button type="button" onClick={() => setRetryCount((count) => count + 1)} className="mt-2 font-medium text-primary-emphasis hover:underline">Try again</button>
+          </div>
+        ) : !pageData?.students?.length ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            No students in this course.
+            {query.courseId === "all" && !query.search ? "No active interns yet." : "No matching students."}
           </p>
         ) : (
-          filteredStudents.map((s) => {
-            const pct = Math.round((s.accumulated_hours / s.total_hours) * 100);
-            const atRisk = isStudentAtRisk(s);
+          pageData.students.map((s) => {
+            const pct = s.total_hours > 0 ? Math.round((s.accumulated_hours / s.total_hours) * 100) : 0;
 
             return (
               <div
                 key={s.id}
-                className="rounded-lg border border-border p-3 sm:p-4"
+                className="min-w-0 rounded-lg border border-border p-3 sm:p-4"
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-foreground truncate">
+                      <Link href={`/users/${encodeURIComponent(s.student_id)}`} className="text-sm font-semibold text-foreground truncate hover:text-primary-emphasis hover:underline focus-visible:underline">
                         {s.name}
-                      </p>
+                      </Link>
                       <span className="rounded-full bg-muted border border-border px-2 py-0.5 text-[11px] font-medium text-foreground-soft">
                         {s.course}
                       </span>
-                      {atRisk && (
+                      {s.atRisk && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-red-50 text-red-600 px-2 py-0.5 text-[11px] font-medium">
                           <AlertTriangle className="w-3 h-3" />
                           At risk
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="mt-0.5 break-words text-xs text-muted-foreground">
                       {s.company}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <ProgressBar
-                      value={pct}
-                      label={`${s.name} internship hours completed`}
-                      className="w-28 sm:w-36"
-                    />
-                    <span className="text-xs font-semibold text-foreground w-9 text-right">
-                      {pct}%
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
-                      <Clock className="w-3 h-3" />
-                      {s.accumulated_hours}/{s.total_hours}h
+                  <div className="flex min-w-0 w-full flex-col-reverse gap-2 xl:w-auto xl:flex-row xl:items-center xl:gap-3">
+                    <div className="flex min-w-0 w-full items-center gap-3 xl:w-auto">
+                      <ProgressBar
+                        value={pct}
+                        label={`${s.name} internship hours completed`}
+                        className="min-w-0 flex-1 xl:w-36 xl:flex-none"
+                      />
+                      <span className="w-9 shrink-0 text-right text-xs font-semibold text-foreground">
+                        {pct}%
+                      </span>
+                    </div>
+                    <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+                      <Clock className="w-3 h-3 shrink-0" />
+                      {Number(s.accumulated_hours).toFixed(1)}/{s.total_hours}h
                     </span>
                   </div>
                 </div>
@@ -105,6 +164,14 @@ function StudentHoursTracker({ students = [], courses = [] }) {
             );
           })
         )}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+        <span>{isLoading ? "Loading..." : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}</span>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => setQuery((current) => ({ ...current, page: current.page - 1 }))} disabled={isLoading || query.page <= 1} className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+          <span>Page {pageData?.page ?? 1} / {pageData?.totalPages ?? 1}</span>
+          <button type="button" onClick={() => setQuery((current) => ({ ...current, page: current.page + 1 }))} disabled={isLoading || query.page >= (pageData?.totalPages ?? 1)} className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+        </div>
       </div>
     </div>
   );

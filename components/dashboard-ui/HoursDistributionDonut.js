@@ -6,28 +6,18 @@ import { Pie, PieChart, Cell } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart";
-import { isStudentAtRisk } from "@/lib/internshipRisk";
+import useChartLabelVisibility from "./useChartLabelVisibility";
+import useWideChartViewport from "./useWideChartViewport";
+import chartPalette from "./chartPalette";
 
 // Fixed palette, assigned to courses in sorted order so the same course
 // always gets the same color across renders/filters.
-const palette = [
-  "var(--chart-maroon)",
-  "var(--color-blue-500)",
-  "var(--color-amber-500)",
-  "var(--color-emerald-500)",
-  "var(--color-purple-500)",
-  "var(--color-rose-500)",
-  "var(--color-cyan-500)",
-];
-
 function buildCourseColorMap(courses) {
   const sorted = [...courses].sort();
   const map = new Map();
   sorted.forEach((course, i) => {
-    map.set(course, palette[i % palette.length]);
+    map.set(course, chartPalette[i % chartPalette.length]);
   });
   return map;
 }
@@ -55,47 +45,15 @@ function CustomTooltip({ active, payload }) {
   );
 }
 
-function HoursDistributionDonut({ students = [] }) {
+function HoursDistributionDonut({ summary = [] }) {
+  const useHoverTooltip = useWideChartViewport();
   const { chartData, chartConfig } = useMemo(() => {
-    const courses = Array.from(new Set(students.map((s) => s.course)));
+    const courses = summary.map((row) => row.course);
     const colorMap = buildCourseColorMap(courses);
-
-    const grouped = new Map();
-    courses.forEach((course) => {
-      grouped.set(course, {
-        course,
-        students: [],
-        fill: colorMap.get(course),
-      });
-    });
-
-    students.forEach((s) => {
-      grouped.get(s.course).students.push(s);
-    });
-
-    const data = Array.from(grouped.values()).map((group) => {
-      const studentCount = group.students.length;
-      const avgCompletion =
-        studentCount > 0
-          ? Math.round(
-              group.students.reduce(
-                (sum, s) => sum + (s.accumulated_hours / s.total_hours) * 100,
-                0,
-              ) / studentCount,
-            )
-          : 0;
-      const atRiskCount = group.students.filter((s) =>
-        isStudentAtRisk(s),
-      ).length;
-
-      return {
-        course: group.course,
-        avgCompletion,
-        studentCount,
-        atRiskCount,
-        fill: group.fill,
-      };
-    });
+    const data = summary.map((row) => ({
+      ...row,
+      fill: colorMap.get(row.course),
+    }));
 
     const config = {};
     data.forEach((d) => {
@@ -103,12 +61,16 @@ function HoursDistributionDonut({ students = [] }) {
     });
 
     return { chartData: data, chartConfig: config };
-  }, [students]);
+  }, [summary]);
+  const [chartRef, showCourseLabels] = useChartLabelVisibility(
+    480,
+    chartData.length > 0,
+  );
 
   const totalAtRisk = chartData.reduce((sum, d) => sum + d.atRiskCount, 0);
 
   return (
-    <div className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full flex flex-col">
+    <div className="min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6 h-full flex flex-col">
       <div className="mb-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <PieChartIcon className="w-4 h-4 text-primary-emphasis" />
@@ -132,28 +94,58 @@ function HoursDistributionDonut({ students = [] }) {
           </p>
         </div>
       ) : (
-        <ChartContainer
-          config={chartConfig}
-          className="flex-1 min-h-[220px] w-full bg-muted rounded-lg p-3"
-        >
-          <PieChart>
-            <ChartTooltip content={<CustomTooltip />} />
-            <Pie
-              data={chartData}
-              dataKey="avgCompletion"
-              nameKey="course"
-              innerRadius={55}
-              outerRadius={85}
-              strokeWidth={2}
-              stroke="var(--card)"
+        <div ref={chartRef} className="flex min-w-0 flex-1 flex-col justify-center rounded-lg bg-muted p-3">
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-52 min-w-0 w-full"
+          >
+            <PieChart>
+              <ChartTooltip
+                trigger={useHoverTooltip ? "hover" : "click"}
+                content={<CustomTooltip />}
+              />
+              <Pie
+                data={chartData}
+                dataKey="avgCompletion"
+                nameKey="course"
+                innerRadius={55}
+                outerRadius={85}
+                strokeWidth={2}
+                stroke="var(--card)"
+                className="cursor-pointer"
+              >
+                {chartData.map((entry) => (
+                  <Cell key={entry.course} fill={entry.fill} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ChartContainer>
+          {showCourseLabels && (
+            <div
+              className="mt-3 flex min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2"
+              aria-label="Course colors"
             >
               {chartData.map((entry) => (
-                <Cell key={entry.course} fill={entry.fill} />
+                <div
+                  key={entry.course}
+                  className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[11px] leading-tight text-muted-foreground"
+                >
+                  <span
+                    className="size-2 shrink-0 rounded-[2px]"
+                    style={{ backgroundColor: entry.fill }}
+                    aria-hidden="true"
+                  />
+                  <span>{entry.course}</span>
+                </div>
               ))}
-            </Pie>
-            <ChartLegend content={<ChartLegendContent nameKey="course" />} />
-          </PieChart>
-        </ChartContainer>
+            </div>
+          )}
+          {!showCourseLabels && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {useHoverTooltip ? "Hover" : "Tap"} a segment to see its course details.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

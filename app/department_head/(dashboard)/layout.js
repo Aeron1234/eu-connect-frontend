@@ -1,8 +1,7 @@
-import PageTitle from "@/components/ui/PageTitle";
 import { getUserSession } from "@/lib/server-actions/auth";
 import { redirect } from "next/navigation";
 
-async function DepartmentHeadDashboardLayout({ stats, children }) {
+async function DepartmentHeadDashboardLayout({ children }) {
   const session = await getUserSession();
   const role = session?.user?.role;
 
@@ -13,20 +12,7 @@ async function DepartmentHeadDashboardLayout({ stats, children }) {
   if (department === "REG") return redirect("/department_head/sipp-reports");
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-      <div className="space-y-6">
-        <PageTitle
-          title={"Dashboard"}
-          description={
-            "Overview of internships and student activity in your department."
-          }
-        />
-
-        {stats}
-
-        {children}
-      </div>
-    </main>
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">{children}</main>
   );
 }
 

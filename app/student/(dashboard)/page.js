@@ -1,4 +1,5 @@
 import { withReadErrorPage } from "@/lib/page-read-error";
+import DashboardStatsSection from "@/components/dashboard-ui/StudentDashboardStats";
 import MapSmallContainer from "@/components/map-ui/MapSmallContainer";
 import DtrTodayCard from "@/components/dtr-ui/DtrTodayCard";
 import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
@@ -57,7 +58,8 @@ async function StudentDashboardPage({ searchParams }) {
   const sParams = await searchParams;
   const currentDtrPage = Number(sParams.d_page) || 1;
 
-  const [activityLogs, dashboardRes, dtrData] = await Promise.all([
+  const [stats, activityLogs, dashboardRes, dtrData] = await Promise.all([
+    DashboardStatsSection(),
     getMyActivityLogs({ page: 1 }),
     getStudentDashboardData(),
     getDtrs(currentDtrPage),
@@ -81,6 +83,17 @@ async function StudentDashboardPage({ searchParams }) {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          Dashboard
+        </h1>
+        <p className="text-sm text-foreground-soft mt-1">
+          Here&apos;s your OJT overview for today
+        </p>
+      </div>
+
+      {stats}
+
       {/* Today card */}
       <DtrTodayCard
         internshipData={internshipData}

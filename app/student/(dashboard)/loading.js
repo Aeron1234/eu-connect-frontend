@@ -1,10 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin } from "lucide-react";
 import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
+import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
+import DashboardStatsSkeleton from "@/components/skeletons/DashboardStatsSkeleton";
 
 function StudentDashboardLoading() {
   return (
     <div className="space-y-6">
+      <PageTitleSkeleton />
+      <DashboardStatsSkeleton />
+
       {/* Today card */}
       <section className="rounded-xl bg-primary p-5 sm:p-6 shadow-sm overflow-hidden">
         <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">

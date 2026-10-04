@@ -1,44 +1,41 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
-import { Briefcase, Building2, Users, UserX } from "lucide-react";
+import {
+  Briefcase,
+  FileText,
+  MessageSquareText,
+  Megaphone,
+} from "lucide-react";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
-import { getAdminDashboardStats } from "@/lib/server-actions/dashboard-actions";
 
-export const metadata = {
-  title: "Admin",
-};
-
-async function StatsPage() {
-  const getStats = await getAdminDashboardStats();
-
+function DepartmentHeadDashboardStats({ stats: dashboardStats }) {
   const stats = [
     {
       label: "Ongoing Internships",
-      value: getStats?.stats?.ongoingInternships ?? 0,
+      value: dashboardStats?.ongoingInternships ?? 0,
       icon: Briefcase,
       accent: "bg-primary text-white border border-primary-400",
       valueClass: "text-primary-foreground",
       labelClass: "text-primary-foreground/80",
     },
     {
-      label: "Employers",
-      value: getStats?.stats?.employers ?? 0,
-      icon: Building2,
+      label: "Internship Records",
+      value: dashboardStats?.internshipRecords ?? 0,
+      icon: FileText,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
     },
     {
-      label: "Students",
-      value: getStats?.stats?.students ?? 0,
-      icon: Users,
+      label: "Pending Responses",
+      value: dashboardStats?.pendingResponses ?? 0,
+      icon: MessageSquareText,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
     },
     {
-      label: "Inactive / Suspended",
-      value: getStats?.stats?.inactiveOrSuspended ?? 0,
-      icon: UserX,
+      label: "Unread Announcements",
+      value: dashboardStats?.unreadAnnouncements ?? 0,
+      icon: Megaphone,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
@@ -48,4 +45,4 @@ async function StatsPage() {
   return <DashboardStats stats={stats} />;
 }
 
-export default withReadErrorPage(StatsPage);
+export default DepartmentHeadDashboardStats;
