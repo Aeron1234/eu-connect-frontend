@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Clock, AlertTriangle } from "lucide-react";
+import { Clock, AlertTriangle, Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,10 +19,23 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState({ page: 1, courseId: "all", search: "" });
   const [retryCount, setRetryCount] = useState(0);
-  const [result, setResult] = useState({ key: JSON.stringify([1, "all", "", 0]), data: initialPage });
+  const [result, setResult] = useState({
+    key: JSON.stringify([1, "all", "", 0]),
+    data: initialPage,
+  });
   const [failure, setFailure] = useState(null);
-  const requestKey = JSON.stringify([query.page, query.courseId, query.search, retryCount]);
+  const requestKey = JSON.stringify([
+    query.page,
+    query.courseId,
+    query.search,
+    retryCount,
+  ]);
   const isLoading = result.key !== requestKey && failure?.key !== requestKey;
+  const isSearchPending = searchInput.trim() !== query.search;
+  const isPending = isSearchPending || isLoading;
+  const loadingMessage = isSearchPending
+    ? "Searching students..."
+    : "Loading student hours...";
   const pageData = result.data;
 
   useEffect(() => {
@@ -41,24 +54,33 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
       page: query.page,
       courseId: query.courseId === "all" ? undefined : query.courseId,
       search: query.search,
-    }).then((response) => {
-      if (!active) return;
-      if (response?.error) {
-        setFailure({ key: requestKey, message: response.error });
-      } else {
-        setResult({ key: requestKey, data: response });
-        setFailure(null);
-        listRef.current?.scrollTo({ top: 0 });
-      }
-    }).catch(() => {
-      if (active) setFailure({ key: requestKey, message: "Could not load student hours. Please try again." });
-    });
-    return () => { active = false; };
+    })
+      .then((response) => {
+        if (!active) return;
+        if (response?.error) {
+          setFailure({ key: requestKey, message: response.error });
+        } else {
+          setResult({ key: requestKey, data: response });
+          setFailure(null);
+          listRef.current?.scrollTo({ top: 0 });
+        }
+      })
+      .catch(() => {
+        if (active)
+          setFailure({
+            key: requestKey,
+            message: "Could not load student hours. Please try again.",
+          });
+      });
+    return () => {
+      active = false;
+    };
   }, [query, requestKey, result.key]);
 
   function changeCourse(value) {
     setCourseFilter(value);
     setQuery({ page: 1, courseId: value, search: searchInput.trim() });
+    listRef.current?.scrollTo({ top: 0 });
   }
 
   return (
@@ -91,31 +113,64 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
         </Select>
       </div>
 
-      <input
-        type="search"
-        value={searchInput}
-        onChange={(event) => setSearchInput(event.target.value)}
-        placeholder="Search student name"
-        aria-label="Search student name"
-        maxLength={100}
-        className="mb-4 h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      />
+      <div className="mb-4">
+        <input
+          type="search"
+          value={searchInput}
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+            listRef.current?.scrollTo({ top: 0 });
+          }}
+          placeholder="Search student name"
+          aria-label="Search student name"
+          aria-busy={isPending}
+          maxLength={100}
+          className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        />
+        {isPending && (
+          <p
+            className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"
+            role="status"
+          >
+            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            {loadingMessage}
+          </p>
+        )}
+      </div>
 
-      <div ref={listRef} className="min-w-0 space-y-3 max-h-[420px] overflow-x-hidden overflow-y-auto pr-1" aria-live="polite">
-        {isLoading ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">Loading students...</p>
+      <div
+        ref={listRef}
+        className="min-w-0 space-y-3 max-h-[420px] overflow-x-hidden overflow-y-auto pr-1"
+        aria-live="polite"
+        aria-busy={isPending}
+      >
+        {isPending ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            {loadingMessage}
+          </p>
         ) : failure?.key === requestKey ? (
           <div className="py-6 text-center text-sm">
             <p className="text-red-600">{failure.message}</p>
-            <button type="button" onClick={() => setRetryCount((count) => count + 1)} className="mt-2 font-medium text-primary-emphasis hover:underline">Try again</button>
+            <button
+              type="button"
+              onClick={() => setRetryCount((count) => count + 1)}
+              className="mt-2 font-medium text-primary-emphasis hover:underline"
+            >
+              Try again
+            </button>
           </div>
         ) : !pageData?.students?.length ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            {query.courseId === "all" && !query.search ? "No active interns yet." : "No matching students."}
+            {query.courseId === "all" && !query.search
+              ? "No active interns yet."
+              : "No matching students."}
           </p>
         ) : (
           pageData.students.map((s) => {
-            const pct = s.total_hours > 0 ? Math.round((s.accumulated_hours / s.total_hours) * 100) : 0;
+            const pct =
+              s.total_hours > 0
+                ? Math.round((s.accumulated_hours / s.total_hours) * 100)
+                : 0;
 
             return (
               <div
@@ -125,7 +180,10 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link href={`/users/${encodeURIComponent(s.student_id)}`} className="text-sm font-semibold text-foreground truncate hover:text-primary-emphasis hover:underline focus-visible:underline">
+                      <Link
+                        href={`/users/${encodeURIComponent(s.student_id)}`}
+                        className="text-sm font-semibold text-foreground truncate hover:text-primary-emphasis hover:underline focus-visible:underline"
+                      >
                         {s.name}
                       </Link>
                       <span className="rounded-full bg-muted border border-border px-2 py-0.5 text-[11px] font-medium text-foreground-soft">
@@ -166,11 +224,35 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
         )}
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-        <span>{isLoading ? "Loading..." : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}</span>
+        <span>
+          {isPending
+            ? "Loading..."
+            : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}
+        </span>
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => setQuery((current) => ({ ...current, page: current.page - 1 }))} disabled={isLoading || query.page <= 1} className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
-          <span>Page {pageData?.page ?? 1} / {pageData?.totalPages ?? 1}</span>
-          <button type="button" onClick={() => setQuery((current) => ({ ...current, page: current.page + 1 }))} disabled={isLoading || query.page >= (pageData?.totalPages ?? 1)} className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+          <button
+            type="button"
+            onClick={() =>
+              setQuery((current) => ({ ...current, page: current.page - 1 }))
+            }
+            disabled={isPending || query.page <= 1}
+            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span>
+            Page {pageData?.page ?? 1} / {pageData?.totalPages ?? 1}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              setQuery((current) => ({ ...current, page: current.page + 1 }))
+            }
+            disabled={isPending || query.page >= (pageData?.totalPages ?? 1)}
+            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
