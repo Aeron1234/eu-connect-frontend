@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { ChevronDown, Building2 } from "lucide-react";
 import SearchedStudentFiles from "./SearchedStudentFiles";
 import {
-  getInternshipFiles,
+  getInternshipFilesResult as getInternshipFiles,
   downloadInternshipFile,
 } from "@/lib/server-actions/internship-docs-actions";
 
@@ -32,15 +32,28 @@ function RecordRow({ record, currentUserId }) {
   const [expanded, setExpanded] = useState(false);
   const [docs, setDocs] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
-  async function handleToggle() {
-    if (!expanded && docs === null) {
-      setIsLoading(true);
+  async function loadDocs() {
+    setIsLoading(true);
+    try {
       const result = await getInternshipFiles({ internshipId: record.id });
-      setDocs(result || []);
+      setLoadError(result?.error || "");
+      if (Array.isArray(result)) setDocs(result);
+    } catch {
+      setLoadError("Could not load files. Please try again.");
+    } finally {
       setIsLoading(false);
     }
-    setExpanded((prev) => !prev);
+  }
+
+  async function handleToggle() {
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+    setExpanded(true);
+    if (docs === null) await loadDocs();
   }
 
   return (
@@ -83,6 +96,13 @@ function RecordRow({ record, currentUserId }) {
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
               Loading files...
+            </div>
+          ) : loadError ? (
+            <div role="alert" className="p-4 text-sm text-foreground">
+              <p>{loadError}</p>
+              <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={loadDocs}>
+                Try again
+              </button>
             </div>
           ) : (
             <SearchedStudentFiles

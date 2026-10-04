@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import {
   getAllAnnouncements,
   getAnnouncementCategories,
@@ -26,4 +27,4 @@ async function AnnouncementPage() {
   );
 }
 
-export default AnnouncementPage;
+export default withReadErrorPage(AnnouncementPage);

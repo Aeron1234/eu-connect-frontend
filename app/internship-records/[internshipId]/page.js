@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import RecordsDetailsPageContent from "@/components/internship-records-ui/RecordsDetailsPageContent";
 import RecordsHeader from "@/components/internship-records-ui/RecordsHeader";
 import { getInternshipRecordOverview } from "@/lib/server-actions/internship-records-actions";
@@ -54,4 +55,4 @@ async function InternshipRecordsDetailsPage({ params }) {
   );
 }
 
-export default InternshipRecordsDetailsPage;
+export default withReadErrorPage(InternshipRecordsDetailsPage);

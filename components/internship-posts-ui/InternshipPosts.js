@@ -1,11 +1,13 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState } from "react";
 import { BriefcaseBusiness } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
 import SearchBar from "../ui/SearchBar";
 import DropdownFilter from "../ui/DropdownFilter";
-import { getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
+import { getInternshipPostsResult as getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
 import { useUser } from "@/contexts/UserContext";
 import InternshipPostsListSkeleton from "../skeletons/InternshipPostsListSkeleton";
 import {
@@ -159,7 +161,7 @@ function InternshipPosts({
         if (thisRequestId !== requestIdRef.current) return;
 
         if (!hasValidPage(newData, "data", "pagination", 1)) {
-          console.error(
+          notifyReadError(
             "Error loading filtered internship posts:",
             newData?.error || "Invalid response from the server",
           );
@@ -172,7 +174,7 @@ function InternshipPosts({
         setTotal(newData.pagination.total || 0);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading filtered internship posts:", error);
+          notifyReadError("Error loading filtered internship posts:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -215,7 +217,7 @@ function InternshipPosts({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more internship posts:",
           newData?.error || "Invalid response from the server",
         );
@@ -236,7 +238,7 @@ function InternshipPosts({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more internship posts:", error);
+        notifyReadError("Error loading more internship posts:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);

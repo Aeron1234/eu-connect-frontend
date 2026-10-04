@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import EvaluationsManager from "@/components/evaluations-ui/EvaluationsManager";
 import PageTitle from "@/components/ui/PageTitle";
 import { getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
@@ -27,4 +28,4 @@ async function EvaluationsPage() {
   );
 }
 
-export default EvaluationsPage;
+export default withReadErrorPage(EvaluationsPage);

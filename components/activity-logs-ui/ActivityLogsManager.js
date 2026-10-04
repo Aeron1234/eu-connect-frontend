@@ -1,9 +1,11 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Activity, Layers3, ScrollText, Trash2, Users } from "lucide-react";
 import {
-  getAllActivityLogs,
+  getAllActivityLogsResult as getAllActivityLogs,
   deleteActivityLog,
 } from "@/lib/server-actions/activity-logs-actions";
 import SearchBar from "../ui/SearchBar";
@@ -124,7 +126,7 @@ export default function ActivityLogsManager({
         if (thisRequestId !== requestIdRef.current) return;
 
         if (!hasValidPage(newData, "data")) {
-          console.error(
+          notifyReadError(
             "Error loading activity logs:",
             newData?.error || "Invalid response from the server",
           );
@@ -138,7 +140,7 @@ export default function ActivityLogsManager({
         setStats(newData.stats);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading activity logs:", error);
+          notifyReadError("Error loading activity logs:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -165,7 +167,7 @@ export default function ActivityLogsManager({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more activity logs:",
           newData?.error || "Invalid response from the server",
         );
@@ -188,7 +190,7 @@ export default function ActivityLogsManager({
       setStats(newData.stats);
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more activity logs:", error);
+        notifyReadError("Error loading more activity logs:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -232,7 +234,7 @@ export default function ActivityLogsManager({
         });
         if (thisRequestId !== requestIdRef.current) return;
         if (!hasValidPage(fresh, "data")) {
-          console.error(
+          notifyReadError(
             "Error refreshing activity logs:",
             fresh?.error || "Invalid response from the server",
           );
@@ -245,7 +247,7 @@ export default function ActivityLogsManager({
         setStats(fresh.stats);
       } catch (error) {
         if (thisRequestId === requestIdRef.current)
-          console.error("Error refreshing activity logs:", error);
+          notifyReadError("Error refreshing activity logs:", error);
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
       }

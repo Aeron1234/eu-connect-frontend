@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import {
   Briefcase,
   FileText,
@@ -54,4 +55,4 @@ async function StatsPage() {
   return <DashboardStats stats={stats} />;
 }
 
-export default StatsPage;
+export default withReadErrorPage(StatsPage);

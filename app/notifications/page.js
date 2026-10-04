@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import { Bell } from "lucide-react";
 import { getInbox } from "@/lib/server-actions/notifications-actions";
 import NotificationList from "../../components/notifications-ui/NotificationList";
@@ -27,4 +28,4 @@ async function NotificationsPage() {
   );
 }
 
-export default NotificationsPage;
+export default withReadErrorPage(NotificationsPage);

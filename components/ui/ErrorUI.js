@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ShieldAlert,
@@ -55,8 +56,9 @@ function classifyError(error) {
     return {
       icon: RefreshCw,
       title: "Slow Down",
-      description:
-        "You've made too many requests. Please wait a moment and try again.",
+      description: status === 429 && error?.message
+        ? error.message
+        : "You've made too many requests. Please wait a moment and try again.",
       tone: "blue",
     };
   }
@@ -104,10 +106,12 @@ const toneStyles = {
   stone: { bg: "bg-muted", text: "text-muted-foreground", ring: "ring-ring" },
 };
 
-export default function ErrorBoundary({ error, reset }) {
+export default function ErrorBoundary({ error, reset, logError = true }) {
+  const router = useRouter();
+
   useEffect(() => {
-    console.error("Route error boundary caught:", error);
-  }, [error]);
+    if (logError) console.error("Route error boundary caught:", error);
+  }, [error, logError]);
 
   const {
     icon: Icon,
@@ -139,7 +143,7 @@ export default function ErrorBoundary({ error, reset }) {
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <button
             type="button"
-            onClick={() => reset()}
+            onClick={() => reset ? reset() : router.refresh()}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             <RefreshCw className="h-4 w-4" />

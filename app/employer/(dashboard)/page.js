@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import InternsSupervisedCard from "@/components/dashboard-ui/InternsSupervisedCard";
 import QuickActionsCard from "@/components/dashboard-ui/QuickActionsCard";
 import JobsPostedTable, {
@@ -122,4 +123,4 @@ async function EmployerDashboardPage({ searchParams }) {
   );
 }
 
-export default EmployerDashboardPage;
+export default withReadErrorPage(EmployerDashboardPage);

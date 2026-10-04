@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getErrorMessage, parseApiResponse } from "../lib/api-response.js";
+import { getErrorMessage, parseApiResponse, throwApiError, toReadActionResult } from "../lib/api-response.js";
 
 test("authorization errors use consistent messages without exposing backend details", async () => {
   for (const [status, expected] of [
@@ -29,6 +29,31 @@ test("rate limits use backend text when available and a safe fallback otherwise"
     await getErrorMessage(new Response("<html>rate limited</html>", { status: 429 })),
     "You're submitting too quickly. Please wait a moment and try again.",
   );
+});
+
+test("failed reads can throw a safe message with their HTTP status", async () => {
+  await assert.rejects(
+    throwApiError(Response.json({ error: "Please try again after 15 minutes." }, { status: 429 })),
+    (error) => error.status === 429 && error.message === "Please try again after 15 minutes.",
+  );
+});
+
+test("client read results retain safe API errors and hide unexpected exceptions", async () => {
+  const limited = new Error("Please try again after 15 minutes.");
+  limited.status = 429;
+  assert.deepEqual(await toReadActionResult(async () => { throw limited; }, []), {
+    error: "Please try again after 15 minutes.",
+    status: 429,
+  });
+  assert.deepEqual(await toReadActionResult(async () => { throw new Error("DB secret"); }, []), {
+    error: "Could not reach the server. Please try again.",
+    status: 0,
+  });
+  assert.deepEqual(await toReadActionResult(async () => { throw new Error("You must be logged in."); }, []), {
+    error: "Your session has expired. Please log in again.",
+    status: 401,
+  });
+  assert.deepEqual(await toReadActionResult(async (value) => value, [null]), null);
 });
 
 test("validation errors accept both backend error and message fields", async () => {

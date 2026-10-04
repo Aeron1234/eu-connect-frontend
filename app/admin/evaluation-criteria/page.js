@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import EvaluationCriteriaPageContent from "@/components/evaluations-ui/EvaluationCriteriaPageContent";
 import PageTitle from "@/components/ui/PageTitle";
 import { getAllEvaluationCriteria } from "@/lib/server-actions/evaluations-actions";
@@ -25,4 +26,4 @@ async function EvaluationCriteriaPage() {
   );
 }
 
-export default EvaluationCriteriaPage;
+export default withReadErrorPage(EvaluationCriteriaPage);

@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import ActivityLogsManager from "@/components/activity-logs-ui/ActivityLogsManager";
 import { getAllActivityLogs } from "@/lib/server-actions/activity-logs-actions";
 
@@ -22,4 +23,4 @@ async function ActivityLogsPage() {
   );
 }
 
-export default ActivityLogsPage;
+export default withReadErrorPage(ActivityLogsPage);

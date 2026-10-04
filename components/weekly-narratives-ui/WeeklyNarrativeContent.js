@@ -1,5 +1,7 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { Calendar, Edit2, Trash2 } from "lucide-react";
 import Modal from "../ui/Modal";
 import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
@@ -7,8 +9,8 @@ import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import {
-  fetchMoreWeeklyNarratives,
-  getWeeklyNarratives,
+  fetchMoreWeeklyNarrativesResult as fetchMoreWeeklyNarratives,
+  getWeeklyNarrativesResult as getWeeklyNarratives,
 } from "@/lib/server-actions/weekly-narratives-actions";
 import {
   canKeepLoadedPages,
@@ -84,7 +86,7 @@ function WeeklyNarrativeContent({
       const fresh = await getWeeklyNarratives();
       if (thisRequestId !== requestIdRef.current) return;
       if (!hasValidPage(fresh, "narratives", null)) {
-        console.error(
+        notifyReadError(
           "Error refreshing weekly narratives:",
           fresh?.error || "Invalid response from the server",
         );
@@ -95,7 +97,7 @@ function WeeklyNarrativeContent({
       setTotalPages(fresh.totalPages || 1);
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
-        console.error("Error refreshing weekly narratives:", error);
+        notifyReadError("Error refreshing weekly narratives:", error);
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
     }
@@ -111,7 +113,7 @@ function WeeklyNarrativeContent({
       const newData = await fetchMoreWeeklyNarratives({ page: nextPage });
       if (thisRequestId !== requestIdRef.current) return;
       if (!hasValidPage(newData, "narratives", null, nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more weekly narratives:",
           newData?.error || "Invalid response from the server",
         );
@@ -131,7 +133,7 @@ function WeeklyNarrativeContent({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
-        console.error("Error loading more weekly narratives:", error);
+        notifyReadError("Error loading more weekly narratives:", error);
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
     }

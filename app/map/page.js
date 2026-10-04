@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import MapWrapper from "@/components/map-ui/MapWrapper";
 import { getMapLocations } from "@/lib/server-actions/map-actions";
 
@@ -18,4 +19,4 @@ async function MapPage() {
   );
 }
 
-export default MapPage;
+export default withReadErrorPage(MapPage);

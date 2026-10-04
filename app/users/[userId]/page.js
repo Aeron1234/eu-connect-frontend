@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import SearchedUserHeader from "@/components/search-user-ui/SearchedUserHeader";
 import SearchedUserRecordsManager from "@/components/search-user-ui/SearchedUserRecordsManager";
 import {
@@ -111,4 +112,4 @@ async function UserProfilePage({ params, searchParams }) {
   );
 }
 
-export default UserProfilePage;
+export default withReadErrorPage(UserProfilePage);

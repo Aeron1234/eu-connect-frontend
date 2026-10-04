@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import AccountProfile from "@/components/account-ui/AccountProfile";
 import { getUserProfile } from "@/lib/server-actions/account-actions";
 
@@ -13,4 +14,4 @@ async function StudentAccountPage() {
   return <AccountProfile roleLabel="Student" userData={userData || {}} />;
 }
 
-export default StudentAccountPage;
+export default withReadErrorPage(StudentAccountPage);

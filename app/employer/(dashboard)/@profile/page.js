@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import EmployerProfileCard from "@/components/dashboard-ui/EmployerProfileCard";
 import { getUserProfile } from "@/lib/server-actions/account-actions";
 
@@ -12,4 +13,4 @@ async function ProfilePage() {
   return <EmployerProfileCard profile={profile} />;
 }
 
-export default ProfilePage;
+export default withReadErrorPage(ProfilePage);

@@ -1,10 +1,12 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState } from "react";
 import { Building2, FileText, Loader2, Users } from "lucide-react";
 
 import ExportPdfButton from "../ui/ExportPdfButton";
-import { getHteCompanyList } from "@/lib/server-actions/sipp-hte-actions";
+import { getHteCompanyListResult as getHteCompanyList } from "@/lib/server-actions/sipp-hte-actions";
 import SearchBar from "../ui/SearchBar";
 import HTEListSkeleton from "../skeletons/HTEListSkeleton";
 import { hasValidPage } from "@/lib/see-more-pagination.mjs";
@@ -54,7 +56,7 @@ export function AnnexDHteList({
         if (thisRequestId !== requestIdRef.current) return;
 
         if (!hasValidPage(newData, "companies")) {
-          console.error(
+          notifyReadError(
             "Error loading HTE companies:",
             newData?.error || "Invalid response from the server",
           );
@@ -67,7 +69,7 @@ export function AnnexDHteList({
         setTotal(newData?.pagination?.total || 0);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading HTE companies:", error);
+          notifyReadError("Error loading HTE companies:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -93,7 +95,7 @@ export function AnnexDHteList({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "companies", "pagination", nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more HTE companies:",
           newData?.error || "Invalid response from the server",
         );
@@ -116,7 +118,7 @@ export function AnnexDHteList({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more HTE companies:", error);
+        notifyReadError("Error loading more HTE companies:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);

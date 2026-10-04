@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import Modal from "@/components/ui/Modal";
 import StorageUploadForm from "@/components/internship-docs-ui/StorageUploadForm";
 import RecordsDocuments from "@/components/internship-docs-ui/RecordsDocuments";
@@ -100,4 +101,4 @@ async function PastInternshipsSection({ currentUserId }) {
   );
 }
 
-export default StoragePage;
+export default withReadErrorPage(StoragePage);

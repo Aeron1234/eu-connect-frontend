@@ -37,7 +37,7 @@ const EMPTY_ACCOUNT_FORM = {
   first_name: "",
   last_name: "",
   username: "",
-  password: "00000000",
+  password: "qwerty12345",
   email: "",
 };
 
@@ -160,7 +160,7 @@ function CreateAccountForm({ roles, courses, departments, onCreated }) {
             disabled={isPending}
           />
           <Select
-            name="role"
+            value={selectedRole}
             onValueChange={setSelectedRole}
             disabled={isPending}
           >
@@ -365,7 +365,7 @@ function CreateAccountForm({ roles, courses, departments, onCreated }) {
                 Gender *
               </label>
               <Select
-                name="gender"
+                value={selectedGender}
                 onValueChange={setSelectedGender}
                 disabled={isPending}
               >

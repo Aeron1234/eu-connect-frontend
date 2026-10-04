@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import SearchUsers from "../../components/search-user-ui/SearchUsers";
 import { getSearchHistory } from "@/lib/server-actions/history-actions";
 
@@ -26,4 +27,4 @@ async function UsersPage() {
   );
 }
 
-export default UsersPage;
+export default withReadErrorPage(UsersPage);

@@ -1,12 +1,13 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { format } from "date-fns";
 import {
   CalendarDays,
   CheckCircle2,
   Clock,
   GraduationCap,
-  Loader2,
   RotateCcw,
   XCircle,
 } from "lucide-react";
@@ -18,9 +19,8 @@ import RecordsPageFilter from "./RecordsPageFilter";
 import { toastAndAction } from "../../lib/helpers";
 import {
   updateInternshipRecordStatus,
-  getDepartmentInternshipRecords,
+  getDepartmentInternshipRecordsResult as getDepartmentInternshipRecords,
 } from "@/lib/server-actions/internship-records-actions";
-import RecordCardSkeleton from "../skeletons/RecordCardSkeleton";
 import ProgressBar from "../ui/ProgressBar";
 
 const statusMeta = {
@@ -80,7 +80,7 @@ function RecordsPageContent({
   const [isPending, startTransition] = useTransition();
 
   const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
+  const lastCriteriaRef = useRef({ query: "", statusParam: "", limit });
 
   const statusParam = filter === "all" ? "" : filter;
 
@@ -88,10 +88,15 @@ function RecordsPageContent({
   // keystroke are treated identically: same debounce, same spinner, same
   // request-race protection via requestIdRef.
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
+    const previous = lastCriteriaRef.current;
+    if (
+      previous.query === query &&
+      previous.statusParam === statusParam &&
+      previous.limit === limit
+    ) {
       return;
     }
+    lastCriteriaRef.current = { query, statusParam, limit };
 
     const thisRequestId = ++requestIdRef.current;
     setIsLoadingMore(false);
@@ -109,7 +114,7 @@ function RecordsPageContent({
         if (thisRequestId !== requestIdRef.current) return;
 
         if (!hasValidPage(newData, "data")) {
-          console.error(
+          notifyReadError(
             "Error loading filtered records:",
             newData?.error || "Invalid response from the server",
           );
@@ -123,7 +128,7 @@ function RecordsPageContent({
         if (newData?.stats) setStats(newData.stats);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading filtered records:", error);
+          notifyReadError("Error loading filtered records:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsSearching(false);
@@ -150,7 +155,7 @@ function RecordsPageContent({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more records:",
           newData?.error || "Invalid response from the server",
         );
@@ -171,7 +176,7 @@ function RecordsPageContent({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more records:", error);
+        notifyReadError("Error loading more records:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
@@ -204,7 +209,7 @@ function RecordsPageContent({
           });
           if (thisRequestId !== requestIdRef.current) return;
           if (!hasValidPage(fresh, "data")) {
-            console.error(
+            notifyReadError(
               "Error refreshing records:",
               fresh?.error || "Invalid response from the server",
             );
@@ -220,7 +225,7 @@ function RecordsPageContent({
           if (fresh.stats) setStats(fresh.stats);
         } catch (error) {
           if (thisRequestId === requestIdRef.current)
-            console.error("Error refreshing records:", error);
+            notifyReadError("Error refreshing records:", error);
         } finally {
           if (thisRequestId === requestIdRef.current) setIsSearching(false);
         }
@@ -243,14 +248,7 @@ function RecordsPageContent({
         totalItems={total}
       />
 
-      {isSearching ? (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <RecordCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-3">
+      <div className="space-y-3" aria-busy={isSearching}>
           {records.map((r) => (
             <article
               key={r.id}
@@ -364,8 +362,7 @@ function RecordsPageContent({
               </p>
             </div>
           )}
-        </div>
-      )}
+      </div>
 
       {!isSearching && currentPage < totalPages && (
         <div className="w-full text-center">

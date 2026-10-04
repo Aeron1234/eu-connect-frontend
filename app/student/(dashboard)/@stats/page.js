@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import { Briefcase, ClipboardCheck, FolderOpen, Megaphone } from "lucide-react";
 import { getStudentDashboardStats } from "@/lib/server-actions/dashboard-actions";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
@@ -43,4 +44,4 @@ async function StatsPage() {
   return <DashboardStats stats={stats} />;
 }
 
-export default StatsPage;
+export default withReadErrorPage(StatsPage);

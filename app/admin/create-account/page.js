@@ -1,5 +1,6 @@
 import AccountsManager from "@/components/account-ui/AccountsManager";
 import PageTitle from "@/components/ui/PageTitle";
+import { withReadErrorPage } from "@/lib/page-read-error";
 import {
   getAllAccounts,
   getCreateAccountFormData,
@@ -39,4 +40,4 @@ async function CreateAccountPage() {
   );
 }
 
-export default CreateAccountPage;
+export default withReadErrorPage(CreateAccountPage);

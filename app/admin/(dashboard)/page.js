@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import UserGrowthChart from "@/components/dashboard-ui/UserGrowthChart";
 import UsersByRoleChart from "@/components/dashboard-ui/UsersByRoleChart";
 import InternshipsByDepartmentChart from "@/components/dashboard-ui/InternshipsByDepartmentChart";
@@ -83,4 +84,4 @@ async function AdminDashboardPage() {
   );
 }
 
-export default AdminDashboardPage;
+export default withReadErrorPage(AdminDashboardPage);

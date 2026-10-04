@@ -1,10 +1,12 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, FileText, ClipboardList } from "lucide-react";
 import {
   saveAnnexCReport,
-  getAnnexCReports,
+  getAnnexCReportsResult as getAnnexCReports,
   deleteAnnexCReport,
 } from "@/lib/server-actions/sipp-hte-actions";
 import ExportPdfButton from "../ui/ExportPdfButton";
@@ -71,7 +73,7 @@ export default function AnnexCManager({
       });
       if (thisRequestId !== requestIdRef.current) return;
       if (!hasValidPage(fresh, "reports")) {
-        console.error(
+        notifyReadError(
           "Error refreshing Annex C reports:",
           fresh?.error || "Invalid response from the server",
         );
@@ -83,7 +85,7 @@ export default function AnnexCManager({
       setTotal(fresh.pagination.total || 0);
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
-        console.error("Error refreshing Annex C reports:", error);
+        notifyReadError("Error refreshing Annex C reports:", error);
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
     }
@@ -109,7 +111,7 @@ export default function AnnexCManager({
         if (thisRequestId !== requestIdRef.current) return;
 
         if (!hasValidPage(newData, "reports")) {
-          console.error(
+          notifyReadError(
             "Error loading Annex C reports:",
             newData?.error || "Invalid response from the server",
           );
@@ -122,7 +124,7 @@ export default function AnnexCManager({
         setTotal(newData?.pagination?.total || 0);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading Annex C reports:", error);
+          notifyReadError("Error loading Annex C reports:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -148,7 +150,7 @@ export default function AnnexCManager({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "reports", "pagination", nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more Annex C reports:",
           newData?.error || "Invalid response from the server",
         );
@@ -169,7 +171,7 @@ export default function AnnexCManager({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more Annex C reports:", error);
+        notifyReadError("Error loading more Annex C reports:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -245,7 +247,7 @@ export default function AnnexCManager({
     if (!confirm("Delete this report? This cannot be undone.")) return;
     const result = await deleteAnnexCReport(reportId);
     if (result?.error) {
-      console.error(result.error);
+      notifyReadError(result.error);
       return;
     }
     setReports((prev) => prev.filter((r) => r.id !== reportId));

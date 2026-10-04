@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { notifyReadError } from "@/lib/client-read-error";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import SearchedUserFilter from "./SearchedUserFilter";
 import DtrTable from "../dtr-ui/DtrTable";
 import SetDtrLocation from "../dtr-ui/SetDtrLocation";
@@ -10,15 +12,15 @@ import StudentEvaluationCriteria from "../evaluations-ui/StudentEvaluationCriter
 import EmployerCertificateUploads from "../internship-docs-ui/EmployerCertificateUploads";
 import ProfileInfoGrid from "./ProfileInfoGrid";
 import TabContentSkeleton from "../skeletons/TabContentSkeleton";
-import { getEmployerUploadedFiles } from "@/lib/server-actions/internship-docs-actions";
-import { getSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
+import { getEmployerUploadedFilesResult as getEmployerUploadedFiles } from "@/lib/server-actions/internship-docs-actions";
+import { getSearchedStudentWeeklyNarrativesResult as getSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 import {
-  getStudentPastEvaluations,
-  getStudentEvaluationCriterias,
+  getStudentPastEvaluationsResult as getStudentPastEvaluations,
+  getStudentEvaluationCriteriasResult as getStudentEvaluationCriterias,
 } from "@/lib/server-actions/evaluations-actions";
 import {
-  getSearchedStudentDtrLocation,
-  getSearchedStudentDTRs,
+  getSearchedStudentDtrLocationResult as getSearchedStudentDtrLocation,
+  getSearchedStudentDTRsResult as getSearchedStudentDTRs,
 } from "@/lib/server-actions/dtr-actions";
 
 function buildTabs({ userRole, searchedUserRole, supervision }) {
@@ -93,11 +95,13 @@ function SearchedUserRecordsManager({
       : {},
   );
   const [isPending, setIsPending] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
 
-  const fetchers = {
+  const fetchers = useMemo(() => ({
     dtr: async () => {
       const [dtrData, dtrLocation] = await Promise.all([
         getSearchedStudentDTRs(searchedUserId, 1),
@@ -124,7 +128,7 @@ function SearchedUserRecordsManager({
       const uploadedFiles = await getEmployerUploadedFiles(searchedUserId);
       return { uploadedFiles };
     },
-  };
+  }), [searchedUserId, userRole]);
 
   function handleTabClick(value) {
     setSelectedTab(value);
@@ -147,19 +151,22 @@ function SearchedUserRecordsManager({
 
     const timeout = setTimeout(async () => {
       setIsPending(true);
+      setLoadError("");
       try {
         const result = await fetchers[selectedTab]();
 
         if (thisRequestId !== requestIdRef.current) return;
+        const failedRead = Object.values(result).find((value) => value?.error);
+        if (failedRead) throw new Error(failedRead.error);
 
         setFilter(selectedTab);
         setData(result);
         if (selectedTab === "dtr") setDtrPage(1);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading profile tab:", error);
-          setFilter(selectedTab);
-          setData({});
+          const message = error?.message || "Could not load this section.";
+          notifyReadError(message);
+          setLoadError(message);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -167,7 +174,7 @@ function SearchedUserRecordsManager({
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [selectedTab, filter]);
+  }, [selectedTab, filter, retryKey, fetchers]);
 
   // NEW — mirrors the server's DTR props into local state whenever they
   // change. This is what makes pagination actually work: clicking the
@@ -194,7 +201,12 @@ function SearchedUserRecordsManager({
       />
 
       <div className="mt-6">
-        {isPending ? (
+        {loadError && !isPending ? (
+          <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
+            <p>{loadError}</p>
+            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => setRetryKey((value) => value + 1)}>Try again</button>
+          </div>
+        ) : isPending ? (
           <TabContentSkeleton tab={selectedTab} userRole={userRole} />
         ) : (
           <>

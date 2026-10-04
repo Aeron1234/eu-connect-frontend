@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Check, Trash2 } from "lucide-react";
 import Modal from "../ui/Modal";
 import {
-  getAvailableAvatars,
+  getAvailableAvatarsResult as getAvailableAvatars,
   updateUserAvatar,
   deleteUserAvatar,
 } from "@/lib/server-actions/account-actions";
@@ -15,20 +15,29 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
   const router = useRouter();
   const [avatars, setAvatars] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     let cancelled = false;
-    getAvailableAvatars().then((result) => {
-      if (!cancelled) {
-        setAvatars(result?.avatars || []);
-        setIsLoading(false);
-      }
-    });
+    getAvailableAvatars()
+      .then((result) => {
+        if (!cancelled) {
+          setLoadError(result?.error || "");
+          setAvatars(result?.error ? [] : result?.avatars || []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError("Could not load avatars. Please try again.");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   function handleSelect(avatarName) {
     const formData = new FormData();
@@ -77,6 +86,13 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary-emphasis" />
+          </div>
+        ) : loadError ? (
+          <div role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm">
+            <p>{loadError}</p>
+            <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => { setIsLoading(true); setReloadKey((value) => value + 1); }}>
+              Try again
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">

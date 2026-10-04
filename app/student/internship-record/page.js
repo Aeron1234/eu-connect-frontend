@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import InternshipRecordsManager from "@/components/internship-records-ui/InternshipRecordsManager";
 import { getRegions } from "@/lib/server-actions/map-actions";
 
@@ -26,4 +27,4 @@ async function InternshipRecordPage() {
   );
 }
 
-export default InternshipRecordPage;
+export default withReadErrorPage(InternshipRecordPage);

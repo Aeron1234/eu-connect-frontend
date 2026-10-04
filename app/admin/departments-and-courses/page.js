@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import DepartmentsAndCoursesManager from "@/components/departments-and-courses-ui/DepartmentAndCoursesManager";
 import {
   getCourses,
@@ -24,4 +25,4 @@ async function DepartmentsAndCoursesPage() {
   );
 }
 
-export default DepartmentsAndCoursesPage;
+export default withReadErrorPage(DepartmentsAndCoursesPage);

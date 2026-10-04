@@ -1,17 +1,19 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState } from "react";
 import EmployerEvaluations from "./EmployerEvaluations";
 import EvaluationCard from "./EvaluationCard";
 import TabBar from "../ui/TabBar";
 import EvaluationsTabContentSkeleton from "../skeletons/EvaluationsTabContentSkeleton";
 import {
-  getAllEvaluations,
-  getDisputedEvaluations,
-  getStudentPendingEvaluations,
+  getAllEvaluationsResult as getAllEvaluations,
+  getDisputedEvaluationsResult as getDisputedEvaluations,
+  getStudentPendingEvaluationsResult as getStudentPendingEvaluations,
 } from "@/lib/server-actions/evaluations-actions";
 
-import { getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
+import { getEmployerEvaluationCriteriasResult as getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
 
 const tabs = [
   { label: "Evaluate Supervisor", value: "evaluate-supervisor" },
@@ -25,24 +27,29 @@ const tabs = [
 // component's expected shape.
 const filterTabs = tabs.map((t) => ({ value: t.value, text: t.label }));
 
+function requireRead(value) {
+  if (value?.error) throw new Error(value.error);
+  return value;
+}
+
 // Each tab pulls from a different endpoint with a different shape — this
 // normalizes them all to { criteria } or { evaluations } so the render
 // logic below stays simple.
 const fetchers = {
   "evaluate-supervisor": async () => {
-    const criteria = await getEmployerEvaluationCriterias();
+    const criteria = requireRead(await getEmployerEvaluationCriterias());
     return { criteria: criteria || [] };
   },
   "pending-confirmation": async () => {
-    const res = await getStudentPendingEvaluations();
+    const res = requireRead(await getStudentPendingEvaluations());
     return { evaluations: res?.data || [] };
   },
   "past-evaluations": async () => {
-    const res = await getAllEvaluations();
+    const res = requireRead(await getAllEvaluations());
     return { evaluations: res?.data || [] };
   },
   disputed: async () => {
-    const res = await getDisputedEvaluations();
+    const res = requireRead(await getDisputedEvaluations());
     return { evaluations: res?.data || [] };
   },
 };
@@ -56,6 +63,8 @@ function EvaluationsManager({ initialCriteria = [] }) {
   const [selectedTab, setSelectedTab] = useState("evaluate-supervisor");
   const [data, setData] = useState({ criteria: initialCriteria });
   const [isPending, setIsPending] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
@@ -76,6 +85,7 @@ function EvaluationsManager({ initialCriteria = [] }) {
 
     const timeout = setTimeout(async () => {
       setIsPending(true);
+      setLoadError("");
       try {
         const result = await fetchers[selectedTab]();
 
@@ -85,9 +95,9 @@ function EvaluationsManager({ initialCriteria = [] }) {
         setData(result);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading evaluations tab:", error);
-          setFilter(selectedTab);
-          setData({});
+          const message = error?.message || "Could not load evaluations.";
+          notifyReadError(message);
+          setLoadError(message);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -95,7 +105,7 @@ function EvaluationsManager({ initialCriteria = [] }) {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [selectedTab, filter]);
+  }, [selectedTab, filter, retryKey]);
 
   return (
     <>
@@ -106,7 +116,12 @@ function EvaluationsManager({ initialCriteria = [] }) {
       />
 
       <div className="flex flex-col gap-2 mt-2">
-        {isPending ? (
+        {loadError && !isPending ? (
+          <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
+            <p>{loadError}</p>
+            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => setRetryKey((value) => value + 1)}>Try again</button>
+          </div>
+        ) : isPending ? (
           <EvaluationsTabContentSkeleton tab={selectedTab} />
         ) : (
           <>

@@ -1,10 +1,12 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, BellRing, Inbox } from "lucide-react";
 import MarkAllAsReadButton from "./MarkAllAsReadButton";
 import NotificationItem from "./NotificationItem";
-import { getInbox } from "@/lib/server-actions/notifications-actions";
+import { getInboxResult as getInbox } from "@/lib/server-actions/notifications-actions";
 import { useUser } from "@/contexts/UserContext";
 import { socket } from "../ui/SocketProvider";
 import {
@@ -82,7 +84,7 @@ function NotificationList({ inboxData: initialData }) {
       setUnreadCount(fresh.unreadCount || 0);
       return true;
     } catch (error) {
-      console.error("Could not refresh notifications:", error);
+      notifyReadError("Could not refresh notifications:", error);
       return false;
     } finally {
       if (requestId === requestIdRef.current) setIsPending(false);
@@ -186,7 +188,7 @@ function NotificationList({ inboxData: initialData }) {
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "data", null, nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more notifications:",
           newData?.error || "Invalid response from the server",
         );
@@ -205,7 +207,7 @@ function NotificationList({ inboxData: initialData }) {
       if (newData?.totalPages) setTotalPages(newData.totalPages);
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more notifications:", error);
+        notifyReadError("Error loading more notifications:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);

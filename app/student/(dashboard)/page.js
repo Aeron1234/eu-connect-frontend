@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import MapSmallContainer from "@/components/map-ui/MapSmallContainer";
 import DtrTodayCard from "@/components/dtr-ui/DtrTodayCard";
 import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
@@ -156,4 +157,4 @@ function InternshipProgress({ accumulated_hours = 0, total_hours = 0 }) {
   );
 }
 
-export default StudentDashboardPage;
+export default withReadErrorPage(StudentDashboardPage);

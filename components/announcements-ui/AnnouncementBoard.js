@@ -1,8 +1,10 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState } from "react";
 import { Megaphone } from "lucide-react";
-import { getAllAnnouncements } from "@/lib/server-actions/announcements-actions";
+import { getAllAnnouncementsResult as getAllAnnouncements } from "@/lib/server-actions/announcements-actions";
 import PostAnnouncementButton from "../internship-records-ui/PostAnnouncementButton";
 import AnnouncementCard from "./AnnouncementCard";
 import AnnouncementsFilter from "./AnnouncementsFilter";
@@ -43,7 +45,7 @@ function AnnouncementBoard({
       !hasValidPage(newData, "regular", null) ||
       !Array.isArray(newData.pinned)
     ) {
-      console.error(newData?.error || "Invalid announcements response");
+      notifyReadError(newData?.error || "Invalid announcements response");
       return;
     }
     setPinned(newData.pinned);
@@ -76,7 +78,7 @@ function AnnouncementBoard({
           !hasValidPage(newData, "regular", null) ||
           !Array.isArray(newData.pinned)
         ) {
-          console.error(
+          notifyReadError(
             "Error loading announcements:",
             newData?.error || "Invalid response from the server",
           );
@@ -89,7 +91,7 @@ function AnnouncementBoard({
         setTotalPages(newData.totalPages || 1);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading announcements:", error);
+          notifyReadError("Error loading announcements:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsSearching(false);
@@ -115,7 +117,7 @@ function AnnouncementBoard({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "regular", null, nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more announcements:",
           newData?.error || "Invalid response from the server",
         );
@@ -134,7 +136,7 @@ function AnnouncementBoard({
       if (newData?.totalPages) setTotalPages(newData.totalPages);
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more announcements:", error);
+        notifyReadError("Error loading more announcements:", error);
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);

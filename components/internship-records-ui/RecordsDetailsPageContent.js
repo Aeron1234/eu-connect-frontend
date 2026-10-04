@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import RecordsDtrTable from "../dtr-ui/RecordsDtrTable";
 import RecordsNarrative from "../weekly-narratives-ui/RecordsNarratives";
 import EvaluationCard from "../evaluations-ui/EvaluationCard";
@@ -10,15 +10,15 @@ import SetDtrLocation from "../dtr-ui/SetDtrLocation";
 import TabBar from "../ui/TabBar";
 import RecordsTabContentSkeleton from "../skeletons/RecordsTabContentSkeleton";
 import ProgressBar from "../ui/ProgressBar";
-import { getInternshipRecordDocuments } from "@/lib/server-actions/internship-docs-actions";
+import { getInternshipRecordDocumentsResult as getInternshipRecordDocuments } from "@/lib/server-actions/internship-docs-actions";
 import {
-  getInternshipRecordDtr,
-  getSearchedStudentDtrLocation,
+  getInternshipRecordDtrResult as getInternshipRecordDtr,
+  getSearchedStudentDtrLocationResult as getSearchedStudentDtrLocation,
 } from "@/lib/server-actions/dtr-actions";
-import { getInternshipRecordWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
-import { getInternshipRecordEvaluations } from "@/lib/server-actions/evaluations-actions";
+import { getInternshipRecordWeeklyNarrativesResult as getInternshipRecordWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
+import { getInternshipRecordEvaluationsResult as getInternshipRecordEvaluations } from "@/lib/server-actions/evaluations-actions";
 
-import { getFileRequirementTypes } from "@/lib/server-actions/internship-docs-actions";
+import { getFileRequirementTypesResult as getFileRequirementTypes } from "@/lib/server-actions/internship-docs-actions";
 
 const tabs = [
   { value: "overview", text: "Overview" },
@@ -51,14 +51,20 @@ function RecordsDetailsPageContent({ record, internshipId }) {
   const [filter, setFilter] = useState("overview");
   const [data, setData] = useState({});
   const [isPending, setIsPending] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
 
   // Overview's data is already on hand via `record` — switching to it
   // never needs a fetch.
-  const fetchers = {
+  const fetchers = useMemo(() => ({
     dtr: async () => {
+      if (record?.status !== "ongoing") {
+        return { dtrs: await getInternshipRecordDtr(internshipId) };
+      }
+
       const [dtrs, dtrLocation] = await Promise.all([
         getInternshipRecordDtr(internshipId),
         getSearchedStudentDtrLocation(record?.student_id),
@@ -81,7 +87,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
       ]);
       return { fileData, requirementTypes };
     },
-  };
+  }), [internshipId, record?.status, record?.student_id]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -100,18 +106,19 @@ function RecordsDetailsPageContent({ record, internshipId }) {
 
     const timeout = setTimeout(async () => {
       setIsPending(true);
+      setLoadError("");
       try {
         const result = await fetchers[selectedTab]();
 
         if (thisRequestId !== requestIdRef.current) return;
+        const failedRead = Object.values(result).find((value) => value?.error);
+        if (failedRead) throw new Error(failedRead.error);
 
         setFilter(selectedTab);
         setData(result);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading record tab:", error);
-          setFilter(selectedTab);
-          setData({});
+          setLoadError(error?.message || "Could not load this section.");
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -119,7 +126,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [selectedTab, filter]);
+  }, [selectedTab, filter, retryKey, fetchers]);
 
   const pct = Math.min(
     100,
@@ -130,7 +137,14 @@ function RecordsDetailsPageContent({ record, internshipId }) {
     <>
       <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={setSelectedTab} />
 
-      {isPending ? (
+      {loadError && !isPending ? (
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
+          <p>{loadError}</p>
+          <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => setRetryKey((value) => value + 1)}>
+            Try again
+          </button>
+        </div>
+      ) : isPending ? (
         <RecordsTabContentSkeleton tab={selectedTab} />
       ) : (
         <>
@@ -199,12 +213,14 @@ function RecordsDetailsPageContent({ record, internshipId }) {
               <div className="rounded-xl bg-card border border-border shadow-sm p-4 sm:p-6">
                 <RecordsDtrTable dtrs={data?.dtrs || []} />
               </div>
-              <div className="mt-6">
-                <SetDtrLocation
-                  studentId={record?.student_id}
-                  dataLocation={normalizeDtrLocation(data?.dtrLocation)}
-                />
-              </div>
+              {record?.status === "ongoing" && (
+                <div className="mt-6">
+                  <SetDtrLocation
+                    studentId={record?.student_id}
+                    dataLocation={normalizeDtrLocation(data?.dtrLocation)}
+                  />
+                </div>
+              )}
             </>
           )}
 

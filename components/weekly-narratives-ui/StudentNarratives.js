@@ -1,9 +1,11 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { format } from "date-fns";
 import Modal from "../ui/Modal";
 import { useEffect, useRef, useState } from "react";
-import { fetchMoreSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
+import { fetchMoreSearchedStudentWeeklyNarrativesResult as fetchMoreSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
 import {
   canKeepLoadedPages,
   hasValidPage,
@@ -81,7 +83,7 @@ function StudentNarratives({
       if (thisRequestId !== requestIdRef.current) return;
 
       if (!hasValidPage(newData, "narratives", null, nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more weekly narratives:",
           newData?.error || "Invalid response from the server",
         );
@@ -101,7 +103,7 @@ function StudentNarratives({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
-        console.error("Error loading more weekly narratives:", error);
+        notifyReadError("Error loading more weekly narratives:", error);
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
     }

@@ -1,4 +1,4 @@
-import { ClipboardList, Search } from "lucide-react";
+import { ClipboardList, Loader2, Search } from "lucide-react";
 import PageTitle from "../ui/PageTitle";
 
 function RecordsPageHeader({ query, setQuery, isPending }) {
@@ -19,11 +19,17 @@ function RecordsPageHeader({ query, setQuery, isPending }) {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          disabled={isPending}
           placeholder="Search student, company or course..."
           aria-label="Search internship records"
-          className="w-full rounded-lg border border-border bg-background py-3 pl-9 pr-3 text-sm outline-none focus:border-primary"
+          aria-busy={isPending}
+          className="w-full rounded-lg border border-border bg-background py-3 pl-9 pr-10 text-sm outline-none focus:border-primary"
         />
+        {isPending && (
+          <Loader2
+            aria-hidden="true"
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+          />
+        )}
       </div>
     </div>
   );

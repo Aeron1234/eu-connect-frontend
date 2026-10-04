@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Search, UserPlus } from "lucide-react";
-import { getAllAccounts } from "@/lib/server-actions/account-actions";
+import { RefreshCw, TriangleAlert, UserPlus } from "lucide-react";
+import { getAllAccountsResult } from "@/lib/server-actions/account-actions";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
 import ExistingAccountListSkeleton from "../skeletons/ExistingAccountListSkeleton";
@@ -11,6 +11,18 @@ import AccountDropdownFilter from "./AccountDropdownFilter";
 import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const tabs = ["Form", "Accounts"];
+
+function requireAccountPage(result, expectedPage) {
+  if (result?.error) {
+    const error = new Error(result.error);
+    error.status = result.status;
+    throw error;
+  }
+  if (!hasValidPage(result, "accounts", null, expectedPage)) {
+    throw new Error("Invalid accounts response from the server.");
+  }
+  return result;
+}
 
 function AccountsManager({
   roles = [],
@@ -34,6 +46,7 @@ function AccountsManager({
   // see and scroll, so that one just disables the button + swaps its text).
   const [isFiltering, setIsFiltering] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [listError, setListError] = useState(null);
 
   const requestIdRef = useRef(0);
   const isFirstRun = useRef(true);
@@ -41,15 +54,21 @@ function AccountsManager({
   async function refreshList() {
     const thisRequestId = ++requestIdRef.current;
     setIsLoadingMore(false);
-    const newData = await getAllAccounts({ filter, search, page: 1 });
-    if (thisRequestId !== requestIdRef.current) return;
-    if (!hasValidPage(newData, "accounts", null)) {
-      console.error(newData?.error || "Invalid accounts response");
-      return;
+    setIsFiltering(true);
+    setListError(null);
+    try {
+      const newData = requireAccountPage(await getAllAccountsResult({ filter, search, page: 1 }));
+      if (thisRequestId !== requestIdRef.current) return;
+      setAccounts(newData.accounts);
+      setPage(1);
+      setTotalPages(newData.totalPages || 1);
+    } catch (error) {
+      if (thisRequestId === requestIdRef.current) {
+        setListError({ message: error?.message || "Couldn't load accounts. Please try again.", operation: "refresh", status: error?.status });
+      }
+    } finally {
+      if (thisRequestId === requestIdRef.current) setIsFiltering(false);
     }
-    setAccounts(newData.accounts);
-    setPage(1);
-    setTotalPages(newData.totalPages || 1);
   }
 
   useEffect(() => {
@@ -61,27 +80,20 @@ function AccountsManager({
     const thisRequestId = ++requestIdRef.current;
     setIsLoadingMore(false);
     setIsFiltering(true);
+    setListError(null);
 
     const timeout = setTimeout(async () => {
       try {
-        const newData = await getAllAccounts({ filter, search, page: 1 });
+        const newData = requireAccountPage(await getAllAccountsResult({ filter, search, page: 1 }));
 
         if (thisRequestId !== requestIdRef.current) return;
-
-        if (!hasValidPage(newData, "accounts", null)) {
-          console.error(
-            "Error loading accounts:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
 
         setAccounts(newData.accounts);
         setPage(1);
         setTotalPages(newData.totalPages || 1);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error loading accounts:", error);
+          setListError({ message: error?.message || "Couldn't load accounts. Please try again.", operation: "refresh", status: error?.status });
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsFiltering(false);
@@ -94,21 +106,14 @@ function AccountsManager({
   async function handleSeeMore() {
     if (isFiltering || isLoadingMore || page >= totalPages) return;
     setIsLoadingMore(true);
+    setListError(null);
     const nextPage = page + 1;
     const thisRequestId = ++requestIdRef.current;
 
     try {
-      const newData = await getAllAccounts({ filter, search, page: nextPage });
+      const newData = requireAccountPage(await getAllAccountsResult({ filter, search, page: nextPage }), nextPage);
 
       if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "accounts", null, nextPage)) {
-        console.error(
-          "Error loading more accounts:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
 
       setAccounts((prev) => {
         const existingIds = new Set(prev.map((a) => a.id));
@@ -122,7 +127,7 @@ function AccountsManager({
       if (newData?.totalPages) setTotalPages(newData.totalPages);
     } catch (error) {
       if (thisRequestId === requestIdRef.current) {
-        console.error("Error loading more accounts:", error);
+        setListError({ message: error?.message || "Couldn't load more accounts. Please try again.", operation: "page", status: error?.status });
       }
     } finally {
       if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
@@ -178,6 +183,22 @@ function AccountsManager({
             />
           </div>
 
+          {listError && (
+            <div role="alert" className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-2">
+                <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
+                <div>
+                  <p className="font-semibold">{listError.status === 429 ? "Too many requests" : "Accounts could not be updated"}</p>
+                  <p className="mt-1 text-foreground-soft">{listError.message}</p>
+                  {accounts.length > 0 && <p className="mt-1 text-xs text-foreground-soft">Previously loaded accounts are still shown.</p>}
+                </div>
+              </div>
+              <button type="button" onClick={listError.operation === "page" ? handleSeeMore : refreshList} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 font-semibold hover:bg-accent">
+                <RefreshCw className="size-4" aria-hidden="true" /> Retry
+              </button>
+            </div>
+          )}
+
           {isFiltering ? (
             <ExistingAccountListSkeleton rows={10} />
           ) : accounts.length > 0 ? (
@@ -185,16 +206,16 @@ function AccountsManager({
               filteredAccounts={accounts}
               onActionSuccess={refreshList}
             />
-          ) : (
+          ) : !listError ? (
             <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
               <UserPlus className="size-8 text-foreground-faint" />
               <p className="text-sm text-muted-foreground">
                 No accounts found.
               </p>
             </div>
-          )}
+          ) : null}
 
-          {page < totalPages && (
+          {!listError && page < totalPages && (
             <button
               onClick={handleSeeMore}
               disabled={isLoadingMore}

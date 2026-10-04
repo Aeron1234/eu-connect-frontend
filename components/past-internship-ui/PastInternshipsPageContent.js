@@ -1,11 +1,13 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import { useEffect, useRef, useState } from "react";
 import { Building2 } from "lucide-react";
 import SearchBar from "../ui/SearchBar";
 import AlumniCompanies from "./AlumniCompanies";
 import AcademicYearFilter from "../ui/AcademicYearFilter";
-import { getAlumniInternships } from "@/lib/server-actions/past-internships-actions";
+import { getAlumniInternshipsResult as getAlumniInternships } from "@/lib/server-actions/past-internships-actions";
 import AlumniCompaniesSkeleton from "../skeletons/AlumniCompaniesSkeleton";
 import {
   canKeepLoadedPages,
@@ -113,7 +115,7 @@ function PastInternshipsPageContent({
         if (thisRequestId !== requestIdRef.current) return;
 
         if (!hasValidPage(newData, "data")) {
-          console.error(
+          notifyReadError(
             "Error searching past internships:",
             newData?.error || "Invalid response from the server",
           );
@@ -125,7 +127,7 @@ function PastInternshipsPageContent({
         setTotalPages(newData?.pagination?.totalPages || 1);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
-          console.error("Error searching past internships:", error);
+          notifyReadError("Error searching past internships:", error);
         }
       } finally {
         if (thisRequestId === requestIdRef.current) setIsPending(false);
@@ -148,7 +150,7 @@ function PastInternshipsPageContent({
       });
       if (thisRequestId !== requestIdRef.current) return;
       if (!hasValidPage(fresh, "data")) {
-        console.error(
+        notifyReadError(
           "Error refreshing past internships:",
           fresh?.error || "Invalid response from the server",
         );
@@ -159,7 +161,7 @@ function PastInternshipsPageContent({
       setTotalPages(fresh.pagination.totalPages || 1);
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
-        console.error("Error refreshing past internships:", error);
+        notifyReadError("Error refreshing past internships:", error);
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
     }
@@ -179,7 +181,7 @@ function PastInternshipsPageContent({
       });
       if (thisRequestId !== requestIdRef.current) return;
       if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        console.error(
+        notifyReadError(
           "Error loading more past internships:",
           newData?.error || "Invalid response from the server",
         );
@@ -199,7 +201,7 @@ function PastInternshipsPageContent({
       }
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
-        console.error("Error loading more past internships:", error);
+        notifyReadError("Error loading more past internships:", error);
     } finally {
       if (thisRequestId === requestIdRef.current) setIsPending(false);
     }
@@ -233,25 +235,17 @@ function PastInternshipsPageContent({
         </div>
       ) : (
         <>
-          {isPending ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <AlumniCompaniesSkeleton key={i} />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {companies.map((c) => (
-                <AlumniCompanies
-                  company={c}
-                  key={keyOf(c)}
-                  handleItemDelete={refreshAfterRecordChange}
-                  handleItemUpdate={refreshAfterRecordChange}
-                  courses={courses}
-                />
-              ))}
-            </div>
-          )}
+          <div className="space-y-3">
+            {companies.map((c) => (
+              <AlumniCompanies
+                company={c}
+                key={keyOf(c)}
+                handleItemDelete={refreshAfterRecordChange}
+                handleItemUpdate={refreshAfterRecordChange}
+                courses={courses}
+              />
+            ))}
+          </div>
 
           {page < totalPages && (
             <button

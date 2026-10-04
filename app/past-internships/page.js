@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import { Building2 } from "lucide-react";
 import PastInternshipsPageContent from "../../components/past-internship-ui/PastInternshipsPageContent";
 import PastInternshipPostButton from "../../components/past-internship-ui/PastInternshipPostButton";
@@ -46,4 +47,4 @@ async function PastInternshipsPage({ searchParams }) {
   );
 }
 
-export default PastInternshipsPage;
+export default withReadErrorPage(PastInternshipsPage);

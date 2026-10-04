@@ -24,8 +24,8 @@ import { socket } from "./SocketProvider";
 import { toast } from "sonner";
 import { toastAndAction } from "../../lib/helpers";
 import {
-  getInbox,
-  getUnreadNotificationCount,
+  getInboxResult as getInbox,
+  getUnreadNotificationCountResult as getUnreadNotificationCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
@@ -106,8 +106,8 @@ function NotificationsButton() {
         ...current,
         unreadCount: Math.max(0, Number(fresh.unreadCount)),
       }));
-    } catch (error) {
-      console.error("Could not refresh unread notification count:", error);
+    } catch {
+      // Keep the previous badge when the background count refresh fails.
     }
   }, []);
 
@@ -130,8 +130,7 @@ function NotificationsButton() {
       });
       setInboxStatus("ready");
       return true;
-    } catch (error) {
-      console.error("Could not refresh notification inbox:", error);
+    } catch {
       if (requestId === requestIdRef.current) {
         setInboxStatus((current) =>
           current === "loading" ? "error" : current,

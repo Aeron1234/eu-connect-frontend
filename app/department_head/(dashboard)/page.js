@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import ShiftHoursChart from "@/components/dashboard-ui/ShiftHoursChart";
 import InternshipsPerCourseChart from "@/components/dashboard-ui/InternshipsPerCourseChart";
 import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
@@ -122,4 +123,4 @@ async function DepartmentHeadDashboardPage() {
     </div>
   );
 }
-export default DepartmentHeadDashboardPage;
+export default withReadErrorPage(DepartmentHeadDashboardPage);

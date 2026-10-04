@@ -1,5 +1,7 @@
 "use client";
 
+import { notifyReadError } from "@/lib/client-read-error";
+
 import {
   ClipboardList,
   Loader2,
@@ -15,7 +17,7 @@ import {
   reactivateCriterion,
   deactivateSection,
   reactivateSection,
-  getAllEvaluationCriteria,
+  getAllEvaluationCriteriaResult as getAllEvaluationCriteria,
 } from "@/lib/server-actions/evaluations-actions";
 import { cx } from "@/lib/utils";
 import EvaluationCriteriaListSkeleton from "../skeletons/EvaluationCriteriaListSkeleton";
@@ -93,14 +95,15 @@ export default function EvaluationCriteriaPageContent({
         const result = await getAllEvaluationCriteria({ type: formType });
 
         if (thisRequestId !== typeRequestIdRef.current) return;
+        if (result?.error) throw new Error(result.error);
 
         setSections(toSections(result));
         setDraftSections([]);
         setError(null);
       } catch (err) {
         if (thisRequestId === typeRequestIdRef.current) {
-          console.error("Error loading evaluation criteria:", err);
-          setError("Failed to load criteria. Please try again.");
+          notifyReadError("Error loading evaluation criteria:", err);
+          setError(err?.message || "Failed to load criteria. Please try again.");
         }
       } finally {
         if (thisRequestId === typeRequestIdRef.current) {

@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import { getUserSession } from "../../../lib/server-actions/auth";
 import { FileText } from "lucide-react";
 import SIPPReportsManager from "../../../components/sipp-reports-ui/SIPPReportsManager";
@@ -57,4 +58,4 @@ async function SIPPReportsPage() {
   );
 }
 
-export default SIPPReportsPage;
+export default withReadErrorPage(SIPPReportsPage);

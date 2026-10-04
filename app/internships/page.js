@@ -1,3 +1,4 @@
+import { withReadErrorPage } from "@/lib/page-read-error";
 import { getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
 import { getCourses } from "@/lib/server-actions/course-and-department-actions";
 
@@ -54,4 +55,4 @@ async function InternshipPage({ searchParams }) {
   );
 }
 
-export default InternshipPage;
+export default withReadErrorPage(InternshipPage);
