@@ -86,50 +86,24 @@
     }
   }
 
-  /* Root loading screen (app/loading.js) */
-  @keyframes loading-spin-kf {
+  /* A short connection moving from the university seal toward the internship. */
+  @keyframes loader-connection-travel {
     from {
-      transform: rotate(0deg);
+      transform: translateX(0);
+      opacity: 0.55;
     }
     to {
-      transform: rotate(360deg);
-    }
-  }
-  @keyframes loading-pulse-kf {
-    0%,
-    100% {
-      transform: scale(0.94);
-      opacity: 0.5;
-    }
-    50% {
-      transform: scale(1.04);
-      opacity: 0.9;
-    }
-  }
-  @keyframes loading-fade-in-kf {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    to {
+      transform: translateX(104px);
       opacity: 1;
-      transform: translateY(0);
     }
   }
-  .loading-spin {
-    animation: loading-spin-kf 1.4s linear infinite;
-  }
-  .loading-pulse {
-    animation: loading-pulse-kf 2s ease-in-out infinite;
-  }
-  .loading-fade-in {
-    animation: loading-fade-in-kf 0.6s ease-out 0.1s both;
+  .loader-connection-beam {
+    animation: loader-connection-travel 1.7s ease-in-out infinite alternate;
   }
   @media (prefers-reduced-motion: reduce) {
-    .loading-spin,
-    .loading-pulse,
-    .loading-fade-in {
+    .loader-connection-beam {
       animation: none;
+      transform: translateX(52px);
     }
   }
 }

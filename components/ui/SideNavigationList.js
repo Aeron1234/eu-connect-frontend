@@ -1,6 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import {
   Activity,
   BookOpen,
@@ -25,6 +23,7 @@ import {
 } from "lucide-react";
 import SignoutButton from "./SignoutButton";
 import SidebarThemeSwitch from "./SidebarThemeSwitch";
+import useSidebarTooltip from "./useSidebarTooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
@@ -126,6 +125,7 @@ function SideNavigationList({ fullName = "", avatar = null }) {
   const { user } = useUser();
   const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobile } =
     useSidebar();
+  const accountTooltip = useSidebarTooltip("Account", isCollapsed);
 
   const userRole = user.role;
   const userDepartment = user.department_code;
@@ -226,6 +226,7 @@ function SideNavigationList({ fullName = "", avatar = null }) {
               title="View account"
               aria-label={`View account for ${fullName || "your profile"}`}
               aria-current={pathName === accountHref ? "page" : undefined}
+              {...accountTooltip.bind}
               className={`group flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isCollapsed ? "lg:justify-center" : ""} ${pathName === accountHref ? "bg-white/15" : ""}`}
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 text-white ring-1 ring-white/30 transition-transform group-hover:scale-105">
@@ -240,6 +241,7 @@ function SideNavigationList({ fullName = "", avatar = null }) {
                 <span className="block truncate text-[11px] font-normal text-white/65">{getFormattedRole(userRole)}</span>
               </span>
             </Link>
+            {accountTooltip.tooltip}
             <SignoutButton isCollapsed={isCollapsed} compact />
           </div>
         </div>
@@ -289,25 +291,7 @@ function NavLink({
   exact = false,
 }) {
   const isActive = exact ? pathName === href : pathName.includes(href);
-  const [tooltipPosition, setTooltipPosition] = useState(null);
-
-  useEffect(() => {
-    if (!tooltipPosition) return;
-
-    const dismiss = () => setTooltipPosition(null);
-    window.addEventListener("scroll", dismiss, true);
-    window.addEventListener("resize", dismiss);
-    return () => {
-      window.removeEventListener("scroll", dismiss, true);
-      window.removeEventListener("resize", dismiss);
-    };
-  }, [tooltipPosition]);
-
-  function showTooltip(event) {
-    if (!isCollapsed || !window.matchMedia("(min-width: 1024px)").matches) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    setTooltipPosition({ left: bounds.right + 6, top: bounds.top + bounds.height / 2 });
-  }
+  const { bind, tooltip } = useSidebarTooltip(name, isCollapsed);
 
   return (
     <>
@@ -317,10 +301,7 @@ function NavLink({
         title={isCollapsed ? undefined : name}
         aria-label={name}
         onClick={onClick}
-        onMouseEnter={showTooltip}
-        onMouseLeave={() => setTooltipPosition(null)}
-        onFocus={showTooltip}
-        onBlur={() => setTooltipPosition(null)}
+        {...bind}
         aria-current={isActive ? "page" : undefined}
         className={`relative flex min-h-10 w-full items-center gap-3 px-3 py-2.5 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isActive ? "rounded-l-md rounded-r-full bg-white/20 text-white shadow-sm dark:bg-white/10" : "rounded-lg text-white/85 hover:bg-white/10 hover:text-white"} ${isCollapsed ? "lg:justify-center lg:px-0 lg:rounded-xl" : ""}`}
       >
@@ -328,16 +309,7 @@ function NavLink({
         {icon}
         <span className={isCollapsed ? "lg:hidden" : ""}>{name}</span>
       </Link>
-      {tooltipPosition && isCollapsed && createPortal(
-        <span
-          role="tooltip"
-          className="pointer-events-none fixed z-[100] hidden -translate-y-1/2 whitespace-nowrap rounded-r-xl rounded-l-md bg-gradient-to-r from-primary-300 via-primary-500 to-primary-700 px-4 py-2 text-xs font-semibold text-white shadow-lg ring-1 ring-white/20 lg:block"
-          style={tooltipPosition}
-        >
-          {name}
-        </span>,
-        document.body,
-      )}
+      {tooltip}
     </>
   );
 }
