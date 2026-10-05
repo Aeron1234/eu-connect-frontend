@@ -1,4 +1,6 @@
 "use client";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Activity,
   BookOpen,
@@ -10,6 +12,7 @@ import {
   FileText,
   FolderOpen,
   Gauge,
+  CircleHelp,
   Layers,
   LayoutDashboard,
   LibraryBig,
@@ -18,125 +21,71 @@ import {
   SlidersHorizontal,
   UserPlus,
   Users,
-  CircleUserRound,
   User,
 } from "lucide-react";
 import SignoutButton from "./SignoutButton";
+import SidebarThemeSwitch from "./SidebarThemeSwitch";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { useUser } from "@/contexts/UserContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 
-function roleRoutes(userRole, userDepartment) {
-  let routes = [];
+function roleRouteGroups(userRole, userDepartment) {
   if (userRole === "student") {
-    routes = [
-      {
-        name: "Narratives",
-        href: "/student/narratives",
-        icon: <BookOpen className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "My Records",
-        href: "/student/internship-record",
-        icon: <LibraryBig className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Storage",
-        href: "/student/storage",
-        icon: <FolderOpen className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Evaluations",
-        href: "/student/evaluations",
-        icon: <ClipboardCheck className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Past Internships",
-        href: "/past-internships",
-        icon: <Building2 className="h-5 w-5 shrink-0" />,
-      },
-    ];
+    return [{ label: "Student", routes: [
+      { name: "Narratives", href: "/student/narratives", icon: <BookOpen className="h-5 w-5 shrink-0" /> },
+      { name: "My Records", href: "/student/internship-record", icon: <LibraryBig className="h-5 w-5 shrink-0" /> },
+      { name: "Storage", href: "/student/storage", icon: <FolderOpen className="h-5 w-5 shrink-0" /> },
+      { name: "Evaluations", href: "/student/evaluations", icon: <ClipboardCheck className="h-5 w-5 shrink-0" /> },
+      { name: "Past Internships", href: "/past-internships", icon: <Building2 className="h-5 w-5 shrink-0" /> },
+    ] }];
   }
 
   if (userRole === "department_head") {
-    if (userDepartment === "REG")
-      routes.push({
+    const staffRoutes = [];
+    if (userDepartment === "REG") {
+      staffRoutes.push({
         name: "SIPP Reports",
         href: "/department_head/sipp-reports",
         icon: <FileText className="h-5 w-5 shrink-0" />,
       });
+    }
 
-    routes = [
-      ...routes,
-      {
-        name: "Map",
-        href: "/map",
-        icon: <MapPin className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Past Internships",
-        href: "/past-internships",
-        icon: <Building2 className="h-5 w-5 shrink-0" />,
-      },
-    ];
+    staffRoutes.push(
+      { name: "Map", href: "/map", icon: <MapPin className="h-5 w-5 shrink-0" /> },
+      { name: "Past Internships", href: "/past-internships", icon: <Building2 className="h-5 w-5 shrink-0" /> },
+    );
 
-    if (userDepartment !== "REG")
-      routes.push({
+    if (userDepartment !== "REG") {
+      staffRoutes.push({
         name: "Records",
         href: "/internship-records",
         icon: <LibraryBig className="h-5 w-5 shrink-0" />,
       });
+    }
+
+    return [{ label: "Staff tools", routes: staffRoutes }];
   }
 
   if (userRole === "admin") {
-    routes = [
-      {
-        name: "Accounts",
-        href: "/admin/create-account",
-        icon: <UserPlus className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Departments & Courses",
-        href: "/admin/departments-and-courses",
-        icon: <Layers className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Activity Logs",
-        href: "/admin/activity-logs",
-        icon: <Activity className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Cache Monitoring",
-        href: "/admin/cache-monitoring",
-        icon: <Gauge className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Evaluation Criteria",
-        href: "/admin/evaluation-criteria",
-        icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Map",
-        href: "/map",
-        icon: <MapPin className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Records",
-        href: "/internship-records",
-        icon: <LibraryBig className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Past Internships",
-        href: "/past-internships",
-        icon: <Building2 className="h-5 w-5 shrink-0" />,
-      },
+    return [
+      { label: "Administration", routes: [
+        { name: "Accounts", href: "/admin/create-account", icon: <UserPlus className="h-5 w-5 shrink-0" /> },
+        { name: "Departments & Courses", href: "/admin/departments-and-courses", icon: <Layers className="h-5 w-5 shrink-0" /> },
+        { name: "Activity Logs", href: "/admin/activity-logs", icon: <Activity className="h-5 w-5 shrink-0" /> },
+        { name: "Cache Monitoring", href: "/admin/cache-monitoring", icon: <Gauge className="h-5 w-5 shrink-0" /> },
+        { name: "Evaluation Criteria", href: "/admin/evaluation-criteria", icon: <SlidersHorizontal className="h-5 w-5 shrink-0" /> },
+      ] },
+      { label: "Staff tools", routes: [
+        { name: "Map", href: "/map", icon: <MapPin className="h-5 w-5 shrink-0" /> },
+        { name: "Records", href: "/internship-records", icon: <LibraryBig className="h-5 w-5 shrink-0" /> },
+        { name: "Past Internships", href: "/past-internships", icon: <Building2 className="h-5 w-5 shrink-0" /> },
+      ] },
     ];
   }
 
-  return routes;
+  return [];
 }
 
 const publicRoutes = [
@@ -172,7 +121,7 @@ function getFormattedRole(role) {
   }
 }
 
-function SideNavigationList({ firstName = "", fullName = "", avatar = null }) {
+function SideNavigationList({ fullName = "", avatar = null }) {
   const pathName = usePathname();
   const { user } = useUser();
   const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobile } =
@@ -188,7 +137,16 @@ function SideNavigationList({ firstName = "", fullName = "", avatar = null }) {
 
   const homeHref = `/${userRole}`;
   const accountHref = `/${userRole}/account`;
-  const routes = roleRoutes(userRole, userDepartment) || [];
+  const routeGroups = [
+    ...(userDepartment !== "REG"
+      ? [{
+          label: "Overview",
+          routes: [{ name: "Dashboard", href: homeHref, icon: <LayoutDashboard size={20} />, exact: true }],
+        }]
+      : []),
+    ...roleRouteGroups(userRole, userDepartment),
+    { label: "Public", routes: publicRoutes },
+  ];
 
   return (
     <>
@@ -202,15 +160,16 @@ function SideNavigationList({ firstName = "", fullName = "", avatar = null }) {
       )}
 
       <aside
-        className={`fixed lg:sticky inset-y-0 lg:inset-auto left-0 top-0 z-50 lg:h-screen h-full border-r border-primary-300 dark:border-white/25 bg-primary dark:bg-card text-sm text-white font-semibold py-4 px-4 flex flex-col transition-all duration-300 ease-in-out
+        className={`fixed inset-y-0 left-0 top-0 z-50 flex h-full flex-col border-r border-primary-300 bg-primary px-3 pb-5 pt-1.5 text-sm font-semibold text-white transition-all duration-300 ease-in-out dark:border-white/15 dark:bg-card lg:sticky lg:inset-auto lg:h-screen
   ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
   w-64 ${isCollapsed ? "lg:w-20" : "lg:w-64"}`}
       >
         {/* Collapse toggle - desktop only */}
         <button
           onClick={toggleCollapsed}
-          className="hidden lg:flex items-center justify-center absolute -right-3 top-8 h-6 w-6 rounded-full bg-card text-primary-emphasis shadow-md hover:scale-110 transition-transform"
+          className="absolute -right-3 top-12 hidden h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-primary-emphasis shadow-md transition-transform hover:scale-110 lg:flex"
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -219,109 +178,104 @@ function SideNavigationList({ firstName = "", fullName = "", avatar = null }) {
           )}
         </button>
 
-        {/* Logo section */}
+        {/* Brand */}
         <Link
           href={homeHref}
           scroll={false}
           onClick={closeMobile}
-          className="flex items-center gap-2 flex-col w-full mb-4 group cursor-pointer"
+          className={`group mb-3 flex w-full items-center gap-3 border-b border-white/25 pb-3 ${isCollapsed ? "lg:justify-center" : ""}`}
         >
-          <div className="p-1 bg-white rounded-full group-hover:scale-105 transition-transform">
-            <Logo compactOnDesktop={isCollapsed} />
+          <div className="shrink-0 rounded-full bg-white p-0.5 transition-transform group-hover:scale-105">
+            <Logo small />
           </div>
-
-          <h2
-            className={`text-base font-semibold line-clamp-2 text-center ${isCollapsed ? "lg:hidden" : ""}`}
-          >
+          <h2 className={`text-sm font-bold tracking-wide ${isCollapsed ? "lg:hidden" : ""}`}>
             EU-Connect
           </h2>
         </Link>
 
-        <Link
-          href={accountHref}
-          scroll={false}
-          onClick={closeMobile}
-          title="View account"
-          aria-label={`View account for ${fullName || "your profile"}`}
-          aria-current={pathName === accountHref ? "page" : undefined}
-          className={`group mb-4 flex w-full min-w-0 items-center gap-3 border border-white/15 bg-white/10 py-2.5 px-5 text-left transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
-            isCollapsed
-              ? "lg:justify-center lg:p-0.5 rounded-full"
-              : "rounded-xl"
-          } ${pathName === accountHref ? "bg-white/20 border-white/30" : ""}`}
-        >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-card text-primary-emphasis ring-2 ring-white/20 transition-transform group-hover:scale-105">
-            {avatar ? (
-              <img
-                src={`/avatars/${avatar}`}
-                alt="avatar"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <User className="w-6 h-6" />
-            )}
-          </span>
-          <span className={`min-w-0 flex-1 ${isCollapsed ? "lg:hidden" : ""}`}>
-            <span className="block truncate text-sm font-semibold text-white">
-              {fullName || "My account"}
-            </span>
-            <span className="block truncate text-xs font-normal text-white/80">
-              {getFormattedRole(userRole) || "User"}
-            </span>
-          </span>
-        </Link>
-
-        <ul className="flex flex-col gap-1 flex-1 w-full overflow-y-auto">
-          {userDepartment !== "REG" && (
-            <NavLink
-              href={homeHref}
-              name="Dashboard"
-              icon={<LayoutDashboard className="h-5 w-5 shrink-0" />}
-              pathName={pathName}
+        <nav className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto" aria-label="Main navigation">
+          {routeGroups.map((group, index) => (
+            <NavSection
+              key={group.label}
+              label={group.label}
+              routes={group.routes}
+              divided={index > 0}
               isCollapsed={isCollapsed}
+              pathName={pathName}
               onClick={closeMobile}
-              exact
             />
-          )}
-
-          {routes.map((item) => (
-            <li key={item.name}>
-              <NavLink
-                href={item.href}
-                name={item.name}
-                icon={item.icon}
-                pathName={pathName}
-                isCollapsed={isCollapsed}
-                onClick={closeMobile}
-              />
-            </li>
           ))}
-
-          <div
-            className={`flex flex-col gap-1 w-full ${routes.length > 0 ? "mt-2 pt-2 border-t border-primary-400 dark:border-border" : ""}`}
-          >
-            {publicRoutes.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  href={item.href}
-                  name={item.name}
-                  icon={item.icon}
-                  pathName={pathName}
-                  isCollapsed={isCollapsed}
-                  onClick={closeMobile}
-                />
-              </li>
-            ))}
+        </nav>
+        <div className="mt-2">
+          <NavLink
+            href="/help"
+            name="Help"
+            icon={<CircleHelp className="h-5 w-5 shrink-0" />}
+            pathName={pathName}
+            isCollapsed={isCollapsed}
+            onClick={closeMobile}
+            exact
+          />
+        </div>
+        <div className="mt-3 border-t border-white/25 pt-3">
+          <div className={`flex items-center gap-1 ${isCollapsed ? "lg:flex-col" : ""}`}>
+            <Link
+              href={accountHref}
+              scroll={false}
+              onClick={closeMobile}
+              title="View account"
+              aria-label={`View account for ${fullName || "your profile"}`}
+              aria-current={pathName === accountHref ? "page" : undefined}
+              className={`group flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isCollapsed ? "lg:justify-center" : ""} ${pathName === accountHref ? "bg-white/15" : ""}`}
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 text-white ring-1 ring-white/30 transition-transform group-hover:scale-105">
+                {avatar ? (
+                  <img src={`/avatars/${avatar}`} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-5 w-5" aria-hidden="true" />
+                )}
+              </span>
+              <span className={`min-w-0 flex-1 ${isCollapsed ? "lg:hidden" : ""}`}>
+                <span className="block truncate text-xs font-semibold text-white">{fullName || "My account"}</span>
+                <span className="block truncate text-[11px] font-normal text-white/65">{getFormattedRole(userRole)}</span>
+              </span>
+            </Link>
+            <SignoutButton isCollapsed={isCollapsed} compact />
           </div>
-
-          <div className="mt-auto pt-2 border-t border-primary-400 dark:border-border">
-            <li title="Sign out">
-              <SignoutButton isCollapsed={isCollapsed} />
-            </li>
-          </div>
-        </ul>
+        </div>
+        <div className="mt-4">
+          <SidebarThemeSwitch isCollapsed={isCollapsed} />
+        </div>
       </aside>
     </>
+  );
+}
+
+function NavSection({ label, routes, divided, isCollapsed, pathName, onClick }) {
+  return (
+    <section
+      aria-label={label}
+      className={`w-full ${divided ? "mt-2 border-t border-white/20 pt-2" : ""}`}
+    >
+      <h3 className={`px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 ${isCollapsed ? "lg:hidden" : ""}`}>
+        {label}
+      </h3>
+      <ul className="flex flex-col gap-1">
+        {routes.map((item) => (
+          <li key={item.href}>
+            <NavLink
+              href={item.href}
+              name={item.name}
+              icon={item.icon}
+              pathName={pathName}
+              isCollapsed={isCollapsed}
+              onClick={onClick}
+              exact={item.exact}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -335,18 +289,56 @@ function NavLink({
   exact = false,
 }) {
   const isActive = exact ? pathName === href : pathName.includes(href);
+  const [tooltipPosition, setTooltipPosition] = useState(null);
+
+  useEffect(() => {
+    if (!tooltipPosition) return;
+
+    const dismiss = () => setTooltipPosition(null);
+    window.addEventListener("scroll", dismiss, true);
+    window.addEventListener("resize", dismiss);
+    return () => {
+      window.removeEventListener("scroll", dismiss, true);
+      window.removeEventListener("resize", dismiss);
+    };
+  }, [tooltipPosition]);
+
+  function showTooltip(event) {
+    if (!isCollapsed || !window.matchMedia("(min-width: 1024px)").matches) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({ left: bounds.right + 6, top: bounds.top + bounds.height / 2 });
+  }
 
   return (
-    <Link
-      scroll={false}
-      href={href}
-      title={name}
-      onClick={onClick}
-      className={`${isActive ? "bg-white text-primary" : ""} font-normal w-full flex items-center gap-2 px-5 py-2 hover:text-primary hover:bg-white transition-colors rounded-sm ${isCollapsed ? "lg:justify-center lg:px-0" : ""}`}
-    >
-      {icon}
-      <span className={isCollapsed ? "lg:hidden" : ""}>{name}</span>
-    </Link>
+    <>
+      <Link
+        scroll={false}
+        href={href}
+        title={isCollapsed ? undefined : name}
+        aria-label={name}
+        onClick={onClick}
+        onMouseEnter={showTooltip}
+        onMouseLeave={() => setTooltipPosition(null)}
+        onFocus={showTooltip}
+        onBlur={() => setTooltipPosition(null)}
+        aria-current={isActive ? "page" : undefined}
+        className={`relative flex min-h-10 w-full items-center gap-3 px-3 py-2.5 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isActive ? "rounded-l-md rounded-r-full bg-white/20 text-white shadow-sm dark:bg-white/10" : "rounded-lg text-white/85 hover:bg-white/10 hover:text-white"} ${isCollapsed ? "lg:justify-center lg:px-0 lg:rounded-xl" : ""}`}
+      >
+        {isActive && <span aria-hidden="true" className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-gradient-to-b from-primary-200 to-white dark:from-primary-emphasis dark:to-primary" />}
+        {icon}
+        <span className={isCollapsed ? "lg:hidden" : ""}>{name}</span>
+      </Link>
+      {tooltipPosition && isCollapsed && createPortal(
+        <span
+          role="tooltip"
+          className="pointer-events-none fixed z-[100] hidden -translate-y-1/2 whitespace-nowrap rounded-r-xl rounded-l-md bg-gradient-to-r from-primary-300 via-primary-500 to-primary-700 px-4 py-2 text-xs font-semibold text-white shadow-lg ring-1 ring-white/20 lg:block"
+          style={tooltipPosition}
+        >
+          {name}
+        </span>,
+        document.body,
+      )}
+    </>
   );
 }
 

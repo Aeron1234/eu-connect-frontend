@@ -11,7 +11,7 @@ import Link from "next/link";
 
 function EmployerProfileCard({ profile = {} }) {
   return (
-    <section className="rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm overflow-hidden">
+    <section className="brand-orbit rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm">
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
           <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-card flex items-center justify-center">

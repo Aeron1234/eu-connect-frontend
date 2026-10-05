@@ -2,7 +2,6 @@
 import { Menu } from "lucide-react";
 
 import NotificationsButton from "./NotificationsButton";
-import ThemeToggle from "./ThemeToggle";
 import { useSidebar } from "@/contexts/SidebarContext";
 
 function Navigation() {
@@ -19,10 +18,7 @@ function Navigation() {
         <Menu className="size-5" />
       </button>
 
-      <div className="flex items-center gap-1">
-        <NotificationsButton />
-        <ThemeToggle />
-      </div>
+      <NotificationsButton />
     </div>
   );
 }

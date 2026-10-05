@@ -1,7 +1,7 @@
 import { FileText, MapPin } from "lucide-react";
 import DtrButton from "./DtrButton";
 import BreakButton from "./BreakButton";
-import { format } from "date-fns";
+import { formatDtrDate, formatDtrTime } from "@/lib/dtr-time.mjs";
 import Link from "next/link";
 import Modal from "../ui/Modal";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
@@ -13,10 +13,10 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
     status !== "CLOCKED_IN" && status !== "ON_BREAK" &&
     internshipData?.accumulated_hours >= internshipData?.total_hours;
 
-  const today = format(new Date(), "EEEE, MMMM d, yyyy");
+  const today = formatDtrDate(new Date());
 
   return (
-    <section className="rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm overflow-hidden">
+    <section className="brand-orbit rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm">
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] uppercase tracking-widest text-primary-foreground/70">
@@ -30,9 +30,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                   Clock In
                 </p>
                 <p className="text-lg font-semibold mt-0.5">
-                  {dtrToday?.clock_in
-                    ? format(new Date(dtrToday?.clock_in), "h:mm a")
-                    : "—"}
+                  {formatDtrTime(dtrToday?.clock_in)}
                 </p>
               </div>
               <div>
@@ -40,9 +38,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                   Clock Out
                 </p>
                 <p className="text-lg font-semibold mt-0.5">
-                  {dtrToday?.clock_out
-                    ? format(new Date(dtrToday?.clock_out), "h:mm a")
-                    : "—"}
+                  {formatDtrTime(dtrToday?.clock_out)}
                 </p>
               </div>
               <div>

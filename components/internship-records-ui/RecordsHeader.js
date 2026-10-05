@@ -71,7 +71,7 @@ function RecordsHeader({ record, internshipId }) {
   }
 
   return (
-    <div className="rounded-xl bg-primary p-6 text-primary-foreground">
+    <div className="brand-orbit rounded-xl bg-primary p-6 text-primary-foreground">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">

@@ -124,9 +124,9 @@ function SearchedUserHeader({
       </Link>
 
       {/* Student header card */}
-      <div className="bg-primary rounded-xl border border-border shadow-sm overflow-hidden">
+      <div className="brand-orbit bg-primary rounded-xl border border-border shadow-sm">
         {/* Banner */}
-        <div className="h-16 sm:h-20 bg-primary" />
+        <div className="h-16 sm:h-20" />
 
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 ">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-8 sm:-mt-10">

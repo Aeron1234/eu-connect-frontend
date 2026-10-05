@@ -20,6 +20,33 @@
 }
 
 @layer components {
+  /* Echo the soft concentric rings on the landing-page callout. */
+  .brand-orbit {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .brand-orbit > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-orbit::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    width: 22rem;
+    height: 22rem;
+    right: -5rem;
+    bottom: -12rem;
+    border: 1px solid rgb(255 255 255 / 22%);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4rem rgb(255 255 255 / 5%),
+      0 0 0 8rem rgb(255 255 255 / 3%);
+  }
+
   @keyframes notification-toast-ring {
     0% { transform: rotate(-14deg) scale(0.88); }
     48% { transform: rotate(10deg) scale(1.08); }

@@ -122,11 +122,11 @@ async function StudentDashboardPage({ searchParams }) {
 
       {/* Activity + sidebar row */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
+        <div className="order-2 lg:order-1 lg:col-span-2">
           <RecentActivityCard activities={activities} />
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="order-1 flex flex-col gap-5 lg:order-2">
           <InternshipProgress
             accumulated_hours={internshipData?.accumulated_hours || 0}
             total_hours={internshipData?.total_hours || 0}
