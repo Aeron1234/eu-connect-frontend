@@ -280,6 +280,12 @@
     @apply border-border outline-ring/50;
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html, body, main, main > [class~="overflow-y-auto"], nav[aria-label="Main navigation"]) {
+      scroll-behavior: smooth;
+    }
+  }
+
   ::-webkit-scrollbar {
     width: 4px;
     height: 5px;

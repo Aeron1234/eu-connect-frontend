@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { DM_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "@/contexts/SidebarContext";
+import SmoothScroll from "@/components/ui/SmoothScroll";
 
 const DmSans = DM_Sans({
   subsets: ["latin"],
@@ -20,9 +21,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="overflow-x-hidden" suppressHydrationWarning>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className="overflow-x-hidden scroll-smooth"
+      suppressHydrationWarning
+    >
       <body className={`${DmSans.className} `}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SmoothScroll />
           <SidebarProvider>{children}</SidebarProvider>
           <Toaster position="top-center" className="shadow-lg" />
         </ThemeProvider>
