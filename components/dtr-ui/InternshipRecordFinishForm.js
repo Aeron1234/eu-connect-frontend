@@ -3,9 +3,7 @@
 import { useTransition } from "react";
 import { toastAndAction } from "../../lib/helpers";
 import { finishInternshipRecord } from "@/lib/server-actions/internship-records-actions";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import ModalForm from "@/components/ui/ModalForm";
 
 function InternshipRecordFinishForm({ internshipId }) {
   const [isPending, startTransition] = useTransition();
@@ -28,32 +26,12 @@ function InternshipRecordFinishForm({ internshipId }) {
   }
 
   return (
-    <form action={handleAction}>
-      <DialogFooter>
-        <div className="flex gap-2 font-semibold w-full justify-end">
-          <DialogClose asChild>
-            <Button variant="outline" className={"w-fit"} disabled={isPending}>
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <DialogClose asChild>
-            <Button
-              className={"bg-primary hover:bg-primary-400 w-fit "}
-              type="submit"
-              disabled={isPending}
-              // onClick={() => toast.success("Event has been created")}
-            >
-              {isPending ? (
-                <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
-              ) : (
-                "Finish"
-              )}
-            </Button>
-          </DialogClose>
-        </div>
-      </DialogFooter>
-    </form>
+    <ModalForm.Root action={handleAction}>
+      <ModalForm.Confirmation>
+        This internship record will be marked as finished.
+      </ModalForm.Confirmation>
+      <ModalForm.Actions isPending={isPending} disableCancelWhilePending submitLabel="Finish" />
+    </ModalForm.Root>
   );
 }
 

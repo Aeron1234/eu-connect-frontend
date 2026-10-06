@@ -160,7 +160,7 @@ function SideNavigationList({ fullName = "", avatar = null }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 top-0 z-50 flex h-full flex-col border-r border-primary-300 bg-primary px-3 pb-5 pt-1.5 text-sm font-semibold text-white transition-all duration-300 ease-in-out dark:border-white/15 dark:bg-card lg:sticky lg:inset-auto lg:h-screen
+        className={`fixed inset-y-0 left-0 top-0 z-50 flex h-full flex-col border-r border-primary-300 bg-primary px-3 pb-5 text-sm font-semibold text-white transition-all duration-300 ease-in-out dark:border-white/15 dark:bg-card lg:sticky lg:inset-auto lg:h-screen
   ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
   w-64 ${isCollapsed ? "lg:w-20" : "lg:w-64"}`}
       >
@@ -183,7 +183,7 @@ function SideNavigationList({ fullName = "", avatar = null }) {
           href={homeHref}
           scroll={false}
           onClick={closeMobile}
-          className={`group mb-3 flex w-full items-center gap-3 border-b border-white/25 pb-3 ${isCollapsed ? "lg:justify-center" : ""}`}
+          className={`group flex h-16 w-full shrink-0 items-center gap-3 border-b border-white/25 ${isCollapsed ? "lg:justify-center" : ""}`}
         >
           <div className="shrink-0 rounded-full bg-white p-0.5 transition-transform group-hover:scale-105">
             <Logo small />
@@ -193,7 +193,7 @@ function SideNavigationList({ fullName = "", avatar = null }) {
           </h2>
         </Link>
 
-        <nav className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto" aria-label="Main navigation">
+        <nav className="mt-3 flex min-h-0 w-full flex-1 flex-col overflow-y-auto" aria-label="Main navigation">
           {routeGroups.map((group, index) => (
             <NavSection
               key={group.label}
@@ -305,7 +305,7 @@ function NavLink({
         aria-current={isActive ? "page" : undefined}
         className={`relative flex min-h-10 w-full items-center gap-3 px-3 py-2.5 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isActive ? "rounded-l-md rounded-r-full bg-white/20 text-white shadow-sm dark:bg-white/10" : "rounded-lg text-white/85 hover:bg-white/10 hover:text-white"} ${isCollapsed ? "lg:justify-center lg:px-0 lg:rounded-xl" : ""}`}
       >
-        {isActive && <span aria-hidden="true" className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-gradient-to-b from-primary-200 to-white dark:from-primary-emphasis dark:to-primary" />}
+        {isActive && <span aria-hidden="true" className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-primary-300" />}
         {icon}
         <span className={isCollapsed ? "lg:hidden" : ""}>{name}</span>
       </Link>

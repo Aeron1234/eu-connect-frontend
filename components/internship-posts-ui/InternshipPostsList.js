@@ -133,7 +133,6 @@ function InternshipPostsList({
                     Update internship post
                   </span>
                 }
-                description="Update the details for this posting."
               >
                 <InternshipPostForm
                   handleAction={handleUpdate}
@@ -159,7 +158,6 @@ function InternshipPostsList({
                     Delete internship post
                   </span>
                 }
-                description="Are you sure you want to delete this post?"
               >
                 <DeleteForm
                   handleAction={handleDelete}
@@ -223,9 +221,6 @@ function InternshipPostsList({
             ))}
           </div>
         )}
-        <span className="ml-0 sm:ml-auto">
-          Posted {format(new Date(item.created_at), "MMM d, yyyy")}
-        </span>
       </div>
 
       <div className="mt-4">
@@ -249,7 +244,7 @@ function InternshipPostsList({
         <p className="text-xs font-semibold text-muted-foreground">
           Contact Details:
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div className="mt-2 flex flex-col items-start gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
           <span className="font-medium text-foreground">
             {item.contact_name}
           </span>
@@ -274,6 +269,10 @@ function InternshipPostsList({
           >
             <Globe className="h-3.5 w-3.5" /> {item.contact_website}
           </a>
+
+          <span className="self-end shrink-0 text-xs text-muted-foreground sm:ml-auto sm:self-auto">
+            Posted {format(new Date(item.created_at), "MMM d, yyyy")}
+          </span>
         </div>
       </div>
     </article>

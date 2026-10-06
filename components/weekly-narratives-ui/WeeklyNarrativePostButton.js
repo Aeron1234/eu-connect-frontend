@@ -30,7 +30,6 @@ function WeeklyNarrativePostButton() {
         </TitleButton>
       }
       title={<span>Weekly Narrative</span>}
-      description="Summarize your week."
     >
       <WeeklyNarrativeForm
         handleAction={handleAction}

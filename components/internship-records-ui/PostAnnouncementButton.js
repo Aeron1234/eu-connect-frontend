@@ -44,7 +44,6 @@ function PostAnnouncementButton({ categories, onPosted }) {
           <Megaphone className="h-5 w-5" />
         </span>
       }
-      description="Provide clear and concise information."
     >
       <AnnouncementForm
         categories={categories}

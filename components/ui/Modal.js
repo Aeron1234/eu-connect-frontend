@@ -17,11 +17,13 @@ function Modal({
   onClick = null,
   titleIcon = null,
   titleStyles = "",
+  open,
+  onOpenChange,
 }) {
   if (disabled) return null;
 
   return (
-    <Dialog>
+    <Dialog {...(open === undefined ? {} : { open, onOpenChange })}>
       <DialogTrigger
         disabled={disabled}
         className={triggerStyles}
@@ -31,10 +33,11 @@ function Modal({
       </DialogTrigger>
       <DialogContent
         showCloseButton={true}
-        className={"flex flex-col max-h-150 overflow-auto"}
+        className="flex max-h-[calc(100dvh-1rem)] flex-col gap-3 overflow-auto p-3.5 sm:max-h-150 sm:gap-4 sm:p-6"
+        {...(!description ? { "aria-describedby": undefined } : {})}
       >
-        <DialogHeader>
-          <DialogTitle className={`text-base ${titleStyles}`}>
+        <DialogHeader className="text-left">
+          <DialogTitle className={`flex items-center gap-2 pr-6 text-left text-sm sm:text-base ${titleStyles}`}>
             {titleIcon && titleIcon} {title}
           </DialogTitle>
           {description && (

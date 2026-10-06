@@ -1,6 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import ModalForm, { controlClass } from "@/components/ui/ModalForm";
 import {
   Select,
   SelectContent,
@@ -10,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 import DeleteForm from "../ui/DeleteForm";
 import { useUser } from "@/contexts/UserContext";
@@ -86,110 +84,96 @@ function CreateUpdateAnnouncementForm({
   );
 
   return (
-    <form action={handleAction} className="flex-1 flex flex-col gap-4">
+    <ModalForm.Root action={handleAction}>
       {isEdit && <input type="hidden" name="id" defaultValue={data.id} />}
 
-      <div className="flex gap-4 flex-1 max-sm:flex-col">
-        <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-muted-foreground">
-            Title
+      <ModalForm.Section title="Announcement Details">
+        <ModalForm.Row>
+          <label className="flex flex-col gap-1 flex-1">
+            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+              Title
+            </span>
+            <ModalForm.Input
+              type="text"
+              name="title"
+              placeholder="Title of your announcement..."
+              defaultValue={isEdit ? data.title : ""}
+              disabled={isPending}
+              required
+            />
+          </label>
+
+          <label className="flex flex-col gap-1 flex-1">
+            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+              Categories
+            </span>
+            <input
+              type="hidden"
+              name="category_id"
+              className="pointer-events-none cursor-not-allowed"
+              value={selectedCategory}
+              disabled={isPending}
+            />
+
+            {isAdmin ? (
+              // Admin has no department, so Department-category is never a
+              // valid choice — no picker at all, just a locked display.
+              <div className="mt-1 flex min-h-11 w-full items-center rounded-xl border border-border/80 bg-muted/40 px-3 text-sm text-muted-foreground sm:mt-1.5 sm:px-3.5">
+                General
+              </div>
+            ) : (
+              <Select
+                className="w-full h-full "
+                onValueChange={setSelectedCategory}
+                disabled={isPending}
+                defaultValue={isEdit ? `${data.category_id}` : undefined}
+              >
+                <SelectTrigger className={controlClass}>
+                  <SelectValue placeholder={"Select category"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Categories</SelectLabel>
+                    {categories.length > 0
+                      ? categories.map((category) => (
+                          <SelectItem key={category.id} value={`${category.id}`}>
+                            {category.name}
+                          </SelectItem>
+                        ))
+                      : null}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </label>
+        </ModalForm.Row>
+
+        <ModalForm.Field label="Event date (optional)">
+          <ModalForm.Input
+            type="date"
+            name="event_date"
+            defaultValue={isEdit ? data.event_date?.slice(0, 10) || "" : ""}
+            disabled={isPending}
+          />
+        </ModalForm.Field>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+            Content
           </span>
-          <input
-            type="text"
-            name="title"
-            placeholder="Title of your announcement..."
-            className="p-2 border border-border rounded-sm text-sm"
-            defaultValue={isEdit ? data.title : ""}
+          <ModalForm.Textarea
+            name="content"
+            placeholder="Write your announcement here..."
+            className="min-h-28 sm:min-h-40"
+            defaultValue={isEdit ? data.content : ""}
             disabled={isPending}
             required
           />
         </label>
+      </ModalForm.Section>
 
-        <label className="flex flex-col gap-1 flex-1">
-          <span className="text-sm font-semibold text-muted-foreground">
-            Categories
-          </span>
-          <input
-            type="hidden"
-            name="category_id"
-            className="pointer-events-none cursor-not-allowed"
-            value={selectedCategory}
-            disabled={isPending}
-          />
-
-          {isAdmin ? (
-            // Admin has no department, so Department-category is never a
-            // valid choice — no picker at all, just a locked display.
-            <div className="h-9.5 px-3 flex items-center text-sm w-full rounded-sm border border-border bg-muted/50 text-muted-foreground">
-              General
-            </div>
-          ) : (
-            <Select
-              className="w-full h-full "
-              onValueChange={setSelectedCategory}
-              disabled={isPending}
-              defaultValue={isEdit ? `${data.category_id}` : undefined}
-            >
-              <SelectTrigger className="h-9.5 px-3 text-sm w-full rounded-sm border border-border focus:ring-2 focus:ring-ring focus:border-transparent">
-                <SelectValue placeholder={"Select category"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Categories</SelectLabel>
-                  {categories.length > 0
-                    ? categories.map((category) => (
-                        <SelectItem key={category.id} value={`${category.id}`}>
-                          {category.name}
-                        </SelectItem>
-                      ))
-                    : null}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
-        </label>
-      </div>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-semibold text-muted-foreground">
-          Content
-        </span>
-        <textarea
-          name="content"
-          placeholder="Write your announcement here..."
-          className="px-2 py-1 border border-border rounded-sm min-h-40 overflow-y-auto resize-none text-sm"
-          defaultValue={isEdit ? data.content : ""}
-          disabled={isPending}
-          required
-        />
-      </label>
-
-      <DialogFooter>
-        <div className="flex gap-2 font-semibold w-full justify-end">
-          <DialogClose asChild>
-            <Button variant="outline" className={"w-fit"}>
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <DialogClose asChild>
-            <Button
-              className={`bg-primary hover:bg-primary-400 w-fit ${isPending ? "pointer-events-none opacity-50" : ""} `}
-              type="submit"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
-              ) : type === "edit" ? (
-                "Update"
-              ) : (
-                "Post"
-              )}
-            </Button>
-          </DialogClose>
-        </div>
-      </DialogFooter>
-    </form>
+      <ModalForm.Actions isPending={isPending} submitLabel={isEdit ? "Update" : "Post"} />
+    </ModalForm.Root>
   );
 }
 
@@ -200,7 +184,7 @@ function TogglePinAnnouncementForm({
   is_pinned,
 }) {
   return (
-    <form action={handleAction}>
+    <ModalForm.Root action={handleAction}>
       <input
         type="hidden"
         name="announcementId"
@@ -215,30 +199,11 @@ function TogglePinAnnouncementForm({
         className="pointer-events-none cursor-not-allowed"
       />
 
-      <DialogFooter>
-        <div className="flex gap-2 font-semibold w-full justify-end">
-          <DialogClose asChild>
-            <Button variant="outline" className={"w-fit"}>
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <DialogClose asChild>
-            <Button
-              className={"bg-primary hover:bg-primary-400 w-fit "}
-              type="submit"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </DialogClose>
-        </div>
-      </DialogFooter>
-    </form>
+      <ModalForm.Confirmation>
+        This announcement will be {is_pinned > 0 ? "unpinned" : "pinned"} for all users.
+      </ModalForm.Confirmation>
+      <ModalForm.Actions isPending={isPending} submitLabel="Save" />
+    </ModalForm.Root>
   );
 }
 

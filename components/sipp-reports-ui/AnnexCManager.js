@@ -3,7 +3,7 @@
 import { notifyReadError } from "@/lib/client-read-error";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, FileText, ClipboardList } from "lucide-react";
+import { Plus, Trash2, FileText, ClipboardList, Pencil } from "lucide-react";
 import {
   saveAnnexCReport,
   getAnnexCReportsResult as getAnnexCReports,
@@ -25,7 +25,7 @@ const innerTabs = [
 export default function AnnexCManager({
   hei,
   address,
-  availableAcadYear = [],
+  initialAvailableYears = [],
   initialReports = [],
   pagination: {
     page: initialPage = 1,
@@ -49,13 +49,16 @@ export default function AnnexCManager({
   const [certifiedBy, setCertifiedBy] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [editingReportId, setEditingReportId] = useState(null);
 
   // --- Reports tab state, seeded from server-fetched props ---
   const [reports, setReports] = useState(initialReports);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [total, setTotal] = useState(initialTotal);
+  const [, setTotal] = useState(initialTotal);
   const [reportsYear, setReportsYear] = useState(initialYear);
+  const [reportsStatus, setReportsStatus] = useState("");
+  const [availableYears, setAvailableYears] = useState(initialAvailableYears);
   const [query, setQuery] = useState("");
   const [isPending, setIsPending] = useState(false);
 
@@ -69,6 +72,7 @@ export default function AnnexCManager({
       const fresh = await getAnnexCReports({
         academicYear: reportsYear,
         search: query,
+        status: reportsStatus,
         page: 1,
       });
       if (thisRequestId !== requestIdRef.current) return;
@@ -83,6 +87,7 @@ export default function AnnexCManager({
       setCurrentPage(1);
       setTotalPages(fresh.pagination.totalPages || 1);
       setTotal(fresh.pagination.total || 0);
+      setAvailableYears(fresh.availableYears || []);
     } catch (error) {
       if (thisRequestId === requestIdRef.current)
         notifyReadError("Error refreshing Annex C reports:", error);
@@ -105,6 +110,7 @@ export default function AnnexCManager({
         const newData = await getAnnexCReports({
           academicYear: reportsYear,
           search: query,
+          status: reportsStatus,
           page: 1,
         });
 
@@ -122,6 +128,7 @@ export default function AnnexCManager({
         setCurrentPage(1);
         setTotalPages(newData?.pagination?.totalPages || 1);
         setTotal(newData?.pagination?.total || 0);
+        setAvailableYears(newData.availableYears || []);
       } catch (error) {
         if (thisRequestId === requestIdRef.current) {
           notifyReadError("Error loading Annex C reports:", error);
@@ -132,7 +139,7 @@ export default function AnnexCManager({
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [reportsYear, query]);
+  }, [reportsYear, reportsStatus, query]);
 
   async function handleSeeMore() {
     if (isPending || currentPage >= totalPages) return;
@@ -144,6 +151,7 @@ export default function AnnexCManager({
       const newData = await getAnnexCReports({
         academicYear: reportsYear,
         search: query,
+        status: reportsStatus,
         page: nextPage,
       });
 
@@ -192,6 +200,26 @@ export default function AnnexCManager({
     setRows((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function resetForm() {
+    setAcademicYear("");
+    setDegreeProgram("");
+    setRows([emptyRow(), emptyRow(), emptyRow(), emptyRow()]);
+    setPreparedBy("");
+    setCertifiedBy("");
+    setFormError("");
+    setEditingReportId(null);
+  }
+
+  function editDraft(report) {
+    setAcademicYear(report.academic_year);
+    setDegreeProgram(report.degree_program);
+    setRows(report.entries?.length ? report.entries.map((entry) => ({ ...entry })) : [emptyRow()]);
+    setPreparedBy(report.prepared_by || "");
+    setCertifiedBy(report.certified_by || "");
+    setFormError("");
+    setEditingReportId(report.id);
+  }
+
   async function handleSubmit(status) {
     setFormError("");
 
@@ -211,6 +239,7 @@ export default function AnnexCManager({
     setIsSaving(true);
     try {
       const result = await saveAnnexCReport({
+        ...(editingReportId ? { reportId: editingReportId } : {}),
         academicYear,
         degreeProgram,
         entries: rows,
@@ -219,23 +248,18 @@ export default function AnnexCManager({
         status,
       });
 
-      if (result?.error) {
-        setFormError(result.error);
+      if (result?.error || !result?.report) {
+        setFormError(result?.error || "The report could not be saved. Please try again.");
         return;
       }
 
-      if (status === "submitted") {
-        setAcademicYear("");
-        setDegreeProgram("");
-        setRows([emptyRow(), emptyRow(), emptyRow(), emptyRow()]);
-        setPreparedBy("");
-        setCertifiedBy("");
-
-        if (result.report) {
-          setReports((prev) => [result.report, ...prev]);
-          setTotal((prev) => prev + 1);
-        }
-        setTab("reports");
+      const sameFilter = reportsYear === academicYear && reportsStatus === status && !query;
+      setTab("reports");
+      resetForm();
+      setQuery("");
+      setReportsYear(academicYear);
+      setReportsStatus(status);
+      if (sameFilter) {
         await refreshReports();
       }
     } finally {
@@ -250,18 +274,13 @@ export default function AnnexCManager({
       notifyReadError(result.error);
       return;
     }
+    if (editingReportId === reportId) resetForm();
     setReports((prev) => prev.filter((r) => r.id !== reportId));
     setTotal((prev) => Math.max(0, prev - 1));
     await refreshReports();
   }
 
-  return (
-    <div>
-      <div className="mb-6 rounded-xl bg-secondary p-1.5 sm:w-fit">
-        <TabBar tabs={innerTabs} selectedTab={tab} onSelect={setTab} />
-      </div>
-
-      {tab === "form" ? (
+  const form = (
         <div className="space-y-5">
           <section className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm">
             <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -276,8 +295,9 @@ export default function AnnexCManager({
                 <input
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
+                  disabled={!!editingReportId}
                   placeholder="e.g. 2026-2027"
-                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-60"
                 />
               </div>
               <div>
@@ -287,8 +307,9 @@ export default function AnnexCManager({
                 <input
                   value={degreeProgram}
                   onChange={(e) => setDegreeProgram(e.target.value)}
+                  disabled={!!editingReportId}
                   placeholder="e.g. BS Computer Science"
-                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-60"
                 />
               </div>
             </div>
@@ -429,6 +450,11 @@ export default function AnnexCManager({
           )}
 
           <div className="flex justify-end gap-3">
+            {editingReportId && (
+              <button type="button" onClick={resetForm} disabled={isSaving} className="rounded-md px-4 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50">
+                Cancel
+              </button>
+            )}
             <button
               type="button"
               onClick={() => handleSubmit("draft")}
@@ -447,22 +473,33 @@ export default function AnnexCManager({
             </button>
           </div>
         </div>
-      ) : (
+  );
+
+  return (
+    <div>
+      <div className="mb-6 rounded-xl bg-secondary p-1.5 sm:w-fit">
+        <TabBar tabs={innerTabs} selectedTab={tab} onSelect={(nextTab) => {
+          if (nextTab !== tab) resetForm();
+          setTab(nextTab);
+        }} />
+      </div>
+
+      {tab === "form" ? form : (
         <div className="space-y-5">
           <div className="flex gap-2 flex-col sm:flex-row">
             <div className="items-start">
               <SearchBar
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { if (editingReportId) resetForm(); setQuery(e.target.value); }}
                 placeholder="Search degree or program..."
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {["All", ...availableAcadYear].map((ay) => (
+              {["All", ...availableYears].map((ay) => (
                 <button
                   key={ay}
-                  onClick={() => setReportsYear(ay === "All" ? "" : ay)}
+                  onClick={() => { if (editingReportId) resetForm(); setReportsYear(ay === "All" ? "" : ay); }}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                     (ay === "All" && !reportsYear) || reportsYear === ay
                       ? "bg-primary text-primary-foreground"
@@ -473,6 +510,24 @@ export default function AnnexCManager({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2" aria-label="Report status">
+            {[
+              { value: "", label: "All statuses" },
+              { value: "draft", label: "Drafts" },
+              { value: "submitted", label: "Submitted" },
+            ].map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => { if (editingReportId) resetForm(); setReportsStatus(value); }}
+                aria-pressed={reportsStatus === value}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${reportsStatus === value ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-primary-emphasis"}`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           {isPending ? (
@@ -499,7 +554,7 @@ export default function AnnexCManager({
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
                         AY {r.academic_year} · {r.degree_program} ·{" "}
-                        {r.submitted_at
+                        {r.status === "submitted" && r.submitted_at
                           ? `Submitted ${new Date(r.submitted_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`
                           : "Draft"}
                         {r.prepared_by
@@ -509,6 +564,16 @@ export default function AnnexCManager({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0 ">
+                    {r.status === "draft" && (
+                      <button
+                        type="button"
+                        onClick={() => editingReportId === r.id ? resetForm() : editDraft(r)}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-primary-emphasis hover:bg-primary-50"
+                        aria-expanded={editingReportId === r.id}
+                      >
+                        <Pencil className="size-3.5" /> {editingReportId === r.id ? "Close editor" : "Edit draft"}
+                      </button>
+                    )}
                     <ExportPdfButton
                       endpoint="/api/reports/annex-c"
                       params={{ reportId: r.id }}
@@ -522,6 +587,11 @@ export default function AnnexCManager({
                     </button>
                   </div>
                 </header>
+
+                {editingReportId === r.id ? (
+                  <div className="bg-background p-4 sm:p-5">{form}</div>
+                ) : (
+                  <>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 text-sm">
                   <p>
@@ -576,6 +646,13 @@ export default function AnnexCManager({
                       </tbody>
                     </table>
                   </div>
+                )}
+                {!r.entries?.length && (
+                  <p className="border-t border-border px-4 py-4 text-sm text-muted-foreground sm:px-5">
+                    No issues, solutions, or recommendations were saved for this report.
+                  </p>
+                )}
+                  </>
                 )}
               </section>
             ))

@@ -42,7 +42,7 @@ export default function ExportPdfButton({
     <button
       onClick={handleExport}
       disabled={isPending}
-      className="inline-flex items-center gap-1 bg-red-900 text-white px-3 py-1.5 rounded-md text-sm"
+      className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {isPending ? (
         <Spinner className={"size-6 stroke-3 stroke-primary-50"} />

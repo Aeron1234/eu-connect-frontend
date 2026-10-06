@@ -1,4 +1,5 @@
 import { LOGO_BASE64 } from "./pdfAssets";
+import { formatGender } from "@/lib/formatGender";
 
 const baseStyles = `
   <style>
@@ -65,7 +66,7 @@ export function annexDHtml(data) {
         ${i === 0 ? `<td rowspan="${c.interns.length}" style="vertical-align: middle;">${escapeHtml(c.name)}</td>` : ""}
         <td>${i + 1}. ${escapeHtml(s.name)}</td>
         <td>${escapeHtml(s.course)}</td>
-        <td>${escapeHtml(s.gender || "—")}</td>
+        <td>${escapeHtml(formatGender(s.gender))}</td>
         <td>${escapeHtml(formatDuration(s.date_started, s.date_ended))}</td>
       </tr>`,
     )

@@ -1,8 +1,12 @@
+"use client";
+
 import { LogIn, LogOut } from "lucide-react";
 import Modal from "../ui/Modal";
 import DtrForm from "./DtrForm";
+import { useState } from "react";
 
 function DtrButton({ internshipData, status }) {
+  const [open, setOpen] = useState(false);
   if (
     !internshipData ||
     status === "ON_BREAK" ||
@@ -22,6 +26,8 @@ function DtrButton({ internshipData, status }) {
 
   return (
     <Modal
+      open={open}
+      onOpenChange={setOpen}
       triggerStyles="w-full sm:w-auto"
       trigger={
         <div
@@ -32,9 +38,8 @@ function DtrButton({ internshipData, status }) {
         </div>
       }
       title={<span className={`text-primary-emphasis`}>{theme.label}?</span>}
-      description={`Record your daily attendance`}
     >
-      <DtrForm isOut={isOut} />
+      <DtrForm isOut={isOut} onSuccess={() => setOpen(false)} />
     </Modal>
   );
 }

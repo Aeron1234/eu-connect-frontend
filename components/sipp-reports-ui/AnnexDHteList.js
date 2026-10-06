@@ -10,6 +10,7 @@ import { getHteCompanyListResult as getHteCompanyList } from "@/lib/server-actio
 import SearchBar from "../ui/SearchBar";
 import HTEListSkeleton from "../skeletons/HTEListSkeleton";
 import { hasValidPage } from "@/lib/see-more-pagination.mjs";
+import { formatGender } from "@/lib/formatGender";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -252,7 +253,7 @@ export function AnnexDHteList({
                           {intern.course}
                         </td>
                         <td className="px-4 sm:px-5 py-3 text-foreground-soft">
-                          {intern.gender || "—"}
+                          {formatGender(intern.gender)}
                         </td>
                         <td className="px-4 sm:px-5 py-3 text-foreground-soft">
                           {intern.date_started?.slice(0, 10)} –{" "}

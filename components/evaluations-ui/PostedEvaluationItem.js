@@ -183,7 +183,6 @@ function PostedEvaluationItem({
             title={
               <span className={`text-primary-emphasis`}>Delete Evaluation</span>
             }
-            description={`Are you sure you want to delete this evaluation?`}
           >
             <StudentEvaluationDeleteForm
               evaluationId={ev.id}

@@ -42,7 +42,6 @@ function PastInternshipPostButton({ courses = [] }) {
           Post alumni internship records
         </span>
       }
-      description={`Let students see the companies that accepted interns in the past.`}
     >
       <PastInternshipPostEditForm
         courses={courses}

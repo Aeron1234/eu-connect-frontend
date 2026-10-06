@@ -224,7 +224,6 @@ function GridView({
                 </span>
               }
               title={<span className="text-red-600">Delete File</span>}
-              description="Are you sure you want to delete this file?"
             >
               <StorageDeleteFile fileId={item.id} />
             </Modal>
@@ -299,7 +298,6 @@ function ListView({
               </span>
             }
             title={<span className="text-red-600">Delete File</span>}
-            description="Are you sure you want to delete this file?"
           >
             <StorageDeleteFile fileId={item.id} />
           </Modal>

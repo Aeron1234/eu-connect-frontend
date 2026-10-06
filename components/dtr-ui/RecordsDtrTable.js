@@ -83,7 +83,6 @@ function RecordsDtrTable({ dtrs = [] }) {
                     </span>
                   }
                   // title={<span className="text-red-600">Clock-out?</span>}
-                  description={`Are you sure you want to delete this daily time record?`}
                 >
                   <DtrDeleteForm dtrId={dtr.id} />
                 </Modal>

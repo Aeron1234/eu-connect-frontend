@@ -12,7 +12,6 @@ import { notFound } from "next/navigation";
 async function SIPPReportsPage() {
   const session = await getUserSession();
 
-  const userId = session?.user?.id;
   const userRole = session?.user?.role;
   const userDepartment = session?.user?.department_code;
 
@@ -47,6 +46,7 @@ async function SIPPReportsPage() {
           reports: annexCReports?.reports || [],
           pagination: annexCReports?.pagination || {},
           academicYear: annexCReports?.academicYear || "",
+          availableYears: annexCReports?.availableYears || [],
         }}
         initialAnnexD={{
           companies: hteCompanyList?.companies || [],

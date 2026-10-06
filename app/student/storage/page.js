@@ -46,7 +46,6 @@ async function StoragePage() {
               <Upload className="w-4 h-4" /> Upload File
             </TitleButton>
           }
-          description="Save your internship related documents here."
           triggerStyles="max-xs:w-full"
           title={"Upload file"}
         >

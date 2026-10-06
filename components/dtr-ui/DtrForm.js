@@ -1,66 +1,50 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import ModalForm from "@/components/ui/ModalForm";
 import { clockIn, clockOut } from "@/lib/server-actions/dtr-actions";
-import { useTransition } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { useState } from "react";
 import { toastAndAction, useGetLocation } from "../../lib/helpers";
+import { toast } from "sonner";
 
-function DtrForm({ isOut }) {
+function DtrForm({ isOut, onSuccess }) {
   const action = isOut ? clockIn : clockOut;
 
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  const coords = useGetLocation();
+  const { refreshLocation } = useGetLocation(false);
 
-  const { latitude, longitude } = coords;
+  async function handleAction(formData) {
+    if (isPending) return;
+    setIsPending(true);
+    try {
+      // Get the position at submission time. The modal may open before a
+      // phone has its first GPS fix, and an earlier reading may be stale.
+      const { latitude, longitude } = await refreshLocation();
+      formData.set(isOut ? "lat_in" : "lat_out", String(latitude));
+      formData.set(isOut ? "lon_in" : "lon_out", String(longitude));
 
-  function handleAction(formData) {
-    // FOR TESTING ONLY
-    // const tempLat = 13.92301387;
-    // const tempLon = 121.43426039;
-
-    formData.append(isOut ? "lat_in" : "lat_out", latitude);
-    formData.append(isOut ? "lon_in" : "lon_out", longitude);
-
-    const handler = {
-      loadingLabel: isOut ? "Clocking in..." : "Clocking out...",
-      successLabel: isOut ? "Clocked in!" : "Clocked out!",
-      errorLabel: isOut ? "Failed to clock in." : "Failed to clock out.",
-      action,
-      formData,
-    };
-
-    startTransition(async () => await toastAndAction(handler));
+      const result = await toastAndAction({
+        loadingLabel: isOut ? "Clocking in..." : "Clocking out...",
+        successLabel: isOut ? "Clocked in!" : "Clocked out!",
+        errorLabel: isOut ? "Failed to clock in." : "Failed to clock out.",
+        action,
+        formData,
+      });
+      if (result?.success) onSuccess?.();
+    } catch (error) {
+      toast.error(error.message || "Could not get your current location. Please try again.");
+    } finally {
+      setIsPending(false);
+    }
   }
 
   return (
-    <form action={handleAction} className="flex flex-col gap-6 w-full">
-      <DialogFooter>
-        <div className="flex gap-2 font-semibold w-full justify-end">
-          <DialogClose asChild>
-            <Button variant="outline" className={"w-fit"}>
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <DialogClose asChild>
-            <Button
-              className={"bg-primary hover:bg-primary-400 w-fit "}
-              type="submit"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </DialogClose>
-        </div>
-      </DialogFooter>
-    </form>
+    <ModalForm.Root action={handleAction} className="w-full">
+      <ModalForm.Confirmation>
+        {isOut ? "Record your clock-in now?" : "Record your clock-out now?"}
+      </ModalForm.Confirmation>
+      <ModalForm.Actions isPending={isPending} submitLabel="Save" closeOnSubmit={false} />
+    </ModalForm.Root>
   );
 }
 

@@ -2,9 +2,7 @@
 
 import { Coffee, Play } from "lucide-react";
 import { useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
+import ModalForm from "@/components/ui/ModalForm";
 import { startBreak, resumeDuty } from "@/lib/server-actions/dtr-actions";
 import { toastAndAction } from "@/lib/helpers";
 import Modal from "../ui/Modal";
@@ -46,22 +44,15 @@ function BreakAction({ label, action, Icon }) {
         </div>
       }
       title={<span className="text-primary-emphasis">{label}?</span>}
-      description={label === "Start break"
-        ? "Break time won't count toward your duty hours."
-        : "Your duty-hour timer will continue when you resume."}
     >
-      <form action={handleAction}>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" type="button">Cancel</Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? <Spinner className="size-5" /> : label}
-            </Button>
-          </DialogClose>
-        </DialogFooter>
-      </form>
+      <ModalForm.Root action={handleAction}>
+        <ModalForm.Confirmation>
+          {label === "Start break"
+            ? "Start your break and pause your duty-hour timer?"
+            : "Resume duty and continue counting your duty hours?"}
+        </ModalForm.Confirmation>
+        <ModalForm.Actions isPending={isPending} submitLabel={label} />
+      </ModalForm.Root>
     </Modal>
   );
 }

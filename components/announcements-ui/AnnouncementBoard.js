@@ -183,7 +183,7 @@ function AnnouncementBoard({
       {isSearching ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <AnnouncementCardSkeleton key={i} />
+            <AnnouncementCardSkeleton key={i} showEventDate={i % 2 === 0} />
           ))}
         </div>
       ) : (

@@ -173,7 +173,6 @@ function WeeklyNarrativeContent({
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Modal
                       title="Update your narrative"
-                      description="Do you want to change something?"
                       trigger={
                         <div
                           aria-label="Edit"
@@ -193,7 +192,6 @@ function WeeklyNarrativeContent({
                       title={
                         <span className="text-red-600">Delete Narrative</span>
                       }
-                      description="Are you sure you want to delete this narrative?"
                       trigger={
                         <div
                           aria-label="Delete"

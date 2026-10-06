@@ -33,7 +33,7 @@ function SIPPReportsManager({
         <AnnexCManager
           hei={hei}
           address={address}
-          availableAcadYear={availableAcadYear}
+          initialAvailableYears={initialAnnexC?.availableYears}
           initialReports={initialAnnexC?.reports}
           pagination={initialAnnexC?.pagination}
           academicYear={initialAnnexC?.academicYear}

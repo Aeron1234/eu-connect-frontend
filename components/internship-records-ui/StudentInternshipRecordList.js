@@ -137,7 +137,6 @@ function Record({ record, onDeleted }) {
             title={
               <span className="text-red-600">Delete internship record</span>
             }
-            description={`Delete your ${status} internship record for ${company_name}? This cannot be undone.`}
           >
             <DeleteForm
               handleAction={handleDelete}

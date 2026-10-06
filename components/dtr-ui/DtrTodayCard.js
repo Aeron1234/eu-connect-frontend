@@ -88,7 +88,6 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                   Finish this internship record?
                 </span>
               }
-              description={`You have now completed the required hours.`}
             >
               <InternshipRecordFinishForm
                 internshipId={internshipData?.id || ""}

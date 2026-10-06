@@ -71,6 +71,14 @@ test("validation errors accept both backend error and message fields", async () 
   );
 });
 
+test("DTR geofence rejections explain distance instead of looking like role failures", async () => {
+  const error = "Clock-in rejected. You are 180m away from the designated area (Limit: 150m).";
+  assert.deepEqual(
+    await parseApiResponse(Response.json({ error }, { status: 422 })),
+    { success: false, error },
+  );
+});
+
 test("non-JSON and empty failures remain failures without exposing HTML or exceptions", async () => {
   assert.deepEqual(
     await parseApiResponse(new Response("<html>proxy error</html>", { status: 502 })),

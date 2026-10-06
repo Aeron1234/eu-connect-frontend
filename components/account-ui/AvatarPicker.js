@@ -80,7 +80,6 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
     <Modal
       trigger={trigger}
       title={<span className="text-primary-emphasis">Choose Avatar</span>}
-      description="Pick a display picture, or remove it to use your initials instead."
     >
       <div className="flex flex-col gap-4">
         {isLoading ? (

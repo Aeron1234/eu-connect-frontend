@@ -20,7 +20,6 @@ function InternshipPostButtonWrapper({ courses }) {
         </TitleButton>
       }
       title={<span className={`text-primary-emphasis`}>Post Internship</span>}
-      description={`Do you need an intern? Post the job here.`}
     >
       <InternshipPostButton courses={courses || []} />
     </Modal>

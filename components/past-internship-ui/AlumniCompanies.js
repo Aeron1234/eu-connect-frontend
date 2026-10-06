@@ -173,7 +173,6 @@ function AlumniRow({
                   <Pencil className="h-4 w-4" />
                 </div>
               }
-              description="Do you want to change something?"
             >
               <PastInternshipPostEditForm
                 data={{
@@ -200,7 +199,6 @@ function AlumniRow({
                   <Trash2 className="h-4 w-4" />
                 </div>
               }
-              description="Are you sure you want to delete this record?"
             >
               <DeleteForm
                 isPending={isPending}

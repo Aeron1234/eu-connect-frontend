@@ -5,7 +5,10 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import {
   Award,
+  ArrowUpRight,
   Bell,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   ClipboardX,
   FileText,
@@ -19,6 +22,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
+import { getNotificationTargetPath } from "@/lib/notification-routes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { socket } from "./SocketProvider";
 import { toast } from "sonner";
@@ -36,28 +40,19 @@ import {
 } from "@/lib/notification-events";
 
 const TYPE_META = {
-  announcement: { icon: Megaphone, tone: "violet" },
-  internship_record_request: { icon: FileText, tone: "blue" },
-  internship_record_approved: { icon: CheckCircle2, tone: "emerald" },
-  internship_record_rejected: { icon: XCircle, tone: "red" },
-  internship_record_finished: { icon: CheckCircle2, tone: "emerald" },
-  internship_record_force_finished: { icon: CheckCircle2, tone: "emerald" },
-  evaluation_submitted: { icon: Star, tone: "amber" },
-  evaluation_deleted: { icon: ClipboardX, tone: "stone" },
-  certificate_uploaded: { icon: Award, tone: "blue" },
-  supervisor_request_submitted: { icon: UserPlus, tone: "violet" },
-  supervisor_request_accepted: { icon: UserCheck, tone: "emerald" },
-  supervisor_request_rejected: { icon: UserX, tone: "red" },
-  dtr_location_set: { icon: MapPin, tone: "blue" },
-};
-
-const TONE_STYLES = {
-  amber: "bg-amber-100 text-amber-600",
-  blue: "bg-blue-100 text-blue-600",
-  violet: "bg-violet-100 text-violet-600",
-  emerald: "bg-emerald-100 text-emerald-600",
-  red: "bg-red-100 text-red-600",
-  stone: "bg-muted text-muted-foreground",
+  announcement: { icon: Megaphone, label: "Announcement" },
+  internship_record_request: { icon: FileText, label: "Internship request" },
+  internship_record_approved: { icon: CheckCircle2, label: "Internship update" },
+  internship_record_rejected: { icon: XCircle, label: "Internship update" },
+  internship_record_finished: { icon: CheckCircle2, label: "Internship update" },
+  internship_record_force_finished: { icon: CheckCircle2, label: "Internship update" },
+  evaluation_submitted: { icon: Star, label: "Evaluation" },
+  evaluation_deleted: { icon: ClipboardX, label: "Evaluation" },
+  certificate_uploaded: { icon: Award, label: "Document" },
+  supervisor_request_submitted: { icon: UserPlus, label: "Supervisor request" },
+  supervisor_request_accepted: { icon: UserCheck, label: "Supervisor request" },
+  supervisor_request_rejected: { icon: UserX, label: "Supervisor request" },
+  dtr_location_set: { icon: MapPin, label: "DTR location" },
 };
 
 function NotificationBell({ unreadCount, isOpen = false }) {
@@ -80,8 +75,11 @@ function NotificationsButton() {
   const [inbox, setInbox] = useState(() => ({
     notifications: [],
     unreadCount: 0,
+    page: 1,
+    totalPages: 1,
+    totalRecords: 0,
   }));
-  const { notifications, unreadCount } = inbox;
+  const { notifications, unreadCount, page, totalPages, totalRecords } = inbox;
   const [showNotifications, setShowNotifications] = useState(false);
   const [inboxStatus, setInboxStatus] = useState("idle");
   const [deletingId, setDeletingId] = useState(null);
@@ -90,6 +88,7 @@ function NotificationsButton() {
   const dropdownRef = useRef(null);
   const requestIdRef = useRef(0);
   const countRequestIdRef = useRef(0);
+  const pageRef = useRef(1);
   const [, startDeleteTransition] = useTransition();
 
   const refreshUnreadCount = useCallback(async () => {
@@ -111,11 +110,12 @@ function NotificationsButton() {
     }
   }, []);
 
-  const refreshInbox = useCallback(async (showLoading = false) => {
+  const refreshInbox = useCallback(async (showLoading = false, targetPage = pageRef.current) => {
     const requestId = ++requestIdRef.current;
+    pageRef.current = targetPage;
     if (showLoading) setInboxStatus("loading");
     try {
-      const fresh = await getInbox({ scope: "all", page: 1 });
+      let fresh = await getInbox({ scope: "all", page: targetPage });
       if (requestId !== requestIdRef.current) return false;
       if (!Array.isArray(fresh?.data)) {
         setInboxStatus((current) =>
@@ -123,10 +123,24 @@ function NotificationsButton() {
         );
         return false;
       }
+      const lastPage = Math.max(1, Number(fresh.totalPages) || 1);
+      if (targetPage > lastPage) {
+        targetPage = lastPage;
+        fresh = await getInbox({ scope: "all", page: targetPage });
+        if (requestId !== requestIdRef.current) return false;
+        if (!Array.isArray(fresh?.data)) {
+          setInboxStatus("error");
+          return false;
+        }
+      }
       countRequestIdRef.current += 1;
+      pageRef.current = targetPage;
       setInbox({
         notifications: fresh.data,
         unreadCount: Math.max(0, Number(fresh.unreadCount) || 0),
+        page: targetPage,
+        totalPages: Math.max(1, Number(fresh.totalPages) || 1),
+        totalRecords: Math.max(0, Number(fresh.totalRecords) || 0),
       });
       setInboxStatus("ready");
       return true;
@@ -150,7 +164,7 @@ function NotificationsButton() {
   }, [refreshUnreadCount]);
 
   useEffect(() => {
-    if (showNotifications) void refreshInbox(true);
+    if (showNotifications) void refreshInbox(true, 1);
   }, [showNotifications, refreshInbox]);
 
   // Socket payloads have no row ID. Refresh the open menu; otherwise keep
@@ -207,8 +221,29 @@ function NotificationsButton() {
   }, []);
 
   function toggleNotifications() {
-    if (!showNotifications) setInboxStatus("loading");
+    if (!showNotifications) {
+      pageRef.current = 1;
+      setInboxStatus("loading");
+    }
     setShowNotifications((current) => !current);
+  }
+
+  function handlePageChange(nextPage) {
+    if (
+      inboxStatus === "loading" ||
+      nextPage < 1 ||
+      nextPage > totalPages ||
+      nextPage === page
+    ) return;
+    void refreshInbox(true, nextPage);
+  }
+
+  function handleOpenNotification(notif) {
+    setShowNotifications(false);
+    if (notif.is_read || notif.actionable) return;
+    void markAsRead(notif.id).then((result) => {
+      if (result?.success) notifyNotificationsChanged();
+    });
   }
 
   async function handleMarkRead(id) {
@@ -228,6 +263,7 @@ function NotificationsButton() {
         );
         if (!target || target.is_read) return current;
         return {
+          ...current,
           notifications: current.notifications.map((notification) =>
             String(notification.id) === String(id)
               ? { ...notification, is_read: true }
@@ -257,6 +293,7 @@ function NotificationsButton() {
       requestIdRef.current += 1;
       countRequestIdRef.current += 1;
       setInbox((current) => ({
+        ...current,
         notifications: current.notifications.map((notification) =>
           notification.is_read
             ? notification
@@ -297,6 +334,7 @@ function NotificationsButton() {
           );
           if (!target) return current;
           return {
+            ...current,
             notifications: current.notifications.filter(
               (notification) => String(notification.id) !== String(id),
             ),
@@ -304,6 +342,7 @@ function NotificationsButton() {
               0,
               current.unreadCount - (target.is_read ? 0 : 1),
             ),
+            totalRecords: Math.max(0, current.totalRecords - 1),
           };
         });
         notifyNotificationsChanged();
@@ -346,36 +385,49 @@ function NotificationsButton() {
       {showNotifications && (
         <div
           id="notifications-menu"
-          className="absolute top-full right-0 z-50 mt-2.5 hidden w-96 rounded-xl border border-border bg-card shadow-2xl md:block"
+          className="absolute top-full right-0 z-50 mt-2 hidden w-[min(25rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl md:block"
         >
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <span className="text-sm font-semibold text-foreground">
-              Notifications
-            </span>
-            <div className="flex items-center gap-3">
-              {inboxStatus === "ready" && unreadCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleMarkAllRead}
-                  disabled={isMarkingAll}
-                  className="text-xs font-semibold text-primary-emphasis hover:underline"
-                >
-                  Mark all read
-                </button>
-              )}
+          <div className="relative overflow-hidden bg-primary px-4 py-3.5 text-white">
+            <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 size-48 rounded-full border-[24px] border-white/10" />
+            <div className="relative flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">Your inbox</p>
+                <h2 className="mt-0.5 text-lg font-semibold tracking-tight">Notifications</h2>
+                <p className="mt-0.5 text-xs text-white/75">
+                  {unreadCount > 0
+                    ? `${unreadCount} unread ${unreadCount === 1 ? "update" : "updates"}`
+                    : "You’re all caught up"}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowNotifications(false)}
-                aria-label="Close"
-                className="text-muted-foreground hover:text-foreground"
+                aria-label="Close notifications"
+                className="grid size-7 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <X className="size-4" />
               </button>
             </div>
           </div>
 
+          <div className="flex items-center justify-between gap-3 border-b border-border bg-secondary/40 px-4 py-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Latest activity
+            </span>
+            {inboxStatus === "ready" && unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                disabled={isMarkingAll}
+                className="text-xs font-semibold text-primary-emphasis transition hover:underline disabled:opacity-50"
+              >
+                {isMarkingAll ? "Marking…" : "Mark all read"}
+              </button>
+            )}
+          </div>
+
           <div
-            className="max-h-96 overflow-y-auto custom-scrollbar"
+            className="max-h-[min(20rem,calc(100vh-13rem))] min-h-28 overflow-y-auto custom-scrollbar"
             aria-busy={inboxStatus === "loading"}
           >
             {inboxStatus === "loading" ? (
@@ -383,109 +435,129 @@ function NotificationsButton() {
                 {[0, 1, 2].map((index) => (
                   <div
                     key={index}
-                    className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-0"
+                    className="flex gap-2.5 border-b border-border/60 px-4 py-3 last:border-0"
                   >
-                    <Skeleton className="size-9 shrink-0 rounded-full" />
+                    <Skeleton className="size-8 shrink-0 rounded-lg" />
                     <div className="flex-1 space-y-2 py-0.5">
+                      <Skeleton className="h-2.5 w-1/3" />
                       <Skeleton className="h-3.5 w-2/3" />
                       <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-2.5 w-1/3" />
                     </div>
                   </div>
                 ))}
                 <span className="sr-only">Loading notifications...</span>
               </div>
             ) : inboxStatus === "error" ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">
+              <div className="p-4 text-center text-sm text-muted-foreground">
                 <p>Could not load notifications.</p>
                 <button
                   type="button"
-                  onClick={() => void refreshInbox(true)}
+                  onClick={() => void refreshInbox(true, pageRef.current)}
                   className="mt-2 font-semibold text-primary-emphasis hover:underline"
                 >
                   Try again
                 </button>
               </div>
             ) : notifications.length > 0 ? (
-              notifications.map((notif) => {
-                const meta = TYPE_META[notif.type] ?? {
-                  icon: FileText,
-                  tone: "stone",
-                };
-                const Icon = meta.icon;
+              <ul className="divide-y divide-border/70">
+                {notifications.map((notif) => {
+                  const meta = TYPE_META[notif.type] ?? {
+                    icon: FileText,
+                    label: "Update",
+                  };
+                  const Icon = meta.icon;
+                  const destination = getNotificationTargetPath(notif) || "/notifications";
 
-                return (
-                  <div
-                    key={notif.ui_key || notif.id}
-                    className={cx(
-                      "relative flex gap-3 border-b border-border/60 px-4 py-3 last:border-0 transition-colors",
-                      notif.is_read ? "bg-card" : "bg-primary/10",
-                    )}
-                  >
-                    <span
+                  return (
+                    <li
+                      key={notif.ui_key || notif.id}
                       className={cx(
-                        "grid size-9 shrink-0 place-items-center rounded-full",
-                        TONE_STYLES[meta.tone],
+                        "relative transition-colors hover:bg-accent/60",
+                        !notif.is_read && "bg-primary/5",
                       )}
                     >
-                      <Icon className="size-4.5" />
-                    </span>
-
-                    <div className="min-w-0 flex-1 pr-5">
-                      <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                        {notif.title}
-                        {!notif.is_read && (
-                          <span className="size-1.5 rounded-full bg-primary" />
-                        )}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
-                        {notif.message}
-                      </p>
-                      <div className="mt-1.5 flex items-center gap-3 text-[11px] text-muted-foreground/70">
-                        <span>
-                          {formatDistanceToNow(new Date(notif.created_at), {
-                            addSuffix: true,
-                          })}
+                      {!notif.is_read && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-primary" />}
+                      <Link
+                        href={destination}
+                        onClick={() => handleOpenNotification(notif)}
+                        className="group block px-4 py-2.5 pr-18 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+                        aria-label={`Open ${notif.title}`}
+                      >
+                        <span className="flex items-start gap-2.5">
+                          <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary-emphasis">
+                            <Icon className="size-4" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-primary-emphasis">
+                              {meta.label}
+                            </span>
+                            <span className="mt-0.5 block text-sm font-semibold leading-snug text-foreground line-clamp-2">
+                              {notif.title}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground line-clamp-2">
+                              {notif.message}
+                            </span>
+                            <span className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                              {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
+                              <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                            </span>
+                          </span>
                         </span>
+                      </Link>
+                      <div className="absolute right-2 top-2 flex items-center gap-1">
                         {!notif.is_read && (
                           <button
                             type="button"
                             onClick={() => handleMarkRead(notif.id)}
                             disabled={markingId === notif.id}
-                            className="font-semibold text-primary-emphasis hover:underline"
+                            aria-label={`Mark ${notif.title} as read`}
+                            title="Mark as read"
+                            className="grid size-7 place-items-center rounded-md text-muted-foreground transition hover:bg-primary/10 hover:text-primary-emphasis disabled:opacity-50"
                           >
-                            Mark read
+                            <CheckCircle2 className="size-4" />
                           </button>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => handleDismiss(notif.id)}
+                          disabled={deletingId === notif.id}
+                          aria-label={`Delete ${notif.title}`}
+                          title="Delete notification"
+                          className="grid size-7 place-items-center rounded-md text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                        >
+                          <X className="size-4" />
+                        </button>
                       </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDismiss(notif.id)}
-                      disabled={deletingId === notif.id}
-                      aria-label="Delete notification"
-                      title="Delete notification"
-                      className="absolute right-3 top-3 text-muted-foreground/60 transition hover:text-destructive disabled:opacity-50"
-                    >
-                      <X className="size-3.5" />
-                    </button>
-                  </div>
-                );
-              })
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
-              <div className="p-8 text-center text-sm text-muted-foreground">
-                No notifications yet.
+              <div className="flex min-h-28 flex-col items-center justify-center px-4 py-6 text-center">
+                <Bell className="size-7 text-primary-emphasis/60" />
+                <p className="mt-2 text-sm font-semibold text-foreground">Nothing here yet</p>
+                <p className="mt-1 text-xs text-muted-foreground">New updates will appear in this inbox.</p>
               </div>
             )}
           </div>
 
-          <Link
-            href="/notifications"
-            onClick={() => setShowNotifications(false)}
-            className="block w-full border-t border-border px-4 py-3 text-center text-xs font-semibold text-primary-emphasis hover:underline"
-          >
-            View all notifications
+          {inboxStatus === "ready" && totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
+              <span>{totalRecords} updates · Page {page} of {totalPages}</span>
+              <div className="flex items-center gap-1">
+                <button type="button" onClick={() => handlePageChange(page - 1)} disabled={page <= 1} aria-label="Previous notification page" className="grid size-7 place-items-center rounded-md transition hover:bg-accent disabled:opacity-40">
+                  <ChevronLeft className="size-4" />
+                </button>
+                <button type="button" onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages} aria-label="Next notification page" className="grid size-7 place-items-center rounded-md transition hover:bg-accent disabled:opacity-40">
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          <Link href="/notifications" onClick={() => setShowNotifications(false)} className="flex items-center justify-between border-t border-border bg-secondary/40 px-4 py-2.5 text-xs font-semibold text-primary-emphasis transition hover:bg-secondary">
+            Open notification center
+            <ArrowUpRight className="size-4" />
           </Link>
         </div>
       )}

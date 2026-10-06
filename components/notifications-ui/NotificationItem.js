@@ -19,6 +19,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
+import { getNotificationTargetPath } from "@/lib/notification-routes";
 import { toastAndAction } from "../../lib/helpers";
 import {
   markAsRead,
@@ -49,26 +50,6 @@ const TONE_STYLES = {
   muted: "bg-secondary text-muted-foreground",
 };
 
-// Where clicking a notification of this type should navigate. Types not
-// listed here just mark-as-read on click without navigating anywhere.
-const TYPE_ROUTES = {
-  announcement: "/announcements",
-  internship_record_request: "/internship-records",
-  internship_record_rejected: "/student/internship-record",
-  evaluation_submitted: "/student/evaluations?filter=pending-confirmation",
-  certificate_uploaded: "/student/storage",
-};
-
-// internship_record_request needs the specific record id appended — every
-// other routed type just goes to a flat page.
-function getTargetPath(item, route) {
-  if (!route) return null;
-  if (item.type === "internship_record_request") {
-    return item.link_uuid ? `${route}/${item.link_uuid}` : null;
-  }
-  return route;
-}
-
 function NotificationItem({ item, onChanged }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -94,13 +75,11 @@ function NotificationItem({ item, onChanged }) {
 
   const meta = TYPE_META[item.type] ?? { icon: FileText, tone: "muted" };
   const Icon = meta.icon;
-  const route = TYPE_ROUTES[item.type];
-  const isClickable = !isActionable && (!item.is_read || Boolean(route));
+  const targetPath = getNotificationTargetPath(item);
+  const isClickable = !isActionable && (!item.is_read || Boolean(targetPath));
 
   function handleOpen() {
     if (isActionable) return;
-
-    const targetPath = getTargetPath(item, route);
 
     if (targetPath) {
       // Skip the optimistic local re-render here — this page is about to

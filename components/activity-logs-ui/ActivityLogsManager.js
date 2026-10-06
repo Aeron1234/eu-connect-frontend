@@ -390,7 +390,6 @@ export default function ActivityLogsManager({
                             </span>
                           }
                           // title={<span className="text-red-600">Clock-out?</span>}
-                          description={`Are you sure you want to delete this activity log entry?`}
                         >
                           <DeleteForm
                             handleAction={handleDelete}
