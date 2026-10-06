@@ -1,17 +1,18 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { MapPin, Save, Trash2, Crosshair } from "lucide-react";
 import MapFormContainer from "../map-ui/MapFormContainer";
 import { toastAndAction } from "../../lib/helpers";
 import { setStudentDtrLocation } from "@/lib/server-actions/dtr-actions";
+import { socket } from "@/components/ui/SocketProvider";
 
 const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
   const [loc, setLoc] = useState({
     lat: dataLocation.location.lat || "",
     lon: dataLocation.location.lon || "",
-    label: dataLocation.location.label || "",
-    address: dataLocation.location.address || "",
+    label: dataLocation.location.label ?? "",
+    address: dataLocation.location.address ?? "",
     internshipId: dataLocation.internship_id || "",
     updatedAt: dataLocation.location.updated_at || null,
   });
@@ -19,6 +20,78 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
     dataLocation.location.radius_meters || 150,
   );
   const [isPending, startTransition] = useTransition();
+  const [liveLocation, setLiveLocation] = useState(null);
+  const [liveStatus, setLiveStatus] = useState("Waiting for the student to share a location.");
+
+  useEffect(() => {
+    const internshipId = loc.internshipId;
+    if (!studentId || !internshipId) return;
+    const targetStudentId = String(studentId);
+    const targetInternshipId = String(internshipId);
+    let active = true;
+    let subscriptionVersion = 0;
+
+    function subscribe() {
+      const version = ++subscriptionVersion;
+      socket.emit("dtr_location:watch", {
+        studentId: targetStudentId, internshipId: targetInternshipId,
+      }, (reply) => {
+        if (!active || version !== subscriptionVersion) return;
+        setLiveLocation(reply?.ok ? reply.location : null);
+        setLiveStatus(reply?.ok
+          ? reply.location ? "Student is sharing a live position." : "Waiting for the student to share a location."
+          : reply?.error || "Live location unavailable.");
+      });
+    }
+    function onUpdate(event) {
+      if (String(event?.studentId) !== targetStudentId || String(event?.internshipId) !== targetInternshipId) return;
+      setLiveLocation(event.location);
+      setLiveStatus(event.location
+        ? "Student is sharing a live position."
+        : "The student stopped sharing or their position expired.");
+    }
+    function onDisconnect() {
+      setLiveLocation(null);
+      setLiveStatus("Live connection unavailable.");
+    }
+    socket.on("dtr_location:update", onUpdate);
+    socket.on("connect", subscribe);
+    socket.on("disconnect", onDisconnect);
+    if (socket.connected) subscribe();
+    const accessTimer = setInterval(() => {
+      if (socket.connected) subscribe();
+    }, 30_000);
+    return () => {
+      active = false;
+      subscriptionVersion += 1;
+      clearInterval(accessTimer);
+      socket.off("dtr_location:update", onUpdate);
+      socket.off("connect", subscribe);
+      socket.off("disconnect", onDisconnect);
+      if (socket.connected) socket.emit("dtr_location:unwatch");
+    };
+  }, [studentId, loc.internshipId]);
+
+  useEffect(() => {
+    if (!liveLocation) return;
+    const timer = setTimeout(() => {
+      setLiveLocation(null);
+      setLiveStatus("The student's shared position expired.");
+    }, Math.max(0, 60_000 - (Date.now() - liveLocation.timestamp)));
+    return () => clearTimeout(timer);
+  }, [liveLocation]);
+
+  function handleUseSharedLocation() {
+    if (!liveLocation) return;
+    setLoc((current) => ({
+      ...current,
+      lat: liveLocation.latitude,
+      lon: liveLocation.longitude,
+      label: "",
+      address: "",
+      updatedAt: null,
+    }));
+  }
 
   function handleSetLocation() {
     const formData = {
@@ -98,7 +171,31 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
           defaultCoords={defaultCoords}
           radius={radius}
           setRadius={setRadius}
+          liveLocation={liveLocation}
         />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted p-3 text-xs">
+        <div className="min-w-0 text-foreground-soft" role="status">
+          <p>{liveStatus}</p>
+          {liveLocation && (
+            <p className="mt-1">
+              Blue pin: about {Math.round(liveLocation.accuracy)} m accuracy.
+              {Number(liveLocation.accuracy) > Number(radius) &&
+                " This is wider than the allowed DTR radius; verify the position before saving."}
+            </p>
+          )}
+        </div>
+        {liveLocation && (
+          <button
+            type="button"
+            onClick={handleUseSharedLocation}
+            disabled={isPending}
+            className="rounded-md bg-primary px-3 py-2 font-medium text-white disabled:opacity-50"
+          >
+            Use student&apos;s pin
+          </button>
+        )}
       </div>
 
       <div className="bg-muted rounded-xl p-3">
@@ -132,7 +229,7 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
             max={2000}
             step={10}
             disabled={(!loc.lat && !loc.lon) || isPending}
-            defaultValue={radius || 150}
+            value={radius || ""}
             onChange={(e) => loc.lat && loc.lon && setRadius(e.target.value)}
             className="mt-0.5 w-full bg-transparent text-sm font-medium text-foreground focus:outline-none disabled:opacity-50"
           />
@@ -144,7 +241,7 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
         <input
           type="text"
           disabled={(!loc.lat && !loc.lon) || isPending}
-          defaultValue={loc.label}
+          value={loc.label}
           onChange={(e) =>
             loc.lat && loc.lon && setLoc({ ...loc, label: e.target.value })
           }
@@ -156,12 +253,12 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div className="flex items-center gap-2 text-xs text-foreground-soft">
           <Crosshair className="w-3.5 h-3.5" />
-          {loc ? (
+          {loc.updatedAt ? (
             <span>
               Saved · updated {new Date(loc.updatedAt).toLocaleString()}
             </span>
           ) : (
-            <span>No DTR location set yet</span>
+            <span>{loc.lat !== "" && loc.lon !== "" ? "Unsaved location" : "No DTR location set yet"}</span>
           )}
         </div>
         <div className="flex items-center gap-2">

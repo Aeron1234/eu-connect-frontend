@@ -132,7 +132,7 @@ async function StudentDashboardPage({ searchParams }) {
             total_hours={internshipData?.total_hours || 0}
           />
 
-          <div className="rounded-xl bg-card border border-border shadow-sm h-64 lg:h-full min-h-64">
+          <div className="flex min-h-64 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:h-full">
             <MapSmallContainer
               latitude={locationData?.lat || 0}
               longitude={locationData?.lon || 0}

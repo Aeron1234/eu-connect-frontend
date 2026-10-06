@@ -19,13 +19,8 @@ import {
   Pin,
 } from "lucide-react";
 import { getMyActivityLogs } from "@/lib/server-actions/activity-logs-actions";
-import {
-  getEmployerDashboardData,
-  getPostedJobs,
-} from "@/lib/server-actions/dashboard-actions";
+import { getEmployerDashboardData } from "@/lib/server-actions/dashboard-actions";
 import { formatDistanceToNow } from "date-fns";
-import { Suspense } from "react";
-import JobsPostedTableSkeleton from "@/components/skeletons/JobsPostedTableSkeleton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Employer" };
@@ -54,41 +49,20 @@ function getActivityVisual(action = "") {
   return { icon: Sparkles, color: "text-blue-600" };
 }
 
-const statusMap = {
-  pending: "pending",
-  ongoing: "ongoing",
-  finished: "completed",
-  rejected: "rejected",
-};
-
 async function EmployerDashboardPage({ searchParams }) {
   const params = await searchParams;
-  const currentJobPage = Number(params.j_page) || 1;
+  const requestedJobPage = Number(params.j_page);
+  const currentJobPage = Number.isSafeInteger(requestedJobPage) && requestedJobPage > 0 && requestedJobPage <= 1000000
+    ? requestedJobPage
+    : 1;
 
-  // The aggregate endpoint only ever returns page 1 of posted jobs — if the
-  // user navigated to a later page (j_page > 1), fetch that page directly
-  // instead of relying on the aggregate.
-  const [profile, activityLogs, dashboardRes, jobsPageRes] = await Promise.all([
+  const [profile, activityLogs, dashboardRes] = await Promise.all([
     DashboardProfileSection(),
     getMyActivityLogs({ page: 1 }),
-    getEmployerDashboardData(),
-    currentJobPage > 1 ? getPostedJobs({ page: currentJobPage }) : null,
+    getEmployerDashboardData({ jobPage: currentJobPage }),
   ]);
 
-  const interns = (dashboardRes?.interns || []).map((row) => ({
-    id: row.student_id,
-    name: `${row.first_name || ""} ${row.last_name || ""}`.trim() || "Unknown",
-    status: statusMap[row.status] || row.status,
-    role: row.internship_position,
-    program: row.course_name || "—",
-    programShort: row.short_name || "",
-    startDate: row.date_started,
-    hoursCompleted: row.accumulated_hours ?? 0,
-    hoursRequired: row.total_hours ?? 0,
-    email: row.email,
-  }));
-
-  const jobsRes = currentJobPage > 1 ? jobsPageRes : dashboardRes?.postedJobs;
+  const jobsRes = dashboardRes?.postedJobs;
   const jobs = (jobsRes?.jobs || []).map(mapJobRow);
 
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {
@@ -113,7 +87,14 @@ async function EmployerDashboardPage({ searchParams }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2">
-          <InternsSupervisedCard interns={interns} />
+          <InternsSupervisedCard
+            initialPage={{
+              interns: dashboardRes?.interns || [],
+              page: dashboardRes?.internsPagination?.page || 1,
+              total: dashboardRes?.internsPagination?.total || 0,
+              totalPages: dashboardRes?.internsPagination?.totalPages || 1,
+            }}
+          />
         </div>
 
         <div className="flex flex-col gap-5">
@@ -125,13 +106,11 @@ async function EmployerDashboardPage({ searchParams }) {
         </div>
       </div>
 
-      <Suspense fallback={<JobsPostedTableSkeleton />} key={jobs}>
-        <JobsPostedTable
-          jobs={jobs}
-          totalPages={jobsRes?.totalPages || 1}
-          currentJobPage={currentJobPage}
-        />
-      </Suspense>
+      <JobsPostedTable
+        jobs={jobs}
+        totalPages={jobsRes?.totalPages || 1}
+        currentJobPage={jobsRes?.currentPage || currentJobPage}
+      />
     </div>
   );
 }

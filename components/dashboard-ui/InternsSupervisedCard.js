@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, Clock, Mail, Eye, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, Clock, Mail, Eye, Users, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { getEmployerInternsPageResult } from "@/lib/server-actions/dashboard-actions";
 
 const statusBadgeStyles = {
   ongoing: "text-blue-700 bg-blue-50",
   completed: "text-emerald-700 bg-emerald-50",
+  pending: "text-amber-700 bg-amber-50",
+  rejected: "text-red-700 bg-red-50",
 };
 
-const filters = ["All", "Ongoing", "Completed"];
+const filters = [
+  { label: "All", status: "all" },
+  { label: "Ongoing", status: "ongoing" },
+  { label: "Completed", status: "finished" },
+];
 
 function formatDate(dateString) {
   if (!dateString) return "—";
@@ -20,50 +27,103 @@ function formatDate(dateString) {
   });
 }
 
-function InternsSupervisedCard({ interns = [] }) {
-  const [activeFilter, setActiveFilter] = useState("All");
+function mapIntern(row) {
+  return {
+    internshipId: row.internship_id,
+    id: row.student_id,
+    name: `${row.first_name || ""} ${row.last_name || ""}`.trim() || "Unknown",
+    status: row.status === "finished" ? "completed" : row.status,
+    role: row.internship_position,
+    program: row.course_name || "—",
+    programShort: row.short_name || "",
+    startDate: row.date_started,
+    hoursCompleted: Number(row.accumulated_hours) || 0,
+    hoursRequired: Number(row.total_hours) || 0,
+    email: row.email,
+  };
+}
 
-  const filteredInterns =
-    activeFilter === "All"
-      ? interns
-      : interns.filter(
-          (i) => i.status.toLowerCase() === activeFilter.toLowerCase(),
-        );
+function InternsSupervisedCard({ initialPage }) {
+  const [query, setQuery] = useState({ page: 1, status: "all" });
+  const [retryCount, setRetryCount] = useState(0);
+  const [result, setResult] = useState({ key: JSON.stringify([1, "all", 0]), data: initialPage });
+  const [failure, setFailure] = useState(null);
+  const requestKey = JSON.stringify([query.page, query.status, retryCount]);
+  const isLoading = result.key !== requestKey && failure?.key !== requestKey;
+  const hasError = failure?.key === requestKey;
+  const pageData = result.data;
+  const interns = (pageData?.interns || []).map(mapIntern);
+
+  useEffect(() => {
+    if (requestKey === result.key) return;
+    let active = true;
+    getEmployerInternsPageResult(query)
+      .then((response) => {
+        if (!active) return;
+        if (response?.error) {
+          setFailure({ key: requestKey, message: response.error });
+        } else {
+          setResult({ key: requestKey, data: response });
+          setFailure(null);
+        }
+      })
+      .catch(() => {
+        if (active) setFailure({ key: requestKey, message: "Could not load interns. Please try again." });
+      });
+    return () => { active = false; };
+  }, [query, requestKey, result.key]);
 
   return (
-    <div className="h-full rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+    <div className="h-full min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Users className="w-4 h-4 text-primary-emphasis" />
           Interns You Supervised
         </h3>
         <div className="flex items-center gap-1.5">
-          {filters.map((f) => (
+          {filters.map((filter) => (
             <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
+              key={filter.status}
+              type="button"
+              onClick={() => setQuery({ page: 1, status: filter.status })}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                activeFilter === f
+                query.status === filter.status
                   ? "bg-primary text-white"
                   : "bg-muted text-foreground-soft hover:bg-secondary"
               }`}
             >
-              {f}
+              {filter.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="space-y-3 overflow-x-auto">
-        {filteredInterns.length === 0 ? (
+      <div className="space-y-3" aria-live="polite" aria-busy={isLoading}>
+        {isLoading ? (
+          <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground" role="status">
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            Loading interns...
+          </p>
+        ) : hasError ? (
+          <div className="py-6 text-center text-sm">
+            <p className="text-red-600">{failure.message}</p>
+            <button
+              type="button"
+              onClick={() => setRetryCount((count) => count + 1)}
+              className="mt-2 font-medium text-primary-emphasis hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : interns.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
             No interns in this category.
           </p>
         ) : (
-          filteredInterns.map((intern, i) => (
+          interns.map((intern) => (
             <div
-              key={i}
-              className="flex items-center justify-between gap-4 rounded-lg border border-border p-4 w-xl md:w-full"
+              key={intern.internshipId}
+              className="flex w-full min-w-0 flex-col items-start justify-between gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center"
             >
               <div className="flex items-start gap-3 min-w-0">
                 <div className="w-10 h-10 flex-shrink-0 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center text-xs font-semibold">
@@ -79,13 +139,13 @@ function InternsSupervisedCard({ interns = [] }) {
                       {intern.name}
                     </p>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${statusBadgeStyles[intern.status]}`}
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${statusBadgeStyles[intern.status] || "bg-muted text-foreground-soft"}`}
                     >
                       {intern.status}
                     </span>
                   </div>
                   <p
-                    className="text-xs text-muted-foreground mt-0.5"
+                    className="mt-0.5 break-words text-xs text-muted-foreground"
                     title={intern.programShort || undefined}
                   >
                     {intern.role} · {intern.program}
@@ -100,15 +160,15 @@ function InternsSupervisedCard({ interns = [] }) {
                       {intern.hoursCompleted?.toFixed(1)}/{intern.hoursRequired}{" "}
                       hrs
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-3.5 h-3.5" />
-                      {intern.email}
+                    <span className="flex min-w-0 items-start gap-1">
+                      <Mail className="mt-0.5 w-3.5 h-3.5 shrink-0" />
+                      <span className="break-all">{intern.email}</span>
                     </span>
                   </div>
                 </div>
               </div>
               <Link
-                href={`/users/${intern.id}`}
+                href={`/users/${encodeURIComponent(intern.id)}`}
                 className="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-primary-emphasis hover:text-primary-600 transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -117,6 +177,30 @@ function InternsSupervisedCard({ interns = [] }) {
             </div>
           ))
         )}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+        <span>
+          {isLoading ? "Loading..." : hasError ? "Unavailable" : `${pageData?.total ?? 0} intern${pageData?.total === 1 ? "" : "s"}`}
+        </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setQuery((current) => ({ ...current, page: current.page - 1 }))}
+            disabled={isLoading || hasError || query.page <= 1}
+            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span>Page {pageData?.page ?? 1} / {pageData?.totalPages ?? 1}</span>
+          <button
+            type="button"
+            onClick={() => setQuery((current) => ({ ...current, page: current.page + 1 }))}
+            disabled={isLoading || hasError || query.page >= (pageData?.totalPages ?? 1)}
+            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

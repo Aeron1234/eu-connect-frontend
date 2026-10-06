@@ -11,6 +11,7 @@ import {
   useMapEvents,
   Marker,
   Circle,
+  Popup,
 } from "react-leaflet";
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -73,10 +74,12 @@ function MapForm({
   defaultCoords,
   radius = null,
   setRadius = null,
+  liveLocation = null,
 }) {
   // Both callers store coordinates in their form data. The pin follows that
   // source of truth, including when a form resets or clears the location.
   const selectedPosition = toPosition([data?.lat, data?.lon]);
+  const sharedPosition = liveLocation && toPosition([liveLocation.latitude, liveLocation.longitude]);
   const initialCenter = selectedPosition ||
     toPosition(defaultCoords) || [13.931, 121.423];
   const selectionVersionRef = useRef(0);
@@ -161,7 +164,7 @@ function MapForm({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <MapViewSync position={selectedPosition} />
+        <MapViewSync position={selectedPosition} livePosition={sharedPosition} />
 
         <SearchField onLocationSelect={handleLocationSelect} />
 
@@ -190,6 +193,21 @@ function MapForm({
                 }}
               />
             )}
+          </>
+        )}
+        {sharedPosition && formType === "setDtrLocation" && (
+          <>
+            <Marker position={sharedPosition} zIndexOffset={1000}>
+              <Popup>
+                Student&apos;s shared location<br />
+                Accuracy: about {Math.round(liveLocation.accuracy)} m
+              </Popup>
+            </Marker>
+            <Circle
+              center={sharedPosition}
+              radius={liveLocation.accuracy}
+              pathOptions={{ color: "#2774c7", fillColor: "#2774c7", fillOpacity: 0.08, weight: 1 }}
+            />
           </>
         )}
       </MapContainer>
@@ -243,18 +261,26 @@ function MapForm({
   );
 }
 
-function MapViewSync({ position }) {
+function MapViewSync({ position, livePosition }) {
   const map = useMap();
   const lat = position?.[0];
   const lon = position?.[1];
+  const liveLat = livePosition?.[0];
+  const liveLon = livePosition?.[1];
 
   useEffect(() => {
-    if (lat === undefined || lon === undefined) return;
-    const nextPosition = [lat, lon];
-    if (!map.getBounds().contains(nextPosition)) {
+    const nextPosition = lat === undefined || lon === undefined ? null : [lat, lon];
+    const studentPosition = liveLat === undefined || liveLon === undefined ? null : [liveLat, liveLon];
+    if (studentPosition && !map.getBounds().contains(studentPosition)) {
+      if (nextPosition) {
+        map.fitBounds([nextPosition, studentPosition], { padding: [36, 36], maxZoom: 16 });
+      } else {
+        map.setView(studentPosition, 16);
+      }
+    } else if (nextPosition && !map.getBounds().contains(nextPosition)) {
       map.setView(nextPosition, map.getZoom());
     }
-  }, [map, lat, lon]);
+  }, [map, lat, lon, liveLat, liveLon]);
 
   return null;
 }

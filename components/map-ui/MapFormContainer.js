@@ -14,6 +14,7 @@ function MapFormContainer({
   defaultCoords = [],
   radius = null,
   setRadius = null,
+  liveLocation = null,
 }) {
   return (
     <div className="overflow-hidden rounded-lg  z-0" style={mapStyle}>
@@ -24,6 +25,7 @@ function MapFormContainer({
         defaultCoords={defaultCoords}
         radius={radius}
         setRadius={setRadius}
+        liveLocation={liveLocation}
       />
     </div>
   );
