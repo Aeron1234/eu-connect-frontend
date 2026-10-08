@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronDown, Building2 } from "lucide-react";
 import SearchedStudentFiles from "./SearchedStudentFiles";
+import { downloadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 import {
-  getInternshipFilesResult as getInternshipFiles,
-  downloadInternshipFile,
-} from "@/lib/server-actions/internship-docs-actions";
+  pastInternshipDocumentsKeys,
+  pastInternshipFilesOptions,
+  pastInternshipRecordsOptions,
+} from "@/lib/cache/past-internship-documents-queries";
 
 import { getFileTypeLabel, typeTone } from "@/lib/utils";
 
@@ -30,36 +33,42 @@ function StatusPill({ status }) {
 
 function RecordRow({ record, currentUserId }) {
   const [expanded, setExpanded] = useState(false);
-  const [docs, setDocs] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState("");
+  const queryClient = useQueryClient();
+  const filesQuery = useQuery({
+    ...pastInternshipFilesOptions(currentUserId, record.id),
+    enabled: expanded && Boolean(currentUserId),
+  });
 
-  async function loadDocs() {
-    setIsLoading(true);
-    try {
-      const result = await getInternshipFiles({ internshipId: record.id });
-      setLoadError(result?.error || "");
-      if (Array.isArray(result)) setDocs(result);
-    } catch {
-      setLoadError("Could not load files. Please try again.");
-    } finally {
-      setIsLoading(false);
+  function handleFilesChanged({ type, fileId }) {
+    const filesKey = pastInternshipDocumentsKeys.files(currentUserId, record.id);
+    const recordsKey = pastInternshipDocumentsKeys.records(currentUserId);
+    if (type === "deleted") {
+      queryClient.setQueryData(filesKey, (files) =>
+        files?.filter((file) => String(file.id) !== String(fileId)),
+      );
+      queryClient.setQueryData(recordsKey, (records) => records?.map((item) =>
+        String(item.id) === String(record.id)
+          ? { ...item, file_count: Math.max(0, Number(item.file_count || 0) - 1) }
+          : item,
+      ));
+    } else if (type === "approved") {
+      queryClient.setQueryData(filesKey, (files) => files?.map((file) =>
+        String(file.id) === String(fileId)
+          ? { ...file, verification_status: "accepted" }
+          : file,
+      ));
     }
-  }
-
-  async function handleToggle() {
-    if (expanded) {
-      setExpanded(false);
-      return;
+    void queryClient.invalidateQueries({ queryKey: filesKey });
+    if (type === "deleted") {
+      void queryClient.invalidateQueries({ queryKey: recordsKey });
     }
-    setExpanded(true);
-    if (docs === null) await loadDocs();
   }
 
   return (
     <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
       <button
-        onClick={handleToggle}
+        onClick={() => setExpanded((value) => !value)}
+        aria-expanded={expanded}
         className="w-full flex items-center justify-between gap-3 p-4 hover:bg-muted/40 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -93,20 +102,20 @@ function RecordRow({ record, currentUserId }) {
 
       {expanded && (
         <div className="border-t border-border/60 p-3">
-          {isLoading ? (
+          {filesQuery.isPending ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
               Loading files...
             </div>
-          ) : loadError ? (
+          ) : filesQuery.isError && !filesQuery.data ? (
             <div role="alert" className="p-4 text-sm text-foreground">
-              <p>{loadError}</p>
-              <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={loadDocs}>
+              <p>{filesQuery.error?.message || "Could not load files. Please try again."}</p>
+              <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void filesQuery.refetch()}>
                 Try again
               </button>
             </div>
           ) : (
             <SearchedStudentFiles
-              filtered={docs || []}
+              filtered={filesQuery.data || []}
               view="list"
               typeTone={typeTone}
               getFileTypeLabel={getFileTypeLabel}
@@ -114,6 +123,7 @@ function RecordRow({ record, currentUserId }) {
               userRole="student"
               currentUserId={currentUserId}
               downloadAction={downloadInternshipFile}
+              onChanged={handleFilesChanged}
             />
           )}
         </div>
@@ -123,9 +133,24 @@ function RecordRow({ record, currentUserId }) {
 }
 
 function PastInternshipDocuments({ records = [], currentUserId = "" }) {
-  if (records.length === 0) return null;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(records);
+  const recordsQuery = useQuery({
+    ...pastInternshipRecordsOptions(currentUserId),
+    enabled: Boolean(currentUserId),
+    initialData: records,
+  });
 
-  const totalFiles = records.reduce(
+  useEffect(() => {
+    if (serverSnapshotRef.current === records || !currentUserId) return;
+    serverSnapshotRef.current = records;
+    queryClient.setQueryData(pastInternshipDocumentsKeys.records(currentUserId), records);
+  }, [records, queryClient, currentUserId]);
+
+  const pastRecords = recordsQuery.data || [];
+  if (pastRecords.length === 0) return null;
+
+  const totalFiles = pastRecords.reduce(
     (sum, r) => sum + Number(r.file_count || 0),
     0,
   );
@@ -136,11 +161,11 @@ function PastInternshipDocuments({ records = [], currentUserId = "" }) {
         <Building2 className="size-4" />
         Past Internship Records
         <span className="text-sm font-normal text-muted-foreground">
-          {records.length} records · {totalFiles} files
+          {pastRecords.length} records · {totalFiles} files
         </span>
       </h3>
       <div className="space-y-2">
-        {records.map((record) => (
+        {pastRecords.map((record) => (
           <RecordRow
             key={record.id}
             record={record}

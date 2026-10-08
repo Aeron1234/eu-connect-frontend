@@ -71,6 +71,7 @@ function SearchedStudentFiles({
   canDelete = userRole === "admin",
   canApprove = userRole === "student",
   downloadAction = null,
+  onChanged = null,
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -113,7 +114,8 @@ function SearchedStudentFiles({
     };
 
     startTransition(async () => {
-      await toastAndAction(handlers);
+      const result = await toastAndAction(handlers);
+      if (result?.success) onChanged?.({ type: "approved", fileId: id });
     });
   }
 
@@ -134,6 +136,7 @@ function SearchedStudentFiles({
     isPending,
     userRole,
     currentUserId,
+    onChanged,
   };
 
   if (view === "grid")
@@ -165,6 +168,7 @@ function GridView({
   isPending,
   userRole,
   currentUserId,
+  onChanged,
 }) {
   const typeLabel = getFileTypeLabel(item.file_type);
   const showApprove = canApprove && item.verification_status === "pending";
@@ -225,7 +229,10 @@ function GridView({
               }
               title={<span className="text-red-600">Delete File</span>}
             >
-              <StorageDeleteFile fileId={item.id} />
+              <StorageDeleteFile
+                fileId={item.id}
+                onDeleted={() => onChanged?.({ type: "deleted", fileId: item.id })}
+              />
             </Modal>
           )}
         </div>
@@ -245,6 +252,7 @@ function ListView({
   isPending,
   userRole,
   currentUserId,
+  onChanged,
 }) {
   const typeLabel = getFileTypeLabel(item.file_type);
   const showApprove = canApprove && item.verification_status === "pending";
@@ -299,7 +307,10 @@ function ListView({
             }
             title={<span className="text-red-600">Delete File</span>}
           >
-            <StorageDeleteFile fileId={item.id} />
+            <StorageDeleteFile
+              fileId={item.id}
+              onDeleted={() => onChanged?.({ type: "deleted", fileId: item.id })}
+            />
           </Modal>
         )}
       </div>

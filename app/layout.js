@@ -4,6 +4,7 @@ import { DM_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import SmoothScroll from "@/components/ui/SmoothScroll";
+import QueryProvider from "@/lib/cache/QueryProvider";
 
 const DmSans = DM_Sans({
   subsets: ["latin"],
@@ -28,11 +29,13 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <body className={`${DmSans.className} `}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SmoothScroll />
-          <SidebarProvider>{children}</SidebarProvider>
-          <Toaster position="top-center" className="shadow-lg" />
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SmoothScroll />
+            <SidebarProvider>{children}</SidebarProvider>
+            <Toaster position="top-center" className="shadow-lg" />
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

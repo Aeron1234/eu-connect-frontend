@@ -33,8 +33,7 @@ async function CreateAccountPage() {
         roles={formData?.roles || []}
         courses={formData?.courses || []}
         departments={formData?.departments || []}
-        initialAccounts={accountsRes?.accounts || []}
-        initialTotalPages={accountsRes?.totalPages || 1}
+        initialPage={accountsRes}
       />
     </main>
   );

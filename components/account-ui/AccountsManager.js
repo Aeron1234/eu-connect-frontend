@@ -1,142 +1,111 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, TriangleAlert, UserPlus } from "lucide-react";
-import { getAllAccountsResult } from "@/lib/server-actions/account-actions";
+import { useUser } from "@/contexts/UserContext";
+import { accountsInfiniteOptions, accountsKeys } from "@/lib/cache/accounts-queries";
+import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
 import ExistingAccountListSkeleton from "../skeletons/ExistingAccountListSkeleton";
 import SearchBar from "../ui/SearchBar";
 import AccountDropdownFilter from "./AccountDropdownFilter";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const tabs = ["Form", "Accounts"];
-
-function requireAccountPage(result, expectedPage) {
-  if (result?.error) {
-    const error = new Error(result.error);
-    error.status = result.status;
-    throw error;
-  }
-  if (!hasValidPage(result, "accounts", null, expectedPage)) {
-    throw new Error("Invalid accounts response from the server.");
-  }
-  return result;
-}
+const defaultFilters = { filter: "all", search: "" };
 
 function AccountsManager({
   roles = [],
   courses = [],
   departments = [],
-  initialAccounts = [],
-  initialTotalPages = 1,
+  initialPage,
 }) {
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialPage);
   const [tab, setTab] = useState(tabs[0]);
-
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
-
-  const [accounts, setAccounts] = useState(initialAccounts);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-
-  // Split from `isLoadingMore` below — filter/search changes replace the
-  // whole list (skeleton makes sense), while "See more" appends to what's
-  // already visible (skeleton would wipe out a list the person can still
-  // see and scroll, so that one just disables the button + swaps its text).
-  const [isFiltering, setIsFiltering] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [listError, setListError] = useState(null);
-
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
-
-  async function refreshList() {
-    const thisRequestId = ++requestIdRef.current;
-    setIsLoadingMore(false);
-    setIsFiltering(true);
-    setListError(null);
-    try {
-      const newData = requireAccountPage(await getAllAccountsResult({ filter, search, page: 1 }));
-      if (thisRequestId !== requestIdRef.current) return;
-      setAccounts(newData.accounts);
-      setPage(1);
-      setTotalPages(newData.totalPages || 1);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        setListError({ message: error?.message || "Couldn't load accounts. Please try again.", operation: "refresh", status: error?.status });
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsFiltering(false);
-    }
-  }
+  const [debouncedFilters, setDebouncedFilters] = useState(defaultFilters);
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-
-    const thisRequestId = ++requestIdRef.current;
-    setIsLoadingMore(false);
-    setIsFiltering(true);
-    setListError(null);
-
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = requireAccountPage(await getAllAccountsResult({ filter, search, page: 1 }));
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        setAccounts(newData.accounts);
-        setPage(1);
-        setTotalPages(newData.totalPages || 1);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          setListError({ message: error?.message || "Couldn't load accounts. Please try again.", operation: "refresh", status: error?.status });
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsFiltering(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
+    const nextFilters = { filter, search: search.trim() };
+    const timer = setTimeout(() => setDebouncedFilters(nextFilters), 500);
+    return () => clearTimeout(timer);
   }, [filter, search]);
 
-  async function handleSeeMore() {
-    if (isFiltering || isLoadingMore || page >= totalPages) return;
-    setIsLoadingMore(true);
-    setListError(null);
-    const nextPage = page + 1;
-    const thisRequestId = ++requestIdRef.current;
-
-    try {
-      const newData = requireAccountPage(await getAllAccountsResult({ filter, search, page: nextPage }), nextPage);
-
-      if (thisRequestId !== requestIdRef.current) return;
-
-      setAccounts((prev) => {
-        const existingIds = new Set(prev.map((a) => a.id));
-        const filteredNew = newData.accounts.filter(
-          (a) => !existingIds.has(a.id),
-        );
-        return [...prev, ...filteredNew];
-      });
-
-      setPage(nextPage);
-      if (newData?.totalPages) setTotalPages(newData.totalPages);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        setListError({ message: error?.message || "Couldn't load more accounts. Please try again.", operation: "page", status: error?.status });
+  const isChangingFilters =
+    debouncedFilters.filter !== filter ||
+    debouncedFilters.search !== search.trim();
+  const accountsQuery = useInfiniteQuery({
+    ...accountsInfiniteOptions(userId, debouncedFilters),
+    enabled: Boolean(userId) && tab === "Accounts",
+    initialData:
+      debouncedFilters.filter === "all" && !debouncedFilters.search && initialPage
+        ? { pages: [initialPage], pageParams: [1] }
+        : undefined,
+  });
+  const accounts = useMemo(() => {
+    const seen = new Set();
+    return (accountsQuery.data?.pages || []).flatMap((page) =>
+      page.accounts.filter((account) => {
+        if (seen.has(account.id)) return false;
+        seen.add(account.id);
+        return true;
+      }),
+    );
+  }, [accountsQuery.data]);
+  const isFiltering = isChangingFilters || accountsQuery.isPending;
+  const isLoadingMore = accountsQuery.isFetchingNextPage;
+  const listError = !isChangingFilters && accountsQuery.error
+    ? {
+        message: accountsQuery.error.message || "Couldn't load accounts. Please try again.",
+        status: accountsQuery.error.status,
+        operation: accountsQuery.isFetchNextPageError ? "page" : "refresh",
       }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
+    : null;
+
+  // revalidatePath can send an updated first page without remounting this manager.
+  useEffect(() => {
+    if (!initialPage || serverSnapshotRef.current === initialPage || !userId) return;
+    serverSnapshotRef.current = initialPage;
+    queryClient.setQueryData(accountsKeys.list(userId, defaultFilters), (old) => {
+      if (!old?.pages?.length) return { pages: [initialPage], pageParams: [1] };
+      const previous = old.pages[0];
+      const keepLoaded = canKeepLoadedPages(
+        previous.accounts.map((account) => account.id),
+        previous.totalRecords,
+        initialPage.accounts,
+        initialPage.totalRecords,
+      );
+      return {
+        pages: keepLoaded ? [initialPage, ...old.pages.slice(1)] : [initialPage],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+  }, [initialPage, queryClient, userId]);
+
+  function refreshList() {
+    // Creating or changing an account can shift every later offset page.
+    queryClient.setQueriesData({ queryKey: accountsKeys.all(userId) }, (old) =>
+      old?.pages?.length
+        ? { pages: [old.pages[0]], pageParams: [1] }
+        : old,
+    );
+    void queryClient.invalidateQueries({ queryKey: accountsKeys.all(userId) });
+  }
+
+  function handleSeeMore() {
+    if (!isFiltering && !accountsQuery.isFetching && accountsQuery.hasNextPage) {
+      void accountsQuery.fetchNextPage();
     }
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex rounded-lg bg-secondary p-1 w-fit">
+      <div className="flex w-fit rounded-lg bg-secondary p-1">
         {tabs.map((t) => (
           <button
             key={t}
@@ -154,7 +123,7 @@ function AccountsManager({
       </div>
 
       {tab === "Form" ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-6">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
           <CreateAccountForm
             roles={roles}
             courses={courses}
@@ -164,18 +133,16 @@ function AccountsManager({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex gap-2 flex-col sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative">
-              {/* <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /> */}
               <SearchBar
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search by name or email..."
                 aria-label="Search accounts"
                 className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
               />
             </div>
-
             <AccountDropdownFilter
               roles={roles}
               value={filter}
@@ -188,12 +155,26 @@ function AccountsManager({
               <div className="flex items-start gap-2">
                 <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
                 <div>
-                  <p className="font-semibold">{listError.status === 429 ? "Too many requests" : "Accounts could not be updated"}</p>
+                  <p className="font-semibold">
+                    {listError.status === 429 ? "Too many requests" : "Accounts could not be updated"}
+                  </p>
                   <p className="mt-1 text-foreground-soft">{listError.message}</p>
-                  {accounts.length > 0 && <p className="mt-1 text-xs text-foreground-soft">Previously loaded accounts are still shown.</p>}
+                  {accounts.length > 0 && (
+                    <p className="mt-1 text-xs text-foreground-soft">Previously loaded accounts are still shown.</p>
+                  )}
                 </div>
               </div>
-              <button type="button" onClick={listError.operation === "page" ? handleSeeMore : refreshList} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 font-semibold hover:bg-accent">
+              <button
+                type="button"
+                onClick={() => {
+                  if (listError.operation === "page") {
+                    void accountsQuery.fetchNextPage();
+                  } else {
+                    void accountsQuery.refetch();
+                  }
+                }}
+                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 font-semibold hover:bg-accent"
+              >
                 <RefreshCw className="size-4" aria-hidden="true" /> Retry
               </button>
             </div>
@@ -207,18 +188,17 @@ function AccountsManager({
               onActionSuccess={refreshList}
             />
           ) : !listError ? (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card py-16 text-center">
               <UserPlus className="size-8 text-foreground-faint" />
-              <p className="text-sm text-muted-foreground">
-                No accounts found.
-              </p>
+              <p className="text-sm text-muted-foreground">No accounts found.</p>
             </div>
           ) : null}
 
-          {!listError && page < totalPages && (
+          {!listError && accountsQuery.hasNextPage && (
             <button
+              type="button"
               onClick={handleSeeMore}
-              disabled={isLoadingMore}
+              disabled={accountsQuery.isFetching || isFiltering}
               className="w-full text-center text-lg font-semibold text-foreground-soft transition hover:text-primary-emphasis disabled:opacity-50"
             >
               {isLoadingMore ? "Loading..." : "See more"}

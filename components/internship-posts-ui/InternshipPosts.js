@@ -2,20 +2,22 @@
 
 import { notifyReadError } from "@/lib/client-read-error";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
 import SearchBar from "../ui/SearchBar";
 import DropdownFilter from "../ui/DropdownFilter";
-import { getInternshipPostsResult as getInternshipPosts } from "@/lib/server-actions/internship-posts-actions";
 import { useUser } from "@/contexts/UserContext";
 import InternshipPostsListSkeleton from "../skeletons/InternshipPostsListSkeleton";
 import {
   canKeepLoadedPostingPages,
-  pageAfterPostingRefresh,
-  reconcilePostingPageOne,
 } from "@/lib/internship-posts-pagination.mjs";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
+import {
+  internshipPostsInfiniteOptions,
+  internshipPostsKeys,
+  isFavoriteInternshipPostsQuery,
+} from "@/lib/cache/internship-posts-queries";
 
 const scopeTabs = [
   { label: "All Companies", value: "" },
@@ -47,34 +49,178 @@ function InternshipPosts({
     totalPages: initialTotalPages = 1,
   },
   courses = [],
+  workType: initialWorkType = "",
+  courseId: initialCourseId = "",
+  scope: initialScope = "",
 }) {
-  const [internshipPosts, setInternshipPosts] = useState(initialData);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [total, setTotal] = useState(initialTotal);
   const [query, setQuery] = useState("");
-  const [workType, setWorkType] = useState("");
-  const [courseId, setCourseId] = useState("");
-  const [scope, setScope] = useState("");
+  const [workType, setWorkType] = useState(initialWorkType);
+  const [courseId, setCourseId] = useState(initialCourseId);
+  const [scope, setScope] = useState(initialScope);
   const [favorite, setFavorite] = useState("");
-  const [favoriteRefresh, setFavoriteRefresh] = useState(0);
-  const [isPending, setIsPending] = useState(false);
-  const [favoriteIds, setFavoriteIds] = useState(new Set());
-
+  const [debouncedFilters, setDebouncedFilters] = useState({
+    workType: initialWorkType,
+    courseId: initialCourseId,
+    search: "",
+    mine: initialScope === "myposts" ? "true" : "",
+    favorite: "",
+  });
   const { user } = useUser();
   const userId = user.id;
   const userRole = user.role;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialData);
+  const initialFilters = useMemo(
+    () => ({
+      workType: initialWorkType,
+      courseId: initialCourseId,
+      search: "",
+      mine: initialScope === "myposts" ? "true" : "",
+      favorite: "",
+    }),
+    [initialWorkType, initialCourseId, initialScope],
+  );
 
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
-  const prevPage1IdsRef = useRef(initialData.map(keyOf));
-  const prevTotalRef = useRef(initialTotal);
-  const lastServerSnapshotRef = useRef({
-    data: initialData,
-    page: initialPage,
-    total: initialTotal,
-    totalPages: initialTotalPages,
+  useEffect(() => {
+    const nextFilters = {
+      workType,
+      courseId,
+      search: query,
+      mine: scope === "myposts" ? "true" : "",
+      favorite,
+    };
+    const timeout = setTimeout(() => setDebouncedFilters(nextFilters), 500);
+    return () => clearTimeout(timeout);
+  }, [query, workType, courseId, scope, favorite]);
+
+  const isChangingFilters =
+    debouncedFilters.workType !== workType ||
+    debouncedFilters.courseId !== courseId ||
+    debouncedFilters.search !== query ||
+    debouncedFilters.mine !== (scope === "myposts" ? "true" : "") ||
+    debouncedFilters.favorite !== favorite;
+  const matchesInitialFilters = Object.keys(initialFilters).every(
+    (key) => debouncedFilters[key] === initialFilters[key],
+  );
+  const postsQuery = useInfiniteQuery({
+    ...internshipPostsInfiniteOptions(userId, debouncedFilters),
+    initialData: matchesInitialFilters
+      ? {
+          pages: [
+            {
+              data: initialData,
+              pagination: {
+                page: initialPage,
+                total: initialTotal,
+                totalPages: initialTotalPages,
+              },
+            },
+          ],
+          pageParams: [1],
+        }
+      : undefined,
   });
+
+  const internshipPosts = useMemo(() => {
+    const seen = new Set();
+    return (postsQuery.data?.pages ?? []).flatMap((page) =>
+      page.data.filter((post) => {
+        if (seen.has(keyOf(post))) return false;
+        seen.add(keyOf(post));
+        return true;
+      }),
+    );
+  }, [postsQuery.data]);
+  const total = postsQuery.data?.pages[0]?.pagination?.total ?? 0;
+  const isPending = isChangingFilters || postsQuery.isPending || postsQuery.isFetching;
+
+  useEffect(() => {
+    if (postsQuery.error) {
+      notifyReadError("Error loading internship posts:", postsQuery.error);
+    }
+  }, [postsQuery.error]);
+
+  // revalidatePath can stream a fresh first page while this component remains
+  // mounted. Reconcile that snapshot without discarding stable loaded pages.
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialData) return;
+    serverSnapshotRef.current = initialData;
+    queryClient.setQueryData(
+      internshipPostsKeys.list(userId, initialFilters),
+      (old) => {
+        if (!old?.pages?.length) return old;
+        const previous = old.pages[0];
+        const keepLoaded = canKeepLoadedPostingPages(
+          previous.data.map(keyOf),
+          previous.pagination.total,
+          initialData,
+          initialTotal,
+        );
+        const firstPage = {
+          data: initialData,
+          pagination: {
+            page: initialPage,
+            total: initialTotal,
+            totalPages: initialTotalPages,
+          },
+        };
+        return {
+          pages: keepLoaded ? [firstPage, ...old.pages.slice(1)] : [firstPage],
+          pageParams: keepLoaded ? old.pageParams : [1],
+        };
+      },
+    );
+  }, [initialData, initialFilters, initialPage, initialTotal, initialTotalPages, queryClient, userId]);
+
+  function updateCachedPosts(transform) {
+    queryClient.setQueriesData(
+      { queryKey: internshipPostsKeys.all(userId) },
+      (old) =>
+        old?.pages
+          ? {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                data: transform(page.data),
+              })),
+            }
+          : old,
+    );
+  }
+
+  function refreshPosts() {
+    void queryClient.invalidateQueries({
+      queryKey: internshipPostsKeys.all(userId),
+    });
+  }
+
+  function handleFavoriteSettled(postingId, isFavorited) {
+    updateCachedPosts((posts) =>
+      posts.map((post) =>
+        post.id === postingId ? { ...post, isFavorited } : post,
+      ),
+    );
+    // The unfiltered list only needs its favorite flag updated. Filtered
+    // lists need a fresh page because membership and totals can change.
+    void queryClient.invalidateQueries({
+      predicate: (cachedQuery) =>
+        isFavoriteInternshipPostsQuery(userId, cachedQuery),
+    });
+  }
+
+  function handleItemUpdate(updatedItem) {
+    updateCachedPosts((posts) =>
+      posts.map((post) =>
+        post.id === updatedItem.id ? { ...post, ...updatedItem } : post,
+      ),
+    );
+    refreshPosts();
+  }
+
+  function handleItemDelete(deletedId) {
+    updateCachedPosts((posts) => posts.filter((post) => post.id !== deletedId));
+    refreshPosts();
+  }
 
   const workTypeOptions = workTypeTabs.map((wt) => ({
     value: wt.workType,
@@ -85,177 +231,6 @@ function InternshipPosts({
     { value: "", label: "Courses" },
     ...courses.map((c) => ({ value: String(c.id), label: c.course_name })),
   ];
-
-  useEffect(() => {
-    const previousSnapshot = lastServerSnapshotRef.current;
-    if (
-      previousSnapshot.data === initialData &&
-      previousSnapshot.page === initialPage &&
-      previousSnapshot.total === initialTotal &&
-      previousSnapshot.totalPages === initialTotalPages
-    ) {
-      return;
-    }
-    lastServerSnapshotRef.current = {
-      data: initialData,
-      page: initialPage,
-      total: initialTotal,
-      totalPages: initialTotalPages,
-    };
-
-    const keepLoadedPages = canKeepLoadedPostingPages(
-      prevPage1IdsRef.current,
-      prevTotalRef.current,
-      initialData,
-      initialTotal,
-    );
-    prevPage1IdsRef.current = initialData.map(keyOf);
-    prevTotalRef.current = initialTotal;
-
-    // Server props describe the unfiltered first page. An active client-side
-    // filter owns its own list and must not merge those unfiltered rows in.
-    if (query || workType || courseId || scope || favorite) return;
-
-    if (!keepLoadedPages) {
-      requestIdRef.current += 1;
-      setIsPending(false);
-    }
-    setCurrentPage((page) => pageAfterPostingRefresh(page, keepLoadedPages));
-    setInternshipPosts((prev) =>
-      reconcilePostingPageOne(prev, initialData, keepLoadedPages),
-    );
-    setTotalPages(initialTotalPages || 1);
-    setTotal(initialTotal || 0);
-  }, [
-    initialData,
-    initialPage,
-    initialTotalPages,
-    initialTotal,
-    query,
-    workType,
-    courseId,
-    scope,
-    favorite,
-  ]);
-
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-
-    const thisRequestId = ++requestIdRef.current;
-    setIsPending(true);
-
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = await getInternshipPosts({
-          workType,
-          courseId: courseId ?? "",
-          search: query,
-          mine: scope === "myposts" ? "true" : "",
-          favorite,
-          page: 1,
-        });
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (!hasValidPage(newData, "data", "pagination", 1)) {
-          notifyReadError(
-            "Error loading filtered internship posts:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
-
-        setInternshipPosts(newData.data);
-        setCurrentPage(1);
-        setTotalPages(newData.pagination.totalPages || 1);
-        setTotal(newData.pagination.total || 0);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          notifyReadError("Error loading filtered internship posts:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [query, workType, courseId, scope, favorite, favoriteRefresh]);
-
-  function handleFavoriteSettled(postingId, isFavorited) {
-    setInternshipPosts((prev) =>
-      prev.map((post) =>
-        post.id === postingId ? { ...post, isFavorited } : post,
-      ),
-    );
-    if (favorite) {
-      // Favorited / not-favorited membership and page boundaries can change.
-      requestIdRef.current += 1;
-      setIsPending(true);
-      setFavoriteRefresh((value) => value + 1);
-    }
-  }
-
-  async function handleSeeMore() {
-    if (isPending || currentPage >= totalPages) return;
-    setIsPending(true);
-    const nextPage = currentPage + 1;
-    const thisRequestId = ++requestIdRef.current;
-
-    try {
-      const newData = await getInternshipPosts({
-        workType,
-        courseId: courseId ?? "",
-        search: query,
-        mine: scope === "myposts" ? "true" : "",
-        favorite,
-        page: nextPage,
-      });
-
-      if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        notifyReadError(
-          "Error loading more internship posts:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-
-      const incoming = newData.data;
-
-      setInternshipPosts((prev) => {
-        const existingIds = new Set(prev.map(keyOf));
-        const filteredNew = incoming.filter((p) => !existingIds.has(keyOf(p)));
-        return [...prev, ...filteredNew];
-      });
-
-      setCurrentPage(nextPage);
-      if (newData?.pagination?.totalPages) {
-        setTotalPages(newData.pagination.totalPages);
-      }
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more internship posts:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
-    }
-  }
-
-  const handleItemUpdate = (updatedItem) => {
-    setInternshipPosts((prev) =>
-      prev.map((item) =>
-        item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
-      ),
-    );
-  };
-
-  const handleItemDelete = (deletedId) => {
-    setInternshipPosts((prev) => prev.filter((item) => item.id !== deletedId));
-  };
 
   return (
     <>
@@ -328,25 +303,27 @@ function InternshipPosts({
             <InternshipPostsListSkeleton key={i} />
           ))}
         </div>
+      ) : postsQuery.isError && internshipPosts.length === 0 ? (
+        <button
+          type="button"
+          onClick={() => void postsQuery.refetch()}
+          className="text-sm font-medium text-primary-emphasis hover:underline"
+        >
+          Could not load internship listings. Try again.
+        </button>
       ) : (
         <div className="space-y-4 sm:space-y-6">
-          {internshipPosts.map((item) => {
-            const isFavorited = favoriteIds.has(item.id);
-            return (
-              <InternshipPostsList
-                key={item.id}
-                item={item}
-                isFavorited={isFavorited}
-                setFavoriteIds={setFavoriteIds}
-                userRole={userRole}
-                userId={userId}
-                courses={courses}
-                onUpdate={handleItemUpdate}
-                onDelete={() => handleItemDelete(item.id)}
-                onFavoriteSettled={handleFavoriteSettled}
-              />
-            );
-          })}
+          {internshipPosts.map((item) => (
+            <InternshipPostsList
+              key={item.id}
+              item={item}
+              userRole={userRole}
+              courses={courses}
+              onUpdate={handleItemUpdate}
+              onDelete={() => handleItemDelete(item.id)}
+              onFavoriteSettled={handleFavoriteSettled}
+            />
+          ))}
 
           {internshipPosts.length === 0 && !isPending && (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
@@ -359,10 +336,11 @@ function InternshipPosts({
         </div>
       )}
 
-      {currentPage < totalPages && (
+      {postsQuery.hasNextPage && (
         <div className="w-full">
           <button
-            onClick={handleSeeMore}
+            type="button"
+            onClick={() => void postsQuery.fetchNextPage()}
             disabled={isPending}
             className="w-full text-center text-sm sm:text-lg font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >

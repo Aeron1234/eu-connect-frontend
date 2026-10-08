@@ -12,14 +12,7 @@ async function ActivityLogsPage() {
   const logsData = await getAllActivityLogs({});
 
   return (
-    <ActivityLogsManager
-      initialData={logsData?.data || []}
-      initialStats={logsData?.stats}
-      filters={
-        logsData?.filters || { actions: [], actorRoles: [], targetTypes: [] }
-      }
-      pagination={logsData?.pagination || {}}
-    />
+    <ActivityLogsManager initialPage={logsData} />
   );
 }
 

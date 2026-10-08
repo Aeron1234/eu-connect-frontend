@@ -1,10 +1,16 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
-
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { evaluationsKeys } from "@/lib/cache/evaluations-queries";
+import {
+  userProfileKeys,
+  userProfileTabOptions,
+} from "@/lib/cache/user-profile-queries";
 import SearchedUserFilter from "./SearchedUserFilter";
 import DtrTable from "../dtr-ui/DtrTable";
+import DtrPagination from "../dtr-ui/DtrPagination";
 import SetDtrLocation from "../dtr-ui/SetDtrLocation";
 import StudentNarratives from "../weekly-narratives-ui/StudentNarratives";
 import StudentEvaluationList from "../evaluations-ui/StudentEvaluationList";
@@ -12,16 +18,6 @@ import StudentEvaluationCriteria from "../evaluations-ui/StudentEvaluationCriter
 import EmployerCertificateUploads from "../internship-docs-ui/EmployerCertificateUploads";
 import ProfileInfoGrid from "./ProfileInfoGrid";
 import TabContentSkeleton from "../skeletons/TabContentSkeleton";
-import { getEmployerUploadedFilesResult as getEmployerUploadedFiles } from "@/lib/server-actions/internship-docs-actions";
-import { getSearchedStudentWeeklyNarrativesResult as getSearchedStudentWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
-import {
-  getStudentPastEvaluationsResult as getStudentPastEvaluations,
-  getStudentEvaluationCriteriasResult as getStudentEvaluationCriterias,
-} from "@/lib/server-actions/evaluations-actions";
-import {
-  getSearchedStudentDtrLocationResult as getSearchedStudentDtrLocation,
-  getSearchedStudentDTRsResult as getSearchedStudentDTRs,
-} from "@/lib/server-actions/dtr-actions";
 
 function buildTabs({ userRole, searchedUserRole, supervision }) {
   if (searchedUserRole !== "student") {
@@ -77,7 +73,6 @@ function SearchedUserRecordsManager({
   defaultFilter,
   initialDtrData,
   initialDtrLocation,
-  currentDtrPage,
   supervision,
 }) {
   const tabs = buildTabs({ userRole, searchedUserRole, supervision });
@@ -86,111 +81,102 @@ function SearchedUserRecordsManager({
     ? defaultFilter
     : "info";
 
+  const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState(safeDefaultFilter);
-  const [filter, setFilter] = useState(safeDefaultFilter);
-  const [dtrPage, setDtrPage] = useState(currentDtrPage || 1);
-  const [data, setData] = useState(
-    safeDefaultFilter === "dtr"
-      ? { dtrData: initialDtrData, dtrLocation: initialDtrLocation }
-      : {},
-  );
-  const [isPending, setIsPending] = useState(false);
-  const [loadError, setLoadError] = useState("");
-  const [retryKey, setRetryKey] = useState(0);
+  const [activeTab, setActiveTab] = useState(safeDefaultFilter);
+  const [dtrPage, setDtrPage] = useState(1);
+  const tabQuery = useQuery({
+    ...userProfileTabOptions(
+      userId,
+      searchedUserId,
+      activeTab,
+      dtrPage,
+      userRole,
+    ),
+    enabled: activeTab !== "info" && Boolean(userId && searchedUserId),
+    initialData:
+      activeTab === "dtr" && dtrPage === 1 && initialDtrData
+        ? { dtrData: initialDtrData, dtrLocation: initialDtrLocation }
+        : undefined,
+  });
 
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (selectedTab === activeTab) return;
+    const timeout = setTimeout(() => setActiveTab(selectedTab), 300);
+    return () => clearTimeout(timeout);
+  }, [selectedTab, activeTab]);
 
-  const fetchers = useMemo(() => ({
-    dtr: async () => {
-      const [dtrData, dtrLocation] = await Promise.all([
-        getSearchedStudentDTRs(searchedUserId, 1),
-        ["employer", "admin"].includes(userRole)
-          ? getSearchedStudentDtrLocation(searchedUserId)
-          : null,
-      ]);
-      return { dtrData, dtrLocation };
-    },
-    narratives: async () => {
-      const narrativeData =
-        await getSearchedStudentWeeklyNarratives(searchedUserId);
-      return { narrativeData };
-    },
-    evaluations: async () => {
-      const [pastEvaluationsData, studentEvaluationCriterias] =
-        await Promise.all([
-          getStudentPastEvaluations(searchedUserId),
-          userRole === "employer" ? getStudentEvaluationCriterias() : null,
-        ]);
-      return { pastEvaluationsData, studentEvaluationCriterias };
-    },
-    certificates: async () => {
-      const uploadedFiles = await getEmployerUploadedFiles(searchedUserId);
-      return { uploadedFiles };
-    },
-  }), [searchedUserId, userRole]);
+  useEffect(() => {
+    if (tabQuery.error) {
+      notifyReadError(tabQuery.error.message || "Could not load this section.");
+    }
+  }, [tabQuery.error]);
+
+  useEffect(() => {
+    if (!userId || !initialDtrData) return;
+    queryClient.setQueryData(
+      userProfileKeys.tab(userId, searchedUserId, "dtr", 1),
+      { dtrData: initialDtrData, dtrLocation: initialDtrLocation },
+    );
+  }, [
+    initialDtrData,
+    initialDtrLocation,
+    queryClient,
+    searchedUserId,
+    userId,
+  ]);
 
   function handleTabClick(value) {
     setSelectedTab(value);
+    const page = value === "dtr" ? 1 : dtrPage;
+    if (value === "dtr") {
+      setDtrPage(1);
+    }
+    if (
+      value === "info" ||
+      queryClient.getQueryData(
+        userProfileKeys.tab(userId, searchedUserId, value, page),
+      )
+    ) {
+      setActiveTab(value);
+    }
   }
 
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
+  function handleDtrLocationSaved(saved) {
+    queryClient.setQueriesData(
+      { queryKey: userProfileKeys.dtrPages(userId, searchedUserId) },
+      (previous) => previous && ({
+        ...previous,
+        dtrLocation: {
+          internship_id: saved.internship_id,
+          is_custom_location: true,
+          location: saved,
+        },
+      }),
+    );
+  }
 
-    if (selectedTab === filter) return;
+  function refreshEvaluations() {
+    void queryClient.invalidateQueries({
+      queryKey: userProfileKeys.tab(userId, searchedUserId, "evaluations"),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: evaluationsKeys.all(userId),
+    });
+  }
 
-    if (selectedTab === "info") {
-      setFilter("info");
-      return;
-    }
+  function refreshCertificates() {
+    void queryClient.invalidateQueries({
+      queryKey: userProfileKeys.tab(userId, searchedUserId, "certificates"),
+    });
+  }
 
-    const thisRequestId = ++requestIdRef.current;
-
-    const timeout = setTimeout(async () => {
-      setIsPending(true);
-      setLoadError("");
-      try {
-        const result = await fetchers[selectedTab]();
-
-        if (thisRequestId !== requestIdRef.current) return;
-        const failedRead = Object.values(result).find((value) => value?.error);
-        if (failedRead) throw new Error(failedRead.error);
-
-        setFilter(selectedTab);
-        setData(result);
-        if (selectedTab === "dtr") setDtrPage(1);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          const message = error?.message || "Could not load this section.";
-          notifyReadError(message);
-          setLoadError(message);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [selectedTab, filter, retryKey, fetchers]);
-
-  // NEW — mirrors the server's DTR props into local state whenever they
-  // change. This is what makes pagination actually work: clicking the
-  // Pagination Link navigates to ?filter=dtr&d_page=N, the server page
-  // re-runs and passes fresh initialDtrData/currentDtrPage, and this
-  // effect just reflects that into what the table renders. No client
-  // fetch, no request-id bookkeeping — same "let the server handle it"
-  // approach as the student dashboard.
-  useEffect(() => {
-    setDtrPage(currentDtrPage || 1);
-    setData((prev) => ({
-      ...prev,
-      dtrData: initialDtrData,
-      dtrLocation: initialDtrLocation ?? prev.dtrLocation,
-    }));
-  }, [initialDtrData, currentDtrPage, initialDtrLocation]);
+  const isSwitching = selectedTab !== activeTab;
+  const isPending = isSwitching || (activeTab !== "info" && tabQuery.isPending);
+  const loadError = !isSwitching && tabQuery.isError
+    ? tabQuery.error?.message || "Could not load this section."
+    : "";
+  const data = tabQuery.data;
 
   return (
     <>
@@ -204,21 +190,23 @@ function SearchedUserRecordsManager({
         {loadError && !isPending ? (
           <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
             <p>{loadError}</p>
-            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => setRetryKey((value) => value + 1)}>Try again</button>
+            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void tabQuery.refetch()}>Try again</button>
           </div>
         ) : isPending ? (
           <TabContentSkeleton tab={selectedTab} userRole={userRole} />
         ) : (
           <>
-            {filter === "dtr" && (
+            {activeTab === "dtr" && (
               <>
-                <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 overflow-x-scroll">
+                <div className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
                   <DtrTable
-                    searchedUserId={searchedUserId}
-                    dtrs={data?.dtrData?.dtrs}
-                    currentDtrPage={dtrPage}
+                    dtrs={data?.dtrData?.dtrs || []}
+                  />
+                  <DtrPagination
+                    page={dtrPage}
                     totalPages={data?.dtrData?.totalPages}
-                    isStudentDashboard={false}
+                    onPageChange={setDtrPage}
+                    disabled={tabQuery.isFetching}
                   />
                 </div>
 
@@ -227,22 +215,22 @@ function SearchedUserRecordsManager({
                     <SetDtrLocation
                       studentId={searchedUserId}
                       dataLocation={normalizeDtrLocation(data?.dtrLocation)}
+                      onSaved={handleDtrLocationSaved}
                     />
                   </div>
                 )}
               </>
             )}
 
-            {filter === "narratives" && (
+            {activeTab === "narratives" && (
               <StudentNarratives
-                narratives={data?.narrativeData?.narratives || []}
-                totalPages={data?.narrativeData?.totalPages || 1}
-                totalRecords={data?.narrativeData?.totalRecords || 0}
+                initialPage={data?.narrativeData}
                 searchedUserId={searchedUserId}
+                viewerId={userId}
               />
             )}
 
-            {filter === "evaluations" && (
+            {activeTab === "evaluations" && (
               <>
                 {userRole === "employer" && (
                   <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mb-6">
@@ -252,26 +240,29 @@ function SearchedUserRecordsManager({
                       }
                       searchedUserId={searchedUserId}
                       userRole={userRole}
+                      onSubmitted={refreshEvaluations}
                     />
                   </div>
                 )}
                 <StudentEvaluationList
                   studentId={searchedUserId}
                   pastEvaluations={data?.pastEvaluationsData?.data || []}
+                  onChanged={refreshEvaluations}
                 />
               </>
             )}
 
-            {filter === "certificates" && (
+            {activeTab === "certificates" && (
               <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <EmployerCertificateUploads
                   searchedUserId={searchedUserId}
                   uploadedFiles={data?.uploadedFiles}
+                  onChanged={refreshCertificates}
                 />
               </div>
             )}
 
-            {filter === "info" && (
+            {activeTab === "info" && (
               <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <ProfileInfoGrid info={info} />
               </div>

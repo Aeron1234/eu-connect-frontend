@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getUserSession } from "../../lib/server-actions/auth";
+import ClearQueryCache from "@/lib/cache/ClearQueryCache";
 
 async function LoginLayout({ children }) {
   const session = await getUserSession();
@@ -8,7 +9,7 @@ async function LoginLayout({ children }) {
     redirect(`/${user.role}`);
   }
 
-  return children;
+  return <ClearQueryCache>{children}</ClearQueryCache>;
 }
 
 export default LoginLayout;

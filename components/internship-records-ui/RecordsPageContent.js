@@ -12,15 +12,18 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
+import {
+  internshipRecordsInfiniteOptions,
+  internshipRecordsKeys,
+} from "@/lib/cache/internship-records-queries";
 import RecordsPageHeader from "./RecordsPageHeader";
 import RecordsPageFilter from "./RecordsPageFilter";
 import { toastAndAction } from "../../lib/helpers";
-import {
-  updateInternshipRecordStatus,
-  getDepartmentInternshipRecordsResult as getDepartmentInternshipRecords,
-} from "@/lib/server-actions/internship-records-actions";
+import { updateInternshipRecordStatus } from "@/lib/server-actions/internship-records-actions";
 import ProgressBar from "../ui/ProgressBar";
 
 const statusMeta = {
@@ -65,123 +68,125 @@ function RecordsPageContent({
   },
   stats: initialStats = {},
 }) {
-  const [records, setRecords] = useState(initialData);
   const [query, setQuery] = useState("");
-  // Filter is now client state instead of a URL-driven prop, so switching
-  // tabs no longer triggers a navigation/route change — it goes through
-  // the same debounced fetch + spinner as the search box below.
   const [filter, setFilter] = useState(initialFilter);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [total, setTotal] = useState(initialTotal);
-  const [stats, setStats] = useState(initialStats);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [criteria, setCriteria] = useState({
+    status: initialFilter === "all" ? "" : initialFilter,
+    search: "",
+    limit,
+  });
   const [isPending, startTransition] = useTransition();
-
-  const requestIdRef = useRef(0);
-  const lastCriteriaRef = useRef({ query: "", statusParam: "", limit });
-
+  const { user } = useUser();
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialData);
+  const seedCriteria = useMemo(
+    () => ({ status: "", search: "", limit }),
+    [limit],
+  );
   const statusParam = filter === "all" ? "" : filter;
 
-  // Fires on either query or filter changing — a tab click and a search
-  // keystroke are treated identically: same debounce, same spinner, same
-  // request-race protection via requestIdRef.
   useEffect(() => {
-    const previous = lastCriteriaRef.current;
-    if (
-      previous.query === query &&
-      previous.statusParam === statusParam &&
-      previous.limit === limit
-    ) {
-      return;
-    }
-    lastCriteriaRef.current = { query, statusParam, limit };
-
-    const thisRequestId = ++requestIdRef.current;
-    setIsLoadingMore(false);
-    setIsSearching(true);
-
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = await getDepartmentInternshipRecords({
-          status: statusParam,
-          search: query,
-          page: 1,
-          limit,
-        });
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (!hasValidPage(newData, "data")) {
-          notifyReadError(
-            "Error loading filtered records:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
-
-        setRecords(newData.data);
-        setCurrentPage(1);
-        setTotalPages(newData?.pagination?.totalPages || 1);
-        setTotal(newData?.pagination?.total || 0);
-        if (newData?.stats) setStats(newData.stats);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          notifyReadError("Error loading filtered records:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsSearching(false);
-      }
-    }, 500);
-
+    const timeout = setTimeout(
+      () => setCriteria({ status: statusParam, search: query, limit }),
+      500,
+    );
     return () => clearTimeout(timeout);
   }, [query, statusParam, limit]);
 
-  async function handleSeeMore() {
-    if (isSearching || isLoadingMore || currentPage >= totalPages) return;
-    setIsLoadingMore(true);
-    const nextPage = currentPage + 1;
-    const thisRequestId = ++requestIdRef.current;
+  const isChangingCriteria =
+    criteria.status !== statusParam ||
+    criteria.search !== query ||
+    criteria.limit !== limit;
+  const recordsQuery = useInfiniteQuery({
+    ...internshipRecordsInfiniteOptions(user.id, criteria),
+    initialData:
+      initialFilter === "all" &&
+      criteria.status === "" &&
+      criteria.search === "" &&
+      criteria.limit === limit
+        ? {
+            pages: [
+              {
+                data: initialData,
+                stats: initialStats,
+                pagination: {
+                  page: initialPage,
+                  limit,
+                  total: initialTotal,
+                  totalPages: initialTotalPages,
+                },
+              },
+            ],
+            pageParams: [1],
+          }
+        : undefined,
+  });
 
-    try {
-      const newData = await getDepartmentInternshipRecords({
-        status: statusParam,
-        search: query,
-        page: nextPage,
-        limit,
-      });
+  const records = useMemo(() => {
+    const seen = new Set();
+    return (recordsQuery.data?.pages ?? []).flatMap((page) =>
+      page.data.filter((record) => {
+        if (seen.has(record.id)) return false;
+        seen.add(record.id);
+        return true;
+      }),
+    );
+  }, [recordsQuery.data]);
+  const total = recordsQuery.data?.pages[0]?.pagination?.total ?? initialTotal;
+  const stats = recordsQuery.data?.pages[0]?.stats ?? initialStats;
+  const isLoadingMore = recordsQuery.isFetchingNextPage;
+  const isSearching =
+    isChangingCriteria ||
+    recordsQuery.isPending ||
+    (recordsQuery.isFetching && !isLoadingMore);
 
-      if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        notifyReadError(
-          "Error loading more records:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-
-      const incoming = newData.data;
-
-      setRecords((prev) => {
-        const existingIds = new Set(prev.map((r) => r.id));
-        const filteredNew = incoming.filter((r) => !existingIds.has(r.id));
-        return [...prev, ...filteredNew];
-      });
-
-      setCurrentPage(nextPage);
-      if (newData?.pagination?.totalPages) {
-        setTotalPages(newData.pagination.totalPages);
-      }
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more records:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
+  useEffect(() => {
+    if (recordsQuery.error) {
+      notifyReadError("Error loading internship records:", recordsQuery.error);
     }
-  }
+  }, [recordsQuery.error]);
+
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialData) return;
+    serverSnapshotRef.current = initialData;
+    queryClient.setQueryData(
+      internshipRecordsKeys.list(user.id, seedCriteria),
+      (old) => {
+        if (!old?.pages?.length) return old;
+        const previous = old.pages[0];
+        const keepLoaded = canKeepLoadedPages(
+          previous.data.map((record) => record.id),
+          previous.pagination.total,
+          initialData,
+          initialTotal,
+        );
+        const firstPage = {
+          data: initialData,
+          stats: initialStats,
+          pagination: {
+            page: initialPage,
+            limit,
+            total: initialTotal,
+            totalPages: initialTotalPages,
+          },
+        };
+        return {
+          pages: keepLoaded ? [firstPage, ...old.pages.slice(1)] : [firstPage],
+          pageParams: keepLoaded ? old.pageParams : [1],
+        };
+      },
+    );
+  }, [
+    initialData,
+    initialPage,
+    initialStats,
+    initialTotal,
+    initialTotalPages,
+    limit,
+    queryClient,
+    seedCriteria,
+    user.id,
+  ]);
 
   function handleStatus(internshipId, status) {
     const formData = new FormData();
@@ -198,37 +203,28 @@ function RecordsPageContent({
       });
 
       if (result?.success) {
-        const thisRequestId = ++requestIdRef.current;
-        setIsSearching(true);
-        try {
-          const fresh = await getDepartmentInternshipRecords({
-            status: statusParam,
-            search: query,
-            page: 1,
-            limit,
-          });
-          if (thisRequestId !== requestIdRef.current) return;
-          if (!hasValidPage(fresh, "data")) {
-            notifyReadError(
-              "Error refreshing records:",
-              fresh?.error || "Invalid response from the server",
-            );
-            setRecords((prev) =>
-              prev.map((r) => (r.id === internshipId ? { ...r, status } : r)),
-            );
-            return;
-          }
-          setRecords(fresh.data);
-          setCurrentPage(1);
-          setTotalPages(fresh.pagination.totalPages || 1);
-          setTotal(fresh.pagination.total || 0);
-          if (fresh.stats) setStats(fresh.stats);
-        } catch (error) {
-          if (thisRequestId === requestIdRef.current)
-            notifyReadError("Error refreshing records:", error);
-        } finally {
-          if (thisRequestId === requestIdRef.current) setIsSearching(false);
-        }
+        queryClient.setQueryData(
+          internshipRecordsKeys.list(user.id, criteria),
+          (old) =>
+            old?.pages?.length
+              ? {
+                  pages: [
+                    {
+                      ...old.pages[0],
+                      data: old.pages[0].data.map((record) =>
+                        record.id === internshipId
+                          ? { ...record, status }
+                          : record,
+                      ),
+                    },
+                  ],
+                  pageParams: [1],
+                }
+              : old,
+        );
+        await queryClient.invalidateQueries({
+          queryKey: internshipRecordsKeys.all(user.id),
+        });
       }
     });
   }
@@ -296,7 +292,7 @@ function RecordsPageContent({
                     <>
                       <button
                         type="button"
-                        disabled={isPending}
+                        disabled={isPending || isSearching}
                         onClick={() => handleStatus(r.id, "ongoing")}
                         className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-600 transition disabled:opacity-50"
                       >
@@ -304,7 +300,7 @@ function RecordsPageContent({
                       </button>
                       <button
                         type="button"
-                        disabled={isPending}
+                        disabled={isPending || isSearching}
                         onClick={() => handleStatus(r.id, "rejected")}
                         className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground-soft hover:bg-muted transition disabled:opacity-50"
                       >
@@ -315,7 +311,7 @@ function RecordsPageContent({
                   {r.status === "rejected" && (
                     <button
                       type="button"
-                      disabled={isPending}
+                      disabled={isPending || isSearching}
                       onClick={() => handleStatus(r.id, "pending")}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-emphasis hover:bg-primary hover:text-white transition disabled:opacity-50"
                     >
@@ -325,7 +321,7 @@ function RecordsPageContent({
                   {r.status === "ongoing" && (
                     <button
                       type="button"
-                      disabled={isPending}
+                      disabled={isPending || isSearching}
                       onClick={() => handleStatus(r.id, "finished")}
                       className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground-soft hover:bg-muted transition disabled:opacity-50"
                     >
@@ -355,20 +351,28 @@ function RecordsPageContent({
             </article>
           ))}
 
-          {records.length === 0 && (
+          {recordsQuery.isError && records.length === 0 && !isSearching ? (
+            <button
+              type="button"
+              onClick={() => void recordsQuery.refetch()}
+              className="text-sm font-medium text-primary-emphasis hover:underline"
+            >
+              Could not load internship records. Try again.
+            </button>
+          ) : records.length === 0 && !isSearching ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
               <p className="text-sm text-muted-foreground">
                 No internship records match your filters.
               </p>
             </div>
-          )}
+          ) : null}
       </div>
 
-      {!isSearching && currentPage < totalPages && (
+      {!isSearching && recordsQuery.hasNextPage && (
         <div className="w-full text-center">
           <button
             type="button"
-            onClick={handleSeeMore}
+            onClick={() => void recordsQuery.fetchNextPage()}
             disabled={isLoadingMore}
             className="text-sm sm:text-base font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >

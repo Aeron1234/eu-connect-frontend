@@ -1,11 +1,12 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 
 const SidebarContext = createContext(null);
 
 export function SidebarProvider({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const navigationScrollRef = useRef(0);
 
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
   const toggleMobile = () => setIsMobileOpen((prev) => !prev);
@@ -13,6 +14,7 @@ export function SidebarProvider({ children }) {
   const resetSidebar = () => {
     setIsCollapsed(false);
     setIsMobileOpen(false);
+    navigationScrollRef.current = 0;
   };
 
   return (
@@ -24,6 +26,7 @@ export function SidebarProvider({ children }) {
         toggleMobile,
         closeMobile,
         resetSidebar,
+        navigationScrollRef,
       }}
     >
       {children}

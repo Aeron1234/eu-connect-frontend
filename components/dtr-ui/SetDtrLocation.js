@@ -7,7 +7,7 @@ import { toastAndAction } from "../../lib/helpers";
 import { setStudentDtrLocation } from "@/lib/server-actions/dtr-actions";
 import { socket } from "@/components/ui/SocketProvider";
 
-const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
+const SetDtrLocation = ({ studentId, dataLocation = {}, onSaved }) => {
   const [loc, setLoc] = useState({
     lat: dataLocation.location.lat || "",
     lon: dataLocation.location.lon || "",
@@ -126,6 +126,7 @@ const SetDtrLocation = ({ studentId, dataLocation = {} }) => {
           updatedAt: saved.updated_at ?? new Date().toISOString(),
         });
         setRadius(saved.radius_meters ?? 150);
+        onSaved?.(saved);
       }
     });
   }

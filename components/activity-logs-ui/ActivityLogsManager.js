@@ -2,12 +2,12 @@
 
 import { notifyReadError } from "@/lib/client-read-error";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import { Activity, Layers3, ScrollText, Trash2, Users } from "lucide-react";
-import {
-  getAllActivityLogsResult as getAllActivityLogs,
-  deleteActivityLog,
-} from "@/lib/server-actions/activity-logs-actions";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { Activity, Layers3, ScrollText, Trash2, TriangleAlert, Users } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { activityLogsInfiniteOptions, activityLogsKeys } from "@/lib/cache/activity-logs-queries";
+import { deleteActivityLog } from "@/lib/server-actions/activity-logs-actions";
 import SearchBar from "../ui/SearchBar";
 import PageTitle from "../ui/PageTitle";
 import DropdownFilter from "../ui/DropdownFilter";
@@ -15,7 +15,7 @@ import Modal from "../ui/Modal";
 import DeleteForm from "../ui/DeleteForm";
 import { toastAndAction } from "../../lib/helpers";
 import ActivityLogsTableSkeleton from "../skeletons/ActivityLogsTableSkeleton";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
+import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const ROLE_LABELS = {
   student: "Student",
@@ -63,31 +63,88 @@ function getMetadataIp(metadata) {
   }
 }
 
-export default function ActivityLogsManager({
-  initialData = [],
-  initialStats = {},
-  filters: initialFilters = { actions: [], actorRoles: [], targetTypes: [] },
-  pagination: {
-    page: initialPage = 1,
-    total: initialTotal = 0,
-    totalPages: initialTotalPages = 1,
-  } = {},
-}) {
-  const [isLoading, startTransition] = useTransition();
-  const [logs, setLogs] = useState(initialData);
-  const [filterOptions] = useState(initialFilters);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [total, setTotal] = useState(initialTotal);
-  const [stats, setStats] = useState(initialStats);
+const defaultFilters = { actorRole: "", targetType: "", search: "" };
+const emptyFilterOptions = { actions: [], actorRoles: [], targetTypes: [] };
 
+export default function ActivityLogsManager({ initialPage }) {
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialPage);
+  const [isDeleting, startTransition] = useTransition();
   const [actorRole, setActorRole] = useState("");
   const [targetType, setTargetType] = useState("");
   const [query, setQuery] = useState("");
-  const [isPending, setIsPending] = useState(false);
+  const [filters, setFilters] = useState(defaultFilters);
 
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => setFilters({
+      actorRole,
+      targetType,
+      search: query.trim(),
+    }), 500);
+    return () => clearTimeout(timeout);
+  }, [actorRole, targetType, query]);
+
+  const isChangingFilters =
+    filters.actorRole !== actorRole ||
+    filters.targetType !== targetType ||
+    filters.search !== query.trim();
+  const logsQuery = useInfiniteQuery({
+    ...activityLogsInfiniteOptions(userId, filters),
+    enabled: Boolean(userId),
+    initialData: !filters.actorRole && !filters.targetType && !filters.search &&
+      hasValidPage(initialPage, "data")
+      ? { pages: [initialPage], pageParams: [1] }
+      : undefined,
+  });
+  const logs = useMemo(() => {
+    const seen = new Set();
+    return (logsQuery.data?.pages || []).flatMap((page) =>
+      page.data.filter((log) => {
+        if (seen.has(log.id)) return false;
+        seen.add(log.id);
+        return true;
+      }),
+    );
+  }, [logsQuery.data]);
+  const firstPage = logsQuery.data?.pages[0];
+  const filterOptions = firstPage?.filters ?? initialPage?.filters ?? emptyFilterOptions;
+  const stats = firstPage?.stats ?? {};
+  const total = firstPage?.pagination.total ?? 0;
+  const isFiltering = isChangingFilters || logsQuery.isPending || logsQuery.isPlaceholderData;
+
+  function showCachedFilters(nextFilters) {
+    if (userId && queryClient.getQueryData(activityLogsKeys.list(userId, nextFilters))?.pages?.length) {
+      setFilters(nextFilters);
+    }
+  }
+
+  useEffect(() => {
+    if (!isChangingFilters && logsQuery.error) {
+      notifyReadError("Error loading activity logs:", logsQuery.error);
+    }
+  }, [isChangingFilters, logsQuery.error]);
+
+  // A server action can stream a fresh first page without remounting the list.
+  useEffect(() => {
+    if (!initialPage || serverSnapshotRef.current === initialPage || !userId) return;
+    serverSnapshotRef.current = initialPage;
+    queryClient.setQueryData(activityLogsKeys.list(userId, defaultFilters), (old) => {
+      if (!old?.pages?.length) return { pages: [initialPage], pageParams: [1] };
+      const previous = old.pages[0];
+      const keepLoaded = canKeepLoadedPages(
+        previous.data.map((log) => log.id),
+        previous.pagination.total,
+        initialPage.data,
+        initialPage.pagination.total,
+      );
+      return {
+        pages: keepLoaded ? [initialPage, ...old.pages.slice(1)] : [initialPage],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+  }, [initialPage, queryClient, userId]);
 
   const actorRoleOptions = [
     { value: "", label: "All Roles" },
@@ -105,107 +162,43 @@ export default function ActivityLogsManager({
     })),
   ];
 
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-
-    const thisRequestId = ++requestIdRef.current;
-    setIsPending(true);
-
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = await getAllActivityLogs({
-          actorRole,
-          targetType,
-          search: query,
-          page: 1,
-        });
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (!hasValidPage(newData, "data")) {
-          notifyReadError(
-            "Error loading activity logs:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
-
-        setLogs(newData.data);
-        setCurrentPage(1);
-        setTotalPages(newData?.pagination?.totalPages || 1);
-        setTotal(newData?.pagination?.total || 0);
-        setStats(newData.stats);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          notifyReadError("Error loading activity logs:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [actorRole, targetType, query]);
-
-  async function handleSeeMore() {
-    if (isPending || currentPage >= totalPages) return;
-    setIsPending(true);
-    const nextPage = currentPage + 1;
-    const thisRequestId = ++requestIdRef.current;
-
-    try {
-      const newData = await getAllActivityLogs({
-        actorRole,
-        targetType,
-        search: query,
-        page: nextPage,
-      });
-
-      if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "data", "pagination", nextPage)) {
-        notifyReadError(
-          "Error loading more activity logs:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-
-      const incoming = newData.data;
-
-      setLogs((prev) => {
-        const existingIds = new Set(prev.map((l) => l.id));
-        const filteredNew = incoming.filter((l) => !existingIds.has(l.id));
-        return [...prev, ...filteredNew];
-      });
-
-      setCurrentPage(nextPage);
-      setTotal(newData.pagination.total || 0);
-      if (newData?.pagination?.totalPages) {
-        setTotalPages(newData.pagination.totalPages);
-      }
-      setStats(newData.stats);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more activity logs:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
+  function handleSeeMore() {
+    if (!isFiltering && !isDeleting && !logsQuery.isFetching && logsQuery.hasNextPage) {
+      void logsQuery.fetchNextPage();
     }
   }
 
   async function handleDelete(formData) {
     const logId = formData.get("logId");
-    const previousLogs = logs;
-
-    // Optimistically remove immediately
-    setLogs((prev) => prev.filter((l) => String(l.id) !== String(logId)));
-    setTotal((prev) => Math.max(0, prev - 1));
-
     startTransition(async () => {
+      const queryKey = activityLogsKeys.all(userId);
+      await queryClient.cancelQueries({ queryKey });
+      const previousQueries = queryClient.getQueriesData({ queryKey });
+
+      // Keep the immediate removal, including if this log appears in another cached filter.
+      queryClient.setQueriesData({ queryKey }, (old) => {
+        if (!old?.pages?.length) return old;
+        if (!old.pages.some((page) => page.data.some((log) => String(log.id) === String(logId)))) {
+          return old;
+        }
+        const total = Math.max(0, Number(old.pages[0].pagination.total) - 1);
+        return {
+          ...old,
+          pages: old.pages.map((page) => {
+            const data = page.data.filter((log) => String(log.id) !== String(logId));
+            return {
+              ...page,
+              data,
+              pagination: {
+                ...page.pagination,
+                total,
+                totalPages: Math.ceil(total / page.pagination.limit),
+              },
+            };
+          }),
+        };
+      });
+
       const result = await toastAndAction({
         loadingLabel: "Deleting log entry...",
         successLabel: "Log entry deleted.",
@@ -215,42 +208,15 @@ export default function ActivityLogsManager({
       });
 
       if (!result?.success) {
-        // Roll back on failure
-        setLogs(previousLogs);
-        setTotal((prev) => prev + 1);
+        for (const [key, data] of previousQueries) queryClient.setQueryData(key, data);
         return;
       }
 
-      // Deleting a row shifts every later offset page. Reload the first page
-      // before allowing another See more request.
-      const thisRequestId = ++requestIdRef.current;
-      setIsPending(true);
-      try {
-        const fresh = await getAllActivityLogs({
-          actorRole,
-          targetType,
-          search: query,
-          page: 1,
-        });
-        if (thisRequestId !== requestIdRef.current) return;
-        if (!hasValidPage(fresh, "data")) {
-          notifyReadError(
-            "Error refreshing activity logs:",
-            fresh?.error || "Invalid response from the server",
-          );
-          return;
-        }
-        setLogs(fresh.data);
-        setCurrentPage(1);
-        setTotalPages(fresh.pagination.totalPages || 1);
-        setTotal(fresh.pagination.total || 0);
-        setStats(fresh.stats);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current)
-          notifyReadError("Error refreshing activity logs:", error);
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
+      // Deleting shifts offset pages. Keep only page one before any next-page request.
+      queryClient.setQueriesData({ queryKey }, (old) => old?.pages?.length
+        ? { pages: [old.pages[0]], pageParams: [1] }
+        : old);
+      await queryClient.invalidateQueries({ queryKey });
     });
   }
 
@@ -287,7 +253,11 @@ export default function ActivityLogsManager({
         <div className="items-start">
           <SearchBar
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const search = e.target.value;
+              setQuery(search);
+              showCachedFilters({ actorRole, targetType, search: search.trim() });
+            }}
             placeholder="Search by description..."
           />
         </div>
@@ -295,14 +265,20 @@ export default function ActivityLogsManager({
         <div className="flex gap-2 flex-wrap">
           <DropdownFilter
             value={actorRole}
-            onValueChange={setActorRole}
+            onValueChange={(nextRole) => {
+              setActorRole(nextRole);
+              showCachedFilters({ actorRole: nextRole, targetType, search: query.trim() });
+            }}
             options={actorRoleOptions}
             placeholder="Role"
             className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
           />
           <DropdownFilter
             value={targetType}
-            onValueChange={setTargetType}
+            onValueChange={(nextType) => {
+              setTargetType(nextType);
+              showCachedFilters({ actorRole, targetType: nextType, search: query.trim() });
+            }}
             options={targetTypeOptions}
             placeholder="Module"
             className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
@@ -311,7 +287,27 @@ export default function ActivityLogsManager({
       </div>
 
       {/* Table */}
-      {logs.length === 0 && !isPending ? (
+      {!isChangingFilters && logsQuery.error && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
+          <span className="flex items-center gap-2 text-foreground-soft">
+            <TriangleAlert className="size-4 text-destructive" aria-hidden="true" />
+            {logsQuery.error.message || "Activity logs could not be updated."}
+          </span>
+          <button
+            type="button"
+            onClick={() => logsQuery.isFetchNextPageError ? logsQuery.fetchNextPage() : logsQuery.refetch()}
+            className="font-semibold text-primary-emphasis hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {isFiltering ? (
+        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+          <ActivityLogsTableSkeleton />
+        </div>
+      ) : logsQuery.error && logs.length === 0 ? null : logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-24 text-center shadow-sm">
           <ScrollText className="size-8 text-foreground-faint" />
           <p className="text-sm font-medium text-muted-foreground">
@@ -323,9 +319,6 @@ export default function ActivityLogsManager({
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-          {isPending && logs.length === 0 ? (
-            <ActivityLogsTableSkeleton />
-          ) : (
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
@@ -386,7 +379,7 @@ export default function ActivityLogsManager({
                           }
                           title={
                             <span className={`text-primary-emphasis`}>
-                              Delete Daily Time Record
+                              Delete Activity Log
                             </span>
                           }
                           // title={<span className="text-red-600">Clock-out?</span>}
@@ -394,7 +387,7 @@ export default function ActivityLogsManager({
                           <DeleteForm
                             handleAction={handleDelete}
                             id={log.id}
-                            isPending={isLoading}
+                            isPending={isDeleting}
                             name={"logId"}
                           />
                         </Modal>
@@ -404,19 +397,18 @@ export default function ActivityLogsManager({
                 })}
               </tbody>
             </table>
-          )}
         </div>
       )}
 
-      {currentPage < totalPages && (
+      {!isFiltering && logsQuery.hasNextPage && (
         <div className="text-center">
           <button
             type="button"
             onClick={handleSeeMore}
-            disabled={isPending}
+            disabled={isDeleting || logsQuery.isFetching}
             className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >
-            {isPending ? "Loading..." : "See more"}
+            {logsQuery.isFetchingNextPage ? "Loading..." : "See more"}
           </button>
         </div>
       )}

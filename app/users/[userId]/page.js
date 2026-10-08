@@ -30,14 +30,8 @@ export async function generateMetadata({ params }) {
   return { title: "User Profile" };
 }
 
-async function UserProfilePage({ params, searchParams }) {
+async function UserProfilePage({ params }) {
   const resolvedParams = await params;
-  const sParams = await searchParams;
-  const currentDtrPage = Number(sParams.d_page) || 1;
-  // NEW — the DTR pagination links always set ?filter=dtr, so this tells
-  // us "we're navigating within the dtr tab" even when it isn't this
-  // role's default landing tab.
-  const requestedFilter = sParams.filter || null;
 
   const searchedUserId = resolvedParams.userId
     ? decodeURIComponent(resolvedParams.userId)
@@ -71,14 +65,12 @@ async function UserProfilePage({ params, searchParams }) {
       ? "info"
       : "dtr";
 
-  // Fetch DTR data server-side whenever it's the default landing tab OR
-  // the URL itself points at the dtr tab (a pagination link) — so every
-  // navigation, not just the first load, hands the client fresh data.
+  // Seed the first page; later DTR pages are fetched by the client query.
   let initialDtrData = null;
   let initialDtrLocation = null;
-  if (defaultFilter === "dtr" || requestedFilter === "dtr") {
+  if (defaultFilter === "dtr") {
     const [dtrData, dtrLocation] = await Promise.all([
-      getSearchedStudentDTRs(searchedUserId, currentDtrPage),
+      getSearchedStudentDTRs(searchedUserId, 1),
       ["employer", "admin"].includes(userRole)
         ? getSearchedStudentDtrLocation(searchedUserId)
         : null,
@@ -97,6 +89,7 @@ async function UserProfilePage({ params, searchParams }) {
       />
 
       <SearchedUserRecordsManager
+        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}`}
         searchedUserId={searchedUserId}
         userId={session?.user?.id || ""}
         userRole={userRole}
@@ -106,7 +99,6 @@ async function UserProfilePage({ params, searchParams }) {
         defaultFilter={defaultFilter}
         initialDtrData={initialDtrData}
         initialDtrLocation={initialDtrLocation}
-        currentDtrPage={currentDtrPage}
       />
     </main>
   );

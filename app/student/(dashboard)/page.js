@@ -19,8 +19,7 @@ import {
   Pin,
   ClipboardCheck,
 } from "lucide-react";
-// import StudentDashboardDtrTable from "@/app/_components/StudentDashboardDtrTable";
-import DtrTable from "@/components/dtr-ui/DtrTable";
+import StudentDtrHistory from "@/components/dtr-ui/StudentDtrHistory";
 import { Suspense } from "react";
 import DtrRecordsSkeleton from "@/components/skeletons/DtrRecordsSkeleton";
 
@@ -54,15 +53,12 @@ function getActivityVisual(action = "") {
   return { icon: Sparkles, color: "text-blue-600" };
 }
 
-async function StudentDashboardPage({ searchParams }) {
-  const sParams = await searchParams;
-  const currentDtrPage = Number(sParams.d_page) || 1;
-
+async function StudentDashboardPage() {
   const [stats, activityLogs, dashboardRes, dtrData] = await Promise.all([
     DashboardStatsSection(),
     getMyActivityLogs({ page: 1 }),
     getStudentDashboardData(),
-    getDtrs(currentDtrPage),
+    getDtrs(1),
   ]);
 
   const internshipData = dashboardRes?.internshipData || {};
@@ -110,12 +106,8 @@ async function StudentDashboardPage({ searchParams }) {
             <span className="w-4 h-4 rounded-full border-2 border-primary flex-shrink-0" />
             Recent Time Records
           </h3>
-          <div className="">
-            <DtrTable
-              dtrs={dtrData?.dtrs || []}
-              totalPages={dtrData?.totalPages}
-              currentDtrPage={currentDtrPage}
-            />
+          <div className="min-w-0">
+            <StudentDtrHistory internshipId={internshipData?.id} initialPage={dtrData} />
           </div>
         </section>
       </Suspense>

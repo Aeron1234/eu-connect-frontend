@@ -29,6 +29,7 @@ function PostedEvaluationItem({
   type = "default",
   onOptimisticRemove,
   onOptimisticRestore,
+  onChanged,
 }) {
   const [open, setOpen] = useState(!!defaultOpen);
   const [isPending, startTransition] = useTransition();
@@ -79,8 +80,10 @@ function PostedEvaluationItem({
         formData,
       });
 
-      if (result?.error) {
+      if (!result?.success) {
         onOptimisticRestore?.(ev);
+      } else {
+        onChanged?.();
       }
     });
   }
@@ -104,8 +107,10 @@ function PostedEvaluationItem({
         formData,
       });
 
-      if (result?.error) {
+      if (!result?.success) {
         onOptimisticRestore?.(ev);
+      } else {
+        onChanged?.();
       }
     });
   }
@@ -115,16 +120,16 @@ function PostedEvaluationItem({
 
     formData.append("evaluationId", ev.id);
 
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: `Restoring student evaluation...`,
-          successLabel: `Student evaluation was restored!`,
-          errorLabel: `Restoring student evaluation failed.`,
-          action: reviewDisputedEvaluation,
-          formData,
-        }),
-    );
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: `Restoring student evaluation...`,
+        successLabel: `Student evaluation was restored!`,
+        errorLabel: `Restoring student evaluation failed.`,
+        action: reviewDisputedEvaluation,
+        formData,
+      });
+      if (result?.success) onChanged?.();
+    });
   }
 
   return (
@@ -187,6 +192,7 @@ function PostedEvaluationItem({
             <StudentEvaluationDeleteForm
               evaluationId={ev.id}
               status={ev.status === "Pending"}
+              onSuccess={onChanged}
             />
           </Modal>
         )}

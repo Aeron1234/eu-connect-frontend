@@ -2,14 +2,16 @@
 
 import { notifyReadError } from "@/lib/client-read-error";
 
-import { useEffect, useRef, useState } from "react";
-import { Building2, FileText, Loader2, Users } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { Building2, FileText, TriangleAlert, Users } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { annexDHteInfiniteOptions, sippReportsKeys } from "@/lib/cache/sipp-reports-queries";
 
 import ExportPdfButton from "../ui/ExportPdfButton";
-import { getHteCompanyListResult as getHteCompanyList } from "@/lib/server-actions/sipp-hte-actions";
 import SearchBar from "../ui/SearchBar";
 import HTEListSkeleton from "../skeletons/HTEListSkeleton";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
+import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
 import { formatGender } from "@/lib/formatGender";
 
 function cx(...classes) {
@@ -18,111 +20,78 @@ function cx(...classes) {
 
 export function AnnexDHteList({
   availableAcadYear = [],
-  initialData = [],
-  pagination: {
-    page: initialPage = 1,
-    total: initialTotal = 0,
-    totalPages: initialTotalPages = 1,
-  },
-  academicYear: initialYear = "",
+  initialPage,
 }) {
-  const [companies, setCompanies] = useState(initialData);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [total, setTotal] = useState(initialTotal);
-  const [year, setYear] = useState(initialYear);
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialPage);
+  const [year, setYear] = useState(initialPage?.academicYear || "");
   const [query, setQuery] = useState("");
-  const [isPending, setIsPending] = useState(false);
-
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
+  const [filters, setFilters] = useState({ academicYear: initialPage?.academicYear || "", search: "" });
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-
-    const thisRequestId = ++requestIdRef.current;
-    setIsPending(true);
-
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = await getHteCompanyList({
-          academicYear: year,
-          search: query,
-          page: 1,
-        });
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (!hasValidPage(newData, "companies")) {
-          notifyReadError(
-            "Error loading HTE companies:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
-
-        setCompanies(newData.companies);
-        setCurrentPage(1);
-        setTotalPages(newData?.pagination?.totalPages || 1);
-        setTotal(newData?.pagination?.total || 0);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          notifyReadError("Error loading HTE companies:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 500);
-
+    const timeout = setTimeout(() => setFilters({ academicYear: year, search: query.trim() }), 500);
     return () => clearTimeout(timeout);
   }, [year, query]);
 
-  async function handleSeeMore() {
-    if (isPending || currentPage >= totalPages) return;
-    setIsPending(true);
-    const nextPage = currentPage + 1;
-    const thisRequestId = ++requestIdRef.current;
+  const isChangingFilters = filters.academicYear !== year || filters.search !== query.trim();
+  const companiesQuery = useInfiniteQuery({
+    ...annexDHteInfiniteOptions(userId, filters),
+    enabled: Boolean(userId),
+    initialData:
+      filters.academicYear === (initialPage?.academicYear || "") && !filters.search &&
+      hasValidPage(initialPage, "companies")
+        ? { pages: [initialPage], pageParams: [1] }
+        : undefined,
+  });
+  const companies = useMemo(() => {
+    const seen = new Set();
+    return (companiesQuery.data?.pages || []).flatMap((page) =>
+      page.companies.filter((company) => {
+        if (seen.has(company.company_key)) return false;
+        seen.add(company.company_key);
+        return true;
+      }),
+    );
+  }, [companiesQuery.data]);
+  const total = companiesQuery.data?.pages[0]?.pagination.total || 0;
+  const isPending = isChangingFilters || companiesQuery.isPending;
 
-    try {
-      const newData = await getHteCompanyList({
-        academicYear: year,
-        search: query,
-        page: nextPage,
-      });
+  function showCachedFilters(nextFilters) {
+    if (userId && queryClient.getQueryData(sippReportsKeys.annexDList(userId, nextFilters))?.pages?.length) {
+      setFilters(nextFilters);
+    }
+  }
 
-      if (thisRequestId !== requestIdRef.current) return;
+  useEffect(() => {
+    if (companiesQuery.error) notifyReadError("Error loading HTE companies:", companiesQuery.error);
+  }, [companiesQuery.error]);
 
-      if (!hasValidPage(newData, "companies", "pagination", nextPage)) {
-        notifyReadError(
-          "Error loading more HTE companies:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
+  useEffect(() => {
+    if (!initialPage || serverSnapshotRef.current === initialPage || !userId) return;
+    serverSnapshotRef.current = initialPage;
+    const seedFilters = { academicYear: initialPage.academicYear || "", search: "" };
+    queryClient.setQueryData(sippReportsKeys.annexDList(userId, seedFilters), (old) => {
+      if (!old?.pages?.length) return { pages: [initialPage], pageParams: [1] };
+      const previous = old.pages[0];
+      const keepLoaded = canKeepLoadedPages(
+        previous.companies.map((company) => company.company_key),
+        previous.pagination.total,
+        initialPage.companies,
+        initialPage.pagination.total,
+        (company) => company.company_key,
+      );
+      return {
+        pages: keepLoaded ? [initialPage, ...old.pages.slice(1)] : [initialPage],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+  }, [initialPage, queryClient, userId]);
 
-      const incoming = newData.companies;
-
-      setCompanies((prev) => {
-        const existingKeys = new Set(prev.map((c) => c.company_key));
-        const filteredNew = incoming.filter(
-          (c) => !existingKeys.has(c.company_key),
-        );
-        return [...prev, ...filteredNew];
-      });
-
-      setCurrentPage(nextPage);
-      if (newData?.pagination?.totalPages) {
-        setTotalPages(newData.pagination.totalPages);
-      }
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more HTE companies:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
+  function handleSeeMore() {
+    if (!isPending && !companiesQuery.isFetching && companiesQuery.hasNextPage) {
+      void companiesQuery.fetchNextPage();
     }
   }
 
@@ -134,7 +103,11 @@ export function AnnexDHteList({
         <div className="items-start">
           <SearchBar
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const search = e.target.value;
+              setQuery(search);
+              showCachedFilters({ academicYear: year, search: search.trim() });
+            }}
             placeholder="Search company or student name..."
           />
         </div>
@@ -144,7 +117,11 @@ export function AnnexDHteList({
             <button
               key={ay}
               type="button"
-              onClick={() => setYear(ay === "All" ? "" : ay)}
+              onClick={() => {
+                const academicYear = ay === "All" ? "" : ay;
+                setYear(academicYear);
+                showCachedFilters({ academicYear, search: query.trim() });
+              }}
               className={cx(
                 "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                 (ay === "All" && !year) || year === ay
@@ -177,9 +154,17 @@ export function AnnexDHteList({
         />
       </div>
 
+      {!isChangingFilters && companiesQuery.error && (
+        <div role="alert" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
+          <span className="flex items-center gap-2 text-foreground-soft"><TriangleAlert className="size-4 text-destructive" />{companiesQuery.error.message}</span>
+          <button type="button" onClick={() => companiesQuery.isFetchNextPageError ? companiesQuery.fetchNextPage() : companiesQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
+        </div>
+      )}
+
       {isPending ? (
         <HTEListSkeleton />
-      ) : companies.length === 0 ? (
+      ) : companiesQuery.error && companies.length === 0 ? null
+      : companies.length === 0 ? (
         <div className="mt-6 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
           <FileText className="size-8 text-foreground-faint" />
           <p className="text-sm text-muted-foreground">No placements found</p>
@@ -269,13 +254,14 @@ export function AnnexDHteList({
         </div>
       )}
 
-      {!isPending && currentPage < totalPages && (
+      {!isPending && companiesQuery.hasNextPage && (
         <div className="mt-5 text-center">
           <button
             onClick={handleSeeMore}
+            disabled={companiesQuery.isFetchingNextPage}
             className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition-colors"
           >
-            See more
+            {companiesQuery.isFetchingNextPage ? "Loading..." : "See more"}
           </button>
         </div>
       )}

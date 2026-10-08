@@ -1,8 +1,16 @@
 "use client";
 
 import { format } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
-import RecordsDtrTable from "../dtr-ui/RecordsDtrTable";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { notifyReadError } from "@/lib/client-read-error";
+import {
+  internshipRecordDetailsKeys,
+  internshipRecordDetailsTabOptions,
+} from "@/lib/cache/internship-record-details-queries";
+import DtrTable from "../dtr-ui/DtrTable";
+import DtrPagination from "../dtr-ui/DtrPagination";
 import RecordsNarrative from "../weekly-narratives-ui/RecordsNarratives";
 import EvaluationCard from "../evaluations-ui/EvaluationCard";
 import RecordsDocuments from "../internship-docs-ui/RecordsDocuments";
@@ -10,15 +18,6 @@ import SetDtrLocation from "../dtr-ui/SetDtrLocation";
 import TabBar from "../ui/TabBar";
 import RecordsTabContentSkeleton from "../skeletons/RecordsTabContentSkeleton";
 import ProgressBar from "../ui/ProgressBar";
-import { getInternshipRecordDocumentsResult as getInternshipRecordDocuments } from "@/lib/server-actions/internship-docs-actions";
-import {
-  getInternshipRecordDtrResult as getInternshipRecordDtr,
-  getSearchedStudentDtrLocationResult as getSearchedStudentDtrLocation,
-} from "@/lib/server-actions/dtr-actions";
-import { getInternshipRecordWeeklyNarrativesResult as getInternshipRecordWeeklyNarratives } from "@/lib/server-actions/weekly-narratives-actions";
-import { getInternshipRecordEvaluationsResult as getInternshipRecordEvaluations } from "@/lib/server-actions/evaluations-actions";
-
-import { getFileRequirementTypesResult as getFileRequirementTypes } from "@/lib/server-actions/internship-docs-actions";
 
 const tabs = [
   { value: "overview", text: "Overview" },
@@ -47,86 +46,66 @@ function normalizeDtrLocation(raw) {
 }
 
 function RecordsDetailsPageContent({ record, internshipId }) {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState("overview");
-  const [filter, setFilter] = useState("overview");
-  const [data, setData] = useState({});
-  const [isPending, setIsPending] = useState(false);
-  const [loadError, setLoadError] = useState("");
-  const [retryKey, setRetryKey] = useState(0);
-
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
-
-  // Overview's data is already on hand via `record` — switching to it
-  // never needs a fetch.
-  const fetchers = useMemo(() => ({
-    dtr: async () => {
-      if (record?.status !== "ongoing") {
-        return { dtrs: await getInternshipRecordDtr(internshipId) };
-      }
-
-      const [dtrs, dtrLocation] = await Promise.all([
-        getInternshipRecordDtr(internshipId),
-        getSearchedStudentDtrLocation(record?.student_id),
-      ]);
-      return { dtrs, dtrLocation };
-    },
-    narratives: async () => {
-      const narratives =
-        await getInternshipRecordWeeklyNarratives(internshipId);
-      return { narratives };
-    },
-    evaluations: async () => {
-      const evaluations = await getInternshipRecordEvaluations(internshipId);
-      return { evaluations };
-    },
-    documents: async () => {
-      const [fileData, requirementTypes] = await Promise.all([
-        getInternshipRecordDocuments(internshipId),
-        getFileRequirementTypes(),
-      ]);
-      return { fileData, requirementTypes };
-    },
-  }), [internshipId, record?.status, record?.student_id]);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [dtrPage, setDtrPage] = useState(1);
+  const tabQuery = useQuery({
+    ...internshipRecordDetailsTabOptions(
+      user?.id,
+      internshipId,
+      activeTab,
+      record,
+      dtrPage,
+    ),
+    enabled: activeTab !== "overview" && Boolean(user?.id && internshipId),
+  });
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-
-    if (selectedTab === filter) return;
-
-    if (selectedTab === "overview") {
-      setFilter("overview");
-      return;
-    }
-
-    const thisRequestId = ++requestIdRef.current;
-
-    const timeout = setTimeout(async () => {
-      setIsPending(true);
-      setLoadError("");
-      try {
-        const result = await fetchers[selectedTab]();
-
-        if (thisRequestId !== requestIdRef.current) return;
-        const failedRead = Object.values(result).find((value) => value?.error);
-        if (failedRead) throw new Error(failedRead.error);
-
-        setFilter(selectedTab);
-        setData(result);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          setLoadError(error?.message || "Could not load this section.");
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 300);
-
+    if (selectedTab === activeTab) return;
+    const timeout = setTimeout(() => setActiveTab(selectedTab), 300);
     return () => clearTimeout(timeout);
-  }, [selectedTab, filter, retryKey, fetchers]);
+  }, [selectedTab, activeTab]);
+
+  useEffect(() => {
+    if (tabQuery.error) notifyReadError(tabQuery.error.message || "Could not load this section.");
+  }, [tabQuery.error]);
+
+  function handleTabClick(value) {
+    setSelectedTab(value);
+    if (value === "dtr") setDtrPage(1);
+    if (
+      value === "overview" ||
+      queryClient.getQueryData(
+        internshipRecordDetailsKeys.tab(user?.id, internshipId, value, 1),
+      )
+    ) {
+      setActiveTab(value);
+    }
+  }
+
+  function handleDtrLocationSaved(saved) {
+    queryClient.setQueriesData(
+      { queryKey: internshipRecordDetailsKeys.dtrPages(user?.id, internshipId) },
+      (previous) => previous && ({
+        ...previous,
+        dtrLocation: {
+          internship_id: saved.internship_id,
+          is_custom_location: true,
+          location: saved,
+        },
+      }),
+    );
+  }
+
+  const isSwitching = selectedTab !== activeTab;
+  const isPending =
+    isSwitching || (activeTab !== "overview" && tabQuery.isPending);
+  const loadError = !isSwitching && tabQuery.isError
+    ? tabQuery.error?.message || "Could not load this section."
+    : "";
+  const data = tabQuery.data;
 
   const pct = Math.min(
     100,
@@ -135,12 +114,12 @@ function RecordsDetailsPageContent({ record, internshipId }) {
 
   return (
     <>
-      <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={setSelectedTab} />
+      <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={handleTabClick} />
 
       {loadError && !isPending ? (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
           <p>{loadError}</p>
-          <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => setRetryKey((value) => value + 1)}>
+          <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void tabQuery.refetch()}>
             Try again
           </button>
         </div>
@@ -148,7 +127,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
         <RecordsTabContentSkeleton tab={selectedTab} />
       ) : (
         <>
-          {filter === "overview" && (
+          {activeTab === "overview" && (
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-border shadow-sm bg-card p-4 sm:p-5">
                 <h3 className="text-base sm:text-lg font-bold text-primary-emphasis">
@@ -208,23 +187,30 @@ function RecordsDetailsPageContent({ record, internshipId }) {
             </div>
           )}
 
-          {filter === "dtr" && (
+          {activeTab === "dtr" && (
             <>
-              <div className="rounded-xl bg-card border border-border shadow-sm p-4 sm:p-6">
-                <RecordsDtrTable dtrs={data?.dtrs || []} />
+              <div className="min-w-0 rounded-xl bg-card border border-border shadow-sm p-4 sm:p-6">
+                <DtrTable dtrs={data?.dtrData?.dtrs || []} />
+                <DtrPagination
+                  page={dtrPage}
+                  totalPages={data?.dtrData?.totalPages}
+                  onPageChange={setDtrPage}
+                  disabled={tabQuery.isFetching}
+                />
               </div>
               {record?.status === "ongoing" && (
                 <div className="mt-6">
                   <SetDtrLocation
                     studentId={record?.student_id}
                     dataLocation={normalizeDtrLocation(data?.dtrLocation)}
+                    onSaved={handleDtrLocationSaved}
                   />
                 </div>
               )}
             </>
           )}
 
-          {filter === "narratives" && (
+          {activeTab === "narratives" && (
             <ul className="space-y-3 sm:space-y-4">
               {(data?.narratives || []).map((narrative) => (
                 <RecordsNarrative
@@ -243,11 +229,16 @@ function RecordsDetailsPageContent({ record, internshipId }) {
             </ul>
           )}
 
-          {filter === "evaluations" && (
-            <EvaluationCard evaluations={data?.evaluations || []} />
+          {activeTab === "evaluations" && (
+            <EvaluationCard
+              evaluations={data?.evaluations || []}
+              onChanged={() => void queryClient.invalidateQueries({
+                queryKey: internshipRecordDetailsKeys.tab(user?.id, internshipId, "evaluations"),
+              })}
+            />
           )}
 
-          {filter === "documents" && (
+          {activeTab === "documents" && (
             <RecordsDocuments
               fileData={data?.fileData || []}
               requirementTypes={data?.requirementTypes || []}

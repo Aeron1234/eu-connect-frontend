@@ -23,6 +23,7 @@ async function AnnouncementPage() {
       initialPinned={announcementData?.pinned || []}
       initialRegular={announcementData?.regular || []}
       initialTotalPages={announcementData?.totalPages || 1}
+      initialTotalRecords={announcementData?.totalRecords || 0}
     />
   );
 }

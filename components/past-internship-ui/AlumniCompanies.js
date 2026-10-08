@@ -134,7 +134,7 @@ function AlumniRow({
 
     startTransition(async () => {
       const result = await toastAndAction(handlers);
-      if (result?.success && result.record) {
+      if (result?.success) {
         onUpdate?.(result.record);
       }
     });

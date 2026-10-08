@@ -5,7 +5,7 @@ import { toastAndAction } from "../../lib/helpers";
 import DeleteForm from "../ui/DeleteForm";
 import { deleteFile } from "@/lib/server-actions/internship-docs-actions";
 
-function StorageDeleteFile({ fileId = "", fileUrl = "", path }) {
+function StorageDeleteFile({ fileId = "", fileUrl = "", onDeleted }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
@@ -19,7 +19,10 @@ function StorageDeleteFile({ fileId = "", fileUrl = "", path }) {
       formData,
     };
 
-    startTransition(async () => await toastAndAction(handlers));
+    startTransition(async () => {
+      const result = await toastAndAction(handlers);
+      if (result?.success) onDeleted?.();
+    });
   }
 
   return (

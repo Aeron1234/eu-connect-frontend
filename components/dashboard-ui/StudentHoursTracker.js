@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import {
+  dashboardListsKeys,
+  studentHoursPageOptions,
+} from "@/lib/cache/dashboard-lists-queries";
 import {
   Select,
   SelectContent,
@@ -10,33 +16,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getDepartmentStudentHoursPageResult } from "@/lib/server-actions/dashboard-actions";
 import ProgressBar from "../ui/ProgressBar";
 
 function StudentHoursTracker({ initialPage, courses = [] }) {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
   const listRef = useRef(null);
   const [courseFilter, setCourseFilter] = useState("all");
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState({ page: 1, courseId: "all", search: "" });
-  const [retryCount, setRetryCount] = useState(0);
-  const [result, setResult] = useState({
-    key: JSON.stringify([1, "all", "", 0]),
-    data: initialPage,
+  const pageQuery = useQuery({
+    ...studentHoursPageOptions(user?.id, query),
+    enabled: Boolean(user?.id),
+    initialData: query.page === 1 && query.courseId === "all" && !query.search
+      ? initialPage
+      : undefined,
   });
-  const [failure, setFailure] = useState(null);
-  const requestKey = JSON.stringify([
-    query.page,
-    query.courseId,
-    query.search,
-    retryCount,
-  ]);
-  const isLoading = result.key !== requestKey && failure?.key !== requestKey;
+  const isLoading = pageQuery.isPending;
   const isSearchPending = searchInput.trim() !== query.search;
   const isPending = isSearchPending || isLoading;
   const loadingMessage = isSearchPending
     ? "Searching students..."
     : "Loading student hours...";
-  const pageData = result.data;
+  const pageData = pageQuery.data;
+
+  useEffect(() => {
+    if (!user?.id || !initialPage) return;
+    queryClient.setQueryData(
+      dashboardListsKeys.studentHours(user.id, {
+        page: 1,
+        courseId: "all",
+        search: "",
+      }),
+      initialPage,
+    );
+  }, [initialPage, queryClient, user?.id]);
 
   useEffect(() => {
     const search = searchInput.trim();
@@ -47,39 +61,14 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
     return () => clearTimeout(timer);
   }, [searchInput, query.search]);
 
-  useEffect(() => {
-    if (requestKey === result.key) return;
-    let active = true;
-    getDepartmentStudentHoursPageResult({
-      page: query.page,
-      courseId: query.courseId === "all" ? undefined : query.courseId,
-      search: query.search,
-    })
-      .then((response) => {
-        if (!active) return;
-        if (response?.error) {
-          setFailure({ key: requestKey, message: response.error });
-        } else {
-          setResult({ key: requestKey, data: response });
-          setFailure(null);
-          listRef.current?.scrollTo({ top: 0 });
-        }
-      })
-      .catch(() => {
-        if (active)
-          setFailure({
-            key: requestKey,
-            message: "Could not load student hours. Please try again.",
-          });
-      });
-    return () => {
-      active = false;
-    };
-  }, [query, requestKey, result.key]);
-
   function changeCourse(value) {
     setCourseFilter(value);
     setQuery({ page: 1, courseId: value, search: searchInput.trim() });
+    listRef.current?.scrollTo({ top: 0 });
+  }
+
+  function changePage(offset) {
+    setQuery((current) => ({ ...current, page: current.page + offset }));
     listRef.current?.scrollTo({ top: 0 });
   }
 
@@ -148,12 +137,14 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
           <p className="py-6 text-center text-sm text-muted-foreground">
             {loadingMessage}
           </p>
-        ) : failure?.key === requestKey ? (
+        ) : pageQuery.isError ? (
           <div className="py-6 text-center text-sm">
-            <p className="text-red-600">{failure.message}</p>
+            <p className="text-red-600">
+              {pageQuery.error?.message || "Could not load student hours. Please try again."}
+            </p>
             <button
               type="button"
-              onClick={() => setRetryCount((count) => count + 1)}
+              onClick={() => void pageQuery.refetch()}
               className="mt-2 font-medium text-primary-emphasis hover:underline"
             >
               Try again
@@ -227,15 +218,15 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
         <span>
           {isPending
             ? "Loading..."
-            : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}
+            : pageQuery.isError
+              ? "Unavailable"
+              : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}
         </span>
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() =>
-              setQuery((current) => ({ ...current, page: current.page - 1 }))
-            }
-            disabled={isPending || query.page <= 1}
+            onClick={() => changePage(-1)}
+            disabled={isPending || pageQuery.isError || query.page <= 1}
             className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
             Previous
@@ -245,10 +236,12 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
           </span>
           <button
             type="button"
-            onClick={() =>
-              setQuery((current) => ({ ...current, page: current.page + 1 }))
+            onClick={() => changePage(1)}
+            disabled={
+              isPending ||
+              pageQuery.isError ||
+              query.page >= (pageData?.totalPages ?? 1)
             }
-            disabled={isPending || query.page >= (pageData?.totalPages ?? 1)}
             className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next

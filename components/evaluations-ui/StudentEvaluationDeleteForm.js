@@ -5,20 +5,20 @@ import { toastAndAction } from "../../lib/helpers";
 import DeleteForm from "../ui/DeleteForm";
 import { deletePendingStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
 
-function StudentEvaluationDeleteForm({ evaluationId, status }) {
+function StudentEvaluationDeleteForm({ evaluationId, status, onSuccess }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: "Deleting pending evaluation...",
-          successLabel: "Evaluation deleted.",
-          errorLabel: "Failed to delete.",
-          action: deletePendingStudentEvaluation,
-          formData,
-        }),
-    );
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Deleting pending evaluation...",
+        successLabel: "Evaluation deleted.",
+        errorLabel: "Failed to delete.",
+        action: deletePendingStudentEvaluation,
+        formData,
+      });
+      if (result?.success) onSuccess?.();
+    });
   }
 
   if (!status) return null;

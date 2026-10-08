@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { toastAndAction } from "../../lib/helpers";
 import { postEmployerEvaluation } from "@/lib/server-actions/evaluations-actions";
 
-function EmployerEvaluationForm({ employerEvaluationCriterias }) {
+function EmployerEvaluationForm({ employerEvaluationCriterias, onSubmitted }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {
     const initialState = {};
     employerEvaluationCriterias.forEach((cat) => {
@@ -41,9 +41,11 @@ function EmployerEvaluationForm({ employerEvaluationCriterias }) {
         formData,
       });
 
-      if (!result || result.error) {
+      if (!result?.success) {
         return;
       }
+
+      onSubmitted?.();
 
       setEvaluationGrades(() => {
         const initialState = {};

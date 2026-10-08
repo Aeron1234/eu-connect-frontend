@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition, useCallback } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import {
   Award,
+  CalendarDays,
   ArrowUpRight,
   Bell,
   ChevronLeft,
@@ -22,14 +24,13 @@ import {
   XCircle,
 } from "lucide-react";
 import { cx } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
 import { getNotificationTargetPath } from "@/lib/notification-routes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { socket } from "./SocketProvider";
 import { toast } from "sonner";
 import { toastAndAction } from "../../lib/helpers";
 import {
-  getInboxResult as getInbox,
-  getUnreadNotificationCountResult as getUnreadNotificationCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
@@ -38,9 +39,17 @@ import {
   NOTIFICATIONS_CHANGED,
   notifyNotificationsChanged,
 } from "@/lib/notification-events";
+import {
+  notificationCountOptions,
+  notificationInboxOptions,
+  notificationsKeys,
+  refreshNotificationQueries,
+  updateNotificationInboxes,
+} from "@/lib/cache/notifications-queries";
 
 const TYPE_META = {
   announcement: { icon: Megaphone, label: "Announcement" },
+  calendar_schedule: { icon: CalendarDays, label: "Calendar schedule" },
   internship_record_request: { icon: FileText, label: "Internship request" },
   internship_record_approved: { icon: CheckCircle2, label: "Internship update" },
   internship_record_rejected: { icon: XCircle, label: "Internship update" },
@@ -59,7 +68,7 @@ function NotificationBell({ unreadCount, isOpen = false }) {
   return (
     <>
       <Bell
-        className={`h-5 w-5 transition-colors ${isOpen ? "fill-primary-emphasis text-primary-emphasis" : ""}`}
+        className={`size-5 translate-y-0.5 transition-colors ${isOpen ? "fill-primary-emphasis text-primary-emphasis" : ""}`}
         strokeWidth={isOpen ? 2.5 : 2}
       />
       {unreadCount > 0 && (
@@ -72,111 +81,50 @@ function NotificationBell({ unreadCount, isOpen = false }) {
 }
 
 function NotificationsButton() {
-  const [inbox, setInbox] = useState(() => ({
-    notifications: [],
-    unreadCount: 0,
-    page: 1,
-    totalPages: 1,
-    totalRecords: 0,
-  }));
-  const { notifications, unreadCount, page, totalPages, totalRecords } = inbox;
+  const { user } = useUser();
+  const queryClient = useQueryClient();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [inboxStatus, setInboxStatus] = useState("idle");
+  const [page, setPage] = useState(1);
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [markingId, setMarkingId] = useState(null);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const dropdownRef = useRef(null);
-  const requestIdRef = useRef(0);
-  const countRequestIdRef = useRef(0);
-  const pageRef = useRef(1);
   const [, startDeleteTransition] = useTransition();
-
-  const refreshUnreadCount = useCallback(async () => {
-    const requestId = ++countRequestIdRef.current;
-    try {
-      const fresh = await getUnreadNotificationCount();
-      if (
-        requestId !== countRequestIdRef.current ||
-        !Number.isFinite(Number(fresh?.unreadCount))
-      ) {
-        return;
-      }
-      setInbox((current) => ({
-        ...current,
-        unreadCount: Math.max(0, Number(fresh.unreadCount)),
-      }));
-    } catch {
-      // Keep the previous badge when the background count refresh fails.
-    }
-  }, []);
-
-  const refreshInbox = useCallback(async (showLoading = false, targetPage = pageRef.current) => {
-    const requestId = ++requestIdRef.current;
-    pageRef.current = targetPage;
-    if (showLoading) setInboxStatus("loading");
-    try {
-      let fresh = await getInbox({ scope: "all", page: targetPage });
-      if (requestId !== requestIdRef.current) return false;
-      if (!Array.isArray(fresh?.data)) {
-        setInboxStatus((current) =>
-          current === "loading" ? "error" : current,
-        );
-        return false;
-      }
-      const lastPage = Math.max(1, Number(fresh.totalPages) || 1);
-      if (targetPage > lastPage) {
-        targetPage = lastPage;
-        fresh = await getInbox({ scope: "all", page: targetPage });
-        if (requestId !== requestIdRef.current) return false;
-        if (!Array.isArray(fresh?.data)) {
-          setInboxStatus("error");
-          return false;
-        }
-      }
-      countRequestIdRef.current += 1;
-      pageRef.current = targetPage;
-      setInbox({
-        notifications: fresh.data,
-        unreadCount: Math.max(0, Number(fresh.unreadCount) || 0),
-        page: targetPage,
-        totalPages: Math.max(1, Number(fresh.totalPages) || 1),
-        totalRecords: Math.max(0, Number(fresh.totalRecords) || 0),
-      });
-      setInboxStatus("ready");
-      return true;
-    } catch {
-      if (requestId === requestIdRef.current) {
-        setInboxStatus((current) =>
-          current === "loading" ? "error" : current,
-        );
-      }
-      return false;
-    }
-  }, []);
-
-  // The badge needs only a count. The full inbox is read when the menu opens.
-  useEffect(() => {
-    void refreshUnreadCount();
-    return () => {
-      countRequestIdRef.current += 1;
-      requestIdRef.current += 1;
-    };
-  }, [refreshUnreadCount]);
+  const countQuery = useQuery(notificationCountOptions(user.id));
+  const inboxQuery = useInfiniteQuery({
+    ...notificationInboxOptions(user.id),
+    // Do not create the real inbox query until the dropdown is opened. This
+    // also lets the notifications page seed it with its server-rendered data.
+    queryKey: showNotifications
+      ? notificationsKeys.inbox(user.id)
+      : [...notificationsKeys.all(user.id), "closed-dropdown"],
+    enabled: showNotifications,
+  });
+  const pages = inboxQuery.data?.pages ?? [];
+  const currentPage = pages[page - 1];
+  const notifications = currentPage?.data ?? [];
+  const unreadCount = countQuery.data ?? pages[0]?.unreadCount ?? 0;
+  const totalPages = Math.max(1, pages.at(-1)?.totalPages ?? 1);
+  const totalRecords = pages[0]?.totalRecords ?? 0;
+  const inboxStatus = inboxQuery.isPending || isLoadingPage
+    ? "loading"
+    : inboxQuery.isError && !inboxQuery.data
+      ? "error"
+      : "ready";
 
   useEffect(() => {
-    if (showNotifications) void refreshInbox(true, 1);
-  }, [showNotifications, refreshInbox]);
+    if (page > Math.min(totalPages, Math.max(1, pages.length))) {
+      setPage(Math.min(totalPages, Math.max(1, pages.length)));
+    }
+  }, [page, pages.length, totalPages]);
 
-  // Socket payloads have no row ID. Refresh the open menu; otherwise keep
-  // the badge current without querying the full notification list.
+  // The badge fetches independently; the full inbox remains lazy until opened.
   useEffect(() => {
     let timer;
     const scheduleRefresh = () => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (showNotifications) void refreshInbox();
-        else void refreshUnreadCount();
-      }, 150);
+      timer = setTimeout(() => refreshNotificationQueries(queryClient, user.id), 150);
     };
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") scheduleRefresh();
@@ -193,7 +141,7 @@ function NotificationsButton() {
       window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [showNotifications, refreshInbox, refreshUnreadCount]);
+  }, [queryClient, user.id]);
 
   // Close the dropdown when clicking outside it.
   useEffect(() => {
@@ -222,20 +170,30 @@ function NotificationsButton() {
 
   function toggleNotifications() {
     if (!showNotifications) {
-      pageRef.current = 1;
-      setInboxStatus("loading");
+      setPage(1);
     }
     setShowNotifications((current) => !current);
   }
 
-  function handlePageChange(nextPage) {
+  async function handlePageChange(nextPage) {
     if (
       inboxStatus === "loading" ||
       nextPage < 1 ||
       nextPage > totalPages ||
       nextPage === page
     ) return;
-    void refreshInbox(true, nextPage);
+    if (pages[nextPage - 1]) {
+      setPage(nextPage);
+      return;
+    }
+    setIsLoadingPage(true);
+    try {
+      const result = await inboxQuery.fetchNextPage();
+      if (result.data?.pages[nextPage - 1]) setPage(nextPage);
+      else toast.error("Could not load more notifications.");
+    } finally {
+      setIsLoadingPage(false);
+    }
   }
 
   function handleOpenNotification(notif) {
@@ -244,6 +202,20 @@ function NotificationsButton() {
     void markAsRead(notif.id).then((result) => {
       if (result?.success) notifyNotificationsChanged();
     });
+  }
+
+  function updateReadCache(id) {
+    const target = notifications.find((item) => String(item.id) === String(id));
+    if (!target || target.is_read) return;
+    const nextCount = Math.max(0, unreadCount - 1);
+    updateNotificationInboxes(queryClient, user.id, (inboxPage) => ({
+      ...inboxPage,
+      unreadCount: nextCount,
+      data: inboxPage.data.map((item) =>
+        String(item.id) === String(id) ? { ...item, is_read: true } : item,
+      ),
+    }));
+    queryClient.setQueryData(notificationsKeys.count(user.id), nextCount);
   }
 
   async function handleMarkRead(id) {
@@ -255,23 +227,7 @@ function NotificationsButton() {
         toast.error(result?.error || "Could not mark notification as read.");
         return;
       }
-      requestIdRef.current += 1;
-      countRequestIdRef.current += 1;
-      setInbox((current) => {
-        const target = current.notifications.find(
-          (notification) => String(notification.id) === String(id),
-        );
-        if (!target || target.is_read) return current;
-        return {
-          ...current,
-          notifications: current.notifications.map((notification) =>
-            String(notification.id) === String(id)
-              ? { ...notification, is_read: true }
-              : notification,
-          ),
-          unreadCount: Math.max(0, current.unreadCount - 1),
-        };
-      });
+      updateReadCache(id);
       notifyNotificationsChanged();
     } catch (error) {
       console.error("Could not mark notification as read:", error);
@@ -290,17 +246,14 @@ function NotificationsButton() {
         toast.error(result?.error || "Could not mark notifications as read.");
         return;
       }
-      requestIdRef.current += 1;
-      countRequestIdRef.current += 1;
-      setInbox((current) => ({
-        ...current,
-        notifications: current.notifications.map((notification) =>
-          notification.is_read
-            ? notification
-            : { ...notification, is_read: true },
-        ),
+      updateNotificationInboxes(queryClient, user.id, (inboxPage) => ({
+        ...inboxPage,
         unreadCount: 0,
+        data: inboxPage.data.map((item) =>
+          item.is_read ? item : { ...item, is_read: true },
+        ),
       }));
+      queryClient.setQueryData(notificationsKeys.count(user.id), 0);
       notifyNotificationsChanged();
     } catch (error) {
       console.error("Could not mark notifications as read:", error);
@@ -326,25 +279,33 @@ function NotificationsButton() {
           formData,
         });
         if (!result?.success) return;
-        requestIdRef.current += 1;
-        countRequestIdRef.current += 1;
-        setInbox((current) => {
-          const target = current.notifications.find(
-            (notification) => String(notification.id) === String(id),
+        const target = notifications.find((item) => String(item.id) === String(id));
+        if (target) {
+          const nextCount = Math.max(0, unreadCount - (target.is_read ? 0 : 1));
+          queryClient.setQueryData(notificationsKeys.count(user.id), nextCount);
+          queryClient.setQueriesData(
+            { queryKey: notificationsKeys.inboxes(user.id) },
+            (old) => {
+              if (!old?.pages?.length) return old;
+              const includesTarget = old.pages.some((inboxPage) =>
+                inboxPage.data.some((item) => String(item.id) === String(id)),
+              );
+              return {
+                ...old,
+                pages: old.pages.map((inboxPage) => ({
+                  ...inboxPage,
+                  unreadCount: nextCount,
+                  totalRecords: Math.max(
+                    0,
+                    inboxPage.totalRecords - (includesTarget ? 1 : 0),
+                  ),
+                  data: inboxPage.data.filter((item) => String(item.id) !== String(id)),
+                })),
+              };
+            },
           );
-          if (!target) return current;
-          return {
-            ...current,
-            notifications: current.notifications.filter(
-              (notification) => String(notification.id) !== String(id),
-            ),
-            unreadCount: Math.max(
-              0,
-              current.unreadCount - (target.is_read ? 0 : 1),
-            ),
-            totalRecords: Math.max(0, current.totalRecords - 1),
-          };
-        });
+        }
+        setPage(1);
         notifyNotificationsChanged();
       } catch (error) {
         console.error("Could not delete notification:", error);
@@ -452,7 +413,7 @@ function NotificationsButton() {
                 <p>Could not load notifications.</p>
                 <button
                   type="button"
-                  onClick={() => void refreshInbox(true, pageRef.current)}
+                  onClick={() => void inboxQuery.refetch()}
                   className="mt-2 font-semibold text-primary-emphasis hover:underline"
                 >
                   Try again

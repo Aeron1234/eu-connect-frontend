@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import {
   Award,
+  CalendarDays,
   Check,
   CheckCircle2,
   ClipboardCheck,
@@ -29,6 +30,7 @@ import { respondToSupervisorRequest } from "@/lib/server-actions/supervisor-acti
 
 const TYPE_META = {
   announcement: { icon: Megaphone, tone: "primary" },
+  calendar_schedule: { icon: CalendarDays, tone: "success" },
   internship_record_request: { icon: FileText, tone: "primary" },
   internship_record_approved: { icon: CheckCircle2, tone: "success" },
   internship_record_rejected: { icon: XCircle, tone: "destructive" },
@@ -55,23 +57,10 @@ function NotificationItem({ item, onChanged }) {
   const [isPending, startTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
 
-  // Nullable override: null = trust item.actionable as it comes in from
-  // props (so a fresh fetch or revalidation always reflects the current
-  // server state); false = force-hidden immediately after THIS employer
-  // just responded, before the next revalidation confirms it server-side.
-  // Plain useState(item.actionable) goes stale here because NotificationItem
-  // keeps the same key (item.ui_key) across re-renders even when the
-  // underlying actionable status changes, so its initial value never re-runs.
+  // Hide response actions immediately after submitting, before the refresh.
+  // The parent remounts this item when the server's actionable state changes.
   const [respondedOverride, setRespondedOverride] = useState(null);
   const isActionable = respondedOverride === false ? false : item.actionable;
-
-  // If the request gets superseded/resolved elsewhere (another tab, another
-  // device) and a fresh item.actionable === false comes down through props,
-  // drop any stale local override so we don't keep hiding something that's
-  // already resolved for a different reason than "I just clicked a button".
-  useEffect(() => {
-    if (!item.actionable) setRespondedOverride(null);
-  }, [item.actionable]);
 
   const meta = TYPE_META[item.type] ?? { icon: FileText, tone: "muted" };
   const Icon = meta.icon;
@@ -90,14 +79,18 @@ function NotificationItem({ item, onChanged }) {
       // known web-vitals/INP timing bug when the clicked element gets
       // removed before its interaction entry finishes being read.
       if (!item.is_read) {
-        void markAsRead(item.id).then(() => onChanged?.());
+        void markAsRead(item.id).then((result) => {
+          if (result?.success) onChanged?.();
+        });
       }
       router.push(targetPath);
       return;
     }
 
     if (!item.is_read) {
-      void markAsRead(item.id).then(() => onChanged?.());
+      void markAsRead(item.id).then((result) => {
+        if (result?.success) onChanged?.();
+      });
     }
   }
 
@@ -121,8 +114,8 @@ function NotificationItem({ item, onChanged }) {
 
       if (result?.success) {
         setRespondedOverride(false);
+        onChanged?.();
       }
-      onChanged?.();
     });
   }
 
@@ -133,17 +126,14 @@ function NotificationItem({ item, onChanged }) {
     formData.append("notificationId", item.id);
 
     startDeleteTransition(async () => {
-      try {
-        await toastAndAction({
-          loadingLabel: "Deleting notification...",
-          successLabel: "Notification deleted.",
-          errorLabel: "Failed to delete notification.",
-          action: deleteNotification,
-          formData,
-        });
-      } finally {
-        onChanged?.();
-      }
+      const result = await toastAndAction({
+        loadingLabel: "Deleting notification...",
+        successLabel: "Notification deleted.",
+        errorLabel: "Failed to delete notification.",
+        action: deleteNotification,
+        formData,
+      });
+      if (result?.success) onChanged?.();
     });
   }
 

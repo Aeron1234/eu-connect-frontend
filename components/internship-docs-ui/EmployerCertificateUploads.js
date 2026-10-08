@@ -61,8 +61,12 @@ const EmployerCertificateUploads = ({
   searchedUserId,
   company,
   uploadedFiles,
+  onChanged,
 }) => {
-  const [files, setFiles] = useState(uploadedFiles || []);
+  const [filesOverride, setFilesOverride] = useState(null);
+  const files = filesOverride?.source === uploadedFiles
+    ? filesOverride.files
+    : uploadedFiles || [];
   const [fileName, setFileName] = useState("");
   const [companyName, setCompanyName] = useState(company || "");
   const [pending, setPending] = useState(null);
@@ -115,7 +119,7 @@ const EmployerCertificateUploads = ({
 
       // 🌟 TODO: replace with a real refetch once revalidation is wired up —
       // this optimistically adds it, matching the real API's field shape
-      setFiles([
+      setFilesOverride({ source: uploadedFiles, files: [
         {
           id: result.id,
           file_name: fileName.trim() || pending.name,
@@ -125,9 +129,10 @@ const EmployerCertificateUploads = ({
           verification_status: "pending",
         },
         ...files,
-      ]);
+      ] });
       setPending(null);
       setFileName("");
+      onChanged?.();
     });
   }
 
@@ -167,7 +172,11 @@ const EmployerCertificateUploads = ({
       const result = await toastAndAction(handlers);
       if (!result?.success) return;
 
-      setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      setFilesOverride({
+        source: uploadedFiles,
+        files: files.filter((f) => f.id !== fileId),
+      });
+      onChanged?.();
     });
   }
 

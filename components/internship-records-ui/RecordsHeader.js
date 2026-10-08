@@ -8,6 +8,9 @@ import {
   XCircle,
 } from "lucide-react";
 import { useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { internshipRecordsKeys } from "@/lib/cache/internship-records-queries";
 import { toastAndAction } from "../../lib/helpers";
 import {
   restoreInternshipRecord,
@@ -47,27 +50,32 @@ function StatusPill({ status }) {
 
 function RecordsHeader({ record, internshipId }) {
   const [isPending, startTransition] = useTransition();
-
-  console.log(record);
+  const queryClient = useQueryClient();
+  const { user } = useUser();
 
   function handleStatus(status) {
     const formData = new FormData();
     formData.append("id", internshipId);
     formData.append("status", status);
 
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: "Updating record...",
-          successLabel: "Record updated.",
-          errorLabel: "Failed to update record.",
-          action:
-            status === "restore"
-              ? restoreInternshipRecord
-              : updateInternshipRecordStatus,
-          formData,
-        }),
-    );
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Updating record...",
+        successLabel: "Record updated.",
+        errorLabel: "Failed to update record.",
+        action:
+          status === "restore"
+            ? restoreInternshipRecord
+            : updateInternshipRecordStatus,
+        formData,
+      });
+      if (result?.success) {
+        await queryClient.invalidateQueries({
+          queryKey: internshipRecordsKeys.all(user.id),
+          refetchType: "none",
+        });
+      }
+    });
   }
 
   return (

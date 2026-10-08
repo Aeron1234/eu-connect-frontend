@@ -1,153 +1,116 @@
 "use client";
 
-import { notifyReadError } from "@/lib/client-read-error";
-
 import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { notifyReadError } from "@/lib/client-read-error";
+import { evaluationsKeys, evaluationsTabOptions } from "@/lib/cache/evaluations-queries";
 import EmployerEvaluations from "./EmployerEvaluations";
 import EvaluationCard from "./EvaluationCard";
 import TabBar from "../ui/TabBar";
 import EvaluationsTabContentSkeleton from "../skeletons/EvaluationsTabContentSkeleton";
-import {
-  getAllEvaluationsResult as getAllEvaluations,
-  getDisputedEvaluationsResult as getDisputedEvaluations,
-  getStudentPendingEvaluationsResult as getStudentPendingEvaluations,
-} from "@/lib/server-actions/evaluations-actions";
-
-import { getEmployerEvaluationCriteriasResult as getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
 
 const tabs = [
-  { label: "Evaluate Supervisor", value: "evaluate-supervisor" },
-  { label: "Pending Confirmation", value: "pending-confirmation" },
-  { label: "Past Evaluations", value: "past-evaluations" },
-  { label: "Disputed", value: "disputed" },
+  { value: "evaluate-supervisor", text: "Evaluate Supervisor" },
+  { value: "pending-confirmation", text: "Pending Confirmation" },
+  { value: "past-evaluations", text: "Past Evaluations" },
+  { value: "disputed", text: "Disputed" },
 ];
-
-// TabBar expects { value, text } — this file's evaluation tabs use
-// { value, label } — mapped once here rather than changing either
-// component's expected shape.
-const filterTabs = tabs.map((t) => ({ value: t.value, text: t.label }));
-
-function requireRead(value) {
-  if (value?.error) throw new Error(value.error);
-  return value;
-}
-
-// Each tab pulls from a different endpoint with a different shape — this
-// normalizes them all to { criteria } or { evaluations } so the render
-// logic below stays simple.
-const fetchers = {
-  "evaluate-supervisor": async () => {
-    const criteria = requireRead(await getEmployerEvaluationCriterias());
-    return { criteria: criteria || [] };
-  },
-  "pending-confirmation": async () => {
-    const res = requireRead(await getStudentPendingEvaluations());
-    return { evaluations: res?.data || [] };
-  },
-  "past-evaluations": async () => {
-    const res = requireRead(await getAllEvaluations());
-    return { evaluations: res?.data || [] };
-  },
-  disputed: async () => {
-    const res = requireRead(await getDisputedEvaluations());
-    return { evaluations: res?.data || [] };
-  },
-};
+const changedEvaluationTabs = ["pending-confirmation", "past-evaluations", "disputed"];
 
 function EvaluationsManager({ initialCriteria = [] }) {
-  // Applied tab — drives what's actually fetched/rendered, only updates
-  // after the debounce settles.
-  const [filter, setFilter] = useState("evaluate-supervisor");
-  // Selected tab — updates immediately on click so the active pill
-  // highlights right away, even while the fetch is still debouncing.
+  const { user } = useUser();
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState("evaluate-supervisor");
-  const [data, setData] = useState({ criteria: initialCriteria });
-  const [isPending, setIsPending] = useState(false);
-  const [loadError, setLoadError] = useState("");
-  const [retryKey, setRetryKey] = useState(0);
+  const [activeTab, setActiveTab] = useState("evaluate-supervisor");
+  const tabQuery = useQuery({
+    ...evaluationsTabOptions(user.id, activeTab),
+    initialData: activeTab === "evaluate-supervisor"
+      ? { criteria: initialCriteria }
+      : undefined,
+  });
 
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialCriteria) return;
+    serverSnapshotRef.current = initialCriteria;
+    queryClient.setQueryData(
+      evaluationsKeys.tab(user.id, "evaluate-supervisor"),
+      { criteria: initialCriteria },
+    );
+  }, [initialCriteria, queryClient, user.id]);
+
+  useEffect(() => {
+    if (selectedTab === activeTab) return;
+    const timeout = setTimeout(() => setActiveTab(selectedTab), 300);
+    return () => clearTimeout(timeout);
+  }, [selectedTab, activeTab]);
+
+  useEffect(() => {
+    if (tabQuery.error) notifyReadError(tabQuery.error.message || "Could not load evaluations.");
+  }, [tabQuery.error]);
 
   function handleTabClick(value) {
     setSelectedTab(value);
+    if (queryClient.getQueryData(evaluationsKeys.tab(user.id, value))) {
+      setActiveTab(value);
+    }
   }
 
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
+  function refreshEvaluations() {
+    for (const tab of changedEvaluationTabs) {
+      void queryClient.invalidateQueries({ queryKey: evaluationsKeys.tab(user.id, tab) });
     }
+  }
 
-    if (selectedTab === filter) return;
-
-    const thisRequestId = ++requestIdRef.current;
-
-    const timeout = setTimeout(async () => {
-      setIsPending(true);
-      setLoadError("");
-      try {
-        const result = await fetchers[selectedTab]();
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        setFilter(selectedTab);
-        setData(result);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          const message = error?.message || "Could not load evaluations.";
-          notifyReadError(message);
-          setLoadError(message);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [selectedTab, filter, retryKey]);
+  const isSwitching = selectedTab !== activeTab;
+  const loadError = !isSwitching && tabQuery.isError
+    ? tabQuery.error?.message || "Could not load evaluations."
+    : "";
+  const isPending = isSwitching || tabQuery.isPending;
+  const data = tabQuery.data;
 
   return (
     <>
-      <TabBar
-        tabs={filterTabs}
-        selectedTab={selectedTab}
-        onSelect={handleTabClick}
-      />
+      <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={handleTabClick} />
 
-      <div className="flex flex-col gap-2 mt-2">
+      <div className="mt-2 flex flex-col gap-2">
         {loadError && !isPending ? (
           <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
             <p>{loadError}</p>
-            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => setRetryKey((value) => value + 1)}>Try again</button>
+            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void tabQuery.refetch()}>Try again</button>
           </div>
         ) : isPending ? (
           <EvaluationsTabContentSkeleton tab={selectedTab} />
         ) : (
           <>
-            {filter === "evaluate-supervisor" && (
-              <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mb-8">
+            {activeTab === "evaluate-supervisor" && (
+              <div className="mb-8 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
                 <EmployerEvaluations
                   employerEvaluationCriterias={data?.criteria || []}
+                  onSubmitted={refreshEvaluations}
                 />
               </div>
             )}
-            {filter === "pending-confirmation" && (
+            {activeTab === "pending-confirmation" && (
               <EvaluationCard
                 evaluations={data?.evaluations || []}
-                type={"confirmation"}
+                type="confirmation"
+                onChanged={refreshEvaluations}
               />
             )}
-            {filter === "past-evaluations" && (
+            {activeTab === "past-evaluations" && (
               <EvaluationCard
                 evaluations={data?.evaluations || []}
-                type={"all"}
+                type="all"
+                onChanged={refreshEvaluations}
               />
             )}
-            {filter === "disputed" && (
+            {activeTab === "disputed" && (
               <EvaluationCard
                 evaluations={data?.evaluations || []}
-                type={"disputed"}
+                type="disputed"
+                onChanged={refreshEvaluations}
               />
             )}
           </>

@@ -9,6 +9,7 @@ function StudentEvaluationCriteria({
   studentEvaluationCriterias,
   searchedUserId,
   userRole,
+  onSubmitted,
 }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -43,6 +44,7 @@ function StudentEvaluationCriteria({
           <StudentEvaluationForm
             studentEvaluationCriterias={studentEvaluationCriterias}
             searchedUserId={searchedUserId}
+            onSubmitted={onSubmitted}
           />
         </>
       )}

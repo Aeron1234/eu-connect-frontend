@@ -33,17 +33,12 @@ function SIPPReportsManager({
         <AnnexCManager
           hei={hei}
           address={address}
-          initialAvailableYears={initialAnnexC?.availableYears}
-          initialReports={initialAnnexC?.reports}
-          pagination={initialAnnexC?.pagination}
-          academicYear={initialAnnexC?.academicYear}
+          initialPage={initialAnnexC}
         />
       ) : (
         <AnnexDHteList
           availableAcadYear={availableAcadYear}
-          initialData={initialAnnexD?.companies}
-          pagination={initialAnnexD?.pagination}
-          academicYear={initialAnnexD?.academicYear}
+          initialPage={initialAnnexD}
         />
       )}
     </div>

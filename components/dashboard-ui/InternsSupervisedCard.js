@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, Clock, Mail, Eye, Users, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { getEmployerInternsPageResult } from "@/lib/server-actions/dashboard-actions";
+import { useUser } from "@/contexts/UserContext";
+import {
+  dashboardListsKeys,
+  employerInternsPageOptions,
+} from "@/lib/cache/dashboard-lists-queries";
 
 const statusBadgeStyles = {
   ongoing: "text-blue-700 bg-blue-50",
@@ -44,34 +49,29 @@ function mapIntern(row) {
 }
 
 function InternsSupervisedCard({ initialPage }) {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState({ page: 1, status: "all" });
-  const [retryCount, setRetryCount] = useState(0);
-  const [result, setResult] = useState({ key: JSON.stringify([1, "all", 0]), data: initialPage });
-  const [failure, setFailure] = useState(null);
-  const requestKey = JSON.stringify([query.page, query.status, retryCount]);
-  const isLoading = result.key !== requestKey && failure?.key !== requestKey;
-  const hasError = failure?.key === requestKey;
-  const pageData = result.data;
-  const interns = (pageData?.interns || []).map(mapIntern);
+  const pageQuery = useQuery({
+    ...employerInternsPageOptions(user?.id, query),
+    enabled: Boolean(user?.id),
+    initialData: query.page === 1 && query.status === "all"
+      ? initialPage
+      : undefined,
+  });
 
   useEffect(() => {
-    if (requestKey === result.key) return;
-    let active = true;
-    getEmployerInternsPageResult(query)
-      .then((response) => {
-        if (!active) return;
-        if (response?.error) {
-          setFailure({ key: requestKey, message: response.error });
-        } else {
-          setResult({ key: requestKey, data: response });
-          setFailure(null);
-        }
-      })
-      .catch(() => {
-        if (active) setFailure({ key: requestKey, message: "Could not load interns. Please try again." });
-      });
-    return () => { active = false; };
-  }, [query, requestKey, result.key]);
+    if (!user?.id || !initialPage) return;
+    queryClient.setQueryData(
+      dashboardListsKeys.employerInterns(user.id, { page: 1, status: "all" }),
+      initialPage,
+    );
+  }, [initialPage, queryClient, user?.id]);
+
+  const isLoading = pageQuery.isPending;
+  const hasError = pageQuery.isError;
+  const pageData = pageQuery.data;
+  const interns = (pageData?.interns || []).map(mapIntern);
 
   return (
     <div className="h-full min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
@@ -106,10 +106,12 @@ function InternsSupervisedCard({ initialPage }) {
           </p>
         ) : hasError ? (
           <div className="py-6 text-center text-sm">
-            <p className="text-red-600">{failure.message}</p>
+            <p className="text-red-600">
+              {pageQuery.error?.message || "Could not load interns. Please try again."}
+            </p>
             <button
               type="button"
-              onClick={() => setRetryCount((count) => count + 1)}
+              onClick={() => void pageQuery.refetch()}
               className="mt-2 font-medium text-primary-emphasis hover:underline"
             >
               Try again

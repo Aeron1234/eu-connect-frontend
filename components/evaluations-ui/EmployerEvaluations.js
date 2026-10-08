@@ -5,7 +5,7 @@ import { useState } from "react";
 import EvaluationsCriteria from "./EvaluationsCriteria";
 import EmployerEvaluationForm from "./EmployerEvaluationForm";
 
-function EmployerEvaluations({ employerEvaluationCriterias }) {
+function EmployerEvaluations({ employerEvaluationCriterias, onSubmitted }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -36,6 +36,7 @@ function EmployerEvaluations({ employerEvaluationCriterias }) {
 
           <EmployerEvaluationForm
             employerEvaluationCriterias={employerEvaluationCriterias}
+            onSubmitted={onSubmitted}
           />
         </>
       )}

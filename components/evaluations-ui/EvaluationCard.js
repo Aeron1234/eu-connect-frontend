@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import PostedEvaluationItem from "./PostedEvaluationItem";
 
-function EvaluationCard({ evaluations = [], type = "default" }) {
+function EvaluationCard({ evaluations = [], type = "default", onChanged }) {
   const [items, setItems] = useState(evaluations);
 
   // Re-sync if the parent ever hands us a genuinely new list (real refresh,
@@ -67,6 +67,7 @@ function EvaluationCard({ evaluations = [], type = "default" }) {
             type={type}
             onOptimisticRemove={() => removeItem(ev.id)}
             onOptimisticRestore={() => restoreItem(ev)}
+            onChanged={onChanged}
           />
         ))}
       </div>

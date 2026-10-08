@@ -6,20 +6,20 @@ import DeleteForm from "../ui/DeleteForm";
 import { toastAndAction } from "../../lib/helpers";
 import { deleteDtr } from "@/lib/server-actions/dtr-actions";
 
-function DtrDeleteForm({ dtrId }) {
+function DtrDeleteForm({ dtrId, onDeleted }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
-    startTransition(
-      async () =>
-        await toastAndAction({
-          loadingLabel: "Deleting record...",
-          successLabel: "Record deleted.",
-          errorLabel: "Failed to delete.",
-          action: deleteDtr,
-          formData,
-        }),
-    );
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Deleting record...",
+        successLabel: "Record deleted.",
+        errorLabel: "Failed to delete.",
+        action: deleteDtr,
+        formData,
+      });
+      if (result?.success) onDeleted?.(dtrId);
+    });
   }
 
   return (

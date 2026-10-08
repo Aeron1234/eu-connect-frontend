@@ -13,17 +13,14 @@ function MarkAllAsReadButton({ data, unreadCount, onChanged }) {
 
   function handleAction() {
     startTransition(async () => {
-      try {
-        await toastAndAction({
-          loadingLabel: "Marking all as read...",
-          successLabel: "All notifications marked as read.",
-          errorLabel: "Failed to mark all as read.",
-          action: markAllAsRead,
-          formData: null,
-        });
-      } finally {
-        onChanged?.();
-      }
+      const result = await toastAndAction({
+        loadingLabel: "Marking all as read...",
+        successLabel: "All notifications marked as read.",
+        errorLabel: "Failed to mark all as read.",
+        action: markAllAsRead,
+        formData: null,
+      });
+      if (result?.success) onChanged?.();
     });
   }
 

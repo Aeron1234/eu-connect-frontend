@@ -4,13 +4,16 @@ import { logout } from "@/lib/server-actions/auth";
 import { useUser } from "@/contexts/UserContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import useSidebarTooltip from "./useSidebarTooltip";
+import { useQueryClient } from "@tanstack/react-query";
 
 function SignoutButton({ isCollapsed, compact = false }) {
   const { resetUser } = useUser();
   const { resetSidebar } = useSidebar();
+  const queryClient = useQueryClient();
   const { bind, tooltip } = useSidebarTooltip("Sign out", compact && isCollapsed);
 
   function handleAction() {
+    queryClient.clear();
     resetUser();
     resetSidebar();
     logout();

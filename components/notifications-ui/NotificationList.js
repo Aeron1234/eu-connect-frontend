@@ -1,222 +1,123 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
-
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, BellRing, Inbox } from "lucide-react";
 import MarkAllAsReadButton from "./MarkAllAsReadButton";
 import NotificationItem from "./NotificationItem";
-import { getInboxResult as getInbox } from "@/lib/server-actions/notifications-actions";
 import { useUser } from "@/contexts/UserContext";
 import { socket } from "../ui/SocketProvider";
 import {
   NOTIFICATIONS_CHANGED,
   notifyNotificationsChanged,
 } from "@/lib/notification-events";
+import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import {
-  canKeepLoadedPages,
-  hasValidPage,
-  pageAfterRefresh,
-  reconcilePageOne,
-} from "@/lib/see-more-pagination.mjs";
+  notificationInboxOptions,
+  notificationsKeys,
+  refreshNotificationQueries,
+} from "@/lib/cache/notifications-queries";
 
 const scopeTabs = [
   { label: "All", value: "all" },
   { label: "Requests", value: "requests" },
 ];
 
-function keyOf(n) {
-  return n.id;
-}
-
 function NotificationList({ inboxData: initialData }) {
   const { user } = useUser();
-  const userRole = user?.role;
-  const isEmployer = userRole === "employer";
-
-  const [notifications, setNotifications] = useState(initialData?.data || []);
-  const [page, setPage] = useState(initialData?.currentPage || 1);
-  const [totalPages, setTotalPages] = useState(initialData?.totalPages || 1);
-  const [totalRecords, setTotalRecords] = useState(
-    initialData?.totalRecords || 0,
-  );
-  const [unreadCount, setUnreadCount] = useState(initialData?.unreadCount || 0);
+  const queryClient = useQueryClient();
+  const isEmployer = user?.role === "employer";
   const [scope, setScope] = useState("all");
-  const [isPending, setIsPending] = useState(false);
+  const selectedScope = isEmployer ? scope : "all";
+  const [activeScope, setActiveScope] = useState("all");
+  const serverSnapshotRef = useRef(null);
 
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
-  const lastInitialDataRef = useRef(initialData);
-  const firstPageIdsRef = useRef((initialData?.data || []).map(keyOf));
-  const firstPageTotalRef = useRef(initialData?.totalRecords || 0);
-  const loadedScopeRef = useRef("all");
+  useEffect(() => {
+    const timeout = setTimeout(() => setActiveScope(selectedScope), 300);
+    return () => clearTimeout(timeout);
+  }, [selectedScope]);
 
-  const refreshPageOne = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    setIsPending(true);
-    try {
-      const fresh = await getInbox({ scope, page: 1 });
-      if (
-        requestId !== requestIdRef.current ||
-        !hasValidPage(fresh, "data", null)
-      ) {
-        return false;
+  const inboxQuery = useInfiniteQuery({
+    ...notificationInboxOptions(user.id, activeScope),
+    initialData:
+      activeScope === "all" && initialData
+        ? { pages: [initialData], pageParams: [1] }
+        : undefined,
+  });
+
+  const notifications = useMemo(() => {
+    const seen = new Set();
+    return (inboxQuery.data?.pages ?? []).flatMap((page) =>
+      page.data.filter((item) => {
+        const key = item.ui_key || item.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }),
+    );
+  }, [inboxQuery.data]);
+  const firstPage = inboxQuery.data?.pages[0];
+  const totalRecords = firstPage?.totalRecords ?? 0;
+  const unreadCount = firstPage?.unreadCount ?? 0;
+  const isSwitching = selectedScope !== activeScope;
+  const isLoadingMore = inboxQuery.isFetchingNextPage;
+
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialData) return;
+    serverSnapshotRef.current = initialData;
+    if (!initialData?.data) return;
+
+    queryClient.setQueryData(notificationsKeys.inbox(user.id), (old) => {
+      if (!old?.pages?.length) {
+        return { pages: [initialData], pageParams: [1] };
       }
-
-      const keepLoadedPages =
-        loadedScopeRef.current === scope &&
-        canKeepLoadedPages(
-          firstPageIdsRef.current,
-          firstPageTotalRef.current,
-          fresh.data,
-          fresh.totalRecords,
-          keyOf,
-        );
-      firstPageIdsRef.current = fresh.data.map(keyOf);
-      firstPageTotalRef.current = fresh.totalRecords;
-      loadedScopeRef.current = scope;
-      setNotifications((current) =>
-        reconcilePageOne(current, fresh.data, keepLoadedPages, keyOf),
-      );
-      setPage((current) => pageAfterRefresh(current, keepLoadedPages));
-      setTotalPages(fresh.totalPages || 1);
-      setTotalRecords(fresh.totalRecords || 0);
-      setUnreadCount(fresh.unreadCount || 0);
-      return true;
-    } catch (error) {
-      notifyReadError("Could not refresh notifications:", error);
-      return false;
-    } finally {
-      if (requestId === requestIdRef.current) setIsPending(false);
-    }
-  }, [scope]);
-
-  useEffect(() => {
-    if (!isEmployer && scope !== "all") {
-      setScope("all");
-    }
-  }, [isEmployer, scope]);
-
-  useEffect(() => {
-    if (lastInitialDataRef.current === initialData) return;
-    lastInitialDataRef.current = initialData;
-    if (scope !== "all" || !hasValidPage(initialData, "data", null)) return;
-
-    const keepLoadedPages =
-      loadedScopeRef.current === "all" &&
-      canKeepLoadedPages(
-        firstPageIdsRef.current,
-        firstPageTotalRef.current,
+      const previous = old.pages[0];
+      const keepLoaded = canKeepLoadedPages(
+        previous.data.map((item) => item.ui_key || item.id),
+        previous.totalRecords,
         initialData.data,
         initialData.totalRecords,
-        keyOf,
+        (item) => item.ui_key || item.id,
       );
-    firstPageIdsRef.current = initialData.data.map(keyOf);
-    firstPageTotalRef.current = initialData.totalRecords;
-    loadedScopeRef.current = "all";
-    requestIdRef.current += 1;
-    setIsPending(false);
-    setNotifications((current) =>
-      reconcilePageOne(current, initialData.data, keepLoadedPages, keyOf),
-    );
-    setPage((current) => pageAfterRefresh(current, keepLoadedPages));
-    setTotalPages(initialData?.totalPages || 1);
-    setTotalRecords(initialData?.totalRecords || 0);
-    setUnreadCount(initialData?.unreadCount || 0);
-  }, [initialData, scope]);
+      return {
+        pages: keepLoaded ? [initialData, ...old.pages.slice(1)] : [initialData],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+    queryClient.setQueryData(notificationsKeys.count(user.id), initialData.unreadCount);
+  }, [initialData, queryClient, user.id]);
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
+    if (inboxQuery.error) {
+      notifyReadError("Could not load notifications:", inboxQuery.error);
     }
-
-    // Invalidate a read for the previous scope before it can update this tab.
-    requestIdRef.current += 1;
-    const timeout = setTimeout(refreshPageOne, 500);
-
-    return () => clearTimeout(timeout);
-  }, [scope, refreshPageOne]);
+  }, [inboxQuery.error]);
 
   useEffect(() => {
     let timer;
-    let active = true;
-    let sequence = 0;
-    const runRefresh = async (current, attempt) => {
-      const succeeded = await refreshPageOne();
-      if (active && current === sequence && !succeeded && attempt < 2) {
-        timer = setTimeout(
-          () => runRefresh(current, attempt + 1),
-          1000 * (attempt + 1),
-        );
-      }
-    };
     const scheduleRefresh = () => {
-      const current = ++sequence;
       clearTimeout(timer);
-      timer = setTimeout(() => runRefresh(current, 0), 150);
+      timer = setTimeout(() => refreshNotificationQueries(queryClient, user.id), 150);
     };
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") scheduleRefresh();
     };
-
     socket.on("new_notification", scheduleRefresh);
     socket.on("connect", scheduleRefresh);
     window.addEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
     document.addEventListener("visibilitychange", refreshWhenVisible);
-
     return () => {
-      active = false;
       clearTimeout(timer);
-      requestIdRef.current += 1;
       socket.off("new_notification", scheduleRefresh);
       socket.off("connect", scheduleRefresh);
       window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [refreshPageOne]);
-
-  async function handleSeeMore() {
-    if (isPending || page >= totalPages) return;
-    setIsPending(true);
-    const nextPage = page + 1;
-    const thisRequestId = ++requestIdRef.current;
-
-    try {
-      const newData = await getInbox({ scope, page: nextPage });
-
-      if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "data", null, nextPage)) {
-        notifyReadError(
-          "Error loading more notifications:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-
-      const incoming = newData.data;
-
-      setNotifications((prev) => {
-        const existingKeys = new Set(prev.map(keyOf));
-        const filteredNew = incoming.filter((n) => !existingKeys.has(keyOf(n)));
-        return [...prev, ...filteredNew];
-      });
-
-      setPage(nextPage);
-      if (newData?.totalPages) setTotalPages(newData.totalPages);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more notifications:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
-    }
-  }
+  }, [queryClient, user.id]);
 
   return (
     <div className="space-y-6">
-      {/* Filter bar */}
       <div className="flex w-full flex-wrap items-center gap-3">
         {isEmployer && (
           <div className="flex rounded-lg bg-secondary p-1 w-fit">
@@ -236,7 +137,6 @@ function NotificationList({ inboxData: initialData }) {
             ))}
           </div>
         )}
-
         <div className="w-fit ml-auto">
           <MarkAllAsReadButton
             data={notifications}
@@ -246,14 +146,11 @@ function NotificationList({ inboxData: initialData }) {
         </div>
       </div>
 
-      {/* Stat cards */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2">
         <StatCard
           icon={<Bell className="size-5 opacity-80" />}
           value={String(totalRecords)}
-          label={
-            scope === "requests" ? "Supervisor Requests" : "All Notifications"
-          }
+          label={selectedScope === "requests" ? "Supervisor Requests" : "All Notifications"}
           highlight
         />
         <StatCard
@@ -263,17 +160,25 @@ function NotificationList({ inboxData: initialData }) {
         />
       </div>
 
-      {/* List */}
-      {notifications.length === 0 && !isPending ? (
+      {isSwitching || inboxQuery.isPending ? (
+        <div className="rounded-xl border border-border bg-card px-6 py-16 text-center text-sm text-muted-foreground">
+          Loading notifications...
+        </div>
+      ) : inboxQuery.isError && !inboxQuery.data ? (
+        <div className="rounded-xl border border-border bg-card px-6 py-16 text-center text-sm text-muted-foreground">
+          <p>Could not load notifications.</p>
+          <button type="button" onClick={() => void inboxQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
+            Try again
+          </button>
+        </div>
+      ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
           <Inbox className="size-8 text-foreground-faint" />
           <p className="text-sm font-medium text-muted-foreground">
-            {scope === "requests"
-              ? "No supervisor requests right now"
-              : "You're all caught up"}
+            {selectedScope === "requests" ? "No supervisor requests right now" : "You're all caught up"}
           </p>
           <p className="max-w-sm text-xs text-foreground-subtle">
-            {scope === "requests"
+            {selectedScope === "requests"
               ? "New requests from students will show up here."
               : "New approvals, announcements, and updates will show up here."}
           </p>
@@ -281,24 +186,22 @@ function NotificationList({ inboxData: initialData }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {notifications.map((item) => (
-            <li key={item.ui_key || item.id} className="flex-1">
-              <NotificationItem
-                item={item}
-                onChanged={notifyNotificationsChanged}
-              />
+            <li key={`${item.ui_key || item.id}:${Boolean(item.actionable)}`} className="flex-1">
+              <NotificationItem item={item} onChanged={notifyNotificationsChanged} />
             </li>
           ))}
         </ul>
       )}
 
-      {page < totalPages && (
+      {!isSwitching && inboxQuery.hasNextPage && (
         <div className="text-center">
           <button
-            onClick={handleSeeMore}
-            disabled={isPending}
+            type="button"
+            onClick={() => void inboxQuery.fetchNextPage()}
+            disabled={isLoadingMore}
             className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
           >
-            {isPending ? "Loading..." : "See more"}
+            {isLoadingMore ? "Loading..." : "See more"}
           </button>
         </div>
       )}
@@ -318,11 +221,7 @@ function StatCard({ icon, value, label, highlight }) {
       {icon}
       <div>
         <p className="text-xl sm:text-2xl font-bold leading-none">{value}</p>
-        <p
-          className={`mt-1.5 text-xs ${
-            highlight ? "opacity-80" : "text-muted-foreground"
-          }`}
-        >
+        <p className={`mt-1.5 text-xs ${highlight ? "opacity-80" : "text-muted-foreground"}`}>
           {label}
         </p>
       </div>

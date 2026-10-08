@@ -1,142 +1,98 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
 
-import { Calendar, Edit2, Trash2 } from "lucide-react";
-import Modal from "../ui/Modal";
-import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
-import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
-import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
+import WeeklyNarrativeCard from "./WeeklyNarrativeCard";
 import {
-  fetchMoreWeeklyNarrativesResult as fetchMoreWeeklyNarratives,
-  getWeeklyNarrativesResult as getWeeklyNarratives,
-} from "@/lib/server-actions/weekly-narratives-actions";
-import {
-  canKeepLoadedPages,
-  hasValidPage,
-  pageAfterRefresh,
-  reconcilePageOne,
-} from "@/lib/see-more-pagination.mjs";
+  weeklyNarrativesInfiniteOptions,
+  weeklyNarrativesKeys,
+} from "@/lib/cache/weekly-narratives-queries";
 
-function WeeklyNarrativeContent({
-  narratives: initialData = [],
-  totalPages: initialTotalPages = 1,
-  totalRecords: initialTotalRecords = 0,
-}) {
-  const [narratives, setNarratives] = useState(initialData || []);
-  const [page, setPage] = useState(1);
-  const [isPending, setIsPending] = useState(false);
-  const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
-
-  const prevPage1IdsRef = useRef(initialData.map((n) => n.id));
-  const prevTotalRef = useRef(initialTotalRecords);
-  const lastServerSnapshotRef = useRef({
-    data: initialData,
-    totalPages: initialTotalPages,
-    totalRecords: initialTotalRecords,
+function WeeklyNarrativeContent({ initialPage, internshipId }) {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(null);
+  const queryKey = useMemo(
+    () => weeklyNarrativesKeys.list(user.id, internshipId),
+    [user.id, internshipId],
+  );
+  const narrativesQuery = useInfiniteQuery({
+    ...weeklyNarrativesInfiniteOptions(user.id, internshipId),
+    initialData: initialPage
+      ? { pages: [initialPage], pageParams: [1] }
+      : undefined,
   });
-  const requestIdRef = useRef(0);
+
+  const narratives = useMemo(() => {
+    const seen = new Set();
+    return (narrativesQuery.data?.pages ?? []).flatMap((page) =>
+      page.narratives.filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      }),
+    );
+  }, [narrativesQuery.data]);
 
   useEffect(() => {
-    const previous = lastServerSnapshotRef.current;
-    if (
-      previous.data === initialData &&
-      previous.totalPages === initialTotalPages &&
-      previous.totalRecords === initialTotalRecords
-    )
-      return;
-    lastServerSnapshotRef.current = {
-      data: initialData,
-      totalPages: initialTotalPages,
-      totalRecords: initialTotalRecords,
-    };
-    const keepLoadedPages = canKeepLoadedPages(
-      prevPage1IdsRef.current,
-      prevTotalRef.current,
-      initialData,
-      initialTotalRecords,
-    );
-    prevPage1IdsRef.current = initialData.map((n) => n.id);
-    prevTotalRef.current = initialTotalRecords;
-    if (!keepLoadedPages) {
-      requestIdRef.current += 1;
-      setIsPending(false);
+    if (narrativesQuery.error) {
+      notifyReadError(
+        narrativesQuery.isFetchNextPageError
+          ? "Error loading more weekly narratives:"
+          : "Error loading weekly narratives:",
+        narrativesQuery.error,
+      );
     }
-    setNarratives((prev) =>
-      reconcilePageOne(prev, initialData, keepLoadedPages),
-    );
-    setPage((current) => pageAfterRefresh(current, keepLoadedPages));
-    setTotalPages(initialTotalPages || 1);
-  }, [initialData, initialTotalPages, initialTotalRecords]);
+  }, [narrativesQuery.error, narrativesQuery.isFetchNextPageError]);
 
-  const handleItemUpdate = (updatedItem) => {
-    setNarratives((prev) =>
-      prev.map((item) =>
-        item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
-      ),
-    );
-  };
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialPage || !initialPage) return;
+    serverSnapshotRef.current = initialPage;
+    queryClient.setQueryData(queryKey, (old) => {
+      if (!old?.pages?.length) return old;
+      const previous = old.pages[0];
+      const keepLoaded = canKeepLoadedPages(
+        previous.narratives.map((item) => item.id),
+        previous.totalRecords,
+        initialPage.narratives,
+        initialPage.totalRecords,
+      );
+      return {
+        pages: keepLoaded ? [initialPage, ...old.pages.slice(1)] : [initialPage],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+  }, [initialPage, queryClient, queryKey]);
 
-  async function handleItemDelete(deletedId) {
-    setNarratives((prev) => prev.filter((item) => item.id !== deletedId));
-    const thisRequestId = ++requestIdRef.current;
-    setIsPending(true);
-    try {
-      const fresh = await getWeeklyNarratives();
-      if (thisRequestId !== requestIdRef.current) return;
-      if (!hasValidPage(fresh, "narratives", null)) {
-        notifyReadError(
-          "Error refreshing weekly narratives:",
-          fresh?.error || "Invalid response from the server",
-        );
-        return;
-      }
-      setNarratives(fresh.narratives);
-      setPage(1);
-      setTotalPages(fresh.totalPages || 1);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current)
-        notifyReadError("Error refreshing weekly narratives:", error);
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
-    }
+  function handleItemUpdate(updatedItem) {
+    queryClient.setQueryData(queryKey, (old) => old?.pages?.length
+      ? {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            narratives: page.narratives.map((item) =>
+              item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
+            ),
+          })),
+        }
+      : old);
   }
 
-  async function handleSeeMore() {
-    if (isPending || page >= totalPages) return;
-    setIsPending(true);
-    const nextPage = page + 1;
-    const thisRequestId = ++requestIdRef.current;
-
-    try {
-      const newData = await fetchMoreWeeklyNarratives({ page: nextPage });
-      if (thisRequestId !== requestIdRef.current) return;
-      if (!hasValidPage(newData, "narratives", null, nextPage)) {
-        notifyReadError(
-          "Error loading more weekly narratives:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-      const incoming = newData.narratives;
-
-      setNarratives((prev) => {
-        const existingIds = new Set(prev.map((n) => n.id));
-        const filteredNew = incoming.filter((n) => !existingIds.has(n.id));
-        return [...prev, ...filteredNew];
-      });
-
-      setPage(nextPage);
-      if (newData?.totalPages) {
-        setTotalPages(newData.totalPages);
-      }
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current)
-        notifyReadError("Error loading more weekly narratives:", error);
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
-    }
+  function handleItemDelete(deletedId) {
+    queryClient.setQueryData(queryKey, (old) => old?.pages?.length
+      ? {
+          pages: [{
+            ...old.pages[0],
+            narratives: old.pages[0].narratives.filter((item) => item.id !== deletedId),
+          }],
+          pageParams: [1],
+        }
+      : old);
+    void queryClient.invalidateQueries({ queryKey });
   }
 
   return (
@@ -151,105 +107,24 @@ function WeeklyNarrativeContent({
           </li>
         ) : (
           narratives.map((n) => (
-            <li
+            <WeeklyNarrativeCard
               key={`${n.id}-${n.updated_at || n.created_at}`}
-              className="relative pl-10 sm:pl-14"
-            >
-              <div className="absolute left-0 sm:left-1 top-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white flex items-center justify-center text-[11px] sm:text-xs font-bold shadow-md ring-4 ring-canvas">
-                {n.week_number}
-              </div>
-              <article className="rounded-xl bg-card border border-border shadow-sm p-4 sm:p-5 hover:shadow-md transition-shadow">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="text-sm sm:text-base font-semibold text-foreground">
-                      {n.title}
-                    </h2>
-                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                      <Calendar className="w-3.5 h-3.5" />{" "}
-                      {format(new Date(n.created_at), "MMMM d, yyyy")} · Week{" "}
-                      {n.week_number}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Modal
-                      title="Update your narrative"
-                      trigger={
-                        <div
-                          aria-label="Edit"
-                          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </div>
-                      }
-                    >
-                      <WeeklyNarrativeEditForm
-                        narrative={n}
-                        onSuccess={(updated) => handleItemUpdate(updated)}
-                      />
-                    </Modal>
-
-                    <Modal
-                      title={
-                        <span className="text-red-600">Delete Narrative</span>
-                      }
-                      trigger={
-                        <div
-                          aria-label="Delete"
-                          className="p-1.5 rounded-md hover:bg-red-50 text-muted-foreground hover:text-red-600 transition cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </div>
-                      }
-                    >
-                      <WeeklyNarrativeDelete
-                        narrativeId={n.id}
-                        onSuccess={() => handleItemDelete(n.id)}
-                      />
-                    </Modal>
-                  </div>
-                </div>
-
-                <p className="text-sm text-foreground-soft leading-relaxed mt-3 line-clamp-3">
-                  {n.narrative}
-                </p>
-
-                <Modal
-                  title={
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(n.created_at), "MMMM d, yyyy")} · Week{" "}
-                      {n.week_number}
-                    </p>
-                  }
-                  description={
-                    <span className="text-lg font-bold text-foreground block">
-                      {n.title || "Untitled"}
-                    </span>
-                  }
-                  trigger={
-                    <div className="text-xs font-semibold text-primary-emphasis hover:underline mt-3 cursor-pointer">
-                      Read more →
-                    </div>
-                  }
-                >
-                  <div className="bg-card rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                      {n.narrative}
-                    </p>
-                  </div>
-                </Modal>
-              </article>
-            </li>
+              narrative={n}
+              showActions
+              onUpdate={handleItemUpdate}
+              onDelete={() => handleItemDelete(n.id)}
+            />
           ))
         )}
 
-        {page < totalPages && (
+        {narrativesQuery.hasNextPage && (
           <li className="w-full">
             <button
-              onClick={handleSeeMore}
-              disabled={isPending}
+              onClick={() => void narrativesQuery.fetchNextPage()}
+              disabled={narrativesQuery.isFetchingNextPage}
               className="w-full pl-10 sm:pl-14 text-center text-sm sm:text-base font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
             >
-              {isPending ? "Loading..." : "See more"}
+              {narrativesQuery.isFetchingNextPage ? "Loading..." : "See more"}
             </button>
           </li>
         )}

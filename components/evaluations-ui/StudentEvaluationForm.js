@@ -3,9 +3,8 @@
 import { useState, useTransition } from "react";
 import { postStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
 import { toastAndAction } from "../../lib/helpers";
-import { useUser } from "@/contexts/UserContext";
 
-function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
+function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onSubmitted }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {
     const initialState = {};
     studentEvaluationCriterias.forEach((cat) => {
@@ -18,8 +17,6 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
   });
   const [remarks, setRemarks] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  const { user } = useUser();
 
   const grades = [0, 1, 2, 3, 4, 5];
 
@@ -45,7 +42,7 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
         formData,
       });
 
-      if (!result || result.error) {
+      if (!result?.success) {
         return;
       }
 
@@ -60,6 +57,7 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId }) {
       });
 
       setRemarks("");
+      onSubmitted?.();
     });
   }
 

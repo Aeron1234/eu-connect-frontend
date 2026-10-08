@@ -4,9 +4,20 @@ import { LogIn, LogOut } from "lucide-react";
 import Modal from "../ui/Modal";
 import DtrForm from "./DtrForm";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { dtrKeys } from "@/lib/cache/dtr-queries";
 
 function DtrButton({ internshipData, status }) {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+  function handleSuccess() {
+    setOpen(false);
+    void queryClient.invalidateQueries({
+      queryKey: dtrKeys.student(user?.id, internshipData?.id),
+    });
+  }
   if (
     !internshipData ||
     status === "ON_BREAK" ||
@@ -39,7 +50,7 @@ function DtrButton({ internshipData, status }) {
       }
       title={<span className={`text-primary-emphasis`}>{theme.label}?</span>}
     >
-      <DtrForm isOut={isOut} onSuccess={() => setOpen(false)} />
+      <DtrForm isOut={isOut} onSuccess={handleSuccess} />
     </Modal>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
+import { useLayoutEffect, useRef } from "react";
 import {
   Activity,
   BookOpen,
+  CalendarDays,
   BriefcaseBusiness,
   Building2,
   ChevronLeft,
@@ -32,13 +34,38 @@ import { useSidebar } from "@/contexts/SidebarContext";
 
 function roleRouteGroups(userRole, userDepartment) {
   if (userRole === "student") {
-    return [{ label: "Student", routes: [
-      { name: "Narratives", href: "/student/narratives", icon: <BookOpen className="h-5 w-5 shrink-0" /> },
-      { name: "My Records", href: "/student/internship-record", icon: <LibraryBig className="h-5 w-5 shrink-0" /> },
-      { name: "Storage", href: "/student/storage", icon: <FolderOpen className="h-5 w-5 shrink-0" /> },
-      { name: "Evaluations", href: "/student/evaluations", icon: <ClipboardCheck className="h-5 w-5 shrink-0" /> },
-      { name: "Past Internships", href: "/past-internships", icon: <Building2 className="h-5 w-5 shrink-0" /> },
-    ] }];
+    return [
+      {
+        label: "Student",
+        routes: [
+          {
+            name: "Narratives",
+            href: "/student/narratives",
+            icon: <BookOpen className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "My Records",
+            href: "/student/internship-record",
+            icon: <LibraryBig className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Storage",
+            href: "/student/storage",
+            icon: <FolderOpen className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Evaluations",
+            href: "/student/evaluations",
+            icon: <ClipboardCheck className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Past Internships",
+            href: "/past-internships",
+            icon: <Building2 className="h-5 w-5 shrink-0" />,
+          },
+        ],
+      },
+    ];
   }
 
   if (userRole === "department_head") {
@@ -52,8 +79,16 @@ function roleRouteGroups(userRole, userDepartment) {
     }
 
     staffRoutes.push(
-      { name: "Map", href: "/map", icon: <MapPin className="h-5 w-5 shrink-0" /> },
-      { name: "Past Internships", href: "/past-internships", icon: <Building2 className="h-5 w-5 shrink-0" /> },
+      {
+        name: "Map",
+        href: "/map",
+        icon: <MapPin className="h-5 w-5 shrink-0" />,
+      },
+      {
+        name: "Past Internships",
+        href: "/past-internships",
+        icon: <Building2 className="h-5 w-5 shrink-0" />,
+      },
     );
 
     if (userDepartment !== "REG") {
@@ -69,18 +104,56 @@ function roleRouteGroups(userRole, userDepartment) {
 
   if (userRole === "admin") {
     return [
-      { label: "Administration", routes: [
-        { name: "Accounts", href: "/admin/create-account", icon: <UserPlus className="h-5 w-5 shrink-0" /> },
-        { name: "Departments & Courses", href: "/admin/departments-and-courses", icon: <Layers className="h-5 w-5 shrink-0" /> },
-        { name: "Activity Logs", href: "/admin/activity-logs", icon: <Activity className="h-5 w-5 shrink-0" /> },
-        { name: "Cache Monitoring", href: "/admin/cache-monitoring", icon: <Gauge className="h-5 w-5 shrink-0" /> },
-        { name: "Evaluation Criteria", href: "/admin/evaluation-criteria", icon: <SlidersHorizontal className="h-5 w-5 shrink-0" /> },
-      ] },
-      { label: "Staff tools", routes: [
-        { name: "Map", href: "/map", icon: <MapPin className="h-5 w-5 shrink-0" /> },
-        { name: "Records", href: "/internship-records", icon: <LibraryBig className="h-5 w-5 shrink-0" /> },
-        { name: "Past Internships", href: "/past-internships", icon: <Building2 className="h-5 w-5 shrink-0" /> },
-      ] },
+      {
+        label: "Administration",
+        routes: [
+          {
+            name: "Accounts",
+            href: "/admin/create-account",
+            icon: <UserPlus className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Departments & Courses",
+            href: "/admin/departments-and-courses",
+            icon: <Layers className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Activity Logs",
+            href: "/admin/activity-logs",
+            icon: <Activity className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Cache Monitoring",
+            href: "/admin/cache-monitoring",
+            icon: <Gauge className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Evaluation Criteria",
+            href: "/admin/evaluation-criteria",
+            icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
+          },
+        ],
+      },
+      {
+        label: "Staff tools",
+        routes: [
+          {
+            name: "Map",
+            href: "/map",
+            icon: <MapPin className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Records",
+            href: "/internship-records",
+            icon: <LibraryBig className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Past Internships",
+            href: "/past-internships",
+            icon: <Building2 className="h-5 w-5 shrink-0" />,
+          },
+        ],
+      },
     ];
   }
 
@@ -123,9 +196,19 @@ function getFormattedRole(role) {
 function SideNavigationList({ fullName = "", avatar = null }) {
   const pathName = usePathname();
   const { user } = useUser();
-  const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobile } =
+  const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobile, navigationScrollRef } =
     useSidebar();
   const accountTooltip = useSidebarTooltip("Account", isCollapsed);
+  const navRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const previousBehavior = nav.style.scrollBehavior;
+    nav.style.scrollBehavior = "auto";
+    nav.scrollTop = navigationScrollRef.current;
+    nav.style.scrollBehavior = previousBehavior;
+  }, [navigationScrollRef]);
 
   const userRole = user.role;
   const userDepartment = user.department_code;
@@ -139,12 +222,35 @@ function SideNavigationList({ fullName = "", avatar = null }) {
   const accountHref = `/${userRole}/account`;
   const routeGroups = [
     ...(userDepartment !== "REG"
-      ? [{
-          label: "Overview",
-          routes: [{ name: "Dashboard", href: homeHref, icon: <LayoutDashboard size={20} />, exact: true }],
-        }]
+      ? [
+          {
+            label: "Overview",
+            routes: [
+              {
+                name: "Dashboard",
+                href: homeHref,
+                icon: <LayoutDashboard size={20} />,
+                exact: true,
+              },
+            ],
+          },
+        ]
       : []),
     ...roleRouteGroups(userRole, userDepartment),
+    ...(userRole !== "employer"
+      ? [
+          {
+            label: "Planning",
+            routes: [
+              {
+                name: "Calendar",
+                href: "/calendar",
+                icon: <CalendarDays className="h-5 w-5 shrink-0" />,
+              },
+            ],
+          },
+        ]
+      : []),
     { label: "Public", routes: publicRoutes },
   ];
 
@@ -188,12 +294,21 @@ function SideNavigationList({ fullName = "", avatar = null }) {
           <div className="shrink-0 rounded-full bg-white p-0.5 transition-transform group-hover:scale-105">
             <Logo small />
           </div>
-          <h2 className={`text-sm font-bold tracking-wide ${isCollapsed ? "lg:hidden" : ""}`}>
+          <h2
+            className={`text-sm font-bold tracking-wide ${isCollapsed ? "lg:hidden" : ""}`}
+          >
             EU-Connect
           </h2>
         </Link>
 
-        <nav className="mt-3 flex min-h-0 w-full flex-1 flex-col overflow-y-auto" aria-label="Main navigation">
+        <nav
+          ref={navRef}
+          onScroll={(event) => {
+            navigationScrollRef.current = event.currentTarget.scrollTop;
+          }}
+          className="mt-3 flex min-h-0 w-full flex-1 flex-col overflow-y-auto"
+          aria-label="Main navigation"
+        >
           {routeGroups.map((group, index) => (
             <NavSection
               key={group.label}
@@ -218,7 +333,9 @@ function SideNavigationList({ fullName = "", avatar = null }) {
           />
         </div>
         <div className="mt-3 border-t border-white/25 pt-3">
-          <div className={`flex items-center gap-1 ${isCollapsed ? "lg:flex-col" : ""}`}>
+          <div
+            className={`flex items-center gap-1 ${isCollapsed ? "lg:flex-col" : ""}`}
+          >
             <Link
               href={accountHref}
               scroll={false}
@@ -231,14 +348,24 @@ function SideNavigationList({ fullName = "", avatar = null }) {
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 text-white ring-1 ring-white/30 transition-transform group-hover:scale-105">
                 {avatar ? (
-                  <img src={`/avatars/${avatar}`} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={`/avatars/${avatar}`}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <User className="h-5 w-5" aria-hidden="true" />
                 )}
               </span>
-              <span className={`min-w-0 flex-1 ${isCollapsed ? "lg:hidden" : ""}`}>
-                <span className="block truncate text-xs font-semibold text-white">{fullName || "My account"}</span>
-                <span className="block truncate text-[11px] font-normal text-white/65">{getFormattedRole(userRole)}</span>
+              <span
+                className={`min-w-0 flex-1 ${isCollapsed ? "lg:hidden" : ""}`}
+              >
+                <span className="block truncate text-xs font-semibold text-white">
+                  {fullName || "My account"}
+                </span>
+                <span className="block truncate text-[11px] font-normal text-white/65">
+                  {getFormattedRole(userRole)}
+                </span>
               </span>
             </Link>
             {accountTooltip.tooltip}
@@ -253,19 +380,29 @@ function SideNavigationList({ fullName = "", avatar = null }) {
   );
 }
 
-function NavSection({ label, routes, divided, isCollapsed, pathName, onClick }) {
+function NavSection({
+  label,
+  routes,
+  divided,
+  isCollapsed,
+  pathName,
+  onClick,
+}) {
   return (
     <section
       aria-label={label}
       className={`w-full ${divided ? "mt-2 border-t border-white/20 pt-2" : ""}`}
     >
-      <h3 className={`px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 ${isCollapsed ? "lg:hidden" : ""}`}>
+      <h3
+        className={`px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 ${isCollapsed ? "lg:hidden" : ""}`}
+      >
         {label}
       </h3>
       <ul className="flex flex-col gap-1">
         {routes.map((item) => (
           <li key={item.href}>
             <NavLink
+              scroll={false}
               href={item.href}
               name={item.name}
               icon={item.icon}
@@ -305,7 +442,12 @@ function NavLink({
         aria-current={isActive ? "page" : undefined}
         className={`relative flex min-h-10 w-full items-center gap-3 px-3 py-2.5 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isActive ? "rounded-l-md rounded-r-full bg-white/20 text-white shadow-sm dark:bg-white/10" : "rounded-lg text-white/85 hover:bg-white/10 hover:text-white"} ${isCollapsed ? "lg:justify-center lg:px-0 lg:rounded-xl" : ""}`}
       >
-        {isActive && <span aria-hidden="true" className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-primary-300" />}
+        {isActive && (
+          <span
+            aria-hidden="true"
+            className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-primary-300"
+          />
+        )}
         {icon}
         <span className={isCollapsed ? "lg:hidden" : ""}>{name}</span>
       </Link>

@@ -11,13 +11,15 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { evaluationCriteriaKeys, evaluationCriteriaOptions } from "@/lib/cache/evaluation-criteria-queries";
 import {
   addCriterion,
   deactivateCriterion,
   reactivateCriterion,
   deactivateSection,
   reactivateSection,
-  getAllEvaluationCriteriaResult as getAllEvaluationCriteria,
 } from "@/lib/server-actions/evaluations-actions";
 import { cx } from "@/lib/utils";
 import EvaluationCriteriaListSkeleton from "../skeletons/EvaluationCriteriaListSkeleton";
@@ -42,6 +44,31 @@ function buildFormData(fields) {
   return fd;
 }
 
+function addToGroups(groups, category, item) {
+  if (groups.some((group) => group.category === category)) {
+    return groups.map((group) => group.category === category
+      ? { ...group, items: [...group.items, item] }
+      : group);
+  }
+  return [...groups, { category, items: [item] }]
+    .sort((a, b) => a.category.localeCompare(b.category));
+}
+
+function setCriterionActive(groups, id, isActive) {
+  return groups.map((group) => ({
+    ...group,
+    items: group.items.map((item) => item.id === id
+      ? { ...item, is_active: isActive }
+      : item),
+  }));
+}
+
+function setSectionActive(groups, category, isActive) {
+  return groups.map((group) => group.category === category
+    ? { ...group, items: group.items.map((item) => ({ ...item, is_active: isActive })) }
+    : group);
+}
+
 const FILTERS = [
   { value: "all", label: "All" },
   { value: "active", label: "Active" },
@@ -56,9 +83,13 @@ const FORM_TYPES = [
 export default function EvaluationCriteriaPageContent({
   initialCriteria = [],
 }) {
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialCriteria);
   const [formType, setFormType] = useState("student");
+  const [activeType, setActiveType] = useState("student");
   const [filter, setFilter] = useState("all");
-  const [sections, setSections] = useState(() => toSections(initialCriteria));
   const [error, setError] = useState(null);
   const [newSection, setNewSection] = useState("");
   // Sections created locally with no criteria yet — a category only exists
@@ -72,176 +103,140 @@ export default function EvaluationCriteriaPageContent({
   const [activeKey, setActiveKey] = useState(null);
   const isKeyPending = (key) => isPending && activeKey === key;
 
-  // Separate from the mutation transition above — this is specifically for
-  // switching between Student/Employer tabs, which needs a real fetch.
-  const [isSwitchingType, setIsSwitchingType] = useState(false);
-  const typeRequestIdRef = useRef(0);
-  const isFirstTypeRun = useRef(true);
+  // Student and Employer have separate cache entries.
+  const criteriaQuery = useQuery({
+    ...evaluationCriteriaOptions(userId, activeType),
+    enabled: Boolean(userId),
+    initialData: activeType === "student" && Array.isArray(initialCriteria)
+      ? initialCriteria
+      : undefined,
+  });
+  const sections = useMemo(() => toSections(criteriaQuery.data), [criteriaQuery.data]);
+  const isSwitchingType = formType !== activeType || criteriaQuery.isPending;
 
-  // Debounced fetch whenever formType changes — mirrors the pattern used
-  // in EvaluationsManager. `filter` (All/Active/Inactive) does NOT trigger
-  // this; it's applied client-side below against data already on hand.
+  // Delay only uncached type switches; status filters are applied locally.
   useEffect(() => {
-    if (isFirstTypeRun.current) {
-      isFirstTypeRun.current = false;
-      return;
-    }
-
-    const thisRequestId = ++typeRequestIdRef.current;
-
-    const timeout = setTimeout(async () => {
-      setIsSwitchingType(true);
-      try {
-        const result = await getAllEvaluationCriteria({ type: formType });
-
-        if (thisRequestId !== typeRequestIdRef.current) return;
-        if (result?.error) throw new Error(result.error);
-
-        setSections(toSections(result));
-        setDraftSections([]);
-        setError(null);
-      } catch (err) {
-        if (thisRequestId === typeRequestIdRef.current) {
-          notifyReadError("Error loading evaluation criteria:", err);
-          setError(err?.message || "Failed to load criteria. Please try again.");
-        }
-      } finally {
-        if (thisRequestId === typeRequestIdRef.current) {
-          setIsSwitchingType(false);
-        }
-      }
-    }, 300);
-
+    if (formType === activeType) return;
+    const timeout = setTimeout(() => setActiveType(formType), 300);
     return () => clearTimeout(timeout);
-  }, [formType]);
+  }, [formType, activeType]);
 
-  // Runs a server action outside of a <form>, applying an optimistic UI
-  // update immediately and rolling it back only if the action reports an
-  // error. `onError` receives the pre-mutation snapshot to restore.
-  const runAction = (key, action, fields, onError) => {
+  useEffect(() => {
+    if (criteriaQuery.error) notifyReadError("Error loading evaluation criteria:", criteriaQuery.error);
+  }, [criteriaQuery.error]);
+
+  useEffect(() => {
+    if (serverSnapshotRef.current === initialCriteria || !userId) return;
+    serverSnapshotRef.current = initialCriteria;
+    queryClient.setQueryData(evaluationCriteriaKeys.type(userId, "student"), initialCriteria);
+  }, [initialCriteria, queryClient, userId]);
+
+  function handleTypeChange(type) {
+    if (type === formType || isPending) return;
+    setFormType(type);
+    setDraftSections([]);
+    setError(null);
+    if (userId && queryClient.getQueryData(evaluationCriteriaKeys.type(userId, type))) {
+      setActiveType(type);
+    }
+  }
+
+  // Mutations update the active cache optimistically and restore it on failure.
+  const runAction = (key, action, fields, update, { onError, onSuccess } = {}) => {
+    const queryKey = evaluationCriteriaKeys.type(userId, activeType);
+    void queryClient.cancelQueries({ queryKey, exact: true });
+    const previous = queryClient.getQueryData(queryKey);
+    queryClient.setQueryData(queryKey, (current = []) => update(current));
     setActiveKey(key);
     setError(null);
     startTransition(async () => {
-      const result = await action(null, buildFormData(fields));
-      if (result?.error) {
-        setError(result.error);
+      try {
+        const result = await action(null, buildFormData(fields));
+        if (!result?.success) {
+          queryClient.setQueryData(queryKey, previous);
+          setError(result?.error || "Could not update criteria. Please try again.");
+          onError?.();
+          return;
+        }
+        onSuccess?.(result, queryKey);
+        await queryClient.invalidateQueries({ queryKey, exact: true });
+      } catch (err) {
+        queryClient.setQueryData(queryKey, previous);
+        setError(err?.message || "Could not update criteria. Please try again.");
         onError?.();
+      } finally {
+        setActiveKey(null);
       }
-      setActiveKey(null);
     });
   };
 
   const addCriterionHandler = (category, label) => {
-    const snapshot = sections;
     const wasDraft = draftSections.some((s) => s.title === category);
     const tempId = `temp-${Date.now()}`;
 
     if (wasDraft) {
       setDraftSections((d) => d.filter((s) => s.title !== category));
-      setSections((prev) => [
-        ...prev,
-        {
-          id: category,
-          title: category,
-          items: [{ id: tempId, label, is_active: true }],
-        },
-      ]);
-    } else {
-      setSections((prev) =>
-        prev.map((s) =>
-          s.title === category
-            ? {
-                ...s,
-                items: [...s.items, { id: tempId, label, is_active: true }],
-              }
-            : s,
-        ),
-      );
     }
 
     runAction(
       `add:${category}`,
       addCriterion,
-      { category, type: formType, criterion_name: label },
-      () => {
-        setSections(snapshot);
-        if (wasDraft) {
+      { category, type: activeType, criterion_name: label },
+      (groups) => addToGroups(groups, category, { id: tempId, name: label, is_active: true }),
+      {
+        onError: () => {
+          if (!wasDraft) return;
           setDraftSections((d) => [
             ...d,
             { id: category, title: category, items: [] },
           ]);
-        }
+        },
+        onSuccess: (result, queryKey) => {
+          if (result.id == null) return;
+          queryClient.setQueryData(queryKey, (groups = []) => groups.map((group) => ({
+            ...group,
+            items: group.items.map((item) => item.id === tempId
+              ? { ...item, id: result.id }
+              : item),
+          })));
+        },
       },
     );
   };
 
   const deactivateCriterionHandler = (id) => {
-    const snapshot = sections;
-    setSections((prev) =>
-      prev.map((s) => ({
-        ...s,
-        items: s.items.map((i) =>
-          i.id === id ? { ...i, is_active: false } : i,
-        ),
-      })),
-    );
     runAction(
       `criterion:${id}`,
       deactivateCriterion,
-      { id, type: formType },
-      () => setSections(snapshot),
+      { id, type: activeType },
+      (groups) => setCriterionActive(groups, id, false),
     );
   };
 
   const reactivateCriterionHandler = (id) => {
-    const snapshot = sections;
-    setSections((prev) =>
-      prev.map((s) => ({
-        ...s,
-        items: s.items.map((i) =>
-          i.id === id ? { ...i, is_active: true } : i,
-        ),
-      })),
-    );
     runAction(
       `criterion:${id}`,
       reactivateCriterion,
-      { id, type: formType },
-      () => setSections(snapshot),
+      { id, type: activeType },
+      (groups) => setCriterionActive(groups, id, true),
     );
   };
 
   const deactivateSectionHandler = (category) => {
-    const snapshot = sections;
-    setSections((prev) =>
-      prev.map((s) =>
-        s.title === category
-          ? { ...s, items: s.items.map((i) => ({ ...i, is_active: false })) }
-          : s,
-      ),
-    );
     runAction(
       `section:${category}`,
       deactivateSection,
-      { category, type: formType },
-      () => setSections(snapshot),
+      { category, type: activeType },
+      (groups) => setSectionActive(groups, category, false),
     );
   };
 
   const reactivateSectionHandler = (category) => {
-    const snapshot = sections;
-    setSections((prev) =>
-      prev.map((s) =>
-        s.title === category
-          ? { ...s, items: s.items.map((i) => ({ ...i, is_active: true })) }
-          : s,
-      ),
-    );
     runAction(
       `reactivate-section:${category}`,
       reactivateSection,
-      { category, type: formType },
-      () => setSections(snapshot),
+      { category, type: activeType },
+      (groups) => setSectionActive(groups, category, true),
     );
   };
 
@@ -293,8 +288,9 @@ export default function EvaluationCriteriaPageContent({
             <button
               key={t.value}
               type="button"
-              onClick={() => setFormType(t.value)}
-              className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-1 text-center ${
+              onClick={() => handleTypeChange(t.value)}
+              disabled={isPending}
+              className={`rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-1 text-center disabled:opacity-50 ${
                 formType === t.value
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-primary-emphasis"
@@ -338,9 +334,17 @@ export default function EvaluationCriteriaPageContent({
         </div>
       )}
 
+      {!isSwitchingType && criteriaQuery.error && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
+          <span>{criteriaQuery.error.message || "Could not load evaluation criteria."}</span>
+          <button type="button" onClick={() => criteriaQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
+        </div>
+      )}
+
       {isSwitchingType ? (
         <EvaluationCriteriaListSkeleton />
-      ) : (
+      ) : criteriaQuery.error && !criteriaQuery.data ? null
+      : (
         <>
           <div className="space-y-4">
             {visibleSections.map((section) => (
@@ -348,6 +352,7 @@ export default function EvaluationCriteriaPageContent({
                 key={section.id}
                 section={section}
                 isKeyPending={isKeyPending}
+                isMutationPending={isPending}
                 onAddCriterion={addCriterionHandler}
                 onDeactivateCriterion={deactivateCriterionHandler}
                 onReactivateCriterion={reactivateCriterionHandler}
@@ -406,6 +411,7 @@ function Stat({ label, value }) {
 function SectionCard({
   section,
   isKeyPending,
+  isMutationPending,
   onAddCriterion,
   onDeactivateCriterion,
   onReactivateCriterion,
@@ -449,7 +455,7 @@ function SectionCard({
             {hasInactive && (
               <IconBtn
                 title="Reactivate all inactive criteria in this section"
-                disabled={isKeyPending(`reactivate-section:${section.title}`)}
+                disabled={isMutationPending}
                 pending={isKeyPending(`reactivate-section:${section.title}`)}
                 onClick={() => onReactivateSection(section.title)}
               >
@@ -460,7 +466,7 @@ function SectionCard({
               <IconBtn
                 title="Deactivate all criteria in this section"
                 danger
-                disabled={isKeyPending(`section:${section.title}`)}
+                disabled={isMutationPending}
                 pending={isKeyPending(`section:${section.title}`)}
                 onClick={() => onDeactivateSection(section.title)}
               >
@@ -493,7 +499,7 @@ function SectionCard({
                 <IconBtn
                   title="Deactivate criterion"
                   danger
-                  disabled={isKeyPending(key)}
+                  disabled={isMutationPending || String(item.id).startsWith("temp-")}
                   pending={isKeyPending(key)}
                   onClick={() => onDeactivateCriterion(item.id)}
                 >
@@ -502,7 +508,7 @@ function SectionCard({
               ) : (
                 <IconBtn
                   title="Reactivate criterion"
-                  disabled={isKeyPending(key)}
+                  disabled={isMutationPending || String(item.id).startsWith("temp-")}
                   pending={isKeyPending(key)}
                   onClick={() => onReactivateCriterion(item.id)}
                 >
@@ -533,7 +539,7 @@ function SectionCard({
               <button
                 type="button"
                 onClick={submitNewCriterion}
-                disabled={isKeyPending(`add:${section.title}`)}
+                disabled={isMutationPending}
                 className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
               >
                 {isKeyPending(`add:${section.title}`) ? "Saving…" : "Save"}
@@ -557,7 +563,8 @@ function SectionCard({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary-emphasis hover:underline"
+            disabled={isMutationPending}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary-emphasis hover:underline disabled:opacity-50"
           >
             <Plus className="h-4 w-4" /> Add criterion
           </button>

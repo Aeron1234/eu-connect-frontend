@@ -2,18 +2,20 @@
 
 import { notifyReadError } from "@/lib/client-read-error";
 
-import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, FileText, ClipboardList, Pencil } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Trash2, FileText, ClipboardList, Pencil, TriangleAlert } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { annexCReportsInfiniteOptions, sippReportsKeys } from "@/lib/cache/sipp-reports-queries";
+import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
 import {
   saveAnnexCReport,
-  getAnnexCReportsResult as getAnnexCReports,
   deleteAnnexCReport,
 } from "@/lib/server-actions/sipp-hte-actions";
 import ExportPdfButton from "../ui/ExportPdfButton";
 import SearchBar from "../ui/SearchBar";
 import TabBar from "../ui/TabBar";
 import AnnualReportSkeleton from "../skeletons/AnnualReportSkeleton";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
 
 const emptyRow = () => ({ issue: "", solution: "", recommendation: "" });
 
@@ -25,15 +27,12 @@ const innerTabs = [
 export default function AnnexCManager({
   hei,
   address,
-  initialAvailableYears = [],
-  initialReports = [],
-  pagination: {
-    page: initialPage = 1,
-    total: initialTotal = 0,
-    totalPages: initialTotalPages = 1,
-  } = {},
-  academicYear: initialYear = "",
+  initialPage,
 }) {
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialPage);
   const [tab, setTab] = useState("form");
 
   // --- Form tab state ---
@@ -51,138 +50,103 @@ export default function AnnexCManager({
   const [formError, setFormError] = useState("");
   const [editingReportId, setEditingReportId] = useState(null);
 
-  // --- Reports tab state, seeded from server-fetched props ---
-  const [reports, setReports] = useState(initialReports);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [, setTotal] = useState(initialTotal);
-  const [reportsYear, setReportsYear] = useState(initialYear);
+  // Each year, status, and search combination has its own cached pages.
+  const [reportsYear, setReportsYear] = useState(initialPage?.academicYear || "");
   const [reportsStatus, setReportsStatus] = useState("");
-  const [availableYears, setAvailableYears] = useState(initialAvailableYears);
   const [query, setQuery] = useState("");
-  const [isPending, setIsPending] = useState(false);
+  const [filters, setFilters] = useState({
+    academicYear: initialPage?.academicYear || "",
+    status: "",
+    search: "",
+  });
 
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => setFilters({
+      academicYear: reportsYear,
+      status: reportsStatus,
+      search: query.trim(),
+    }), 500);
+    return () => clearTimeout(timeout);
+  }, [reportsYear, reportsStatus, query]);
 
-  async function refreshReports() {
-    const thisRequestId = ++requestIdRef.current;
-    setIsPending(true);
-    try {
-      const fresh = await getAnnexCReports({
-        academicYear: reportsYear,
-        search: query,
-        status: reportsStatus,
-        page: 1,
-      });
-      if (thisRequestId !== requestIdRef.current) return;
-      if (!hasValidPage(fresh, "reports")) {
-        notifyReadError(
-          "Error refreshing Annex C reports:",
-          fresh?.error || "Invalid response from the server",
-        );
-        return;
-      }
-      setReports(fresh.reports);
-      setCurrentPage(1);
-      setTotalPages(fresh.pagination.totalPages || 1);
-      setTotal(fresh.pagination.total || 0);
-      setAvailableYears(fresh.availableYears || []);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current)
-        notifyReadError("Error refreshing Annex C reports:", error);
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
+  const isChangingFilters =
+    filters.academicYear !== reportsYear ||
+    filters.status !== reportsStatus ||
+    filters.search !== query.trim();
+  const reportsQuery = useInfiniteQuery({
+    ...annexCReportsInfiniteOptions(userId, filters),
+    enabled: Boolean(userId) && tab === "reports",
+    initialData:
+      filters.academicYear === (initialPage?.academicYear || "") &&
+      !filters.status && !filters.search &&
+      hasValidPage(initialPage, "reports")
+        ? { pages: [initialPage], pageParams: [1] }
+        : undefined,
+  });
+  const reports = useMemo(() => {
+    const seen = new Set();
+    return (reportsQuery.data?.pages || []).flatMap((page) =>
+      page.reports.filter((report) => {
+        if (seen.has(report.id)) return false;
+        seen.add(report.id);
+        return true;
+      }),
+    );
+  }, [reportsQuery.data]);
+  const availableYears = reportsQuery.data?.pages[0]?.availableYears ?? initialPage?.availableYears ?? [];
+  const isPending = isChangingFilters || reportsQuery.isPending;
+
+  function showCachedFilters(nextFilters) {
+    if (userId && queryClient.getQueryData(sippReportsKeys.annexCList(userId, nextFilters))?.pages?.length) {
+      setFilters(nextFilters);
     }
   }
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
+    if (reportsQuery.error) notifyReadError("Error loading Annex C reports:", reportsQuery.error);
+  }, [reportsQuery.error]);
 
-    const thisRequestId = ++requestIdRef.current;
-    setIsPending(true);
+  useEffect(() => {
+    if (!initialPage || serverSnapshotRef.current === initialPage || !userId) return;
+    serverSnapshotRef.current = initialPage;
+    const seedFilters = { academicYear: initialPage.academicYear || "", status: "", search: "" };
+    queryClient.setQueryData(sippReportsKeys.annexCList(userId, seedFilters), (old) => {
+      if (!old?.pages?.length) return { pages: [initialPage], pageParams: [1] };
+      const previous = old.pages[0];
+      const keepLoaded = canKeepLoadedPages(
+        previous.reports.map((report) => report.id),
+        previous.pagination.total,
+        initialPage.reports,
+        initialPage.pagination.total,
+      );
+      return {
+        pages: keepLoaded ? [initialPage, ...old.pages.slice(1)] : [initialPage],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+  }, [initialPage, queryClient, userId]);
 
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = await getAnnexCReports({
-          academicYear: reportsYear,
-          search: query,
-          status: reportsStatus,
-          page: 1,
-        });
+  function refreshReportsCache(deletedId) {
+    // A changed report can shift every later offset page in every filter variant.
+    queryClient.setQueriesData({ queryKey: sippReportsKeys.annexCAll(userId) }, (old) => {
+      if (!old?.pages?.length) return old;
+      const firstPage = old.pages[0];
+      return {
+        pages: [{
+          ...firstPage,
+          reports: deletedId
+            ? firstPage.reports.filter((report) => report.id !== deletedId)
+            : firstPage.reports,
+        }],
+        pageParams: [1],
+      };
+    });
+    void queryClient.invalidateQueries({ queryKey: sippReportsKeys.annexCAll(userId) });
+  }
 
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (!hasValidPage(newData, "reports")) {
-          notifyReadError(
-            "Error loading Annex C reports:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
-
-        setReports(newData.reports);
-        setCurrentPage(1);
-        setTotalPages(newData?.pagination?.totalPages || 1);
-        setTotal(newData?.pagination?.total || 0);
-        setAvailableYears(newData.availableYears || []);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          notifyReadError("Error loading Annex C reports:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsPending(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [reportsYear, reportsStatus, query]);
-
-  async function handleSeeMore() {
-    if (isPending || currentPage >= totalPages) return;
-    setIsPending(true);
-    const nextPage = currentPage + 1;
-    const thisRequestId = ++requestIdRef.current;
-
-    try {
-      const newData = await getAnnexCReports({
-        academicYear: reportsYear,
-        search: query,
-        status: reportsStatus,
-        page: nextPage,
-      });
-
-      if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "reports", "pagination", nextPage)) {
-        notifyReadError(
-          "Error loading more Annex C reports:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-
-      const incoming = newData.reports;
-
-      setReports((prev) => {
-        const existingIds = new Set(prev.map((r) => r.id));
-        const filteredNew = incoming.filter((r) => !existingIds.has(r.id));
-        return [...prev, ...filteredNew];
-      });
-
-      setCurrentPage(nextPage);
-      if (newData?.pagination?.totalPages) {
-        setTotalPages(newData.pagination.totalPages);
-      }
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more Annex C reports:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsPending(false);
+  function handleSeeMore() {
+    if (!isPending && !reportsQuery.isFetching && reportsQuery.hasNextPage) {
+      void reportsQuery.fetchNextPage();
     }
   }
 
@@ -253,15 +217,13 @@ export default function AnnexCManager({
         return;
       }
 
-      const sameFilter = reportsYear === academicYear && reportsStatus === status && !query;
+      refreshReportsCache();
       setTab("reports");
       resetForm();
       setQuery("");
       setReportsYear(academicYear);
       setReportsStatus(status);
-      if (sameFilter) {
-        await refreshReports();
-      }
+      setFilters({ academicYear, status, search: "" });
     } finally {
       setIsSaving(false);
     }
@@ -275,9 +237,7 @@ export default function AnnexCManager({
       return;
     }
     if (editingReportId === reportId) resetForm();
-    setReports((prev) => prev.filter((r) => r.id !== reportId));
-    setTotal((prev) => Math.max(0, prev - 1));
-    await refreshReports();
+    refreshReportsCache(reportId);
   }
 
   const form = (
@@ -490,7 +450,12 @@ export default function AnnexCManager({
             <div className="items-start">
               <SearchBar
                 value={query}
-                onChange={(e) => { if (editingReportId) resetForm(); setQuery(e.target.value); }}
+                onChange={(e) => {
+                  if (editingReportId) resetForm();
+                  const search = e.target.value;
+                  setQuery(search);
+                  showCachedFilters({ academicYear: reportsYear, status: reportsStatus, search: search.trim() });
+                }}
                 placeholder="Search degree or program..."
               />
             </div>
@@ -499,7 +464,12 @@ export default function AnnexCManager({
               {["All", ...availableYears].map((ay) => (
                 <button
                   key={ay}
-                  onClick={() => { if (editingReportId) resetForm(); setReportsYear(ay === "All" ? "" : ay); }}
+                  onClick={() => {
+                    if (editingReportId) resetForm();
+                    const academicYear = ay === "All" ? "" : ay;
+                    setReportsYear(academicYear);
+                    showCachedFilters({ academicYear, status: reportsStatus, search: query.trim() });
+                  }}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                     (ay === "All" && !reportsYear) || reportsYear === ay
                       ? "bg-primary text-primary-foreground"
@@ -521,7 +491,11 @@ export default function AnnexCManager({
               <button
                 key={value}
                 type="button"
-                onClick={() => { if (editingReportId) resetForm(); setReportsStatus(value); }}
+                onClick={() => {
+                  if (editingReportId) resetForm();
+                  setReportsStatus(value);
+                  showCachedFilters({ academicYear: reportsYear, status: value, search: query.trim() });
+                }}
                 aria-pressed={reportsStatus === value}
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${reportsStatus === value ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-primary-emphasis"}`}
               >
@@ -530,9 +504,17 @@ export default function AnnexCManager({
             ))}
           </div>
 
+          {!isChangingFilters && reportsQuery.error && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
+              <span className="flex items-center gap-2 text-foreground-soft"><TriangleAlert className="size-4 text-destructive" />{reportsQuery.error.message}</span>
+              <button type="button" onClick={() => reportsQuery.isFetchNextPageError ? reportsQuery.fetchNextPage() : reportsQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
+            </div>
+          )}
+
           {isPending ? (
             <AnnualReportSkeleton />
-          ) : reports.length === 0 ? (
+          ) : reportsQuery.error && reports.length === 0 ? null
+          : reports.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
               <ClipboardList className="size-8 text-foreground-faint" />
               <p className="text-sm text-muted-foreground">No reports found</p>
@@ -658,13 +640,14 @@ export default function AnnexCManager({
             ))
           )}
 
-          {!isPending && currentPage < totalPages && (
+          {!isPending && reportsQuery.hasNextPage && (
             <div className="text-center">
               <button
                 onClick={handleSeeMore}
+                disabled={reportsQuery.isFetchingNextPage}
                 className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition-colors"
               >
-                See more
+                {reportsQuery.isFetchingNextPage ? "Loading..." : "See more"}
               </button>
             </div>
           )}

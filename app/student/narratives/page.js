@@ -37,9 +37,8 @@ async function NarrativesPage() {
           </div>
 
           <WeeklyNarrativeContent
-            narratives={narrativesData?.narratives || []}
-            totalPages={narrativesData?.totalPages || 1}
-            totalRecords={narrativesData?.totalRecords || 0}
+            initialPage={narrativesData}
+            internshipId={internship.id}
           />
         </>
       ) : (

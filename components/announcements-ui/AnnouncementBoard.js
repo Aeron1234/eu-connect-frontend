@@ -2,9 +2,9 @@
 
 import { notifyReadError } from "@/lib/client-read-error";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Megaphone } from "lucide-react";
-import { getAllAnnouncementsResult as getAllAnnouncements } from "@/lib/server-actions/announcements-actions";
 import PostAnnouncementButton from "../internship-records-ui/PostAnnouncementButton";
 import AnnouncementCard from "./AnnouncementCard";
 import AnnouncementsFilter from "./AnnouncementsFilter";
@@ -12,135 +12,117 @@ import SearchBar from "../ui/SearchBar";
 import { useUser } from "@/contexts/UserContext";
 import PageTitle from "../ui/PageTitle";
 import AnnouncementCardSkeleton from "../skeletons/AnnouncementCardSkeleton";
-import { hasValidPage } from "@/lib/see-more-pagination.mjs";
+import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
+import {
+  announcementsInfiniteOptions,
+  announcementsKeys,
+} from "@/lib/cache/announcements-queries";
+
+const defaultFilters = { category: "all", search: "" };
 
 function AnnouncementBoard({
   categories = [],
   initialPinned = [],
   initialRegular = [],
   initialTotalPages = 1,
+  initialTotalRecords = 0,
 }) {
   const { user } = useUser();
   const userRole = user.role;
+  const queryClient = useQueryClient();
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
-
-  const [pinned, setPinned] = useState(initialPinned);
-  const [regular, setRegular] = useState(initialRegular);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  const requestIdRef = useRef(0);
-  const isFirstRun = useRef(true);
-
-  async function refreshList() {
-    const thisRequestId = ++requestIdRef.current;
-    setIsLoadingMore(false);
-    const newData = await getAllAnnouncements({ category, search, page: 1 });
-    if (thisRequestId !== requestIdRef.current) return;
-    if (
-      !hasValidPage(newData, "regular", null) ||
-      !Array.isArray(newData.pinned)
-    ) {
-      notifyReadError(newData?.error || "Invalid announcements response");
-      return;
-    }
-    setPinned(newData.pinned);
-    setRegular(newData.regular);
-    setPage(1);
-    setTotalPages(newData.totalPages || 1);
-  }
+  const [filters, setFilters] = useState(defaultFilters);
+  const serverSnapshotRef = useRef({ initialPinned, initialRegular, initialTotalPages, initialTotalRecords });
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-
-    const thisRequestId = ++requestIdRef.current;
-    setIsLoadingMore(false);
-    setIsSearching(true);
-
-    const timeout = setTimeout(async () => {
-      try {
-        const newData = await getAllAnnouncements({
-          category,
-          search,
-          page: 1,
-        });
-
-        if (thisRequestId !== requestIdRef.current) return;
-
-        if (
-          !hasValidPage(newData, "regular", null) ||
-          !Array.isArray(newData.pinned)
-        ) {
-          notifyReadError(
-            "Error loading announcements:",
-            newData?.error || "Invalid response from the server",
-          );
-          return;
-        }
-
-        setPinned(newData.pinned);
-        setRegular(newData.regular);
-        setPage(1);
-        setTotalPages(newData.totalPages || 1);
-      } catch (error) {
-        if (thisRequestId === requestIdRef.current) {
-          notifyReadError("Error loading announcements:", error);
-        }
-      } finally {
-        if (thisRequestId === requestIdRef.current) setIsSearching(false);
-      }
-    }, 300);
-
+    const timeout = setTimeout(() => setFilters({ category, search }), 300);
     return () => clearTimeout(timeout);
   }, [category, search]);
 
-  async function handleSeeMore() {
-    if (isSearching || isLoadingMore || page >= totalPages) return;
-    setIsLoadingMore(true);
-    const nextPage = page + 1;
-    const thisRequestId = ++requestIdRef.current;
+  const announcementsQuery = useInfiniteQuery({
+    ...announcementsInfiniteOptions(user.id, filters),
+    initialData:
+      filters.category === "all" && filters.search === ""
+        ? {
+            pages: [{
+              pinned: initialPinned,
+              regular: initialRegular,
+              totalPages: initialTotalPages,
+              totalRecords: initialTotalRecords,
+              currentPage: 1,
+            }],
+            pageParams: [1],
+          }
+        : undefined,
+  });
 
-    try {
-      const newData = await getAllAnnouncements({
-        category,
-        search,
-        page: nextPage,
-      });
+  const pinned = announcementsQuery.data?.pages[0]?.pinned ?? [];
+  const regular = useMemo(() => {
+    const seen = new Set();
+    return (announcementsQuery.data?.pages ?? []).flatMap((result) =>
+      result.regular.filter((announcement) => {
+        if (seen.has(announcement.id)) return false;
+        seen.add(announcement.id);
+        return true;
+      }),
+    );
+  }, [announcementsQuery.data]);
+  const isLoadingMore = announcementsQuery.isFetchingNextPage;
+  const isSearching =
+    filters.category !== category ||
+    filters.search !== search ||
+    announcementsQuery.isPending;
 
-      if (thisRequestId !== requestIdRef.current) return;
-
-      if (!hasValidPage(newData, "regular", null, nextPage)) {
-        notifyReadError(
-          "Error loading more announcements:",
-          newData?.error || "Invalid response from the server",
-        );
-        return;
-      }
-
-      setRegular((prev) => {
-        const existingIds = new Set(prev.map((a) => a.id));
-        const filteredNew = newData.regular.filter(
-          (a) => !existingIds.has(a.id),
-        );
-        return [...prev, ...filteredNew];
-      });
-
-      setPage(nextPage);
-      if (newData?.totalPages) setTotalPages(newData.totalPages);
-    } catch (error) {
-      if (thisRequestId === requestIdRef.current) {
-        notifyReadError("Error loading more announcements:", error);
-      }
-    } finally {
-      if (thisRequestId === requestIdRef.current) setIsLoadingMore(false);
+  useEffect(() => {
+    if (announcementsQuery.error) {
+      notifyReadError("Error loading announcements:", announcementsQuery.error);
     }
+  }, [announcementsQuery.error]);
+
+  useEffect(() => {
+    const previous = serverSnapshotRef.current;
+    if (
+      previous.initialPinned === initialPinned &&
+      previous.initialRegular === initialRegular &&
+      previous.initialTotalPages === initialTotalPages &&
+      previous.initialTotalRecords === initialTotalRecords
+    ) return;
+    serverSnapshotRef.current = { initialPinned, initialRegular, initialTotalPages, initialTotalRecords };
+    queryClient.setQueryData(announcementsKeys.list(user.id, defaultFilters), (old) => {
+      if (!old?.pages?.length) return old;
+      const previousFirstPage = old.pages[0];
+      const samePinned =
+        previousFirstPage.pinned.length === initialPinned.length &&
+        previousFirstPage.pinned.every((item, index) => item.id === initialPinned[index].id);
+      const keepLoaded = samePinned && canKeepLoadedPages(
+        previousFirstPage.regular.map((item) => item.id),
+        previousFirstPage.totalRecords,
+        initialRegular,
+        initialTotalRecords,
+      );
+      const firstPage = {
+        pinned: initialPinned,
+        regular: initialRegular,
+        totalPages: initialTotalPages,
+        totalRecords: initialTotalRecords,
+        currentPage: 1,
+      };
+      return {
+        pages: keepLoaded ? [firstPage, ...old.pages.slice(1)] : [firstPage],
+        pageParams: keepLoaded ? old.pageParams : [1],
+      };
+    });
+  }, [initialPinned, initialRegular, initialTotalPages, initialTotalRecords, queryClient, user.id]);
+
+  function refreshList() {
+    queryClient.setQueriesData({ queryKey: announcementsKeys.all(user.id) }, (old) =>
+      old?.pages?.length
+        ? { pages: [old.pages[0]], pageParams: [1] }
+        : old,
+    );
+    void queryClient.invalidateQueries({ queryKey: announcementsKeys.all(user.id) });
   }
 
   const pinnedIds = new Set(pinned.map((p) => p.id));
@@ -186,6 +168,13 @@ function AnnouncementBoard({
             <AnnouncementCardSkeleton key={i} showEventDate={i % 2 === 0} />
           ))}
         </div>
+      ) : announcementsQuery.isError && !announcementsQuery.data ? (
+        <div className="py-12 text-center">
+          <p className="text-sm text-muted-foreground">Could not load announcements.</p>
+          <button type="button" onClick={() => void announcementsQuery.refetch()} className="mt-3 text-sm font-semibold text-primary-emphasis">
+            Try again
+          </button>
+        </div>
       ) : (
         <div className="space-y-6">
           {isPinnedExist && (
@@ -227,7 +216,7 @@ function AnnouncementBoard({
               </ul>
             </div>
           ) : (
-            page === 1 && (
+            !isPinnedExist && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
                 <Megaphone className="size-8 text-foreground-faint" />
                 <p className="text-sm text-muted-foreground">
@@ -239,9 +228,10 @@ function AnnouncementBoard({
         </div>
       )}
 
-      {!isSearching && page < totalPages && (
+      {!isSearching && announcementsQuery.hasNextPage && (
         <button
-          onClick={handleSeeMore}
+          type="button"
+          onClick={() => void announcementsQuery.fetchNextPage()}
           disabled={isLoadingMore}
           className="w-full text-center text-lg font-semibold text-foreground-soft transition hover:text-primary-emphasis disabled:opacity-50"
         >
