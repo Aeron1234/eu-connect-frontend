@@ -45,12 +45,11 @@ function PastInternshipsPageContent({
   });
 
   useEffect(() => {
-    const timeout = setTimeout(
-      () => setFilters({ academicYear: yearFilter, search: query }),
-      500,
-    );
+    const search = query.trim();
+    if (filters.academicYear === yearFilter && filters.search === search) return;
+    const timeout = setTimeout(() => setFilters({ academicYear: yearFilter, search }), 500);
     return () => clearTimeout(timeout);
-  }, [yearFilter, query]);
+  }, [yearFilter, query, filters.academicYear, filters.search]);
 
   const pastInternshipsQuery = useInfiniteQuery({
     ...pastInternshipsInfiniteOptions(user.id, filters),
@@ -86,8 +85,26 @@ function PastInternshipsPageContent({
   const isLoadingMore = pastInternshipsQuery.isFetchingNextPage;
   const isSearching =
     filters.academicYear !== yearFilter ||
-    filters.search !== query ||
-    pastInternshipsQuery.isPending;
+    filters.search !== query.trim() ||
+    pastInternshipsQuery.isPending ||
+    pastInternshipsQuery.isPlaceholderData;
+
+  function showCachedFilters(nextFilters) {
+    if (user?.id && queryClient.getQueryData(pastInternshipsKeys.list(user.id, nextFilters))?.pages?.length) {
+      setFilters(nextFilters);
+    }
+  }
+
+  function handleSearchChange(event) {
+    const search = event.target.value;
+    setQuery(search);
+    showCachedFilters({ academicYear: yearFilter, search: search.trim() });
+  }
+
+  function handleYearChange(academicYear) {
+    setYearFilter(academicYear);
+    showCachedFilters({ academicYear, search: query.trim() });
+  }
 
   useEffect(() => {
     if (pastInternshipsQuery.error) {
@@ -115,7 +132,14 @@ function PastInternshipsPageContent({
     };
     const seedFilters = { academicYear: initialYearFilter, search: "" };
     queryClient.setQueryData(pastInternshipsKeys.list(user.id, seedFilters), (old) => {
-      if (!old?.pages?.length) return old;
+      if (!old?.pages?.length) return {
+        pages: [{
+          data: initialData,
+          academicYears: initialAcademicYears,
+          pagination: { page: initialPage, total: initialTotal, totalPages: initialTotalPages },
+        }],
+        pageParams: [1],
+      };
       const previousFirstPage = old.pages[0];
       const keepLoaded = canKeepLoadedPages(
         previousFirstPage.data.map(keyOf),
@@ -154,14 +178,14 @@ function PastInternshipsPageContent({
         <div className="items-start">
           <SearchBar
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Search company or alumni..."
           />
         </div>
         <AcademicYearFilter
           academicYears={academicYears}
           value={yearFilter}
-          onChange={setYearFilter}
+          onChange={handleYearChange}
         />
       </div>
 

@@ -37,9 +37,11 @@ function AnnouncementBoard({
   const serverSnapshotRef = useRef({ initialPinned, initialRegular, initialTotalPages, initialTotalRecords });
 
   useEffect(() => {
-    const timeout = setTimeout(() => setFilters({ category, search }), 300);
+    const trimmedSearch = search.trim();
+    if (filters.category === category && filters.search === trimmedSearch) return;
+    const timeout = setTimeout(() => setFilters({ category, search: trimmedSearch }), 300);
     return () => clearTimeout(timeout);
-  }, [category, search]);
+  }, [category, search, filters.category, filters.search]);
 
   const announcementsQuery = useInfiniteQuery({
     ...announcementsInfiniteOptions(user.id, filters),
@@ -72,8 +74,26 @@ function AnnouncementBoard({
   const isLoadingMore = announcementsQuery.isFetchingNextPage;
   const isSearching =
     filters.category !== category ||
-    filters.search !== search ||
-    announcementsQuery.isPending;
+    filters.search !== search.trim() ||
+    announcementsQuery.isPending ||
+    announcementsQuery.isPlaceholderData;
+
+  function showCachedFilters(nextFilters) {
+    if (user?.id && queryClient.getQueryData(announcementsKeys.list(user.id, nextFilters))?.pages?.length) {
+      setFilters(nextFilters);
+    }
+  }
+
+  function handleSearchChange(event) {
+    const value = event.target.value;
+    setSearch(value);
+    showCachedFilters({ category, search: value.trim() });
+  }
+
+  function handleCategoryChange(value) {
+    setCategory(value);
+    showCachedFilters({ category: value, search: search.trim() });
+  }
 
   useEffect(() => {
     if (announcementsQuery.error) {
@@ -91,7 +111,14 @@ function AnnouncementBoard({
     ) return;
     serverSnapshotRef.current = { initialPinned, initialRegular, initialTotalPages, initialTotalRecords };
     queryClient.setQueryData(announcementsKeys.list(user.id, defaultFilters), (old) => {
-      if (!old?.pages?.length) return old;
+      const firstPage = {
+        pinned: initialPinned,
+        regular: initialRegular,
+        totalPages: initialTotalPages,
+        totalRecords: initialTotalRecords,
+        currentPage: 1,
+      };
+      if (!old?.pages?.length) return { pages: [firstPage], pageParams: [1] };
       const previousFirstPage = old.pages[0];
       const samePinned =
         previousFirstPage.pinned.length === initialPinned.length &&
@@ -102,13 +129,6 @@ function AnnouncementBoard({
         initialRegular,
         initialTotalRecords,
       );
-      const firstPage = {
-        pinned: initialPinned,
-        regular: initialRegular,
-        totalPages: initialTotalPages,
-        totalRecords: initialTotalRecords,
-        currentPage: 1,
-      };
       return {
         pages: keepLoaded ? [firstPage, ...old.pages.slice(1)] : [firstPage],
         pageParams: keepLoaded ? old.pageParams : [1],
@@ -149,7 +169,7 @@ function AnnouncementBoard({
       >
         <SearchBar
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
           placeholder="Search announcements..."
           ariaLabel="Search announcements"
           position={userRole !== "employer" ? "right" : "left"}
@@ -158,7 +178,7 @@ function AnnouncementBoard({
         <AnnouncementsFilter
           categories={categories || []}
           category={category}
-          setCategory={setCategory}
+          setCategory={handleCategoryChange}
         />
       </div>
 
