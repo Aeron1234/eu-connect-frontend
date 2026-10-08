@@ -5,19 +5,25 @@ import Modal from "../ui/Modal";
 import { useUser } from "@/contexts/UserContext";
 import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
 import { useTransition } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { coursesOptions } from "@/lib/cache/reference-queries";
 import { postAlumniRecord } from "@/lib/server-actions/past-internships-actions";
 import { pastInternshipsKeys } from "@/lib/cache/past-internships-queries";
 import { toastAndAction } from "../../lib/helpers";
 import TitleButton from "../ui/TitleButton";
 
-function PastInternshipPostButton({ courses = [] }) {
+function PastInternshipPostButton() {
   const [isPending, startTransition] = useTransition();
   const { user } = useUser();
   const queryClient = useQueryClient();
 
   const userRole = user.role;
   const userDepartment = user.department_code;
+  const coursesQuery = useQuery({
+    ...coursesOptions(user.id),
+    enabled: Boolean(user.id) && userRole === "department_head" && userDepartment !== "REG",
+  });
+  const courses = coursesQuery.data || [];
 
   if (userRole !== "department_head" || userDepartment === "REG") return null;
 
@@ -52,11 +58,18 @@ function PastInternshipPostButton({ courses = [] }) {
         </span>
       }
     >
-      <PastInternshipPostEditForm
+      {coursesQuery.isPending ? (
+        <p className="text-sm text-muted-foreground">Loading courses...</p>
+      ) : coursesQuery.isError ? (
+        <div role="alert" className="text-sm">
+          <p>{coursesQuery.error.message}</p>
+          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void coursesQuery.refetch()}>Try again</button>
+        </div>
+      ) : <PastInternshipPostEditForm
         courses={courses}
         handleAction={handleAction}
         isPending={isPending}
-      />
+      />}
     </Modal>
   );
 }

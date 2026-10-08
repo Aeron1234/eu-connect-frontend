@@ -1,7 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Building2, GraduationCap, Layers, Power } from "lucide-react";
+import {
+  adminCoursesOptions,
+  adminDepartmentsOptions,
+  departmentCourseKeys,
+} from "@/lib/cache/department-course-queries";
+import { Skeleton } from "@/components/ui/skeleton";
+import { accountFormKeys } from "@/lib/cache/account-form-queries";
+import { referenceKeys } from "@/lib/cache/reference-queries";
 import {
   activateDepartment,
   deactivateDepartment,
@@ -24,12 +34,30 @@ function cx(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DepartmentsAndCoursesManager({
-  initialDepartments = [],
-  initialCourses = [],
-}) {
-  const [departments, setDepartments] = useState(initialDepartments);
-  const [courses, setCourses] = useState(initialCourses);
+const EMPTY_LIST = [];
+
+function LoadingRows() {
+  return Array.from({ length: 4 }, (_, index) => (
+    <tr key={index} className="border-b border-border last:border-0">
+      <td colSpan={5} className="px-5 py-3">
+        <Skeleton className="h-5 w-full" />
+      </td>
+    </tr>
+  ));
+}
+
+export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
+  const queryClient = useQueryClient();
+  const departmentsQuery = useQuery({
+    ...adminDepartmentsOptions(currentUserId),
+    enabled: Boolean(currentUserId),
+  });
+  const coursesQuery = useQuery({
+    ...adminCoursesOptions(currentUserId),
+    enabled: Boolean(currentUserId),
+  });
+  const departments = departmentsQuery.data ?? EMPTY_LIST;
+  const courses = coursesQuery.data ?? EMPTY_LIST;
 
   const [view, setView] = useState("departments"); // "departments" | "courses"
   const [status, setStatus] = useState("all"); // "all" | "active" | "inactive"
@@ -87,7 +115,7 @@ export default function DepartmentsAndCoursesManager({
         const q = query.toLowerCase();
         return (
           c.course_name.toLowerCase().includes(q) ||
-          c.code.toLowerCase().includes(q)
+          (c.code || c.short_name || "").toLowerCase().includes(q)
         );
       }
       return true;
@@ -95,49 +123,65 @@ export default function DepartmentsAndCoursesManager({
   }, [courses, status, query]);
 
   async function handleToggleDepartment(dept) {
-    setPendingIds((prev) => new Set(prev).add(dept.id));
-    const action = dept.is_active ? deactivateDepartment : activateDepartment;
-    const result = await action(dept.id);
-
-    setPendingIds((prev) => {
-      const next = new Set(prev);
-      next.delete(dept.id);
-      return next;
-    });
-
-    if (result?.error) {
-      console.error(result.error);
-      return;
+    const pendingKey = `department:${dept.id}`;
+    setPendingIds((prev) => new Set(prev).add(pendingKey));
+    try {
+      const action = dept.is_active ? deactivateDepartment : activateDepartment;
+      const result = await action(dept.id);
+      if (!result?.success) {
+        toast.error(result?.error || "Could not update department.");
+        return;
+      }
+      queryClient.setQueryData(departmentCourseKeys.departments(currentUserId), (list) =>
+        list?.map((item) =>
+          item.id === dept.id ? { ...item, is_active: dept.is_active ? 0 : 1 } : item,
+        ),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: departmentCourseKeys.departments(currentUserId),
+      });
+      void queryClient.invalidateQueries({ queryKey: accountFormKeys.data(currentUserId) });
+      void queryClient.invalidateQueries({ queryKey: referenceKeys.courses(currentUserId) });
+    } catch {
+      toast.error("Could not update department.");
+    } finally {
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(pendingKey);
+        return next;
+      });
     }
-
-    setDepartments((prev) =>
-      prev.map((d) =>
-        d.id === dept.id ? { ...d, is_active: d.is_active ? 0 : 1 } : d,
-      ),
-    );
   }
 
   async function handleToggleCourse(course) {
-    setPendingIds((prev) => new Set(prev).add(course.id));
-    const action = course.is_active ? deactivateCourse : activateCourse;
-    const result = await action(course.id);
-
-    setPendingIds((prev) => {
-      const next = new Set(prev);
-      next.delete(course.id);
-      return next;
-    });
-
-    if (result?.error) {
-      console.error(result.error);
-      return;
+    const pendingKey = `course:${course.id}`;
+    setPendingIds((prev) => new Set(prev).add(pendingKey));
+    try {
+      const action = course.is_active ? deactivateCourse : activateCourse;
+      const result = await action(course.id);
+      if (!result?.success) {
+        toast.error(result?.error || "Could not update course.");
+        return;
+      }
+      queryClient.setQueryData(departmentCourseKeys.courses(currentUserId), (list) =>
+        list?.map((item) =>
+          item.id === course.id ? { ...item, is_active: course.is_active ? 0 : 1 } : item,
+        ),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: departmentCourseKeys.courses(currentUserId),
+      });
+      void queryClient.invalidateQueries({ queryKey: accountFormKeys.data(currentUserId) });
+      void queryClient.invalidateQueries({ queryKey: referenceKeys.courses(currentUserId) });
+    } catch {
+      toast.error("Could not update course.");
+    } finally {
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(pendingKey);
+        return next;
+      });
     }
-
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === course.id ? { ...c, is_active: c.is_active ? 0 : 1 } : c,
-      ),
-    );
   }
 
   async function handleAddDepartment(e) {
@@ -153,14 +197,23 @@ export default function DepartmentsAndCoursesManager({
     try {
       const result = await addDepartment({ name: deptName, code: deptCode });
 
-      if (result?.error) {
-        setDeptError(result.error);
+      if (!result?.success || !result.department) {
+        setDeptError(result?.error || "Could not add department.");
         return;
       }
 
-      setDepartments((prev) => [result.department, ...prev]);
+      queryClient.setQueryData(departmentCourseKeys.departments(currentUserId), (list) =>
+        list ? [result.department, ...list] : [result.department],
+      );
+      void queryClient.invalidateQueries({
+        queryKey: departmentCourseKeys.departments(currentUserId),
+      });
+      void queryClient.invalidateQueries({ queryKey: accountFormKeys.data(currentUserId) });
+      void queryClient.invalidateQueries({ queryKey: referenceKeys.courses(currentUserId) });
       setDeptName("");
       setDeptCode("");
+    } catch {
+      setDeptError("Could not add department.");
     } finally {
       setIsAddingDept(false);
     }
@@ -183,15 +236,24 @@ export default function DepartmentsAndCoursesManager({
         department_id: courseDeptId,
       });
 
-      if (result?.error) {
-        setCourseError(result.error);
+      if (!result?.success || !result.course) {
+        setCourseError(result?.error || "Could not add course.");
         return;
       }
 
-      setCourses((prev) => [result.course, ...prev]);
+      queryClient.setQueryData(departmentCourseKeys.courses(currentUserId), (list) =>
+        list ? [result.course, ...list] : [result.course],
+      );
+      void queryClient.invalidateQueries({
+        queryKey: departmentCourseKeys.courses(currentUserId),
+      });
+      void queryClient.invalidateQueries({ queryKey: accountFormKeys.data(currentUserId) });
+      void queryClient.invalidateQueries({ queryKey: referenceKeys.courses(currentUserId) });
       setCourseName("");
       setCourseCode("");
       setCourseDeptId("");
+    } catch {
+      setCourseError("Could not add course.");
     } finally {
       setIsAddingCourse(false);
     }
@@ -310,7 +372,7 @@ export default function DepartmentsAndCoursesManager({
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent position="popper">
-                    {departments.map((d) => (
+                    {departments.filter((d) => d.is_active).map((d) => (
                       <SelectItem key={d.id} value={String(d.id)}>
                         {d.code} — {d.name}
                       </SelectItem>
@@ -409,7 +471,18 @@ export default function DepartmentsAndCoursesManager({
               </tr>
             </thead>
             <tbody>
-              {filteredDepartments.map((d) => (
+              {departmentsQuery.isPending ? (
+                <LoadingRows />
+              ) : departmentsQuery.isError && !departmentsQuery.data ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm">
+                    <p>{departmentsQuery.error?.message || "Could not load departments."}</p>
+                    <button type="button" onClick={() => void departmentsQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
+                      Try again
+                    </button>
+                  </td>
+                </tr>
+              ) : filteredDepartments.map((d) => (
                 <tr key={d.id} className="border-b border-border last:border-0">
                   <td className="px-5 py-3 font-medium text-foreground">
                     {d.name}
@@ -433,7 +506,7 @@ export default function DepartmentsAndCoursesManager({
                   <td className="px-5 py-3 text-right">
                     <button
                       onClick={() => handleToggleDepartment(d)}
-                      disabled={pendingIds.has(d.id)}
+                      disabled={pendingIds.has(`department:${d.id}`)}
                       className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 disabled:opacity-50"
                     >
                       <Power className="size-3.5" />
@@ -442,7 +515,7 @@ export default function DepartmentsAndCoursesManager({
                   </td>
                 </tr>
               ))}
-              {filteredDepartments.length === 0 && (
+              {!departmentsQuery.isPending && (departmentsQuery.data || !departmentsQuery.isError) && filteredDepartments.length === 0 && (
                 <tr>
                   <td
                     colSpan={5}
@@ -468,12 +541,23 @@ export default function DepartmentsAndCoursesManager({
               </tr>
             </thead>
             <tbody>
-              {filteredCourses.map((c) => (
+              {coursesQuery.isPending ? (
+                <LoadingRows />
+              ) : coursesQuery.isError && !coursesQuery.data ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm">
+                    <p>{coursesQuery.error?.message || "Could not load courses."}</p>
+                    <button type="button" onClick={() => void coursesQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
+                      Try again
+                    </button>
+                  </td>
+                </tr>
+              ) : filteredCourses.map((c) => (
                 <tr key={c.id} className="border-b border-border last:border-0">
                   <td className="px-5 py-3 font-medium text-foreground">
                     {c.course_name}
                   </td>
-                  <td className="px-5 py-3 text-muted-foreground">{c.code}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{c.code || c.short_name}</td>
                   <td className="px-5 py-3 text-muted-foreground">
                     {departmentNameById[c.department_id] || "—"}
                   </td>
@@ -492,7 +576,7 @@ export default function DepartmentsAndCoursesManager({
                   <td className="px-5 py-3 text-right">
                     <button
                       onClick={() => handleToggleCourse(c)}
-                      disabled={pendingIds.has(c.id)}
+                      disabled={pendingIds.has(`course:${c.id}`)}
                       className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 disabled:opacity-50"
                     >
                       <Power className="size-3.5" />
@@ -501,7 +585,7 @@ export default function DepartmentsAndCoursesManager({
                   </td>
                 </tr>
               ))}
-              {filteredCourses.length === 0 && (
+              {!coursesQuery.isPending && (coursesQuery.data || !coursesQuery.isError) && filteredCourses.length === 0 && (
                 <tr>
                   <td
                     colSpan={5}

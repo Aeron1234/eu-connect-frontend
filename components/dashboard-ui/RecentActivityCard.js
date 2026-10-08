@@ -22,10 +22,10 @@ function RecentActivityCard({ activities = [], title = "Recent Activity" }) {
             >
               <a.icon className={`w-4 h-4 mt-0.5 ${a.color}`} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-foreground line-clamp-2">
+                <p className="text-xs text-foreground line-clamp-2 sm:text-sm">
                   {a.title}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">{a.time}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">{a.time}</p>
               </div>
             </li>
           ))}

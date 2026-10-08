@@ -1,10 +1,11 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, TriangleAlert, UserPlus } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { accountsInfiniteOptions, accountsKeys } from "@/lib/cache/accounts-queries";
+import { accountFormOptions } from "@/lib/cache/account-form-queries";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
@@ -15,15 +16,17 @@ import AccountDropdownFilter from "./AccountDropdownFilter";
 const tabs = ["Form", "Accounts"];
 const defaultFilters = { filter: "all", search: "" };
 
-function AccountsManager({
-  roles = [],
-  courses = [],
-  departments = [],
-  initialPage,
-}) {
+function AccountsManager({ initialPage }) {
   const { user } = useUser();
   const userId = user?.id;
   const queryClient = useQueryClient();
+  const formQuery = useQuery({
+    ...accountFormOptions(userId),
+    enabled: Boolean(userId),
+  });
+  const roles = formQuery.data?.roles || [];
+  const courses = formQuery.data?.courses || [];
+  const departments = formQuery.data?.departments || [];
   const serverSnapshotRef = useRef(initialPage);
   const [tab, setTab] = useState(tabs[0]);
   const [filter, setFilter] = useState("all");
@@ -124,12 +127,19 @@ function AccountsManager({
 
       {tab === "Form" ? (
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
-          <CreateAccountForm
+          {formQuery.isPending ? (
+            <p className="text-sm text-muted-foreground">Loading form options...</p>
+          ) : formQuery.isError ? (
+            <div role="alert" className="text-sm">
+              <p>{formQuery.error.message}</p>
+              <button type="button" onClick={() => void formQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">Try again</button>
+            </div>
+          ) : <CreateAccountForm
             roles={roles}
             courses={courses}
             departments={departments}
             onCreated={refreshList}
-          />
+          />}
         </div>
       ) : (
         <div className="space-y-4">

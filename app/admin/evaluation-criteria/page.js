@@ -1,16 +1,12 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
 import EvaluationCriteriaPageContent from "@/components/evaluations-ui/EvaluationCriteriaPageContent";
 import PageTitle from "@/components/ui/PageTitle";
-import { getAllEvaluationCriteria } from "@/lib/server-actions/evaluations-actions";
 import { SlidersHorizontal } from "lucide-react";
 
 export const metadata = {
   title: "Evaluation Criteria",
 };
 
-async function EvaluationCriteriaPage() {
-  const criteria = await getAllEvaluationCriteria({ type: "student" });
-
+function EvaluationCriteriaPage() {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <PageTitle
@@ -21,9 +17,9 @@ async function EvaluationCriteriaPage() {
         }
       />
 
-      <EvaluationCriteriaPageContent initialCriteria={criteria || []} />
+      <EvaluationCriteriaPageContent />
     </main>
   );
 }
 
-export default withReadErrorPage(EvaluationCriteriaPage);
+export default EvaluationCriteriaPage;

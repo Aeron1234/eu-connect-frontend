@@ -7,6 +7,7 @@ import { createInternshipPosting } from "@/lib/server-actions/internship-posts-a
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { internshipPostsKeys } from "@/lib/cache/internship-posts-queries";
+import { dashboardListsKeys } from "@/lib/cache/dashboard-lists-queries";
 
 function InternshipPostButton({ courses, onSuccess = null }) {
   const [isPending, startTransition] = useTransition();
@@ -23,6 +24,9 @@ function InternshipPostButton({ courses, onSuccess = null }) {
         formData,
       });
       if (result?.success) {
+        void queryClient.invalidateQueries({
+          queryKey: dashboardListsKeys.employerJobsAll(user.id),
+        });
         await queryClient.invalidateQueries({
           queryKey: internshipPostsKeys.all(user.id),
         });

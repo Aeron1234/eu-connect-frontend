@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { sippAcademicYearsOptions } from "@/lib/cache/sipp-reports-queries";
 import TabBar from "../ui/TabBar";
 import AnnexCManager from "./AnnexCManager";
 import { AnnexDHteList } from "./AnnexDHteList";
@@ -22,6 +25,11 @@ function SIPPReportsManager({
   initialAnnexD,
 }) {
   const [scope, setScope] = useState("annex-c");
+  const { user } = useUser();
+  const yearsQuery = useQuery({
+    ...sippAcademicYearsOptions(user?.id),
+    enabled: Boolean(user?.id),
+  });
 
   return (
     <div className="space-y-6">
@@ -35,9 +43,14 @@ function SIPPReportsManager({
           address={address}
           initialPage={initialAnnexC}
         />
+      ) : yearsQuery.isError ? (
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
+          <p>{yearsQuery.error.message}</p>
+          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void yearsQuery.refetch()}>Try again</button>
+        </div>
       ) : (
         <AnnexDHteList
-          availableAcadYear={availableAcadYear}
+          availableAcadYear={yearsQuery.data || availableAcadYear}
           initialPage={initialAnnexD}
         />
       )}

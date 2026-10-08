@@ -1,18 +1,12 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
 import EvaluationsManager from "@/components/evaluations-ui/EvaluationsManager";
 import PageTitle from "@/components/ui/PageTitle";
-import { getEmployerEvaluationCriterias } from "@/lib/server-actions/evaluations-actions";
 import { ClipboardCheck } from "lucide-react";
 
 export const metadata = {
   title: "Evaluations",
 };
 
-export const dynamic = "force-dynamic";
-
-async function EvaluationsPage() {
-  const employerEvaluationCriterias = await getEmployerEvaluationCriterias();
-
+function EvaluationsPage() {
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
       <PageTitle
@@ -23,9 +17,9 @@ async function EvaluationsPage() {
         }
       />
 
-      <EvaluationsManager initialCriteria={employerEvaluationCriterias || []} />
+      <EvaluationsManager />
     </main>
   );
 }
 
-export default withReadErrorPage(EvaluationsPage);
+export default EvaluationsPage;

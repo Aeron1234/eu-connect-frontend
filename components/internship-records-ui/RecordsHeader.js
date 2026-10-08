@@ -11,6 +11,8 @@ import { useTransition } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { internshipRecordsKeys } from "@/lib/cache/internship-records-queries";
+import { mapLocationsKeys } from "@/lib/cache/map-locations-queries";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { toastAndAction } from "../../lib/helpers";
 import {
   restoreInternshipRecord,
@@ -74,6 +76,8 @@ function RecordsHeader({ record, internshipId }) {
           queryKey: internshipRecordsKeys.all(user.id),
           refetchType: "none",
         });
+        void queryClient.invalidateQueries({ queryKey: mapLocationsKeys.all(user.id) });
+        void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(user.id, user.role) });
       }
     });
   }

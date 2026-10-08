@@ -20,6 +20,8 @@ import {
   internshipRecordsInfiniteOptions,
   internshipRecordsKeys,
 } from "@/lib/cache/internship-records-queries";
+import { mapLocationsKeys } from "@/lib/cache/map-locations-queries";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import RecordsPageHeader from "./RecordsPageHeader";
 import RecordsPageFilter from "./RecordsPageFilter";
 import { toastAndAction } from "../../lib/helpers";
@@ -58,14 +60,14 @@ function StatusPill({ status }) {
 }
 
 function RecordsPageContent({
-  initialData = [],
+  initialData,
   filter: initialFilter = "all",
   pagination: {
     page: initialPage = 1,
     limit = 10,
     total: initialTotal = 0,
     totalPages: initialTotalPages = 0,
-  },
+  } = {},
   stats: initialStats = {},
 }) {
   const [query, setQuery] = useState("");
@@ -100,6 +102,7 @@ function RecordsPageContent({
   const recordsQuery = useInfiniteQuery({
     ...internshipRecordsInfiniteOptions(user.id, criteria),
     initialData:
+      Array.isArray(initialData) &&
       initialFilter === "all" &&
       criteria.status === "" &&
       criteria.search === "" &&
@@ -138,7 +141,7 @@ function RecordsPageContent({
   const isSearching =
     isChangingCriteria ||
     recordsQuery.isPending ||
-    (recordsQuery.isFetching && !isLoadingMore);
+    recordsQuery.isPlaceholderData;
 
   useEffect(() => {
     if (recordsQuery.error) {
@@ -147,7 +150,7 @@ function RecordsPageContent({
   }, [recordsQuery.error]);
 
   useEffect(() => {
-    if (serverSnapshotRef.current === initialData) return;
+    if (!Array.isArray(initialData) || serverSnapshotRef.current === initialData) return;
     serverSnapshotRef.current = initialData;
     queryClient.setQueryData(
       internshipRecordsKeys.list(user.id, seedCriteria),
@@ -225,6 +228,8 @@ function RecordsPageContent({
         await queryClient.invalidateQueries({
           queryKey: internshipRecordsKeys.all(user.id),
         });
+        void queryClient.invalidateQueries({ queryKey: mapLocationsKeys.all(user.id) });
+        void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(user.id, user.role) });
       }
     });
   }

@@ -3,7 +3,8 @@
 import { notifyReadError } from "@/lib/client-read-error";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { announcementCategoriesOptions } from "@/lib/cache/reference-queries";
 import { Megaphone } from "lucide-react";
 import PostAnnouncementButton from "../internship-records-ui/PostAnnouncementButton";
 import AnnouncementCard from "./AnnouncementCard";
@@ -21,14 +22,19 @@ import {
 const defaultFilters = { category: "all", search: "" };
 
 function AnnouncementBoard({
-  categories = [],
-  initialPinned = [],
-  initialRegular = [],
+  categories: initialCategories,
+  initialPinned,
+  initialRegular,
   initialTotalPages = 1,
   initialTotalRecords = 0,
 }) {
   const { user } = useUser();
   const userRole = user.role;
+  const categoriesQuery = useQuery({
+    ...announcementCategoriesOptions(user.id),
+    enabled: Boolean(user.id),
+  });
+  const categories = categoriesQuery.data || initialCategories || [];
   const queryClient = useQueryClient();
 
   const [category, setCategory] = useState("all");
@@ -46,7 +52,7 @@ function AnnouncementBoard({
   const announcementsQuery = useInfiniteQuery({
     ...announcementsInfiniteOptions(user.id, filters),
     initialData:
-      filters.category === "all" && filters.search === ""
+      Array.isArray(initialPinned) && Array.isArray(initialRegular) && filters.category === "all" && filters.search === ""
         ? {
             pages: [{
               pinned: initialPinned,
@@ -103,6 +109,7 @@ function AnnouncementBoard({
 
   useEffect(() => {
     const previous = serverSnapshotRef.current;
+    if (!Array.isArray(initialPinned) || !Array.isArray(initialRegular)) return;
     if (
       previous.initialPinned === initialPinned &&
       previous.initialRegular === initialRegular &&
@@ -160,6 +167,9 @@ function AnnouncementBoard({
 
         <PostAnnouncementButton
           categories={categories || []}
+          categoriesLoading={categoriesQuery.isPending}
+          categoriesError={categoriesQuery.error?.message}
+          onRetryCategories={() => void categoriesQuery.refetch()}
           onPosted={refreshList}
         />
       </div>

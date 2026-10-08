@@ -3,7 +3,9 @@
 import { notifyReadError } from "@/lib/client-read-error";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { coursesOptions } from "@/lib/cache/reference-queries";
+import { dashboardListsKeys } from "@/lib/cache/dashboard-lists-queries";
 import { BriefcaseBusiness } from "lucide-react";
 import InternshipPostsList from "./InternshipPostsList";
 import SearchBar from "../ui/SearchBar";
@@ -42,13 +44,13 @@ function keyOf(post) {
 }
 
 function InternshipPosts({
-  internshipPosts: initialData = [],
+  internshipPosts: initialData,
   pagination: {
     page: initialPage = 1,
     total: initialTotal = 0,
     totalPages: initialTotalPages = 1,
-  },
-  courses = [],
+  } = {},
+  courses: initialCourses,
   workType: initialWorkType = "",
   courseId: initialCourseId = "",
   scope: initialScope = "",
@@ -68,6 +70,8 @@ function InternshipPosts({
   const { user } = useUser();
   const userId = user.id;
   const userRole = user.role;
+  const coursesQuery = useQuery({ ...coursesOptions(userId), enabled: Boolean(userId) });
+  const courses = coursesQuery.data || initialCourses || [];
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(initialData);
   const initialFilters = useMemo(
@@ -104,7 +108,7 @@ function InternshipPosts({
   );
   const postsQuery = useInfiniteQuery({
     ...internshipPostsInfiniteOptions(userId, debouncedFilters),
-    initialData: matchesInitialFilters
+    initialData: matchesInitialFilters && Array.isArray(initialData)
       ? {
           pages: [
             {
@@ -132,7 +136,7 @@ function InternshipPosts({
     );
   }, [postsQuery.data]);
   const total = postsQuery.data?.pages[0]?.pagination?.total ?? 0;
-  const isPending = isChangingFilters || postsQuery.isPending || postsQuery.isFetching;
+  const isPending = isChangingFilters || postsQuery.isPending || postsQuery.isPlaceholderData;
 
   useEffect(() => {
     if (postsQuery.error) {
@@ -143,7 +147,7 @@ function InternshipPosts({
   // revalidatePath can stream a fresh first page while this component remains
   // mounted. Reconcile that snapshot without discarding stable loaded pages.
   useEffect(() => {
-    if (serverSnapshotRef.current === initialData) return;
+    if (!Array.isArray(initialData) || serverSnapshotRef.current === initialData) return;
     serverSnapshotRef.current = initialData;
     queryClient.setQueryData(
       internshipPostsKeys.list(userId, initialFilters),
@@ -189,6 +193,9 @@ function InternshipPosts({
   }
 
   function refreshPosts() {
+    void queryClient.invalidateQueries({
+      queryKey: dashboardListsKeys.employerJobsAll(userId),
+    });
     void queryClient.invalidateQueries({
       queryKey: internshipPostsKeys.all(userId),
     });

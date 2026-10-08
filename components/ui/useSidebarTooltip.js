@@ -35,7 +35,7 @@ export default function useSidebarTooltip(label, isCollapsed) {
   const tooltip = position && isCollapsed && createPortal(
     <span
       role="tooltip"
-      className="pointer-events-none fixed z-[100] hidden -translate-y-1/2 whitespace-nowrap rounded-r-xl rounded-l-md bg-gradient-to-r from-primary-300 via-primary-500 to-primary-700 px-4 py-2 text-xs font-semibold text-white shadow-lg ring-1 ring-white/20 lg:block"
+      className="pointer-events-none fixed z-[100] hidden -translate-y-1/2 whitespace-nowrap rounded-r-xl rounded-l-md bg-white px-4 py-2 text-xs font-semibold text-primary shadow-lg ring-1 ring-primary/20 dark:bg-primary dark:text-white dark:ring-white/20 lg:block"
       style={position}
     >
       {label}

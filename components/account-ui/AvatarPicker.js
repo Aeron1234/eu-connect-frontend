@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useTransition } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { avatarChoicesOptions } from "@/lib/cache/avatar-queries";
+import { accountProfileKeys } from "@/lib/cache/account-profile-queries";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Loader2, Check, Trash2 } from "lucide-react";
 import Modal from "../ui/Modal";
 import {
-  getAvailableAvatarsResult as getAvailableAvatars,
   updateUserAvatar,
   deleteUserAvatar,
 } from "@/lib/server-actions/account-actions";
@@ -13,31 +17,16 @@ import { toastAndAction } from "../../lib/helpers";
 
 function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
   const router = useRouter();
-  const [avatars, setAvatars] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [reloadKey, setReloadKey] = useState(0);
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+  const avatarsQuery = useQuery({
+    ...avatarChoicesOptions(user?.id),
+    enabled: Boolean(user?.id),
+  });
+  const avatars = avatarsQuery.data || [];
+  const isLoading = avatarsQuery.isPending;
+  const loadError = avatarsQuery.error?.message;
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    let cancelled = false;
-    getAvailableAvatars()
-      .then((result) => {
-        if (!cancelled) {
-          setLoadError(result?.error || "");
-          setAvatars(result?.error ? [] : result?.avatars || []);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setLoadError("Could not load avatars. Please try again.");
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [reloadKey]);
 
   function handleSelect(avatarName) {
     const formData = new FormData();
@@ -54,6 +43,7 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
 
       if (result?.success) {
         onAvatarChange?.(avatarName);
+        void queryClient.invalidateQueries({ queryKey: accountProfileKeys.profile(user?.id) });
         router.refresh();
       }
     });
@@ -71,6 +61,7 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
 
       if (result?.success) {
         onAvatarChange?.(null);
+        void queryClient.invalidateQueries({ queryKey: accountProfileKeys.profile(user?.id) });
         router.refresh();
       }
     });
@@ -89,7 +80,7 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
         ) : loadError ? (
           <div role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm">
             <p>{loadError}</p>
-            <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => { setIsLoading(true); setReloadKey((value) => value + 1); }}>
+            <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void avatarsQuery.refetch()}>
               Try again
             </button>
           </div>

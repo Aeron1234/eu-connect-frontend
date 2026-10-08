@@ -1,91 +1,114 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import {
+  searchHistoryOptions,
+  searchUsersKeys,
+  searchUsersOptions,
+} from "@/lib/cache/search-users-queries";
 import HistoryLoadingCard from "./HistoryLoadingCard";
 import SearchedUsersHistoryList from "./SearchedUsersHistoryList";
 import UsersSearchBar from "./UsersSearchBar";
 import SearchedUserEmpty from "./SearchedUserEmpty";
-import { useState } from "react";
-import { useApiFetch } from "@/lib/helpers";
 import SearchedUserList from "./SearchedUserList";
 
-function SearchUsers({ historyData = [] }) {
+function SearchUsers() {
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
   const [inputValue, setInputValue] = useState("");
-  const [historyState, setHistoryState] = useState({
-    source: historyData,
-    items: historyData,
+  const [activeTerm, setActiveTerm] = useState("");
+  const term = inputValue.trim();
+  const isSearching = term.length > 2;
+
+  const historyQuery = useQuery({
+    ...searchHistoryOptions(userId),
+    enabled: Boolean(userId),
+  });
+  const searchQuery = useQuery({
+    ...searchUsersOptions(userId, activeTerm),
+    enabled: Boolean(userId) && activeTerm.length > 2,
   });
 
-  // A server refresh can bring newer history after a save or another mutation.
-  if (historyState.source !== historyData) {
-    setHistoryState({ source: historyData, items: historyData });
+  useEffect(() => {
+    if (!isSearching || activeTerm === term) return;
+    const timer = setTimeout(() => setActiveTerm(term), 500);
+    return () => clearTimeout(timer);
+  }, [activeTerm, isSearching, term]);
+
+  function handleInputChange(value) {
+    setInputValue(value);
+    const nextTerm = value.trim();
+    const cached = nextTerm.length > 2 && userId &&
+      queryClient.getQueryData(searchUsersKeys.results(userId, nextTerm)) !== undefined;
+    setActiveTerm(cached ? nextTerm : "");
   }
 
-  const history =
-    historyState.source === historyData ? historyState.items : historyData;
-
-  const trimmed = inputValue.trim();
-  const isSearching = trimmed.length > 2;
-
-  const apiEndpoint = isSearching
-    ? `/api/users?q=${encodeURIComponent(trimmed)}`
-    : null;
-
-  const { data, loading, error } = useApiFetch(apiEndpoint, 500);
-
-  const searchedUsers = data?.success ? data.users : [];
-
-  // Only trust "no results" once we're not mid-debounce/fetch and there's no error.
-  const hasNoResults =
-    isSearching && !loading && !error && searchedUsers.length === 0;
-
-  const hasResults =
-    isSearching && !loading && !error && searchedUsers.length > 0;
-
-  const isHistoryEmpty = history.length === 0;
-
-  function handleHistoryDelete(historyId) {
-    setHistoryState((current) => ({
-      ...current,
-      items: current.items.filter((item) => item.history_id !== historyId),
-    }));
+  function refreshHistory(update) {
+    if (!userId) return;
+    const queryKey = searchUsersKeys.history(userId);
+    void queryClient.cancelQueries({ queryKey }).then(() => {
+      queryClient.setQueryData(queryKey, (current = []) => update(current));
+      void queryClient.invalidateQueries({ queryKey });
+    });
   }
 
-  function handleHistoryClear() {
-    setHistoryState((current) => ({ ...current, items: [] }));
-  }
+  const history = historyQuery.data || [];
+  const isWaitingForTerm = isSearching && activeTerm !== term;
+  const searchLoading = isSearching && (isWaitingForTerm || searchQuery.isPending);
+  const searchError = isSearching && !isWaitingForTerm && searchQuery.isError && !searchQuery.data;
+  const searchedUsers = isWaitingForTerm ? [] : searchQuery.data || [];
 
   return (
     <>
-      <UsersSearchBar inputValue={inputValue} setInputValue={setInputValue} />
+      <UsersSearchBar inputValue={inputValue} setInputValue={handleInputChange} />
 
-      {/* Not searching yet, and no history -> prompt to start */}
-      {!isSearching && isHistoryEmpty && <HistoryLoadingCard />}
-
-      {/* Not searching yet, but history exists -> show history */}
-      {!isSearching && !isHistoryEmpty && (
-        <SearchedUsersHistoryList
-          historyData={history}
-          onDelete={handleHistoryDelete}
-          onClear={handleHistoryClear}
-        />
-      )}
-
-      {/* Actively searching (covers debounce wait + fetch) */}
-      {isSearching && loading && (
-        <p className="text-sm text-foreground-subtle text-center py-8">
-          Searching…
+      {!isSearching && historyQuery.isPending && (
+        <p role="status" className="py-8 text-center text-sm text-foreground-subtle">
+          Loading recently viewed users...
         </p>
       )}
+      {!isSearching && historyQuery.isError && !historyQuery.data && (
+        <div role="alert" className="py-8 text-center text-sm text-foreground-subtle">
+          <p>{historyQuery.error?.message || "Could not load recently viewed users."}</p>
+          <button type="button" onClick={() => void historyQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
+            Try again
+          </button>
+        </div>
+      )}
+      {!isSearching && !historyQuery.isPending && !(historyQuery.isError && !historyQuery.data) &&
+        (history.length === 0 ? (
+          <HistoryLoadingCard />
+        ) : (
+          <SearchedUsersHistoryList
+            historyData={history}
+            onDelete={(historyId) => refreshHistory((items) =>
+              items.filter((item) => item.history_id !== historyId))}
+            onClear={() => refreshHistory(() => [])}
+          />
+        ))}
 
-      {isSearching && !loading && error && (
-        <p className="text-sm text-red-500 text-center py-8">
-          Something went wrong while searching. Please try again.
+      {searchLoading && (
+        <p role="status" className="py-8 text-center text-sm text-foreground-subtle">
+          Searching...
         </p>
       )}
-
-      {hasResults && <SearchedUserList searchedUsers={searchedUsers} />}
-
-      {hasNoResults && <SearchedUserEmpty query={trimmed} />}
+      {!searchLoading && searchError && (
+        <div role="alert" className="py-8 text-center text-sm text-red-500">
+          <p>{searchQuery.error?.message || "Could not search users."}</p>
+          <button type="button" onClick={() => void searchQuery.refetch()} className="mt-2 font-semibold underline">
+            Try again
+          </button>
+        </div>
+      )}
+      {isSearching && !searchLoading && !searchError && searchedUsers.length > 0 && (
+        <SearchedUserList searchedUsers={searchedUsers} />
+      )}
+      {isSearching && !searchLoading && !searchError && searchedUsers.length === 0 && (
+        <SearchedUserEmpty query={term} />
+      )}
     </>
   );
 }

@@ -2,6 +2,7 @@
 import { useLayoutEffect, useRef } from "react";
 import {
   Activity,
+  AlertTriangle,
   BookOpen,
   CalendarDays,
   BriefcaseBusiness,
@@ -121,6 +122,11 @@ function roleRouteGroups(userRole, userDepartment) {
             name: "Activity Logs",
             href: "/admin/activity-logs",
             icon: <Activity className="h-5 w-5 shrink-0" />,
+          },
+          {
+            name: "Error Tracking",
+            href: "/admin/error-tracking",
+            icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           },
           {
             name: "Cache Monitoring",

@@ -66,10 +66,12 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
                 <td className="py-3 pl-2 text-right">
                   <Modal
                     trigger={
-                      <button type="button" title="Delete record" aria-label="Delete record" className="text-foreground-subtle transition-colors hover:text-primary-emphasis">
+                      <div className="flex items-center justify-center">
                         <Trash2 className="size-4" />
-                      </button>
+                        <span className="sr-only">Delete record</span>
+                      </div>
                     }
+                    triggerStyles="text-foreground-subtle transition-colors hover:text-primary-emphasis"
                     title={<span className="text-primary-emphasis">Delete Daily Time Record</span>}
                   >
                     <DtrDeleteForm dtrId={dtr.id} onDeleted={onDeleted} />

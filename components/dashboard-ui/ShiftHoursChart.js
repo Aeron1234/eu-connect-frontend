@@ -1,7 +1,7 @@
-// app/_components/ShiftHoursChart.js
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Clock } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getAverageShiftHoursResult as getAverageShiftHours } from "@/lib/server-actions/dashboard-actions";
+import { useUser } from "@/contexts/UserContext";
+import { shiftHoursMonthOptions } from "@/lib/cache/shift-hours-queries";
 
 const monthNames = [
   "January",
@@ -51,36 +52,20 @@ const chartConfig = {
 function ShiftHoursChart({
   initialMonths = [],
   initialSelectedMonth = null,
-  initialWeeks = [],
 }) {
-  const [months] = useState(initialMonths);
+  const { user } = useUser();
+  const months = initialMonths;
   const [selectedKey, setSelectedKey] = useState(
-    initialSelectedMonth
-      ? monthKey(initialSelectedMonth.month, initialSelectedMonth.year)
+    initialSelectedMonth || months[0]
+      ? monthKey((initialSelectedMonth || months[0]).month, (initialSelectedMonth || months[0]).year)
       : null,
   );
-  const [weeks, setWeeks] = useState(initialWeeks);
-  const [isLoadingWeeks, setIsLoadingWeeks] = useState(false);
-  const [error, setError] = useState(null);
-
-  async function handleMonthChange(key) {
-    setSelectedKey(key);
-    const [year, month] = key.split("-").map(Number);
-
-    setIsLoadingWeeks(true);
-    const res = await getAverageShiftHours({ month, year });
-
-    if (res?.error) {
-      setError(res.error);
-      setWeeks([]);
-      setIsLoadingWeeks(false);
-      return;
-    }
-
-    setError(null);
-    setWeeks(res?.weeks || []);
-    setIsLoadingWeeks(false);
-  }
+  const [year, month] = selectedKey?.split("-").map(Number) || [];
+  const monthQuery = useQuery({
+    ...shiftHoursMonthOptions(user?.id, month, year),
+    enabled: Boolean(user?.id && selectedKey),
+  });
+  const weeks = monthQuery.data?.weeks || [];
 
   const selected = months.find(
     (m) => monthKey(m.month, m.year) === selectedKey,
@@ -100,7 +85,7 @@ function ShiftHoursChart({
         </div>
 
         {months.length > 0 && (
-          <Select value={selectedKey} onValueChange={handleMonthChange}>
+          <Select value={selectedKey} onValueChange={setSelectedKey}>
             <SelectTrigger className="h-8 w-[150px] text-xs px-2">
               <SelectValue>
                 {selected ? monthLabel(selected.month, selected.year) : ""}
@@ -120,11 +105,16 @@ function ShiftHoursChart({
         )}
       </div>
 
-      {error ? (
+      {monthQuery.isError && !monthQuery.data ? (
         <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
-          <p className="text-sm text-red-600">{error}</p>
+          <div className="text-center">
+            <p className="text-sm text-red-600">{monthQuery.error?.message || "Could not load shift hours."}</p>
+            <button type="button" onClick={() => void monthQuery.refetch()} className="mt-2 text-xs font-semibold text-primary-emphasis">
+              Try again
+            </button>
+          </div>
         </div>
-      ) : isLoadingWeeks ? (
+      ) : selectedKey && monthQuery.isPending ? (
         <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>

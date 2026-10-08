@@ -1,24 +1,12 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
 import { Building2 } from "lucide-react";
 import PastInternshipsPageContent from "../../components/past-internship-ui/PastInternshipsPageContent";
 import PastInternshipPostButton from "../../components/past-internship-ui/PastInternshipPostButton";
-import { getAlumniInternships } from "@/lib/server-actions/past-internships-actions";
-import { getCourses } from "@/lib/server-actions/course-and-department-actions";
 import PageTitle from "../../components/ui/PageTitle";
 import { Suspense } from "react";
-
-export const dynamic = "force-dynamic";
 
 async function PastInternshipsPage({ searchParams }) {
   const sParams = await searchParams;
   const yearFilter = sParams.filter || "all";
-
-  const [pastInternshipsData, courses] = await Promise.all([
-    getAlumniInternships({
-      academicYear: yearFilter !== "all" ? yearFilter : undefined,
-    }),
-    getCourses(),
-  ]);
 
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -31,20 +19,16 @@ async function PastInternshipsPage({ searchParams }) {
           }
         />
 
-        <PastInternshipPostButton courses={courses || []} />
+        <PastInternshipPostButton />
       </div>
 
       <Suspense fallback={<div>...</div>}>
         <PastInternshipsPageContent
-          initialData={pastInternshipsData?.data || []}
-          academicYears={pastInternshipsData?.academicYears || []}
-          pagination={pastInternshipsData?.pagination || {}}
           yearFilter={yearFilter}
-          courses={courses || []}
         />
       </Suspense>
     </main>
   );
 }
 
-export default withReadErrorPage(PastInternshipsPage);
+export default PastInternshipsPage;

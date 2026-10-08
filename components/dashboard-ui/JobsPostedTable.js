@@ -1,5 +1,10 @@
-import { Briefcase, MapPin } from "lucide-react";
-import Pagination from "../ui/Pagination";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Briefcase, ChevronLeft, ChevronRight, Loader2, MapPin } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { dashboardListsKeys, employerJobsPageOptions } from "@/lib/cache/dashboard-lists-queries";
 
 // internship_postings.work_type -> display label
 const workTypeMap = {
@@ -35,9 +40,27 @@ function formatDate(dateString) {
   });
 }
 
-function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
-  const hrefPrev = `/employer?j_page=${currentJobPage - 1}`;
-  const hrefNext = `/employer?j_page=${currentJobPage + 1}`;
+function JobsPostedTable({ initialPage }) {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(initialPage);
+  const [page, setPage] = useState(1);
+  const jobsQuery = useQuery({
+    ...employerJobsPageOptions(user?.id, page),
+    enabled: Boolean(user?.id),
+    initialData: page === 1 && initialPage ? initialPage : undefined,
+  });
+
+  useEffect(() => {
+    if (!user?.id || !initialPage || serverSnapshotRef.current === initialPage) return;
+    serverSnapshotRef.current = initialPage;
+    queryClient.setQueryData(dashboardListsKeys.employerJobs(user.id, 1), initialPage);
+  }, [initialPage, queryClient, user?.id]);
+
+  const jobs = (jobsQuery.data?.jobs || []).map(mapJobRow);
+  const totalPages = jobsQuery.data?.totalPages ?? initialPage?.totalPages ?? 1;
+  const isLoading = jobsQuery.isPending;
+  const hasError = jobsQuery.isError && !jobsQuery.data;
 
   return (
     <section className="rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
@@ -45,7 +68,7 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
         <Briefcase className="w-4 h-4 text-primary-emphasis" />
         Jobs You Posted
       </h3>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" aria-busy={isLoading}>
         <table className="w-2xl md:w-full text-sm">
           <thead>
             <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -57,7 +80,25 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
             </tr>
           </thead>
           <tbody>
-            {jobs.map((job) => (
+            {isLoading ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-2" role="status">
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    Loading posted jobs...
+                  </span>
+                </td>
+              </tr>
+            ) : hasError ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-sm text-foreground">
+                  <p>{jobsQuery.error?.message || "Could not load posted jobs."}</p>
+                  <button type="button" onClick={() => void jobsQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis hover:underline">
+                    Try again
+                  </button>
+                </td>
+              </tr>
+            ) : jobs.map((job) => (
               <tr
                 key={job.id}
                 className="border-b border-border last:border-b-0"
@@ -93,7 +134,7 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
                 </td>
               </tr>
             ))}
-            {jobs.length === 0 && (
+            {!isLoading && !hasError && jobs.length === 0 && (
               <tr>
                 <td
                   colSpan={5}
@@ -107,14 +148,29 @@ function JobsPostedTable({ jobs = [], totalPages = 1, currentJobPage = 1 }) {
         </table>
       </div>
 
-      <div className="mt-6 w-full flex justify-end text-sm text-foreground-soft">
-        <Pagination
-          hrefPrev={hrefPrev}
-          hrefNext={hrefNext}
-          currentPage={currentJobPage}
-          totalPages={totalPages}
-        />
-      </div>
+      {(totalPages > 1 || page > 1) && (
+        <div className="mt-6 flex items-center justify-end gap-4 text-sm font-semibold text-muted-foreground">
+          <button
+            type="button"
+            aria-label="Previous jobs page"
+            onClick={() => setPage((current) => current - 1)}
+            disabled={isLoading || hasError || page <= 1}
+            className="rounded-full p-1 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span>Page {page} / {Math.max(1, totalPages)}</span>
+          <button
+            type="button"
+            aria-label="Next jobs page"
+            onClick={() => setPage((current) => current + 1)}
+            disabled={isLoading || hasError || page >= totalPages}
+            className="rounded-full p-1 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </section>
   );
 }

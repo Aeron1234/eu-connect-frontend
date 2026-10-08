@@ -19,8 +19,11 @@ import EmployerCertificateUploads from "../internship-docs-ui/EmployerCertificat
 import ProfileInfoGrid from "./ProfileInfoGrid";
 import TabContentSkeleton from "../skeletons/TabContentSkeleton";
 
-function buildTabs({ userRole, searchedUserRole, supervision }) {
+function buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship }) {
   if (searchedUserRole !== "student") {
+    return [{ value: "info", text: "Info" }];
+  }
+  if (!hasOngoingInternship) {
     return [{ value: "info", text: "Info" }];
   }
   if (userRole === "student") {
@@ -69,13 +72,15 @@ function SearchedUserRecordsManager({
   userId,
   userRole,
   searchedUserRole,
+  hasOngoingInternship,
   info,
   defaultFilter,
   initialDtrData,
   initialDtrLocation,
   supervision,
 }) {
-  const tabs = buildTabs({ userRole, searchedUserRole, supervision });
+  const tabs = buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship });
+  const hideTabs = searchedUserRole === "student" && !hasOngoingInternship;
 
   const safeDefaultFilter = tabs.some((tab) => tab.value === defaultFilter)
     ? defaultFilter
@@ -180,13 +185,15 @@ function SearchedUserRecordsManager({
 
   return (
     <>
-      <SearchedUserFilter
-        tabs={tabs}
-        selectedTab={selectedTab}
-        onSelect={handleTabClick}
-      />
+      {!hideTabs && (
+        <SearchedUserFilter
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onSelect={handleTabClick}
+        />
+      )}
 
-      <div className="mt-6">
+      <div className={hideTabs ? "" : "mt-6"}>
         {loadError && !isPending ? (
           <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
             <p>{loadError}</p>
@@ -210,7 +217,7 @@ function SearchedUserRecordsManager({
                   />
                 </div>
 
-                {["employer", "admin"].includes(userRole) && (
+                {["employer", "admin"].includes(userRole) && data?.dtrLocation?.internship_id && (
                   <div className="mt-6">
                     <SetDtrLocation
                       studentId={searchedUserId}

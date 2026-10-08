@@ -166,7 +166,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
         <Modal
           title={title}
           trigger={<span>See more &rarr;</span>}
-          triggerStyles={`mt-2 text-left text-xs font-semibold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${isPinned ? "text-white" : "text-primary-emphasis"}`}
+          triggerStyles={`mt-2 max-sm:block max-sm:w-fit text-left text-xs font-semibold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${isPinned ? "text-white" : "text-primary-emphasis"}`}
         >
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">

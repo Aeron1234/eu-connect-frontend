@@ -1,34 +1,64 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import {
+  regionsOptions,
+  studentRecordsKeys,
+  studentRecordsOptions,
+} from "@/lib/cache/student-records-queries";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
+import { studentStorageKeys } from "@/lib/cache/student-storage-queries";
 import { Briefcase } from "lucide-react";
 import InternshipRecordForm from "./InternshipRecordForm";
 import StudentInternshipRecordList from "./StudentInternshipRecordList";
 import PageTitle from "../ui/PageTitle";
 
-function InternshipRecordsManager({
-  initialRecords = [],
-  regions = [],
-  recordStatus = "",
-}) {
+function InternshipRecordsManager() {
+  const { user } = useUser();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+  const recordsQuery = useQuery({
+    ...studentRecordsOptions(userId),
+    enabled: Boolean(userId),
+  });
+  const regionsQuery = useQuery({
+    ...regionsOptions(),
+    enabled: Boolean(userId),
+  });
   const [tab, setTab] = useState("form");
-  const [deletedIds, setDeletedIds] = useState(() => new Set());
-  const availableRecords = Array.isArray(initialRecords) ? initialRecords : [];
-  const records = availableRecords.filter(
-    (record) => !deletedIds.has(String(record.id)),
-  );
+  const records = recordsQuery.data?.records || [];
+  const regions = regionsQuery.data || [];
   const visibleActiveRecord = records.find(
     (record) => record.status === "pending" || record.status === "ongoing",
   );
-  const deletedPendingRecord = availableRecords.some(
-    (record) =>
-      deletedIds.has(String(record.id)) && record.status === "pending",
-  );
-  const currentRecordStatus =
-    visibleActiveRecord?.status || (deletedPendingRecord ? "" : recordStatus);
+  const currentRecordStatus = visibleActiveRecord?.status || recordsQuery.data?.active?.status || "";
 
   function handleDeleted(recordId) {
-    setDeletedIds((previous) => new Set(previous).add(String(recordId)));
+    queryClient.setQueryData(studentRecordsKeys.records(userId), (previous) =>
+      previous
+        ? {
+            ...previous,
+            records: previous.records.filter((record) => String(record.id) !== String(recordId)),
+            active: previous.records.find((record) => String(record.id) === String(recordId))?.status === "pending"
+              ? null
+              : previous.active,
+          }
+        : previous,
+    );
+    void queryClient.invalidateQueries({ queryKey: studentRecordsKeys.records(userId) });
+    void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(userId, "student") });
+    void queryClient.invalidateQueries({ queryKey: studentStorageKeys.active(userId) });
+  }
+
+  function handleCreated() {
+    queryClient.setQueryData(studentRecordsKeys.records(userId), (previous) =>
+      previous ? { ...previous, active: { status: "pending" } } : previous,
+    );
+    void queryClient.invalidateQueries({ queryKey: studentRecordsKeys.records(userId) });
+    void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(userId, "student") });
+    void queryClient.invalidateQueries({ queryKey: studentStorageKeys.active(userId) });
   }
 
   return (
@@ -75,12 +105,25 @@ function InternshipRecordsManager({
         </button>
       </div>
 
-      {tab === "form" ? (
+      {(recordsQuery.isPending || regionsQuery.isPending) ? (
+        <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+          Loading internship records...
+        </div>
+      ) : (recordsQuery.isError || regionsQuery.isError) ? (
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-5 text-sm">
+          <p>{recordsQuery.error?.message || regionsQuery.error?.message}</p>
+          <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => {
+            if (recordsQuery.isError) void recordsQuery.refetch();
+            if (regionsQuery.isError) void regionsQuery.refetch();
+          }}>Try again</button>
+        </div>
+      ) : tab === "form" ? (
         <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-8">
           <InternshipRecordForm
             key={currentRecordStatus || "available"}
             regions={regions}
             recordStatus={currentRecordStatus}
+            onCreated={handleCreated}
           />
         </div>
       ) : (

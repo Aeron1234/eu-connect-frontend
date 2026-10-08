@@ -1,6 +1,4 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
 import AccountProfile from "@/components/account-ui/AccountProfile";
-import { getUserProfile } from "@/lib/server-actions/account-actions";
 
 export const metadata = {
   title: "Account",
@@ -8,10 +6,8 @@ export const metadata = {
     "View and manage your EU-Connect employer profile and account status.",
 };
 
-async function EmployerAccountPage() {
-  const userData = await getUserProfile();
-
-  return <AccountProfile roleLabel="Employer" userData={userData || {}} />;
+function EmployerAccountPage() {
+  return <AccountProfile roleLabel="Employer" />;
 }
 
-export default withReadErrorPage(EmployerAccountPage);
+export default EmployerAccountPage;

@@ -51,12 +51,13 @@ function classifyError(error) {
   if (
     status === 429 ||
     message.includes("rate limit") ||
+    message.includes("limit reached") ||
     message.includes("too many requests")
   ) {
     return {
       icon: RefreshCw,
       title: "Slow Down",
-      description: status === 429 && error?.message
+      description: error?.message
         ? error.message
         : "You've made too many requests. Please wait a moment and try again.",
       tone: "blue",

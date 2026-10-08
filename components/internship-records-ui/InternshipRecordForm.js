@@ -25,7 +25,7 @@ const selectTriggerClass =
 const textareaClass =
   "mt-1 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
 
-function InternshipRecordForm({ regions = [], recordStatus = "" }) {
+function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
   const status = recordStatus === "pending" || recordStatus === "ongoing";
 
   const [showForm, setShowForm] = useState(!status);
@@ -62,6 +62,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "" }) {
       const result = await toastAndAction(handlers);
 
       if (result?.success) {
+        onCreated?.();
         setInternshipForm({
           company_name: "",
           company_address: "",

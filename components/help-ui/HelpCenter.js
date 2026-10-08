@@ -56,6 +56,35 @@ const roleGuides = {
       href: "/student/storage",
       linkText: "Open Storage",
     },
+    {
+      title: "Plan internship days on the calendar",
+      summary: "See internship dates and add private daily to-dos.",
+      steps: [
+        "Open Calendar to see your ongoing internship dates, announcement event dates, and school schedules.",
+        "Select a day within your internship, then choose Add to-do. You can edit or remove your own tasks later.",
+        "Use the calendar filters to show only the types of items you need.",
+      ],
+      href: "/calendar",
+      linkText: "Open Calendar",
+    },
+    {
+      title: "Share your location for DTR setup",
+      summary: "Help authorized staff set an accurate attendance location.",
+      steps: [
+        "On your dashboard map, select Share location and allow browser location access when prompted.",
+        "Keep the page open while staff view your temporary position in Set DTR Location. The accuracy shown is an estimate.",
+        "Select Stop sharing when finished. Clock in and clock out still use their own location checks.",
+      ],
+      href: "/student",
+      linkText: "Open dashboard",
+    },
+    {
+      title: "Review past internships",
+      summary: "Find completed placements and their available documents.",
+      steps: ["Open Past Internships and select a placement to review its saved details and files."],
+      href: "/past-internships",
+      linkText: "Open Past Internships",
+    },
   ],
   employer: [
     {
@@ -87,6 +116,24 @@ const roleGuides = {
       ],
       href: "/users",
       linkText: "Search Users",
+    },
+    {
+      title: "Set an intern's DTR location",
+      summary: "Use a map pin or the student's temporarily shared position.",
+      steps: [
+        "Open the supervised student's internship record and find Set DTR Location.",
+        "If the student is sharing a live location, compare its pin and accuracy circle with the workplace before choosing the permitted location and radius.",
+        "Save the location. Ask the student to stop sharing after setup.",
+      ],
+      href: "/users",
+      linkText: "Search Users",
+    },
+    {
+      title: "Use the header calendar",
+      summary: "Check dates without leaving your current page.",
+      steps: ["Select the calendar icon beside notifications to view a simple month calendar. The full internship planning page is available to school roles only."],
+      href: "/employer",
+      linkText: "Open dashboard",
     },
   ],
   department_head: [
@@ -129,6 +176,44 @@ const roleGuides = {
       href: "/department_head/sipp-reports",
       linkText: "Open SIPP Reports",
       onlyRegistrar: true,
+    },
+    {
+      title: "Publish department schedules",
+      summary: "Add internship deadlines and notify students in your department.",
+      steps: [
+        "Open Calendar and select Add schedule. Enter its title, dates, and optional details.",
+        "Publish it to notify students in your department. Select a scheduled day to review it or edit a schedule you created.",
+      ],
+      href: "/calendar",
+      linkText: "Open Calendar",
+    },
+    {
+      title: "Post department announcements",
+      summary: "Share updates and optional event dates with students.",
+      steps: [
+        "Open Announcements and select Announce. Choose the appropriate category and add an event date when the update concerns a specific day.",
+        "Review the announcement after posting. Its event date appears on the calendar for students who can see it.",
+      ],
+      href: "/announcements",
+      linkText: "Open Announcements",
+    },
+    {
+      title: "Set a student's DTR location",
+      summary: "Use a shared position to help place the attendance pin.",
+      steps: [
+        "Open the student's internship record and find Set DTR Location.",
+        "Ask the student to share their location from their dashboard, then check the live pin and its accuracy before setting the workplace location and radius.",
+      ],
+      href: "/internship-records",
+      linkText: "Open Records",
+      hideForRegistrar: true,
+    },
+    {
+      title: "Browse past internships",
+      summary: "Review completed placements and available documents.",
+      steps: ["Open Past Internships, find a placement, and inspect its saved record and documents."],
+      href: "/past-internships",
+      linkText: "Open Past Internships",
     },
   ],
   admin: [
@@ -176,6 +261,46 @@ const roleGuides = {
       href: "/internship-records",
       linkText: "Open Records",
     },
+    {
+      title: "Investigate backend errors",
+      summary: "Read grouped server failures and background-job errors.",
+      steps: [
+        "Open Error Tracking and adjust the date, method, source, status, or search filters.",
+        "Select a group to see recent occurrences, request IDs, and available code locations. Only unexpected errors and server failures are recorded; an empty list can be normal.",
+      ],
+      href: "/admin/error-tracking",
+      linkText: "Open Error Tracking",
+    },
+    {
+      title: "Publish school-wide schedules",
+      summary: "Place internship deadlines on the calendar for students.",
+      steps: [
+        "Open Calendar and choose Add schedule. Set the dates and optional details, then publish it.",
+        "School-wide schedules notify students. Select a scheduled day to review or manage its entry.",
+      ],
+      href: "/calendar",
+      linkText: "Open Calendar",
+    },
+    {
+      title: "Post general announcements",
+      summary: "Share school-wide updates and event dates.",
+      steps: [
+        "Open Announcements and select Announce. Add the title and content, plus an event date when applicable.",
+        "Review the post on the announcement page. Its event date also appears on the calendar.",
+      ],
+      href: "/announcements",
+      linkText: "Open Announcements",
+    },
+    {
+      title: "Set a student's DTR location",
+      summary: "Use the student's shared position when choosing an attendance area.",
+      steps: [
+        "Open the student's internship record and find Set DTR Location.",
+        "If the student shares a live position, review its accuracy and set the workplace pin and permitted radius before saving.",
+      ],
+      href: "/internship-records",
+      linkText: "Open Records",
+    },
   ],
 };
 
@@ -184,7 +309,7 @@ const sharedGuides = [
     title: "Find announcements and opportunities",
     summary: "Use the links available to every account.",
     steps: [
-      "Open Announcements for updates from your school and the system.",
+      "Open Announcements for general and department updates. Announcements with event dates also appear on the school calendar where available.",
       "Open Internships to browse available postings, or Search Users to find a profile.",
     ],
     href: "/announcements",
@@ -194,17 +319,27 @@ const sharedGuides = [
     title: "Check notifications",
     summary: "See updates and clear unread items.",
     steps: [
-      "Select the bell in the header to load recent notifications.",
-      "Open View all notifications for the full list. You can mark items as read or delete them there.",
+      "Select the bell in the header to load recent notifications. Use its page controls to browse older items and select an item to open the related page.",
+      "Open notification center for the full list. You can mark items as read or delete them there.",
     ],
     href: "/notifications",
     linkText: "Open Notifications",
   },
   {
+    title: "Search people and return to profiles",
+    summary: "Find an account and revisit a recently viewed profile.",
+    steps: [
+      "Open Search Users and enter a name or other available search term.",
+      "Select a result to view the information your role can access. Use recently viewed history to return to a profile.",
+    ],
+    href: "/users",
+    linkText: "Search Users",
+  },
+  {
     title: "Update your account or password",
     summary: "Find profile and security settings.",
     steps: [
-      "Select your profile card at the top of the sidebar to open your account page.",
+      "Select your profile card near the bottom of the sidebar to open your account page.",
       "Use the account page's security section for password changes and other available settings.",
     ],
     href: null,

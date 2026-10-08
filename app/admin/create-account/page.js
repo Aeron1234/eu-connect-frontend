@@ -1,24 +1,12 @@
 import AccountsManager from "@/components/account-ui/AccountsManager";
 import PageTitle from "@/components/ui/PageTitle";
-import { withReadErrorPage } from "@/lib/page-read-error";
-import {
-  getAllAccounts,
-  getCreateAccountFormData,
-} from "@/lib/server-actions/account-actions";
 import { UserPlus } from "lucide-react";
 
 export const metadata = {
   title: "Create Account",
 };
 
-export const dynamic = "force-dynamic";
-
-async function CreateAccountPage() {
-  const [formData, accountsRes] = await Promise.all([
-    getCreateAccountFormData(),
-    getAllAccounts({ filter: "all", search: "", page: 1 }),
-  ]);
-
+function CreateAccountPage() {
   return (
     <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <PageTitle
@@ -29,14 +17,9 @@ async function CreateAccountPage() {
         }
       />
 
-      <AccountsManager
-        roles={formData?.roles || []}
-        courses={formData?.courses || []}
-        departments={formData?.departments || []}
-        initialPage={accountsRes}
-      />
+      <AccountsManager />
     </main>
   );
 }
 
-export default withReadErrorPage(CreateAccountPage);
+export default CreateAccountPage;

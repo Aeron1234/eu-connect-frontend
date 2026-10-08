@@ -1,25 +1,23 @@
-import { getUserProfile } from "@/lib/server-actions/account-actions";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { accountProfileOptions } from "@/lib/cache/account-profile-queries";
 import SideNavigationList from "./SideNavigationList";
 
-async function SideNavigation() {
-  // The profile badge is optional; a failed badge read must not hide the page.
-  let userProfile = null;
-  try {
-    userProfile = await getUserProfile();
-  } catch {
-    // The page's own read actions can still show their error UI.
-  }
-
-  const firstName = userProfile?.first_name || "";
-  const fullName = [firstName, userProfile?.last_name].filter(Boolean).join(" ");
+export default function SideNavigation() {
+  const { user } = useUser();
+  const profileQuery = useQuery({
+    ...accountProfileOptions(user?.id),
+    enabled: Boolean(user?.id),
+  });
+  const profile = profileQuery.data;
+  const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ");
 
   return (
     <SideNavigationList
-      firstName={firstName}
       fullName={fullName}
-      avatar={userProfile?.avatar || null}
+      avatar={profile?.avatar || null}
     />
   );
 }
-
-export default SideNavigation;

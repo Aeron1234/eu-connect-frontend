@@ -6,6 +6,9 @@ import ModalForm from "@/components/ui/ModalForm";
 import { startBreak, resumeDuty } from "@/lib/server-actions/dtr-actions";
 import { toastAndAction } from "@/lib/helpers";
 import Modal from "../ui/Modal";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 
 export default function BreakButton({ status, record }) {
   if (
@@ -22,16 +25,23 @@ export default function BreakButton({ status, record }) {
 
 function BreakAction({ label, action, Icon }) {
   const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
+  const { user } = useUser();
 
   function handleAction(formData) {
     startTransition(async () => {
-      await toastAndAction({
+      const result = await toastAndAction({
         loadingLabel: `${label}...`,
         successLabel: label === "Start break" ? "Break started." : "Duty resumed.",
         errorLabel: `Failed to ${label.toLowerCase()}.`,
         action,
         formData,
       });
+      if (result?.success) {
+        void queryClient.invalidateQueries({
+          queryKey: dashboardOverviewKeys.role(user?.id, "student"),
+        });
+      }
     });
   }
 

@@ -1,19 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import InternshipRequirementsType from "./InternshipRequirementsType";
 import { LayoutGrid, ListIcon, Search } from "lucide-react";
 import SearchedStudentFiles from "./SearchedStudentFiles";
+import RecordsDocumentsSkeleton from "../skeletons/RecordsDocumentsSkeleton";
+import {
+  currentInternshipDocumentsKeys,
+  currentInternshipDocumentsOptions,
+  invalidateCurrentInternshipDocuments,
+} from "@/lib/cache/current-internship-documents-queries";
 
 import {
-  FILE_TYPE_LABELS,
-  TYPE_TONES,
   getFileTypeLabel,
   typeTone,
 } from "@/lib/utils";
 
+const EMPTY_DOCS = [];
+
 function RecordsDocuments({
-  fileData = [],
+  fileData,
   requirementTypes = [],
   internshipId,
   userRole = "",
@@ -22,13 +29,35 @@ function RecordsDocuments({
   canApprove = undefined,
   downloadAction = null,
 }) {
-  const docs = fileData;
-  const isOngoing = docs.status === "ongoing";
+  const queryClient = useQueryClient();
+  const isCurrentStorage = userRole === "student" && Boolean(currentUserId && internshipId);
+  const filesQuery = useQuery({
+    ...currentInternshipDocumentsOptions(currentUserId, internshipId),
+    enabled: isCurrentStorage,
+  });
+  const docs = isCurrentStorage
+    ? filesQuery.data ?? EMPTY_DOCS
+    : fileData ?? EMPTY_DOCS;
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("grid");
-  const [hide, setHide] = useState(!isOngoing);
+
+  function handleFilesChanged({ type, fileId }) {
+    const filesKey = currentInternshipDocumentsKeys.files(currentUserId, internshipId);
+    if (type === "deleted") {
+      queryClient.setQueryData(filesKey, (files) =>
+        files?.filter((file) => String(file.id) !== String(fileId)),
+      );
+    } else if (type === "approved") {
+      queryClient.setQueryData(filesKey, (files) => files?.map((file) =>
+        String(file.id) === String(fileId)
+          ? { ...file, verification_status: "accepted" }
+          : file,
+      ));
+    }
+    void invalidateCurrentInternshipDocuments(queryClient, currentUserId, internshipId);
+  }
 
   const filtered = useMemo(() => {
     let result = docs ? [...docs] : [];
@@ -45,6 +74,21 @@ function RecordsDocuments({
 
     return result;
   }, [docs, filter, query]);
+
+  if (isCurrentStorage && filesQuery.isPending) {
+    return <RecordsDocumentsSkeleton />;
+  }
+
+  if (isCurrentStorage && filesQuery.isError && !filesQuery.data) {
+    return (
+      <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
+        <p>{filesQuery.error?.message || "Could not load internship documents."}</p>
+        <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void filesQuery.refetch()}>
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -116,6 +160,7 @@ function RecordsDocuments({
         canDelete={canDelete}
         canApprove={canApprove}
         downloadAction={downloadAction}
+        onChanged={isCurrentStorage ? handleFilesChanged : undefined}
       />
     </>
   );

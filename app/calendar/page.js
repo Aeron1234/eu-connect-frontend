@@ -1,5 +1,5 @@
 import CalendarBoard from "@/components/calendar-ui/CalendarBoard";
-import { getCalendarMonth, getCalendarSchedule } from "@/lib/server-actions/calendar-actions";
+import { getCalendarSchedule } from "@/lib/server-actions/calendar-actions";
 
 export const metadata = { title: "Calendar" };
 export const dynamic = "force-dynamic";
@@ -20,7 +20,5 @@ export default async function CalendarPage({ searchParams }) {
     const parsed = new Date(`${params.date}T00:00:00Z`);
     if (!Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === params.date) selected = params.date;
   }
-  const month = selected.slice(0, 7);
-  const initialData = await getCalendarMonth(month);
-  return <CalendarBoard key={selected} initialDate={selected} initialData={initialData} />;
+  return <CalendarBoard key={selected} initialDate={selected} />;
 }

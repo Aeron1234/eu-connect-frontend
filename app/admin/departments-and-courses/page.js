@@ -1,9 +1,6 @@
 import { withReadErrorPage } from "@/lib/page-read-error";
 import DepartmentsAndCoursesManager from "@/components/departments-and-courses-ui/DepartmentAndCoursesManager";
-import {
-  getCourses,
-  getDepartments,
-} from "@/lib/server-actions/course-and-department-actions";
+import { getUserSession } from "@/lib/server-actions/auth";
 
 export const metadata = {
   title: "Departments & Courses",
@@ -12,15 +9,11 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 async function DepartmentsAndCoursesPage() {
-  const [courses, departments] = await Promise.all([
-    getCourses(),
-    getDepartments(),
-  ]);
+  const session = await getUserSession();
 
   return (
     <DepartmentsAndCoursesManager
-      initialCourses={courses || []}
-      initialDepartments={departments || []}
+      currentUserId={session?.user?.id || ""}
     />
   );
 }

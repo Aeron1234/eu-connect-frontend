@@ -3,9 +3,12 @@
 import ModalForm from "@/components/ui/ModalForm";
 import { uploadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 import { useState, useTransition, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { invalidateCurrentInternshipDocuments } from "@/lib/cache/current-internship-documents-queries";
 import { toastAndAction } from "../../lib/helpers";
 
-function StorageUploadForm({ fileRequirementTypes = [] }) {
+function StorageUploadForm({ fileRequirementTypes = [], currentUserId = "", internshipId = "" }) {
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [selectedRequirementId, setSelectedRequirementId] = useState("");
   const [selectedLabel, setSelectedLabel] = useState("");
@@ -24,15 +27,18 @@ function StorageUploadForm({ fileRequirementTypes = [] }) {
   }, []);
 
   function handleAction(formData) {
-    startTransition(() =>
-      toastAndAction({
+    startTransition(async () => {
+      const result = await toastAndAction({
         loadingLabel: "Uploading file...",
         successLabel: "File was added.",
         errorLabel: "Upload failed.",
         action: uploadInternshipFile,
         formData,
-      }),
-    );
+      });
+      if (result?.success && currentUserId && internshipId) {
+        void invalidateCurrentInternshipDocuments(queryClient, currentUserId, internshipId);
+      }
+    });
   }
 
   function handleSelectRequirement(reqType) {

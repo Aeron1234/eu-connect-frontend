@@ -1,6 +1,4 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
 import AccountProfile from "@/components/account-ui/AccountProfile";
-import { getUserProfile } from "@/lib/server-actions/account-actions";
 
 export const metadata = {
   title: "Account",
@@ -8,11 +6,9 @@ export const metadata = {
     "View and manage your EU-Connect department head profile and account status.",
 };
 
-async function DepartmentHeadAccountPage() {
-  const userData = await getUserProfile();
-
+function DepartmentHeadAccountPage() {
   return (
-    <AccountProfile roleLabel="Department Head" userData={userData || {}} />
+    <AccountProfile roleLabel="Department Head" />
   );
 }
-export default withReadErrorPage(DepartmentHeadAccountPage);
+export default DepartmentHeadAccountPage;

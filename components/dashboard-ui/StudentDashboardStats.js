@@ -1,14 +1,12 @@
 import { Briefcase, ClipboardCheck, FolderOpen, Megaphone } from "lucide-react";
-import { getStudentDashboardStats } from "@/lib/server-actions/dashboard-actions";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
-async function StudentDashboardStats() {
-  const getStats = await getStudentDashboardStats();
+function StudentDashboardStats({ data }) {
 
   const stats = [
     {
       label: "Favorite Internships",
-      value: getStats?.stats?.favoriteInternships ?? 0,
+      value: data?.stats?.favoriteInternships ?? 0,
       icon: Briefcase,
       accent: "bg-primary text-white border border-primary-400",
       valueClass: "text-primary-foreground",
@@ -16,7 +14,7 @@ async function StudentDashboardStats() {
     },
     {
       label: "Unread Announcements",
-      value: getStats?.stats?.unreadAnnouncements ?? 0,
+      value: data?.stats?.unreadAnnouncements ?? 0,
       icon: Megaphone,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
@@ -24,7 +22,7 @@ async function StudentDashboardStats() {
     },
     {
       label: "Pending Evaluations",
-      value: getStats?.stats?.pendingEvaluations ?? 0,
+      value: data?.stats?.pendingEvaluations ?? 0,
       icon: ClipboardCheck,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
@@ -32,7 +30,7 @@ async function StudentDashboardStats() {
     },
     {
       label: "Documents Stored",
-      value: getStats?.stats?.documentsStored ?? 0,
+      value: data?.stats?.documentsStored ?? 0,
       icon: FolderOpen,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",

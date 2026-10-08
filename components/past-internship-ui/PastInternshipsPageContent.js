@@ -2,7 +2,8 @@
 
 import { notifyReadError } from "@/lib/client-read-error";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { coursesOptions } from "@/lib/cache/reference-queries";
 import { Building2 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
@@ -20,17 +21,19 @@ function keyOf(company) {
 }
 
 function PastInternshipsPageContent({
-  initialData = [],
-  academicYears: initialAcademicYears = [],
-  courses = [],
+  initialData,
+  academicYears: initialAcademicYears,
+  courses: initialCourses,
   yearFilter: initialYearFilter = "all",
   pagination: {
     page: initialPage = 1,
     total: initialTotal = 0,
     totalPages: initialTotalPages = 1,
-  },
+  } = {},
 }) {
   const { user } = useUser();
+  const coursesQuery = useQuery({ ...coursesOptions(user.id), enabled: Boolean(user.id) });
+  const courses = coursesQuery.data || initialCourses || [];
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [yearFilter, setYearFilter] = useState(initialYearFilter);
@@ -54,7 +57,7 @@ function PastInternshipsPageContent({
   const pastInternshipsQuery = useInfiniteQuery({
     ...pastInternshipsInfiniteOptions(user.id, filters),
     initialData:
-      filters.academicYear === initialYearFilter && filters.search === ""
+      Array.isArray(initialData) && filters.academicYear === initialYearFilter && filters.search === ""
         ? {
             pages: [{
               data: initialData,
@@ -81,7 +84,7 @@ function PastInternshipsPageContent({
       }),
     );
   }, [pastInternshipsQuery.data]);
-  const academicYears = pastInternshipsQuery.data?.pages[0]?.academicYears ?? initialAcademicYears;
+  const academicYears = pastInternshipsQuery.data?.pages[0]?.academicYears ?? initialAcademicYears ?? [];
   const isLoadingMore = pastInternshipsQuery.isFetchingNextPage;
   const isSearching =
     filters.academicYear !== yearFilter ||
@@ -114,6 +117,7 @@ function PastInternshipsPageContent({
 
   useEffect(() => {
     const previous = serverSnapshotRef.current;
+    if (!Array.isArray(initialData)) return;
     if (
       previous.initialData === initialData &&
       previous.initialAcademicYears === initialAcademicYears &&

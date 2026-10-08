@@ -52,6 +52,7 @@ async function UserProfilePage({ params }) {
 
   const userRole = session?.user?.role || null;
   const searchedUserRole = header.role || "student";
+  const hasOngoingInternship = profileData.user.hasOngoingInternship !== false;
 
   const isEmployerNonSupervisor =
     userRole === "employer" &&
@@ -61,6 +62,7 @@ async function UserProfilePage({ params }) {
   const defaultFilter =
     userRole === "student" ||
     searchedUserRole !== "student" ||
+    !hasOngoingInternship ||
     isEmployerNonSupervisor
       ? "info"
       : "dtr";
@@ -89,11 +91,12 @@ async function UserProfilePage({ params }) {
       />
 
       <SearchedUserRecordsManager
-        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}`}
+        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}:${hasOngoingInternship}`}
         searchedUserId={searchedUserId}
         userId={session?.user?.id || ""}
         userRole={userRole}
         searchedUserRole={searchedUserRole}
+        hasOngoingInternship={hasOngoingInternship}
         info={info}
         supervision={supervision || null}
         defaultFilter={defaultFilter}

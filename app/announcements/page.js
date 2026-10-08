@@ -1,31 +1,11 @@
-import { withReadErrorPage } from "@/lib/page-read-error";
-import {
-  getAllAnnouncements,
-  getAnnouncementCategories,
-} from "@/lib/server-actions/announcements-actions";
 import AnnouncementBoard from "../../components/announcements-ui/AnnouncementBoard";
 
 export const metadata = {
   title: "Announcements",
 };
 
-export const dynamic = "force-dynamic";
-
-async function AnnouncementPage() {
-  const [categories, announcementData] = await Promise.all([
-    getAnnouncementCategories(),
-    getAllAnnouncements({ category: "all", search: "", page: 1 }),
-  ]);
-
-  return (
-    <AnnouncementBoard
-      categories={categories || []}
-      initialPinned={announcementData?.pinned || []}
-      initialRegular={announcementData?.regular || []}
-      initialTotalPages={announcementData?.totalPages || 1}
-      initialTotalRecords={announcementData?.totalRecords || 0}
-    />
-  );
+function AnnouncementPage() {
+  return <AnnouncementBoard />;
 }
 
-export default withReadErrorPage(AnnouncementPage);
+export default AnnouncementPage;

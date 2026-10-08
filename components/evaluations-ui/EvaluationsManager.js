@@ -18,7 +18,7 @@ const tabs = [
 ];
 const changedEvaluationTabs = ["pending-confirmation", "past-evaluations", "disputed"];
 
-function EvaluationsManager({ initialCriteria = [] }) {
+function EvaluationsManager({ initialCriteria }) {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(null);
@@ -26,13 +26,13 @@ function EvaluationsManager({ initialCriteria = [] }) {
   const [activeTab, setActiveTab] = useState("evaluate-supervisor");
   const tabQuery = useQuery({
     ...evaluationsTabOptions(user.id, activeTab),
-    initialData: activeTab === "evaluate-supervisor"
+    initialData: activeTab === "evaluate-supervisor" && Array.isArray(initialCriteria)
       ? { criteria: initialCriteria }
       : undefined,
   });
 
   useEffect(() => {
-    if (serverSnapshotRef.current === initialCriteria) return;
+    if (!Array.isArray(initialCriteria) || serverSnapshotRef.current === initialCriteria) return;
     serverSnapshotRef.current = initialCriteria;
     queryClient.setQueryData(
       evaluationsKeys.tab(user.id, "evaluate-supervisor"),

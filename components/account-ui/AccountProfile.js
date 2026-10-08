@@ -3,6 +3,10 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { accountProfileOptions, accountProfileKeys } from "@/lib/cache/account-profile-queries";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { ArrowLeft } from "lucide-react";
 
 // Adjust this import path to wherever this server action actually lives.
@@ -21,8 +25,9 @@ import SecurityCard from "./SecurityCard";
 import AccountSummaryCard from "./AccountSummaryCard";
 import { useUser } from "@/contexts/UserContext";
 
-export default function AccountProfile({ roleLabel, userData = {} }) {
+function AccountProfileContent({ roleLabel, userData = {} }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useUser();
   const role = user.role;
 
@@ -102,6 +107,12 @@ export default function AccountProfile({ roleLabel, userData = {} }) {
       }
 
       setIsEditing(false);
+      void queryClient.invalidateQueries({
+        queryKey: dashboardOverviewKeys.role(user?.id, role),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: accountProfileKeys.profile(user?.id),
+      });
       router.refresh();
     });
   };
@@ -165,4 +176,25 @@ export default function AccountProfile({ roleLabel, userData = {} }) {
       </div>
     </main>
   );
+}
+
+export default function AccountProfile({ roleLabel }) {
+  const { user } = useUser();
+  const profileQuery = useQuery({
+    ...accountProfileOptions(user?.id),
+    enabled: Boolean(user?.id),
+  });
+
+  if (profileQuery.isPending) {
+    return <main className="flex-1 p-4 text-sm text-muted-foreground sm:p-6 lg:p-8">Loading profile...</main>;
+  }
+  if (profileQuery.isError) {
+    return (
+      <main role="alert" className="flex-1 p-4 text-sm sm:p-6 lg:p-8">
+        <p>{profileQuery.error.message}</p>
+        <button type="button" onClick={() => void profileQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">Try again</button>
+      </main>
+    );
+  }
+  return <AccountProfileContent roleLabel={roleLabel} userData={profileQuery.data} />;
 }

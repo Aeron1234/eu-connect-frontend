@@ -1,7 +1,10 @@
 "use client";
 
-import { Building2, MapPin, Search, Users } from "lucide-react";
+import { Building2, MapPin, Users } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { mapLocationsOptions } from "@/lib/cache/map-locations-queries";
 import dynamic from "next/dynamic";
 import PageTitle from "../ui/PageTitle";
 import SearchBar from "../ui/SearchBar";
@@ -18,6 +21,7 @@ const Map = dynamic(() => import("./Map"), {
 });
 
 const tabs = ["Map View", "Companies"];
+const emptyCompanies = [];
 
 function getInitials(name = "") {
   return name
@@ -44,7 +48,14 @@ function formatPeriod(dateStarted, dateEnded) {
   return `${start} – ${end}`;
 }
 
-export default function MapWrapper({ initialData = [], regions = [] }) {
+export default function MapWrapper() {
+  const { user } = useUser();
+  const locationsQuery = useQuery({
+    ...mapLocationsOptions(user?.id),
+    enabled: Boolean(user?.id),
+  });
+  const initialData = locationsQuery.data?.companies || emptyCompanies;
+  const regions = locationsQuery.data?.availableRegions || [];
   const [tab, setTab] = useState(tabs[0]);
   const [regionId, setRegionId] = useState(null); // null = "All Locations"
   const [query, setQuery] = useState("");
@@ -124,7 +135,17 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
         </div>
       </div>
 
-      <div className="space-y-6">
+      {locationsQuery.isError && (
+        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
+          {locationsQuery.error.message}
+          <button type="button" onClick={() => void locationsQuery.refetch()} className="ml-3 font-semibold text-primary-emphasis">Try again</button>
+        </div>
+      )}
+      {locationsQuery.isPending ? (
+        <div className="grid h-[540px] place-items-center rounded-xl border border-border bg-card text-sm text-muted-foreground">
+          Loading locations...
+        </div>
+      ) : !locationsQuery.isError && <div className="space-y-6">
         {/* Search + location filter */}
 
         <div className="flex gap-2 flex-col sm:flex-row">
@@ -293,7 +314,7 @@ export default function MapWrapper({ initialData = [], regions = [] }) {
             </p>
           </div>
         )}
-      </div>
+      </div>}
     </main>
   );
 }

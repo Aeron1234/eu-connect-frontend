@@ -9,7 +9,7 @@ import { toastAndAction } from "../../lib/helpers";
 import { useUser } from "@/contexts/UserContext";
 import TitleButton from "../ui/TitleButton";
 
-function PostAnnouncementButton({ categories, onPosted }) {
+function PostAnnouncementButton({ categories, onPosted, categoriesLoading = false, categoriesError, onRetryCategories }) {
   const [isPending, startTransition] = useTransition();
   const { user } = useUser();
   const userRole = user.role;
@@ -45,12 +45,19 @@ function PostAnnouncementButton({ categories, onPosted }) {
         </span>
       }
     >
-      <AnnouncementForm
+      {categoriesLoading ? (
+        <p className="text-sm text-muted-foreground">Loading categories...</p>
+      ) : categoriesError ? (
+        <div role="alert" className="text-sm">
+          <p>{categoriesError}</p>
+          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={onRetryCategories}>Try again</button>
+        </div>
+      ) : <AnnouncementForm
         categories={categories}
         isPending={isPending}
         handleAction={handleAction}
         type={"create"}
-      />
+      />}
     </Modal>
   );
 }

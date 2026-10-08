@@ -81,7 +81,7 @@ const FORM_TYPES = [
 ];
 
 export default function EvaluationCriteriaPageContent({
-  initialCriteria = [],
+  initialCriteria,
 }) {
   const { user } = useUser();
   const userId = user?.id;
@@ -126,7 +126,7 @@ export default function EvaluationCriteriaPageContent({
   }, [criteriaQuery.error]);
 
   useEffect(() => {
-    if (serverSnapshotRef.current === initialCriteria || !userId) return;
+    if (!Array.isArray(initialCriteria) || serverSnapshotRef.current === initialCriteria || !userId) return;
     serverSnapshotRef.current = initialCriteria;
     queryClient.setQueryData(evaluationCriteriaKeys.type(userId, "student"), initialCriteria);
   }, [initialCriteria, queryClient, userId]);

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { dtrKeys } from "@/lib/cache/dtr-queries";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 
 function DtrButton({ internshipData, status }) {
   const [open, setOpen] = useState(false);
@@ -16,6 +17,9 @@ function DtrButton({ internshipData, status }) {
     setOpen(false);
     void queryClient.invalidateQueries({
       queryKey: dtrKeys.student(user?.id, internshipData?.id),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: dashboardOverviewKeys.role(user?.id, "student"),
     });
   }
   if (
