@@ -97,7 +97,11 @@ function AccountCard({ account, onActionSuccess }) {
           Created: {format(new Date(created_at), "MMM d, yyyy")}
         </p>
         {status === "active" && (
-          <DeactivateAccount id={id} onSuccess={onActionSuccess} />
+          <DeactivateAccount
+            id={id}
+            accountName={`${first_name} ${last_name}`.trim()}
+            onSuccess={onActionSuccess}
+          />
         )}
         {(isInactive || isSuspended) && (
           <ReactivateAccount id={id} onSuccess={onActionSuccess} />

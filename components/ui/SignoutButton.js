@@ -3,23 +3,25 @@ import { useState } from "react";
 import { LogOut } from "lucide-react";
 import ConfirmDialog from "./ConfirmDialog";
 import { logout } from "@/lib/server-actions/auth";
-import { useUser } from "@/contexts/UserContext";
-import { useSidebar } from "@/contexts/SidebarContext";
 import useSidebarTooltip from "./useSidebarTooltip";
-import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function SignoutButton({ isCollapsed, compact = false }) {
   const [confirming, setConfirming] = useState(false);
-  const { resetUser } = useUser();
-  const { resetSidebar } = useSidebar();
-  const queryClient = useQueryClient();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const { bind, tooltip } = useSidebarTooltip("Sign out", compact && isCollapsed);
 
-  function handleAction() {
-    queryClient.clear();
-    resetUser();
-    resetSidebar();
-    logout();
+  async function handleAction() {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await logout();
+      // A full navigation discards the authenticated dashboard layout and client state.
+      window.location.replace("/login");
+    } catch {
+      setIsSigningOut(false);
+      toast.error("Could not sign out. Please try again.");
+    }
   }
 
   return (
@@ -28,6 +30,7 @@ function SignoutButton({ isCollapsed, compact = false }) {
         <button
           type="button"
           onClick={() => setConfirming(true)}
+          disabled={isSigningOut}
           title={isCollapsed ? undefined : "Sign out"}
           aria-label="Sign out"
           {...bind}
@@ -37,7 +40,7 @@ function SignoutButton({ isCollapsed, compact = false }) {
           {!compact && <span className={isCollapsed ? "lg:hidden" : ""}>Sign out</span>}
         </button>
       </div>
-      <ConfirmDialog open={confirming} onOpenChange={setConfirming} title="Sign out?" description="You will need to sign in again to access your account." confirmLabel="Sign out" onConfirm={handleAction} />
+      <ConfirmDialog open={confirming} onOpenChange={setConfirming} title="Sign out?" description="You will need to sign in again to access your account." confirmLabel="Sign out" pending={isSigningOut} onConfirm={handleAction} />
       {tooltip}
     </>
   );

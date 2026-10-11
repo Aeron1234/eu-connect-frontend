@@ -1,15 +1,20 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toastAndAction } from "../../lib/helpers";
 import { deactivateAccount } from "@/lib/server-actions/account-actions";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/spinner";
 import { ShieldBan } from "lucide-react";
 
-function DeactivateAccount({ id, onSuccess }) {
+function DeactivateAccount({ id, accountName, onSuccess }) {
+  const [confirming, setConfirming] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  function handleAction(formData) {
+  function handleAction() {
+    const formData = new FormData();
+    formData.set("accountId", id);
+
     startTransition(async () => {
       const result = await toastAndAction({
         loadingLabel: "Deactivating account...",
@@ -20,25 +25,21 @@ function DeactivateAccount({ id, onSuccess }) {
       });
 
       if (result?.success) {
+        setConfirming(false);
         onSuccess?.();
       }
     });
   }
 
   return (
-    <form action={handleAction}>
-      <input
-        type="hidden"
-        name="accountId"
-        defaultValue={id}
-        className="pointer-events-none cursor-not-allowed"
-        disabled={isPending}
-      />
-
+    <>
       <button
+        type="button"
         className="relative cursor-pointer flex flex-col justify-center items-center gap-1 p-1 rounded-sm transition-colors hover:bg-red-200 hover:text-red-600"
         disabled={isPending}
         title="Deactivate account"
+        aria-label={`Deactivate ${accountName}`}
+        onClick={() => setConfirming(true)}
       >
         {isPending ? (
           <Spinner className={"stroke-2 stroke-stone-400"} />
@@ -46,7 +47,16 @@ function DeactivateAccount({ id, onSuccess }) {
           <ShieldBan className="h-5 w-5" />
         )}
       </button>
-    </form>
+      <ConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title="Deactivate account?"
+        description={`Deactivate ${accountName}? This account will no longer be able to sign in until it is reactivated.`}
+        confirmLabel="Deactivate"
+        pending={isPending}
+        onConfirm={handleAction}
+      />
+    </>
   );
 }
 
