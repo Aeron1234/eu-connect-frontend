@@ -42,9 +42,9 @@ export default function ConfirmDialog({
         </DialogHeader>
         <ModalForm.Confirmation title={confirmationTitle}>{description}</ModalForm.Confirmation>
         <DialogFooter className="mt-1 border-t border-border pt-3 sm:pt-5">
-          <div className="flex w-full flex-col-reverse gap-2 font-medium sm:flex-row sm:justify-end sm:gap-2.5">
-            <Button type="button" variant="outline" disabled={pending} onClick={() => onOpenChange(false)} className="min-h-11 w-full rounded-xl px-5 sm:w-auto">Cancel</Button>
-            <Button type="button" disabled={pending} onClick={onConfirm} className="min-h-11 w-full rounded-xl bg-primary px-6 font-semibold text-white shadow-sm hover:bg-primary-600 sm:w-auto">
+          <div className="flex w-full items-center justify-end gap-2 font-medium sm:gap-2.5">
+            <Button type="button" variant="outline" disabled={pending} onClick={() => onOpenChange(false)} className="min-h-9 w-auto shrink-0 rounded-xl px-3 text-xs sm:min-h-11 sm:px-5 sm:text-sm">Cancel</Button>
+            <Button type="button" disabled={pending} onClick={onConfirm} className="min-h-9 w-auto shrink-0 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 sm:min-h-11 sm:px-6 sm:text-sm">
               {pending ? <Spinner className="size-6 stroke-3 stroke-primary-50" /> : confirmLabel}
             </Button>
           </div>

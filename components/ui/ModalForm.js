@@ -97,7 +97,7 @@ function Actions({
   const submitButton = (
     <Button
       type="submit"
-      className={cn("min-h-11 w-full rounded-xl bg-primary px-6 font-semibold text-white shadow-sm hover:bg-primary-600 sm:w-auto", submitClassName)}
+      className={cn("min-h-9 w-auto shrink-0 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 sm:min-h-11 sm:px-6 sm:text-sm", submitClassName)}
       disabled={isPending}
     >
       {isPending ? (
@@ -110,12 +110,12 @@ function Actions({
 
   return (
     <DialogFooter className="mt-1 border-t border-border pt-3 sm:pt-5">
-      <div className={cn("flex w-full flex-col-reverse gap-2 font-medium sm:flex-row sm:justify-end sm:gap-2.5", className)}>
+      <div className={cn("flex w-full items-center justify-end gap-2 font-medium sm:gap-2.5", className)}>
         <DialogClose asChild>
           <Button
             variant="outline"
             type="button"
-            className="min-h-11 w-full rounded-xl px-5 sm:w-auto"
+            className="min-h-9 w-auto shrink-0 rounded-xl px-3 text-xs sm:min-h-11 sm:px-5 sm:text-sm"
             disabled={disableCancelWhilePending && isPending}
           >
             {cancelLabel}
