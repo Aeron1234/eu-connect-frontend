@@ -2,7 +2,7 @@
 
 import { ChevronLeft, User, UserCheck, Clock3, Check } from "lucide-react";
 import Link from "next/link";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import useSupervisorRequestStatus from "../../lib/hooks/useSupervisorRequestStatus";
 import ProgressBar from "../ui/ProgressBar";
 
@@ -44,15 +44,7 @@ function SupervisorButton({ searchedUserId }) {
   } = useSupervisorRequestStatus(searchedUserId);
 
   if (isLoadingStatus) {
-    return (
-      <button
-        disabled
-        className="inline-flex items-center gap-2 bg-white/15 text-white ring-1 ring-white/30 px-4 py-2.5 rounded-lg text-sm font-semibold shrink-0 cursor-not-allowed"
-      >
-        <Spinner className="w-3.5 h-3.5 stroke-3 stroke-white" />
-        Loading...
-      </button>
-    );
+    return <Skeleton className="h-10 w-40 shrink-0 rounded-lg bg-white/20" role="status" aria-label="Loading supervisor status" />;
   }
 
   if (!supervisorStatus || supervisorStatus.error) return null;

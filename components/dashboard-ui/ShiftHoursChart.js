@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useUser } from "@/contexts/UserContext";
 import { shiftHoursMonthOptions } from "@/lib/cache/shift-hours-queries";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const monthNames = [
   "January",
@@ -115,9 +116,7 @@ function ShiftHoursChart({
           </div>
         </div>
       ) : selectedKey && monthQuery.isPending ? (
-        <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
+        <Skeleton className="h-64 w-full rounded-lg" role="status" aria-label="Loading shift hours" />
       ) : weeks.length === 0 ? (
         <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
           <p className="text-sm text-muted-foreground">

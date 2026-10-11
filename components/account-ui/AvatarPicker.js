@@ -7,7 +7,8 @@ import { avatarChoicesOptions } from "@/lib/cache/avatar-queries";
 import { accountProfileKeys } from "@/lib/cache/account-profile-queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Loader2, Check, Trash2 } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import Modal from "../ui/Modal";
 import {
   updateUserAvatar,
@@ -74,8 +75,8 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
     >
       <div className="flex flex-col gap-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <Loader2 className="h-6 w-6 animate-spin text-primary-emphasis" />
+          <div className="grid grid-cols-4 gap-3 sm:grid-cols-5" role="status" aria-label="Loading avatars">
+            {Array.from({ length: 10 }, (_, index) => <Skeleton key={index} className="aspect-square w-full rounded-xl" />)}
           </div>
         ) : loadError ? (
           <div role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm">

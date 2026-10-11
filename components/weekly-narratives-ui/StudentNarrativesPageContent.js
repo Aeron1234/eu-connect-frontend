@@ -7,6 +7,7 @@ import { weeklyNarrativesInfiniteOptions } from "@/lib/cache/weekly-narratives-q
 import WeeklyNarrativeContent from "@/components/weekly-narratives-ui/WeeklyNarrativeContent";
 import WeeklyNarrativePostButton from "@/components/weekly-narratives-ui/WeeklyNarrativePostButton";
 import WeeklyNarrativesStats from "@/components/weekly-narratives-ui/WeeklyNarrativesStats";
+import StudentNarrativesPageSkeleton from "@/components/skeletons/StudentNarrativesPageSkeleton";
 import PageTitle from "@/components/ui/PageTitle";
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +27,7 @@ function NarrativesPage() {
   const narrativesData = narrativesQuery.data?.pages[0];
 
   if (activeQuery.isPending || (hasOngoingInternship && narrativesQuery.isPending)) {
-    return <main className="flex-1 p-4 text-sm text-muted-foreground sm:p-6 lg:p-8">Loading weekly narratives...</main>;
+    return <StudentNarrativesPageSkeleton />;
   }
   if (activeQuery.isError || narrativesQuery.isError) {
     return (

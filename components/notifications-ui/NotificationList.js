@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, BellRing, Inbox } from "lucide-react";
 import MarkAllAsReadButton from "./MarkAllAsReadButton";
+import NotificationItemSkeleton from "@/components/skeletons/NotificationItemSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import NotificationItem from "./NotificationItem";
 import { useUser } from "@/contexts/UserContext";
 import { socket } from "../ui/SocketProvider";
@@ -30,18 +32,12 @@ function NotificationList({ inboxData: initialData }) {
   const isEmployer = user?.role === "employer";
   const [scope, setScope] = useState("all");
   const selectedScope = isEmployer ? scope : "all";
-  const [activeScope, setActiveScope] = useState("all");
   const serverSnapshotRef = useRef(null);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => setActiveScope(selectedScope), 300);
-    return () => clearTimeout(timeout);
-  }, [selectedScope]);
-
   const inboxQuery = useInfiniteQuery({
-    ...notificationInboxOptions(user.id, activeScope),
+    ...notificationInboxOptions(user.id, selectedScope),
     initialData:
-      activeScope === "all" && initialData
+      selectedScope === "all" && initialData
         ? { pages: [initialData], pageParams: [1] }
         : undefined,
   });
@@ -60,7 +56,6 @@ function NotificationList({ inboxData: initialData }) {
   const firstPage = inboxQuery.data?.pages[0];
   const totalRecords = firstPage?.totalRecords ?? 0;
   const unreadCount = firstPage?.unreadCount ?? 0;
-  const isSwitching = selectedScope !== activeScope;
   const isLoadingMore = inboxQuery.isFetchingNextPage;
 
   useEffect(() => {
@@ -152,17 +147,19 @@ function NotificationList({ inboxData: initialData }) {
           value={String(totalRecords)}
           label={selectedScope === "requests" ? "Supervisor Requests" : "All Notifications"}
           highlight
+          loading={inboxQuery.isPending}
         />
         <StatCard
           icon={<BellRing className="size-5 text-muted-foreground" />}
           value={String(unreadCount)}
           label="Unread"
+          loading={inboxQuery.isPending}
         />
       </div>
 
-      {isSwitching || inboxQuery.isPending ? (
-        <div className="rounded-xl border border-border bg-card px-6 py-16 text-center text-sm text-muted-foreground">
-          Loading notifications...
+      {inboxQuery.isPending ? (
+        <div className="flex flex-col gap-2" role="status" aria-label="Loading notifications">
+          {Array.from({ length: 5 }, (_, index) => <NotificationItemSkeleton key={index} />)}
         </div>
       ) : inboxQuery.isError && !inboxQuery.data ? (
         <div className="rounded-xl border border-border bg-card px-6 py-16 text-center text-sm text-muted-foreground">
@@ -193,7 +190,7 @@ function NotificationList({ inboxData: initialData }) {
         </ul>
       )}
 
-      {!isSwitching && inboxQuery.hasNextPage && (
+      {inboxQuery.hasNextPage && (
         <div className="text-center">
           <button
             type="button"
@@ -209,7 +206,7 @@ function NotificationList({ inboxData: initialData }) {
   );
 }
 
-function StatCard({ icon, value, label, highlight }) {
+function StatCard({ icon, value, label, highlight, loading = false }) {
   return (
     <div
       className={`flex items-center gap-3 sm:gap-4 rounded-xl border px-4 sm:px-5 py-4 sm:py-5 shadow-sm ${
@@ -220,10 +217,8 @@ function StatCard({ icon, value, label, highlight }) {
     >
       {icon}
       <div>
-        <p className="text-xl sm:text-2xl font-bold leading-none">{value}</p>
-        <p className={`mt-1.5 text-xs ${highlight ? "opacity-80" : "text-muted-foreground"}`}>
-          {label}
-        </p>
+        {loading ? <Skeleton className={`h-6 w-10 ${highlight ? "bg-white/30" : ""}`} /> : <p className="text-xl sm:text-2xl font-bold leading-none">{value}</p>}
+        {loading ? <Skeleton className={`mt-1.5 h-3 w-24 ${highlight ? "bg-white/25" : ""}`} /> : <p className={`mt-1.5 text-xs ${highlight ? "opacity-80" : "text-muted-foreground"}`}>{label}</p>}
       </div>
     </div>
   );

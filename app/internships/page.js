@@ -4,6 +4,7 @@ import { BriefcaseBusiness } from "lucide-react";
 import { Suspense } from "react";
 import InternshipPostButtonWrapper from "@/components/internship-posts-ui/InternshipPostButtonWrapper";
 import PageTitle from "@/components/ui/PageTitle";
+import InternshipPostsSkeleton from "@/components/skeletons/InternshipPostsSkeleton";
 
 export const metadata = {
   title: "Internships",
@@ -27,7 +28,7 @@ async function InternshipPage({ searchParams }) {
         <InternshipPostButtonWrapper />
       </div>
 
-      <Suspense fallback={<div>...</div>}>
+      <Suspense fallback={<InternshipPostsSkeleton />}>
         <InternshipPosts
           workType={workType}
           courseId={courseId}

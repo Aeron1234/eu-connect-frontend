@@ -6,17 +6,15 @@ function HTEListSkeleton({ row = 3 }) {
       {Array.from({ length: 2 }).map((_, i) => (
         <section
           key={i}
-          className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+          className="@container overflow-hidden rounded-xl border border-border bg-card shadow-sm"
         >
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 sm:px-5 py-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <Skeleton className="size-9 flex-shrink-0 rounded-lg" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-3 w-56" />
-              </div>
+          <header className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 border-b border-border px-4 py-4 sm:px-5 @2xl:grid-cols-[auto_minmax(0,1fr)_auto]">
+            <Skeleton className="col-start-1 row-start-1 size-9 rounded-lg" />
+            <div className="col-span-2 row-start-2 min-w-0 space-y-2 @2xl:col-span-1 @2xl:col-start-2 @2xl:row-start-1">
+              <Skeleton className="h-4 w-40 max-w-full" />
+              <Skeleton className="h-3 w-56 max-w-full" />
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="col-start-2 row-start-1 flex items-center justify-self-end gap-2 @2xl:col-start-3">
               <Skeleton className="h-6 w-20 rounded-full" />
               <Skeleton className="h-8 w-28 rounded-md" />
             </div>

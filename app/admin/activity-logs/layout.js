@@ -1,13 +1,11 @@
-import { Spinner } from "@/components/ui/spinner";
+import Loading from "./loading";
 import { Suspense } from "react";
 
 function ActivityLogsLayout({ children }) {
   return (
     <Suspense
       fallback={
-        <div className="self-center justify-self-center p-5">
-          <Spinner className={"size-8 stroke-4 stroke-primary-emphasis"} />
-        </div>
+        <Loading />
       }
     >
       {children}

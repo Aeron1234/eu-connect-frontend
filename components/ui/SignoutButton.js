@@ -1,5 +1,7 @@
 "use client";
+import { useState } from "react";
 import { LogOut } from "lucide-react";
+import ConfirmDialog from "./ConfirmDialog";
 import { logout } from "@/lib/server-actions/auth";
 import { useUser } from "@/contexts/UserContext";
 import { useSidebar } from "@/contexts/SidebarContext";
@@ -7,6 +9,7 @@ import useSidebarTooltip from "./useSidebarTooltip";
 import { useQueryClient } from "@tanstack/react-query";
 
 function SignoutButton({ isCollapsed, compact = false }) {
+  const [confirming, setConfirming] = useState(false);
   const { resetUser } = useUser();
   const { resetSidebar } = useSidebar();
   const queryClient = useQueryClient();
@@ -21,9 +24,10 @@ function SignoutButton({ isCollapsed, compact = false }) {
 
   return (
     <>
-      <form action={handleAction}>
+      <div>
         <button
-          type="submit"
+          type="button"
+          onClick={() => setConfirming(true)}
           title={isCollapsed ? undefined : "Sign out"}
           aria-label="Sign out"
           {...bind}
@@ -32,7 +36,8 @@ function SignoutButton({ isCollapsed, compact = false }) {
           <LogOut className="h-4 w-4 shrink-0" />
           {!compact && <span className={isCollapsed ? "lg:hidden" : ""}>Sign out</span>}
         </button>
-      </form>
+      </div>
+      <ConfirmDialog open={confirming} onOpenChange={setConfirming} title="Sign out?" description="You will need to sign in again to access your account." confirmLabel="Sign out" onConfirm={handleAction} />
       {tooltip}
     </>
   );

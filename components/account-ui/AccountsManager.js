@@ -10,6 +10,7 @@ import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
 import ExistingAccountListSkeleton from "../skeletons/ExistingAccountListSkeleton";
+import CreateAccountFormSkeleton from "../skeletons/CreateAccountFormSkeleton";
 import SearchBar from "../ui/SearchBar";
 import AccountDropdownFilter from "./AccountDropdownFilter";
 
@@ -128,7 +129,7 @@ function AccountsManager({ initialPage }) {
       {tab === "Form" ? (
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
           {formQuery.isPending ? (
-            <p className="text-sm text-muted-foreground">Loading form options...</p>
+            <CreateAccountFormSkeleton />
           ) : formQuery.isError ? (
             <div role="alert" className="text-sm">
               <p>{formQuery.error.message}</p>

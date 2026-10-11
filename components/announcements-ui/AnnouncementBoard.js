@@ -15,6 +15,7 @@ import PageTitle from "../ui/PageTitle";
 import AnnouncementCardSkeleton from "../skeletons/AnnouncementCardSkeleton";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import {
+  announcementByIdOptions,
   announcementsInfiniteOptions,
   announcementsKeys,
 } from "@/lib/cache/announcements-queries";
@@ -22,6 +23,7 @@ import {
 const defaultFilters = { category: "all", search: "" };
 
 function AnnouncementBoard({
+  targetId = null,
   categories: initialCategories,
   initialPinned,
   initialRegular,
@@ -36,6 +38,26 @@ function AnnouncementBoard({
   });
   const categories = categoriesQuery.data || initialCategories || [];
   const queryClient = useQueryClient();
+  const targetRef = useRef(null);
+  const [highlightTarget, setHighlightTarget] = useState(false);
+  const targetQuery = useQuery({
+    ...announcementByIdOptions(user.id, targetId),
+    enabled: Boolean(user.id && targetId),
+  });
+  const targetAnnouncement = targetQuery.data;
+
+  useEffect(() => {
+    if (!targetId || !targetAnnouncement?.id || !targetRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      targetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightTarget(true);
+    });
+    const timer = setTimeout(() => setHighlightTarget(false), 250);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
+  }, [targetId, targetAnnouncement?.id]);
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -152,9 +174,10 @@ function AnnouncementBoard({
     void queryClient.invalidateQueries({ queryKey: announcementsKeys.all(user.id) });
   }
 
+  const visiblePinned = pinned.filter((item) => item.id !== targetAnnouncement?.id);
   const pinnedIds = new Set(pinned.map((p) => p.id));
-  const filteredRegular = regular.filter((a) => !pinnedIds.has(a.id));
-  const isPinnedExist = pinned.length > 0;
+  const filteredRegular = regular.filter((a) => !pinnedIds.has(a.id) && a.id !== targetAnnouncement?.id);
+  const isPinnedExist = visiblePinned.length > 0;
 
   return (
     <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
@@ -192,6 +215,27 @@ function AnnouncementBoard({
         />
       </div>
 
+      {targetId && (
+        <section aria-label="Selected announcement" className="space-y-3">
+          {targetQuery.isPending ? (
+            <AnnouncementCardSkeleton showEventDate />
+          ) : targetQuery.isError ? (
+            <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+              This announcement is unavailable or you do not have access to it.
+            </p>
+          ) : (
+            <div ref={targetRef} className="scroll-mt-6">
+              <AnnouncementCard
+                announcement={targetAnnouncement}
+                categories={categories}
+                onChanged={refreshList}
+                highlighted={highlightTarget}
+              />
+            </div>
+          )}
+        </section>
+      )}
+
       {isSearching ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -213,7 +257,7 @@ function AnnouncementBoard({
                 Pinned
               </p>
               <ul className="flex flex-col gap-3">
-                {pinned.map((announcement) => (
+                {visiblePinned.map((announcement) => (
                   <li key={`pinned-${announcement.id}`}>
                     <AnnouncementCard
                       announcement={announcement}
@@ -246,7 +290,7 @@ function AnnouncementBoard({
               </ul>
             </div>
           ) : (
-            !isPinnedExist && (
+            !isPinnedExist && !targetAnnouncement && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
                 <Megaphone className="size-8 text-foreground-faint" />
                 <p className="text-sm text-muted-foreground">

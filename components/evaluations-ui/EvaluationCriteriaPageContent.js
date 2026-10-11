@@ -23,6 +23,7 @@ import {
 } from "@/lib/server-actions/evaluations-actions";
 import { cx } from "@/lib/utils";
 import EvaluationCriteriaListSkeleton from "../skeletons/EvaluationCriteriaListSkeleton";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 // Backend returns [{ category, items: [{ id, name, is_active }] }].
 function toSections(groups) {
@@ -101,6 +102,7 @@ export default function EvaluationCriteriaPageContent({
   // Which specific button triggered the in-flight transition, so only that
   // one shows a spinner/disabled state instead of the whole page.
   const [activeKey, setActiveKey] = useState(null);
+  const [confirmation, setConfirmation] = useState(null);
   const isKeyPending = (key) => isPending && activeKey === key;
 
   // Student and Employer have separate cache entries.
@@ -282,6 +284,7 @@ export default function EvaluationCriteriaPageContent({
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open) setConfirmation(null); }} title={confirmation?.title || "Deactivate criteria?"} description={confirmation?.description || "The selected criteria will no longer be available for new evaluations."} confirmLabel="Deactivate" destructive pending={isPending} onConfirm={() => { confirmation?.action(); setConfirmation(null); }} />
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="inline-flex rounded-lg bg-secondary p-1">
           {FORM_TYPES.map((t) => (
@@ -354,9 +357,9 @@ export default function EvaluationCriteriaPageContent({
                 isKeyPending={isKeyPending}
                 isMutationPending={isPending}
                 onAddCriterion={addCriterionHandler}
-                onDeactivateCriterion={deactivateCriterionHandler}
+                onDeactivateCriterion={(item) => setConfirmation({ title: "Deactivate criterion?", description: `Deactivate “${item.label}”? It will no longer be offered for new evaluations.`, action: () => deactivateCriterionHandler(item.id) })}
                 onReactivateCriterion={reactivateCriterionHandler}
-                onDeactivateSection={deactivateSectionHandler}
+                onDeactivateSection={(category) => setConfirmation({ title: "Deactivate section?", description: `Deactivate every active criterion in “${category}”?`, action: () => deactivateSectionHandler(category) })}
                 onReactivateSection={reactivateSectionHandler}
               />
             ))}
@@ -501,7 +504,7 @@ function SectionCard({
                   danger
                   disabled={isMutationPending || String(item.id).startsWith("temp-")}
                   pending={isKeyPending(key)}
-                  onClick={() => onDeactivateCriterion(item.id)}
+                  onClick={() => onDeactivateCriterion(item)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </IconBtn>

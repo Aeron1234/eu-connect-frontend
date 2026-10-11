@@ -27,6 +27,7 @@ import RecordsPageFilter from "./RecordsPageFilter";
 import { toastAndAction } from "../../lib/helpers";
 import { updateInternshipRecordStatus } from "@/lib/server-actions/internship-records-actions";
 import ProgressBar from "../ui/ProgressBar";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 const statusMeta = {
   pending: {
@@ -78,6 +79,7 @@ function RecordsPageContent({
     limit,
   });
   const [isPending, startTransition] = useTransition();
+  const [confirmation, setConfirmation] = useState(null);
   const { user } = useUser();
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(initialData);
@@ -192,6 +194,7 @@ function RecordsPageContent({
   ]);
 
   function handleStatus(internshipId, status) {
+    setConfirmation(null);
     const formData = new FormData();
     formData.append("id", internshipId);
     formData.append("status", status);
@@ -236,6 +239,7 @@ function RecordsPageContent({
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open) setConfirmation(null); }} title={`${confirmation?.label || "Update"} internship record?`} description={confirmation ? `This will change ${confirmation.studentName}'s internship status.` : ""} confirmLabel={confirmation?.label || "Confirm"} destructive={confirmation?.status === "rejected"} pending={isPending} onConfirm={() => confirmation && handleStatus(confirmation.id, confirmation.status)} />
       <RecordsPageHeader
         query={query}
         setQuery={setQuery}
@@ -298,7 +302,7 @@ function RecordsPageContent({
                       <button
                         type="button"
                         disabled={isPending || isSearching}
-                        onClick={() => handleStatus(r.id, "ongoing")}
+                        onClick={() => setConfirmation({ id: r.id, studentName: r.student_name, status: "ongoing", label: "Approve" })}
                         className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-600 transition disabled:opacity-50"
                       >
                         Approve
@@ -306,7 +310,7 @@ function RecordsPageContent({
                       <button
                         type="button"
                         disabled={isPending || isSearching}
-                        onClick={() => handleStatus(r.id, "rejected")}
+                        onClick={() => setConfirmation({ id: r.id, studentName: r.student_name, status: "rejected", label: "Reject" })}
                         className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground-soft hover:bg-muted transition disabled:opacity-50"
                       >
                         Reject
@@ -317,7 +321,7 @@ function RecordsPageContent({
                     <button
                       type="button"
                       disabled={isPending || isSearching}
-                      onClick={() => handleStatus(r.id, "pending")}
+                      onClick={() => setConfirmation({ id: r.id, studentName: r.student_name, status: "pending", label: "Restore" })}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary-emphasis hover:bg-primary hover:text-white transition disabled:opacity-50"
                     >
                       <RotateCcw className="h-4 w-4" /> Restore
@@ -327,7 +331,7 @@ function RecordsPageContent({
                     <button
                       type="button"
                       disabled={isPending || isSearching}
-                      onClick={() => handleStatus(r.id, "finished")}
+                      onClick={() => setConfirmation({ id: r.id, studentName: r.student_name, status: "finished", label: "Mark Finished" })}
                       className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground-soft hover:bg-muted transition disabled:opacity-50"
                     >
                       Mark Finished

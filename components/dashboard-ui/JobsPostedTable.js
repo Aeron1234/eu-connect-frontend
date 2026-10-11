@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Briefcase, ChevronLeft, ChevronRight, Loader2, MapPin } from "lucide-react";
+import { Briefcase, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/contexts/UserContext";
 import { dashboardListsKeys, employerJobsPageOptions } from "@/lib/cache/dashboard-lists-queries";
 
@@ -81,14 +82,15 @@ function JobsPostedTable({ initialPage }) {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-2" role="status">
-                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                    Loading posted jobs...
-                  </span>
-                </td>
-              </tr>
+              Array.from({ length: 5 }, (_, index) => (
+                <tr key={index} className="border-b border-border last:border-b-0" aria-label="Loading posted jobs">
+                  <td className="py-3"><Skeleton className="h-3.5 w-32" /></td>
+                  <td className="py-3"><Skeleton className="h-3.5 w-24" /></td>
+                  <td className="py-3"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                  <td className="py-3"><Skeleton className="ml-auto h-3.5 w-6" /></td>
+                  <td className="py-3"><Skeleton className="ml-auto h-3.5 w-20" /></td>
+                </tr>
+              ))
             ) : hasError ? (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-sm text-foreground">

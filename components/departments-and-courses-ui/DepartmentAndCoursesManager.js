@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Building2, GraduationCap, Layers, Power } from "lucide-react";
+import { Building2, GraduationCap, Layers, Pencil, Power } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   adminCoursesOptions,
   adminDepartmentsOptions,
@@ -19,6 +21,8 @@ import {
   deactivateCourse,
   addDepartment,
   addCourse,
+  updateDepartment,
+  updateCourse,
 } from "@/lib/server-actions/course-and-department-actions";
 import SearchBar from "../ui/SearchBar";
 import PageTitle from "../ui/PageTitle";
@@ -38,9 +42,10 @@ const EMPTY_LIST = [];
 
 function LoadingRows() {
   return Array.from({ length: 4 }, (_, index) => (
-    <tr key={index} className="border-b border-border last:border-0">
-      <td colSpan={5} className="px-5 py-3">
-        <Skeleton className="h-5 w-full" />
+    <tr key={index} className="border-b border-border last:border-0 max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:bg-card max-2xl:shadow-sm">
+      <td colSpan={5} className="px-5 py-3 max-2xl:block max-2xl:p-4">
+        <Skeleton className="h-5 w-full max-2xl:mb-3" />
+        <Skeleton className="hidden h-4 w-2/3 max-2xl:block" />
       </td>
     </tr>
   ));
@@ -63,6 +68,10 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
   const [status, setStatus] = useState("all"); // "all" | "active" | "inactive"
   const [query, setQuery] = useState("");
   const [pendingIds, setPendingIds] = useState(new Set());
+  const [confirmDepartment, setConfirmDepartment] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [editError, setEditError] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Add Department form state
   const [deptName, setDeptName] = useState("");
@@ -259,8 +268,55 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
     }
   }
 
+  async function handleEdit(e) {
+    e.preventDefault();
+    if (!editing || isSavingEdit) return;
+    const name = editing.name.trim();
+    const code = editing.code.trim();
+    if (!name || !code || (editing.kind === "course" && !editing.departmentId)) {
+      setEditError("Complete all fields before saving.");
+      return;
+    }
+    setIsSavingEdit(true);
+    setEditError("");
+    try {
+      const result = editing.kind === "department"
+        ? await updateDepartment(editing.id, { name, code })
+        : await updateCourse(editing.id, { course_name: name, short_name: code, department_id: editing.departmentId });
+      const updated = editing.kind === "department" ? result?.department : result?.course;
+      if (!result?.success || !updated) {
+        setEditError(result?.error || "Could not save changes.");
+        return;
+      }
+      const key = editing.kind === "department" ? departmentCourseKeys.departments(currentUserId) : departmentCourseKeys.courses(currentUserId);
+      queryClient.setQueryData(key, (list) => list?.map((item) => item.id === editing.id ? updated : item));
+      void queryClient.invalidateQueries({ queryKey: key });
+      void queryClient.invalidateQueries({ queryKey: accountFormKeys.data(currentUserId) });
+      void queryClient.invalidateQueries({ queryKey: referenceKeys.courses(currentUserId) });
+      setEditing(null);
+      toast.success(`${editing.kind === "department" ? "Department" : "Course"} updated.`);
+    } catch {
+      setEditError("Could not save changes.");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  }
+
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
+      <ConfirmDialog open={Boolean(confirmDepartment)} onOpenChange={(open) => { if (!open) setConfirmDepartment(null); }} title="Deactivate department?" description={confirmDepartment ? `Deactivate ${confirmDepartment.name}? Its courses will no longer be offered for new selections.` : ""} confirmLabel="Deactivate" destructive pending={Boolean(confirmDepartment && pendingIds.has(`department:${confirmDepartment.id}`))} onConfirm={async () => { if (!confirmDepartment) return; await handleToggleDepartment(confirmDepartment); setConfirmDepartment(null); }} />
+      <Dialog open={Boolean(editing)} onOpenChange={(open) => { if (!open && !isSavingEdit) { setEditing(null); setEditError(""); } }}>
+        <DialogContent className="max-w-md p-4 sm:p-6">
+          <DialogHeader className="text-left"><DialogTitle>Edit {editing?.kind === "course" ? "course" : "department"}</DialogTitle><DialogDescription>Update the name, code, and department where applicable.</DialogDescription></DialogHeader>
+          {editing && <form onSubmit={handleEdit} className="space-y-4">
+            <label className="block text-sm font-medium">Name<input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} disabled={isSavingEdit} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3" /></label>
+            <label className="block text-sm font-medium">Code<input value={editing.code} onChange={(e) => setEditing({ ...editing, code: e.target.value })} disabled={isSavingEdit} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3" /></label>
+            {editing.kind === "course" && <div className="text-sm font-medium"><span id="edit-course-department">Department</span><Select value={editing.departmentId} onValueChange={(value) => setEditing({ ...editing, departmentId: value })} disabled={isSavingEdit}><SelectTrigger aria-labelledby="edit-course-department" className="mt-1 h-10 w-full bg-background px-3"><SelectValue /></SelectTrigger><SelectContent>{departments.map((d) => <SelectItem key={d.id} value={String(d.id)}>{d.code} — {d.name}</SelectItem>)}</SelectContent></Select></div>}
+            {editError && <p role="alert" className="text-sm text-destructive">{editError}</p>}
+            <DialogFooter><button type="button" onClick={() => setEditing(null)} disabled={isSavingEdit} className="rounded-md border border-border px-4 py-2 text-sm">Cancel</button><button type="submit" disabled={isSavingEdit} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{isSavingEdit ? "Saving..." : "Save changes"}</button></DialogFooter>
+          </form>}
+        </DialogContent>
+      </Dialog>
       <PageTitle
         Icon={Layers}
         title={"Departments & Courses"}
@@ -459,9 +515,9 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
 
       {/* Table */}
       {view === "departments" ? (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
+        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm max-2xl:overflow-visible max-2xl:border-0 max-2xl:bg-transparent max-2xl:shadow-none">
+          <table className="w-full text-sm max-2xl:block">
+            <thead className="max-2xl:hidden">
               <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
                 <th className="px-5 py-3 font-medium">Name</th>
                 <th className="px-5 py-3 font-medium">Code</th>
@@ -470,12 +526,12 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="max-2xl:grid max-2xl:gap-3 lg:max-2xl:grid-cols-2">
               {departmentsQuery.isPending ? (
                 <LoadingRows />
               ) : departmentsQuery.isError && !departmentsQuery.data ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm">
+                <tr className="max-2xl:col-span-full max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:border-border max-2xl:bg-card">
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm max-2xl:block">
                     <p>{departmentsQuery.error?.message || "Could not load departments."}</p>
                     <button type="button" onClick={() => void departmentsQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
                       Try again
@@ -483,15 +539,20 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                   </td>
                 </tr>
               ) : filteredDepartments.map((d) => (
-                <tr key={d.id} className="border-b border-border last:border-0">
-                  <td className="px-5 py-3 font-medium text-foreground">
+                <tr key={d.id} className="border-b border-border last:border-0 max-2xl:grid max-2xl:min-w-0 max-2xl:grid-cols-2 max-2xl:gap-x-3 max-2xl:gap-y-4 max-2xl:rounded-xl max-2xl:border max-2xl:bg-card max-2xl:p-4 max-2xl:shadow-sm">
+                  <td className="px-5 py-3 font-medium text-foreground max-2xl:col-span-2 max-2xl:p-0 max-2xl:text-base max-2xl:leading-snug">
                     {d.name}
                   </td>
-                  <td className="px-5 py-3 text-muted-foreground">{d.code}</td>
-                  <td className="px-5 py-3 text-muted-foreground">
+                  <td className="px-5 py-3 text-muted-foreground max-2xl:p-0 max-2xl:text-foreground">
+                    <span className="mb-1 block text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground 2xl:hidden">Code</span>
+                    {d.code}
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground max-2xl:p-0 max-2xl:text-foreground">
+                    <span className="mb-1 block text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground 2xl:hidden">Courses</span>
                     {courseCountByDept[d.id] || 0} courses
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3 max-2xl:col-span-2 max-2xl:p-0">
+                    <span className="mr-2 text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground 2xl:hidden">Status</span>
                     <span
                       className={cx(
                         "rounded-full px-2.5 py-1 text-xs font-medium",
@@ -503,11 +564,13 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                       {d.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-5 py-3 text-right max-2xl:col-span-2 max-2xl:flex max-2xl:gap-2 max-2xl:border-t max-2xl:border-border max-2xl:p-0 max-2xl:pt-3">
+                    <button type="button" onClick={() => { setEditError(""); setEditing({ kind: "department", id: d.id, name: d.name, code: d.code }); }} className="mr-2 inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium max-2xl:mr-0 max-2xl:min-h-9 max-2xl:flex-1 max-2xl:justify-center"><Pencil className="size-3.5" /> Edit</button>
                     <button
-                      onClick={() => handleToggleDepartment(d)}
+                      type="button"
+                      onClick={() => d.is_active ? setConfirmDepartment(d) : handleToggleDepartment(d)}
                       disabled={pendingIds.has(`department:${d.id}`)}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 disabled:opacity-50 max-2xl:min-h-9 max-2xl:flex-1 max-2xl:justify-center"
                     >
                       <Power className="size-3.5" />
                       {d.is_active ? "Deactivate" : "Activate"}
@@ -516,10 +579,10 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                 </tr>
               ))}
               {!departmentsQuery.isPending && (departmentsQuery.data || !departmentsQuery.isError) && filteredDepartments.length === 0 && (
-                <tr>
+                <tr className="max-2xl:col-span-full max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:border-border max-2xl:bg-card">
                   <td
                     colSpan={5}
-                    className="px-5 py-10 text-center text-sm text-muted-foreground"
+                    className="px-5 py-10 text-center text-sm text-muted-foreground max-2xl:block"
                   >
                     No departments found.
                   </td>
@@ -529,9 +592,9 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
           </table>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
+        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm max-2xl:overflow-visible max-2xl:border-0 max-2xl:bg-transparent max-2xl:shadow-none">
+          <table className="w-full text-sm max-2xl:block">
+            <thead className="max-2xl:hidden">
               <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wider text-muted-foreground">
                 <th className="px-5 py-3 font-medium">Name</th>
                 <th className="px-5 py-3 font-medium">Code</th>
@@ -540,12 +603,12 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="max-2xl:grid max-2xl:gap-3 lg:max-2xl:grid-cols-2">
               {coursesQuery.isPending ? (
                 <LoadingRows />
               ) : coursesQuery.isError && !coursesQuery.data ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm">
+                <tr className="max-2xl:col-span-full max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:border-border max-2xl:bg-card">
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm max-2xl:block">
                     <p>{coursesQuery.error?.message || "Could not load courses."}</p>
                     <button type="button" onClick={() => void coursesQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
                       Try again
@@ -553,15 +616,20 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                   </td>
                 </tr>
               ) : filteredCourses.map((c) => (
-                <tr key={c.id} className="border-b border-border last:border-0">
-                  <td className="px-5 py-3 font-medium text-foreground">
+                <tr key={c.id} className="border-b border-border last:border-0 max-2xl:grid max-2xl:min-w-0 max-2xl:grid-cols-2 max-2xl:gap-x-3 max-2xl:gap-y-4 max-2xl:rounded-xl max-2xl:border max-2xl:bg-card max-2xl:p-4 max-2xl:shadow-sm">
+                  <td className="px-5 py-3 font-medium text-foreground max-2xl:col-span-2 max-2xl:p-0 max-2xl:text-base max-2xl:leading-snug">
                     {c.course_name}
                   </td>
-                  <td className="px-5 py-3 text-muted-foreground">{c.code || c.short_name}</td>
-                  <td className="px-5 py-3 text-muted-foreground">
+                  <td className="px-5 py-3 text-muted-foreground max-2xl:p-0 max-2xl:text-foreground">
+                    <span className="mb-1 block text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground 2xl:hidden">Code</span>
+                    {c.code || c.short_name}
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground max-2xl:min-w-0 max-2xl:break-words max-2xl:p-0 max-2xl:text-foreground">
+                    <span className="mb-1 block text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground 2xl:hidden">Department</span>
                     {departmentNameById[c.department_id] || "—"}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3 max-2xl:col-span-2 max-2xl:p-0">
+                    <span className="mr-2 text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground 2xl:hidden">Status</span>
                     <span
                       className={cx(
                         "rounded-full px-2.5 py-1 text-xs font-medium",
@@ -573,11 +641,13 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                       {c.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-5 py-3 text-right max-2xl:col-span-2 max-2xl:flex max-2xl:gap-2 max-2xl:border-t max-2xl:border-border max-2xl:p-0 max-2xl:pt-3">
+                    <button type="button" onClick={() => { setEditError(""); setEditing({ kind: "course", id: c.id, name: c.course_name, code: c.short_name || c.code || "", departmentId: String(c.department_id) }); }} className="mr-2 inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium max-2xl:mr-0 max-2xl:min-h-9 max-2xl:flex-1 max-2xl:justify-center"><Pencil className="size-3.5" /> Edit</button>
                     <button
+                      type="button"
                       onClick={() => handleToggleCourse(c)}
                       disabled={pendingIds.has(`course:${c.id}`)}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70 disabled:opacity-50 max-2xl:min-h-9 max-2xl:flex-1 max-2xl:justify-center"
                     >
                       <Power className="size-3.5" />
                       {c.is_active ? "Deactivate" : "Activate"}
@@ -586,10 +656,10 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
                 </tr>
               ))}
               {!coursesQuery.isPending && (coursesQuery.data || !coursesQuery.isError) && filteredCourses.length === 0 && (
-                <tr>
+                <tr className="max-2xl:col-span-full max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:border-border max-2xl:bg-card">
                   <td
                     colSpan={5}
-                    className="px-5 py-10 text-center text-sm text-muted-foreground"
+                    className="px-5 py-10 text-center text-sm text-muted-foreground max-2xl:block"
                   >
                     No courses found.
                   </td>

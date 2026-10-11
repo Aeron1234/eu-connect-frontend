@@ -9,6 +9,7 @@ import {
   searchUsersOptions,
 } from "@/lib/cache/search-users-queries";
 import HistoryLoadingCard from "./HistoryLoadingCard";
+import UserCardSkeleton from "@/components/skeletons/UserCardSkeleton";
 import SearchedUsersHistoryList from "./SearchedUsersHistoryList";
 import UsersSearchBar from "./UsersSearchBar";
 import SearchedUserEmpty from "./SearchedUserEmpty";
@@ -66,9 +67,9 @@ function SearchUsers() {
       <UsersSearchBar inputValue={inputValue} setInputValue={handleInputChange} />
 
       {!isSearching && historyQuery.isPending && (
-        <p role="status" className="py-8 text-center text-sm text-foreground-subtle">
-          Loading recently viewed users...
-        </p>
+        <div className="flex flex-col gap-2" role="status" aria-label="Loading recently viewed users">
+          {Array.from({ length: 4 }, (_, index) => <UserCardSkeleton key={index} />)}
+        </div>
       )}
       {!isSearching && historyQuery.isError && !historyQuery.data && (
         <div role="alert" className="py-8 text-center text-sm text-foreground-subtle">
@@ -91,9 +92,9 @@ function SearchUsers() {
         ))}
 
       {searchLoading && (
-        <p role="status" className="py-8 text-center text-sm text-foreground-subtle">
-          Searching...
-        </p>
+        <div className="flex flex-col gap-2" role="status" aria-label="Searching users">
+          {Array.from({ length: 4 }, (_, index) => <UserCardSkeleton key={index} />)}
+        </div>
       )}
       {!searchLoading && searchError && (
         <div role="alert" className="py-8 text-center text-sm text-red-500">

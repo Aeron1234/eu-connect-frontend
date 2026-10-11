@@ -4,8 +4,10 @@ export const metadata = {
   title: "Announcements",
 };
 
-function AnnouncementPage() {
-  return <AnnouncementBoard />;
+async function AnnouncementPage({ searchParams }) {
+  const params = await searchParams;
+  const targetId = typeof params?.announcement === "string" ? params.announcement : null;
+  return <AnnouncementBoard targetId={targetId} />;
 }
 
 export default AnnouncementPage;

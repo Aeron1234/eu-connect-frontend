@@ -8,6 +8,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useTransition } from "react";
+import { useState } from "react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { internshipRecordsKeys } from "@/lib/cache/internship-records-queries";
@@ -52,6 +54,7 @@ function StatusPill({ status }) {
 
 function RecordsHeader({ record, internshipId }) {
   const [isPending, startTransition] = useTransition();
+  const [confirmation, setConfirmation] = useState(null);
   const queryClient = useQueryClient();
   const { user } = useUser();
 
@@ -61,6 +64,7 @@ function RecordsHeader({ record, internshipId }) {
     formData.append("status", status);
 
     startTransition(async () => {
+      setConfirmation(null);
       const result = await toastAndAction({
         loadingLabel: "Updating record...",
         successLabel: "Record updated.",
@@ -84,6 +88,7 @@ function RecordsHeader({ record, internshipId }) {
 
   return (
     <div className="brand-orbit rounded-xl bg-primary p-6 text-primary-foreground">
+      <ConfirmDialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open) setConfirmation(null); }} title={`${confirmation?.label || "Update"} internship record?`} description={`This will change ${record.student_name}'s internship status.`} confirmLabel={confirmation?.label || "Confirm"} destructive={confirmation?.status === "rejected"} pending={isPending} onConfirm={() => confirmation && handleStatus(confirmation.status)} />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">
@@ -105,7 +110,7 @@ function RecordsHeader({ record, internshipId }) {
             <>
               <button
                 type="button"
-                onClick={() => handleStatus("ongoing")}
+                onClick={() => setConfirmation({ status: "ongoing", label: "Approve" })}
                 disabled={isPending}
                 className="rounded-lg bg-card px-4 py-2 text-sm font-semibold text-primary-emphasis"
               >
@@ -113,7 +118,7 @@ function RecordsHeader({ record, internshipId }) {
               </button>
               <button
                 type="button"
-                onClick={() => handleStatus("rejected")}
+                onClick={() => setConfirmation({ status: "rejected", label: "Reject" })}
                 disabled={isPending}
                 className="rounded-lg border border-primary-foreground/40 px-4 py-2 text-sm font-semibold"
               >
@@ -124,7 +129,7 @@ function RecordsHeader({ record, internshipId }) {
           {record.status === "rejected" && (
             <button
               type="button"
-              onClick={() => handleStatus("restore")}
+              onClick={() => setConfirmation({ status: "restore", label: "Restore" })}
               className="inline-flex items-center gap-1.5 rounded-lg bg-card px-4 py-2 text-sm font-semibold text-primary-emphasis"
             >
               <RotateCcw className="h-4 w-4" /> Restore

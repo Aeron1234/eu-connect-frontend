@@ -14,6 +14,8 @@ import { Briefcase } from "lucide-react";
 import InternshipRecordForm from "./InternshipRecordForm";
 import StudentInternshipRecordList from "./StudentInternshipRecordList";
 import PageTitle from "../ui/PageTitle";
+import InternshipRecordFormSkeleton from "@/components/skeletons/InternshipRecordFormSkeleton";
+import RecordCardSkeleton from "@/components/skeletons/RecordCardSkeleton";
 
 function InternshipRecordsManager() {
   const { user } = useUser();
@@ -106,9 +108,15 @@ function InternshipRecordsManager() {
       </div>
 
       {(recordsQuery.isPending || regionsQuery.isPending) ? (
-        <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-          Loading internship records...
-        </div>
+        tab === "form" ? (
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-8" role="status" aria-label="Loading internship records">
+            <InternshipRecordFormSkeleton />
+          </div>
+        ) : (
+          <div className="space-y-3" role="status" aria-label="Loading internship records">
+            {Array.from({ length: 3 }, (_, index) => <RecordCardSkeleton key={index} />)}
+          </div>
+        )
       ) : (recordsQuery.isError || regionsQuery.isError) ? (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-5 text-sm">
           <p>{recordsQuery.error?.message || regionsQuery.error?.message}</p>

@@ -7,6 +7,7 @@ import { useUser } from "@/contexts/UserContext";
 import { useQuery } from "@tanstack/react-query";
 import { coursesOptions } from "@/lib/cache/reference-queries";
 import TitleButton from "../ui/TitleButton";
+import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
 
 function InternshipPostButtonWrapper() {
   const { user } = useUser();
@@ -28,7 +29,7 @@ function InternshipPostButtonWrapper() {
       title={<span className={`text-primary-emphasis`}>Post Internship</span>}
     >
       {coursesQuery.isPending ? (
-        <p className="text-sm text-muted-foreground">Loading courses...</p>
+        <ModalFormSkeleton />
       ) : coursesQuery.isError ? (
         <div role="alert" className="text-sm">
           <p>{coursesQuery.error.message}</p>

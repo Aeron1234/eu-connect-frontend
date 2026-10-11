@@ -16,6 +16,7 @@ import ExportPdfButton from "../ui/ExportPdfButton";
 import SearchBar from "../ui/SearchBar";
 import TabBar from "../ui/TabBar";
 import AnnualReportSkeleton from "../skeletons/AnnualReportSkeleton";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 const emptyRow = () => ({ issue: "", solution: "", recommendation: "" });
 
@@ -49,6 +50,7 @@ export default function AnnexCManager({
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [editingReportId, setEditingReportId] = useState(null);
+  const [confirmation, setConfirmation] = useState(null);
 
   // Each year, status, and search combination has its own cached pages.
   const [reportsYear, setReportsYear] = useState(initialPage?.academicYear || "");
@@ -184,7 +186,7 @@ export default function AnnexCManager({
     setEditingReportId(report.id);
   }
 
-  async function handleSubmit(status) {
+  async function handleSubmit(status, confirmed = false) {
     setFormError("");
 
     if (!academicYear || !/^\d{4}-\d{4}$/.test(academicYear)) {
@@ -197,6 +199,10 @@ export default function AnnexCManager({
     }
     if (status === "submitted" && !preparedBy.trim()) {
       setFormError("Prepared By is required to submit.");
+      return;
+    }
+    if (status === "submitted" && !confirmed) {
+      setConfirmation({ kind: "submit" });
       return;
     }
 
@@ -230,7 +236,6 @@ export default function AnnexCManager({
   }
 
   async function handleDelete(reportId) {
-    if (!confirm("Delete this report? This cannot be undone.")) return;
     const result = await deleteAnnexCReport(reportId);
     if (result?.error) {
       notifyReadError(result.error);
@@ -437,6 +442,7 @@ export default function AnnexCManager({
 
   return (
     <div>
+      <ConfirmDialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open) setConfirmation(null); }} title={confirmation?.kind === "delete" ? "Delete annual report?" : "Submit annual report?"} description={confirmation?.kind === "delete" ? "This report will be permanently deleted." : "Submitting Annex C will finalize this report."} confirmLabel={confirmation?.kind === "delete" ? "Delete report" : "Submit report"} destructive={confirmation?.kind === "delete"} pending={isSaving} onConfirm={() => { const choice = confirmation; setConfirmation(null); if (choice?.kind === "delete") void handleDelete(choice.id); else if (choice?.kind === "submit") void handleSubmit("submitted", true); }} />
       <div className="mb-6 rounded-xl bg-secondary p-1.5 sm:w-fit">
         <TabBar tabs={innerTabs} selectedTab={tab} onSelect={(nextTab) => {
           if (nextTab !== tab) resetForm();
@@ -523,14 +529,14 @@ export default function AnnexCManager({
             reports.map((r) => (
               <section
                 key={r.id}
-                className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+                className="@container overflow-hidden rounded-xl border border-border bg-card shadow-sm"
               >
-                <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 sm:px-5 py-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-primary-emphasis">
+                <header className="relative border-b border-border px-4 py-4 sm:px-5">
+                  <div className={`grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 ${r.status === "draft" ? "@2xl:pr-72" : "@2xl:pr-48"}`}>
+                    <span className="col-start-1 row-start-1 grid size-9 place-items-center rounded-lg bg-primary-50 text-primary-emphasis">
                       <FileText className="size-4" />
                     </span>
-                    <div className="min-w-0">
+                    <div className="col-span-2 row-start-2 min-w-0 @2xl:col-span-1 @2xl:col-start-2 @2xl:row-start-1">
                       <p className="text-sm font-semibold text-foreground">
                         Annex &quot;C&quot; — SIPP Annual Report
                       </p>
@@ -545,15 +551,16 @@ export default function AnnexCManager({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0 ">
+                  <div className="absolute right-4 top-4 flex items-center gap-2 sm:right-5">
                     {r.status === "draft" && (
                       <button
                         type="button"
                         onClick={() => editingReportId === r.id ? resetForm() : editDraft(r)}
                         className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-primary-emphasis hover:bg-primary-50"
                         aria-expanded={editingReportId === r.id}
+                        aria-label={editingReportId === r.id ? "Close editor" : "Edit draft"}
                       >
-                        <Pencil className="size-3.5" /> {editingReportId === r.id ? "Close editor" : "Edit draft"}
+                        <Pencil className="size-3.5" /> <span className="hidden sm:inline">{editingReportId === r.id ? "Close editor" : "Edit draft"}</span>
                       </button>
                     )}
                     <ExportPdfButton
@@ -561,7 +568,7 @@ export default function AnnexCManager({
                       params={{ reportId: r.id }}
                     />
                     <button
-                      onClick={() => handleDelete(r.id)}
+                      onClick={() => setConfirmation({ kind: "delete", id: r.id })}
                       className="rounded-md p-2 text-foreground-subtle hover:bg-red-50 hover:text-red-600 transition-colors"
                       title="Delete report"
                     >

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useTransition } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import {
   Award,
@@ -34,6 +35,7 @@ import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  openAnnouncementNotification,
 } from "@/lib/server-actions/notifications-actions";
 import {
   NOTIFICATIONS_CHANGED,
@@ -82,12 +84,14 @@ function NotificationBell({ unreadCount, isOpen = false }) {
 
 function NotificationsButton() {
   const { user } = useUser();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [showNotifications, setShowNotifications] = useState(false);
   const [page, setPage] = useState(1);
   const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [markingId, setMarkingId] = useState(null);
+  const [openingId, setOpeningId] = useState(null);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const dropdownRef = useRef(null);
   const [, startDeleteTransition] = useTransition();
@@ -202,6 +206,32 @@ function NotificationsButton() {
     void markAsRead(notif.id).then((result) => {
       if (result?.success) notifyNotificationsChanged();
     });
+  }
+
+  async function handleAnnouncementClick(event, notif) {
+    event.preventDefault();
+    if (openingId !== null) return;
+    setOpeningId(notif.id);
+    try {
+      const result = await openAnnouncementNotification(notif.id);
+      if (result.status === 410) {
+        toast.info(result.error || "This announcement is no longer available.");
+        notifyNotificationsChanged();
+        return;
+      }
+      if (!result.success || !result.announcementId) {
+        toast.error(result.error || "Could not open this announcement.");
+        return;
+      }
+      setShowNotifications(false);
+      router.push(`/announcements?announcement=${encodeURIComponent(result.announcementId)}`);
+      window.setTimeout(notifyNotificationsChanged, 250);
+    } catch (error) {
+      console.error("Could not open announcement notification:", error);
+      toast.error("Could not open this announcement. Please try again.");
+    } finally {
+      setOpeningId(null);
+    }
   }
 
   function updateReadCache(id) {
@@ -440,7 +470,10 @@ function NotificationsButton() {
                       {!notif.is_read && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-primary" />}
                       <Link
                         href={destination}
-                        onClick={() => handleOpenNotification(notif)}
+                        onClick={(event) => notif.type === "announcement"
+                          ? void handleAnnouncementClick(event, notif)
+                          : handleOpenNotification(notif)}
+                        aria-busy={openingId === notif.id}
                         className="group block px-4 py-2.5 pr-18 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
                         aria-label={`Open ${notif.title}`}
                       >

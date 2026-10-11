@@ -92,7 +92,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
         ...previous,
         dtrLocation: {
           internship_id: saved.internship_id,
-          is_custom_location: true,
+          is_custom_location: saved.is_custom_location !== false,
           location: saved,
         },
       }),

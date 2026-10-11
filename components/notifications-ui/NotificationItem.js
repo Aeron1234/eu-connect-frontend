@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
   Award,
@@ -25,6 +26,7 @@ import { toastAndAction } from "../../lib/helpers";
 import {
   markAsRead,
   deleteNotification,
+  openAnnouncementNotification,
 } from "@/lib/server-actions/notifications-actions";
 import { respondToSupervisorRequest } from "@/lib/server-actions/supervisor-actions";
 
@@ -56,6 +58,7 @@ function NotificationItem({ item, onChanged }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isOpeningAnnouncement, setIsOpeningAnnouncement] = useState(false);
 
   // Hide response actions immediately after submitting, before the refresh.
   // The parent remounts this item when the server's actionable state changes.
@@ -69,6 +72,11 @@ function NotificationItem({ item, onChanged }) {
 
   function handleOpen() {
     if (isActionable) return;
+
+    if (item.type === "announcement") {
+      void handleOpenAnnouncement();
+      return;
+    }
 
     if (targetPath) {
       // Skip the optimistic local re-render here — this page is about to
@@ -91,6 +99,30 @@ function NotificationItem({ item, onChanged }) {
       void markAsRead(item.id).then((result) => {
         if (result?.success) onChanged?.();
       });
+    }
+  }
+
+  async function handleOpenAnnouncement() {
+    if (isOpeningAnnouncement) return;
+    setIsOpeningAnnouncement(true);
+    try {
+      const result = await openAnnouncementNotification(item.id);
+      if (result.status === 410) {
+        toast.info(result.error || "This announcement is no longer available.");
+        onChanged?.();
+        return;
+      }
+      if (!result.success || !result.announcementId) {
+        toast.error(result.error || "Could not open this announcement.");
+        return;
+      }
+      router.push(`/announcements?announcement=${encodeURIComponent(result.announcementId)}`);
+      window.setTimeout(() => onChanged?.(), 250);
+    } catch (error) {
+      console.error("Could not open announcement notification:", error);
+      toast.error("Could not open this announcement. Please try again.");
+    } finally {
+      setIsOpeningAnnouncement(false);
     }
   }
 
@@ -140,6 +172,7 @@ function NotificationItem({ item, onChanged }) {
   return (
     <div
       onClick={handleOpen}
+      aria-busy={isOpeningAnnouncement}
       className={cx(
         "relative flex items-start gap-3 rounded-lg border px-4 py-3 transition-colors",
         item.is_read

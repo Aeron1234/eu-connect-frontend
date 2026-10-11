@@ -10,7 +10,7 @@ import { useUser } from "@/contexts/UserContext";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-function AnnouncementCard({ announcement, categories = null, onChanged }) {
+function AnnouncementCard({ announcement, categories = null, onChanged, highlighted = false }) {
   const {
     id: announcementId,
     author_id,
@@ -56,9 +56,9 @@ function AnnouncementCard({ announcement, categories = null, onChanged }) {
 
   return (
     <article
-      className={`rounded-xl border p-4 shadow-sm sm:p-5 ${
-        isPinned ? "border-primary bg-primary" : "border-border bg-card"
-      }`}
+      className={`rounded-xl border p-4 shadow-sm transition-[border-color,box-shadow] duration-[1800ms] ease-out sm:p-5 ${
+        isPinned ? "bg-primary" : "bg-card"
+      } ${highlighted ? "border-primary ring-4 ring-primary/50" : isPinned ? "border-primary" : "border-border"}`}
     >
       <div className="flex items-start gap-2.5 sm:gap-3">
         <div

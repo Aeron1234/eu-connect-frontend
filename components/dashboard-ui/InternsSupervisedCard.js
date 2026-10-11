@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, Mail, Eye, Users, Loader2 } from "lucide-react";
+import { Calendar, Clock, Mail, Eye, Users } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { useUser } from "@/contexts/UserContext";
 import {
@@ -100,10 +101,17 @@ function InternsSupervisedCard({ initialPage }) {
 
       <div className="space-y-3" aria-live="polite" aria-busy={isLoading}>
         {isLoading ? (
-          <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground" role="status">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            Loading interns...
-          </p>
+          Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="flex items-center gap-3 rounded-lg border border-border p-4" role="status" aria-label="Loading interns">
+              <Skeleton className="size-10 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-3.5 w-36" />
+                <Skeleton className="h-3 w-48 max-w-full" />
+                <Skeleton className="h-2.5 w-28" />
+              </div>
+              <Skeleton className="h-3 w-16" />
+            </div>
+          ))
         ) : hasError ? (
           <div className="py-6 text-center text-sm">
             <p className="text-red-600">

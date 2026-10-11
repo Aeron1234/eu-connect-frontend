@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronDown, Building2 } from "lucide-react";
 import SearchedStudentFiles from "./SearchedStudentFiles";
+import { Skeleton } from "@/components/ui/skeleton";
 import { downloadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 import {
   pastInternshipDocumentsKeys,
@@ -103,8 +104,17 @@ function RecordRow({ record, currentUserId }) {
       {expanded && (
         <div className="border-t border-border/60 p-3">
           {filesQuery.isPending ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              Loading files...
+            <div className="space-y-3 p-2" role="status" aria-label="Loading files">
+              {Array.from({ length: 3 }, (_, index) => (
+                <div key={index} className="flex items-center gap-3 rounded-lg border border-border/60 p-3">
+                  <Skeleton className="size-9 shrink-0 rounded-lg" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <Skeleton className="h-3 w-2/3 max-w-56" />
+                    <Skeleton className="h-2.5 w-1/3 max-w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+              ))}
             </div>
           ) : filesQuery.isError && !filesQuery.data ? (
             <div role="alert" className="p-4 text-sm text-foreground">

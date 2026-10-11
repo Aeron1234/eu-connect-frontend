@@ -7,7 +7,7 @@ import { useState } from "react";
 export default function ExportPdfButton({
   endpoint, // e.g. "/api/reports/annex-d" or "/api/reports/annex-c"
   params = {}, // e.g. { companyKey, academicYear } or { reportId }
-  label = "Print / Export",
+  label = "Print",
 }) {
   const [isPending, setIsPending] = useState(false);
 

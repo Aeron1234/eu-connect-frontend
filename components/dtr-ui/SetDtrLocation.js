@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { MapPin, Save, Trash2, Crosshair } from "lucide-react";
 import MapFormContainer from "../map-ui/MapFormContainer";
 import { toastAndAction } from "../../lib/helpers";
-import { setStudentDtrLocation } from "@/lib/server-actions/dtr-actions";
+import { toast } from "sonner";
+import { setStudentDtrLocation, removeStudentDtrLocation } from "@/lib/server-actions/dtr-actions";
 import { socket } from "@/components/ui/SocketProvider";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 const SetDtrLocation = ({ studentId, dataLocation = {}, onSaved }) => {
   const [loc, setLoc] = useState({
@@ -20,6 +22,8 @@ const SetDtrLocation = ({ studentId, dataLocation = {}, onSaved }) => {
     dataLocation.location.radius_meters || 150,
   );
   const [isPending, startTransition] = useTransition();
+  const [confirmation, setConfirmation] = useState(null);
+  const [isCustom, setIsCustom] = useState(Boolean(dataLocation.is_custom_location));
   const [liveLocation, setLiveLocation] = useState(null);
   const [liveStatus, setLiveStatus] = useState("Waiting for the student to share a location.");
 
@@ -126,6 +130,7 @@ const SetDtrLocation = ({ studentId, dataLocation = {}, onSaved }) => {
           updatedAt: saved.updated_at ?? new Date().toISOString(),
         });
         setRadius(saved.radius_meters ?? 150);
+        setIsCustom(true);
         onSaved?.(saved);
       }
     });
@@ -143,10 +148,35 @@ const SetDtrLocation = ({ studentId, dataLocation = {}, onSaved }) => {
     setRadius(0);
   }
 
+  function handleRemove() {
+    if (!isCustom) {
+      handleClear();
+      return;
+    }
+    startTransition(async () => {
+      const result = await removeStudentDtrLocation(studentId, loc.internshipId);
+      if (!result?.success) {
+        toast.error(result?.error || "Could not remove DTR location.");
+        return;
+      }
+      const fallback = result.dtrLocation;
+      setLoc({
+        lat: fallback?.lat ?? "", lon: fallback?.lon ?? "",
+        label: fallback?.label ?? "", address: fallback?.address ?? "",
+        internshipId: loc.internshipId, updatedAt: null,
+      });
+      setRadius(fallback?.radius_meters ?? 150);
+      setIsCustom(false);
+      onSaved?.({ ...fallback, is_custom_location: false });
+      toast.success("Custom DTR location removed. The company location is now the default.");
+    });
+  }
+
   const defaultCoords = useMemo(() => [loc.lat, loc.lon], [loc.lat, loc.lon]);
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mt-4 space-y-4">
+      <ConfirmDialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open) setConfirmation(null); }} title={confirmation === "remove" ? "Remove DTR location?" : "Save DTR location?"} description={confirmation === "remove" ? isCustom ? "The custom location will be removed. Attendance will use the company's default location again." : "The unsaved pin will be cleared from this form." : "The student's clock-in and clock-out location will use this pin and radius."} confirmLabel={confirmation === "remove" ? "Remove location" : "Save location"} destructive={confirmation === "remove"} pending={isPending} onConfirm={() => { const action = confirmation; setConfirmation(null); if (action === "remove") handleRemove(); else if (action === "save") handleSetLocation(); }} />
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-lg bg-primary/10 text-primary-emphasis">
           <MapPin className="w-5 h-5" />
@@ -265,14 +295,14 @@ const SetDtrLocation = ({ studentId, dataLocation = {}, onSaved }) => {
         <div className="flex items-center gap-2">
           {loc && (
             <button
-              onClick={handleClear}
+              onClick={() => setConfirmation("remove")}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
             >
               <Trash2 className="w-4 h-4" /> Remove
             </button>
           )}
           <button
-            onClick={handleSetLocation}
+            onClick={() => setConfirmation("save")}
             disabled={isPending}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

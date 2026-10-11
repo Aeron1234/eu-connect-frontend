@@ -14,6 +14,8 @@ import {
 import { FolderOpen, Upload } from "lucide-react";
 import PageTitle from "@/components/ui/PageTitle";
 import TitleButton from "@/components/ui/TitleButton";
+import RecordsDocumentsSkeleton from "@/components/skeletons/RecordsDocumentsSkeleton";
+import PastInternshipDocumentsSkeleton from "@/components/skeletons/PastInternshipDocumentsSkeleton";
 
 function StoragePage() {
   const { user } = useUser();
@@ -54,9 +56,6 @@ function StoragePage() {
         </Modal>}
       </div>
 
-      {(activeQuery.isPending || typesQuery.isPending || pastQuery.isPending) && (
-        <p className="text-sm text-muted-foreground">Loading documents...</p>
-      )}
       {(activeQuery.isError || typesQuery.isError || pastQuery.isError) && (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
           <p>{activeQuery.error?.message || typesQuery.error?.message || pastQuery.error?.message}</p>
@@ -66,6 +65,13 @@ function StoragePage() {
             if (pastQuery.isError) void pastQuery.refetch();
           }}>Try again</button>
         </div>
+      )}
+
+      {(activeQuery.isPending || typesQuery.isPending) && (
+        <div role="status" aria-label="Loading current internship documents"><RecordsDocumentsSkeleton /></div>
+      )}
+      {pastQuery.isPending && (
+        <div role="status" aria-label="Loading past internship documents"><PastInternshipDocumentsSkeleton /></div>
       )}
 
       {!activeQuery.isPending && !activeQuery.isError && !typesQuery.isPending && !typesQuery.isError && <CurrentInternshipDocs

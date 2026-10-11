@@ -11,6 +11,7 @@ import { postAlumniRecord } from "@/lib/server-actions/past-internships-actions"
 import { pastInternshipsKeys } from "@/lib/cache/past-internships-queries";
 import { toastAndAction } from "../../lib/helpers";
 import TitleButton from "../ui/TitleButton";
+import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
 
 function PastInternshipPostButton() {
   const [isPending, startTransition] = useTransition();
@@ -59,7 +60,7 @@ function PastInternshipPostButton() {
       }
     >
       {coursesQuery.isPending ? (
-        <p className="text-sm text-muted-foreground">Loading courses...</p>
+        <ModalFormSkeleton />
       ) : coursesQuery.isError ? (
         <div role="alert" className="text-sm">
           <p>{coursesQuery.error.message}</p>

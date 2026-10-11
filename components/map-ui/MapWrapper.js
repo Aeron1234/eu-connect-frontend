@@ -10,13 +10,12 @@ import PageTitle from "../ui/PageTitle";
 import SearchBar from "../ui/SearchBar";
 import MapDropdownFilter from "./MapDropdownFilter";
 import ProgressBar from "../ui/ProgressBar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Map = dynamic(() => import("./Map"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-[540px] place-items-center rounded-xl bg-secondary text-sm text-muted-foreground">
-      Loading map…
-    </div>
+    <Skeleton className="h-[540px] w-full rounded-xl" role="status" aria-label="Loading map" />
   ),
 });
 
@@ -142,8 +141,15 @@ export default function MapWrapper() {
         </div>
       )}
       {locationsQuery.isPending ? (
-        <div className="grid h-[540px] place-items-center rounded-xl border border-border bg-card text-sm text-muted-foreground">
-          Loading locations...
+        <div className="space-y-6" role="status" aria-label="Loading locations">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Skeleton className="h-11 w-full rounded-lg sm:max-w-md" />
+            <Skeleton className="h-11 w-full rounded-lg sm:w-44" />
+          </div>
+          <div className="grid gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="rounded-xl border border-border bg-card p-2"><Skeleton className="h-[540px] w-full rounded-xl" /></div>
+            <Skeleton className="h-[540px] w-full rounded-xl" />
+          </div>
         </div>
       ) : !locationsQuery.isError && <div className="space-y-6">
         {/* Search + location filter */}

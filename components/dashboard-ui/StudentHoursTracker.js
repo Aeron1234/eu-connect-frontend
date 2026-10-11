@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { Clock, AlertTriangle } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import {
   dashboardListsKeys,
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ProgressBar from "../ui/ProgressBar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function StudentHoursTracker({ initialPage, courses = [] }) {
   const { user } = useUser();
@@ -107,7 +108,16 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
           type="search"
           value={searchInput}
           onChange={(event) => {
-            setSearchInput(event.target.value);
+            const value = event.target.value;
+            const search = value.trim();
+            setSearchInput(value);
+            if (user?.id && queryClient.getQueryData(dashboardListsKeys.studentHours(user.id, {
+              page: 1,
+              courseId: courseFilter,
+              search,
+            })) !== undefined) {
+              setQuery({ page: 1, courseId: courseFilter, search });
+            }
             listRef.current?.scrollTo({ top: 0 });
           }}
           placeholder="Search student name"
@@ -116,15 +126,6 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
           maxLength={100}
           className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />
-        {isPending && (
-          <p
-            className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"
-            role="status"
-          >
-            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-            {loadingMessage}
-          </p>
-        )}
       </div>
 
       <div
@@ -134,9 +135,20 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
         aria-busy={isPending}
       >
         {isPending ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            {loadingMessage}
-          </p>
+          Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="rounded-lg border border-border p-3 sm:p-4" role="status" aria-label={loadingMessage}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-2">
+                  <Skeleton className="h-3.5 w-36" />
+                  <Skeleton className="h-2.5 w-24" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-2 w-28 rounded-full sm:w-36" />
+                  <Skeleton className="h-2.5 w-8" />
+                </div>
+              </div>
+            </div>
+          ))
         ) : pageQuery.isError ? (
           <div className="py-6 text-center text-sm">
             <p className="text-red-600">

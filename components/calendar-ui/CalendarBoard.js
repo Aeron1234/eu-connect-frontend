@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { CalendarDays, ChevronLeft, ChevronRight, Check, ClipboardList, Megaphone, Plus, Trash2, Pencil, BriefcaseBusiness } from "lucide-react";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
+import { Skeleton } from "@/components/ui/skeleton";
 import Modal from "@/components/ui/Modal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ModalForm from "@/components/ui/ModalForm";
@@ -64,7 +65,7 @@ function shiftMonth(month, delta) {
 function entriesFor(data, day) {
   const result = [];
   for (const item of data.announcements ?? []) {
-    if (item.event_date === day) result.push({ kind: "announcement", key: `a-${item.id}`, title: item.title, detail: item.content, href: "/announcements", subtitle: item.category });
+    if (item.event_date === day) result.push({ kind: "announcement", key: `a-${item.id}`, title: item.title, detail: item.content, href: `/announcements?announcement=${encodeURIComponent(item.id)}`, subtitle: item.category });
   }
   for (const item of data.schedules ?? []) {
     if (item.starts_on <= day && item.ends_on >= day) result.push({ kind: "schedule", key: `s-${item.id}`, title: item.title, detail: item.description, subtitle: item.department_id == null ? "School-wide" : "Department", source: item });
@@ -287,7 +288,7 @@ function CalendarBoard({ initialDate, initialData }) {
               <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary-emphasis">Day agenda</p><h2 className="text-lg font-bold text-foreground">{format(parseDay(selected), "EEEE, MMMM d, yyyy")}</h2></div>
               {canAddTodo && <button type="button" onClick={() => setEditor({ kind: "todo", item: null })} className="inline-flex items-center gap-1 text-sm font-semibold text-primary-emphasis hover:underline"><Plus className="size-4" /> Add to-do</button>}
             </div>
-            {monthQuery.isPending ? <p className="rounded-xl bg-muted/45 p-4 text-sm text-foreground-soft">Loading this day...</p> : entries.length === 0 ? <p className="rounded-xl bg-muted/45 p-4 text-sm text-foreground-soft">Nothing scheduled for this day.</p> : <div className="space-y-2">{entries.map((entry) => {
+            {monthQuery.isPending ? <div className="space-y-2" role="status" aria-label="Loading this day"><Skeleton className="h-16 w-full rounded-xl" /><Skeleton className="h-16 w-full rounded-xl" /></div> : entries.length === 0 ? <p className="rounded-xl bg-muted/45 p-4 text-sm text-foreground-soft">Nothing scheduled for this day.</p> : <div className="space-y-2">{entries.map((entry) => {
               const meta = kinds.find((kind) => kind.id === entry.kind);
               const Icon = meta.icon;
               const editable = entry.kind === "schedule" && (role === "admin" || String(entry.source.created_by) === String(user.id));

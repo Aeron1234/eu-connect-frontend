@@ -23,6 +23,7 @@ import InfoCardsGrid from "./InfoCardsGrid";
 import AccountProfileBanner from "./AccountProfileBanner";
 import SecurityCard from "./SecurityCard";
 import AccountSummaryCard from "./AccountSummaryCard";
+import AccountLoading from "./AccountLoading";
 import { useUser } from "@/contexts/UserContext";
 
 function AccountProfileContent({ roleLabel, userData = {} }) {
@@ -186,7 +187,7 @@ export default function AccountProfile({ roleLabel }) {
   });
 
   if (profileQuery.isPending) {
-    return <main className="flex-1 p-4 text-sm text-muted-foreground sm:p-6 lg:p-8">Loading profile...</main>;
+    return <AccountLoading />;
   }
   if (profileQuery.isError) {
     return (

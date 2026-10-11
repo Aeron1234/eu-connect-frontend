@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Clock3, UserCheck } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import useSupervisorRequestStatus from "../../lib/hooks/useSupervisorRequestStatus";
 
 /**
@@ -33,15 +33,7 @@ function SupervisorRequestControl({ employerId, rounded }) {
   }
 
   if (isLoadingStatus) {
-    return (
-      <button
-        disabled
-        className={`inline-flex items-center gap-2 bg-primary text-white border border-primary px-4 py-2.5 ${rounded} text-sm font-semibold shrink-0 cursor-not-allowed`}
-      >
-        <Spinner className="w-3.5 h-3.5 stroke-3 stroke-white" />
-        Loading...
-      </button>
-    );
+    return <Skeleton className={`h-10 w-40 shrink-0 ${rounded}`} role="status" aria-label="Loading supervisor status" />;
   }
 
   if (!supervisorStatus || supervisorStatus.error) return null;

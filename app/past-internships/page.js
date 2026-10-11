@@ -3,6 +3,8 @@ import PastInternshipsPageContent from "../../components/past-internship-ui/Past
 import PastInternshipPostButton from "../../components/past-internship-ui/PastInternshipPostButton";
 import PageTitle from "../../components/ui/PageTitle";
 import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import AlumniCompaniesSkeleton from "@/components/skeletons/AlumniCompaniesSkeleton";
 
 async function PastInternshipsPage({ searchParams }) {
   const sParams = await searchParams;
@@ -22,7 +24,15 @@ async function PastInternshipsPage({ searchParams }) {
         <PastInternshipPostButton />
       </div>
 
-      <Suspense fallback={<div>...</div>}>
+      <Suspense fallback={
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Skeleton className="h-10 w-full rounded-md sm:w-64" />
+            <Skeleton className="h-10 w-full rounded-md sm:w-40" />
+          </div>
+          {Array.from({ length: 5 }, (_, index) => <AlumniCompaniesSkeleton key={index} />)}
+        </div>
+      }>
         <PastInternshipsPageContent
           yearFilter={yearFilter}
         />

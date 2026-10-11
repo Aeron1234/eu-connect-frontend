@@ -1,11 +1,7 @@
-import { Spinner } from "@/components/ui/spinner";
+import RoleContentSkeleton from "@/components/skeletons/RoleContentSkeleton";
 
 function Loading() {
-  return (
-    <div className="w-full flex justify-center">
-      <Spinner className={"size-8 stroke-3 stroke-stone-400"} />
-    </div>
-  );
+  return <RoleContentSkeleton />;
 }
 
 export default Loading;

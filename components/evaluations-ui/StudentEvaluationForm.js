@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { postStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
 import { toastAndAction } from "../../lib/helpers";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onSubmitted }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {
@@ -17,11 +18,17 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onS
   });
   const [remarks, setRemarks] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [confirming, setConfirming] = useState(false);
 
   const grades = [0, 1, 2, 3, 4, 5];
 
   async function handleEvaluation(e) {
     e.preventDefault();
+    setConfirming(true);
+  }
+
+  function submitEvaluation() {
+    setConfirming(false);
 
     const formData = {
       student_id: searchedUserId,
@@ -62,6 +69,7 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onS
   }
 
   return (
+    <>
     <form className="flex-1 flex flex-col gap-6" onSubmit={handleEvaluation}>
       {/* 1. Loop through each Category */}
       {studentEvaluationCriterias.map((group) => (
@@ -104,6 +112,8 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onS
         Submit Evaluation
       </button>
     </form>
+    <ConfirmDialog open={confirming} onOpenChange={setConfirming} title="Submit supervisor evaluation?" description="Review your scores and remarks before submitting this evaluation." confirmLabel="Submit evaluation" pending={isPending} onConfirm={submitEvaluation} />
+    </>
   );
 }
 

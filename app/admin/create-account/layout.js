@@ -1,15 +1,9 @@
-import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
+import CreateAccountLoading from "./loading";
 
 function CreateAccountLayout({ children }) {
   return (
-    <Suspense
-      fallback={
-        <div className="self-center justify-self-center p-5">
-          <Spinner className={"size-8 stroke-4 stroke-primary-emphasis"} />
-        </div>
-      }
-    >
+    <Suspense fallback={<CreateAccountLoading />}>
       {children}
     </Suspense>
   );

@@ -8,6 +8,7 @@ import { createAnnouncement } from "@/lib/server-actions/announcements-actions";
 import { toastAndAction } from "../../lib/helpers";
 import { useUser } from "@/contexts/UserContext";
 import TitleButton from "../ui/TitleButton";
+import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
 
 function PostAnnouncementButton({ categories, onPosted, categoriesLoading = false, categoriesError, onRetryCategories }) {
   const [isPending, startTransition] = useTransition();
@@ -46,7 +47,7 @@ function PostAnnouncementButton({ categories, onPosted, categoriesLoading = fals
       }
     >
       {categoriesLoading ? (
-        <p className="text-sm text-muted-foreground">Loading categories...</p>
+        <ModalFormSkeleton />
       ) : categoriesError ? (
         <div role="alert" className="text-sm">
           <p>{categoriesError}</p>
