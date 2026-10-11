@@ -385,3 +385,28 @@
 .dark .leaflet-container .leaflet-control-attribution a {
   color: var(--primary-emphasis);
 }
+
+.dark .leaflet-container .leaflet-control-geosearch form,
+.dark .leaflet-container .leaflet-control-geosearch form input,
+.dark .leaflet-container .leaflet-control-geosearch .results,
+.dark .leaflet-container .leaflet-control-geosearch button.reset {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.dark .leaflet-container .leaflet-control-geosearch form input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+
+.dark .leaflet-container .leaflet-control-geosearch .results.active {
+  border-top-color: var(--border);
+}
+
+.dark .leaflet-container .leaflet-control-geosearch .results > .active,
+.dark .leaflet-container .leaflet-control-geosearch .results > :hover,
+.dark .leaflet-container .leaflet-control-geosearch button.reset:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--border);
+}

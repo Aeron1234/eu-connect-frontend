@@ -52,15 +52,39 @@ function formatTimestamp(dateStr) {
 // metadata is stored as a longtext column — may or may not be valid JSON,
 // may or may not contain an ip. Never assume; parse defensively and only
 // render what's actually there.
-function getMetadataIp(metadata) {
+function parseMetadata(metadata) {
   if (!metadata) return null;
   try {
-    const parsed =
-      typeof metadata === "string" ? JSON.parse(metadata) : metadata;
-    return parsed?.ip_address || parsed?.ip || null;
+    const parsed = typeof metadata === "string" ? JSON.parse(metadata) : metadata;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
   } catch {
     return null;
   }
+}
+
+const POSTING_DETAIL_FIELDS = [
+  ["company_name", "Company"],
+  ["position", "Position title"],
+  ["vacancies", "Vacancies"],
+  ["location", "Location"],
+  ["work_type", "Work type"],
+  ["duration_hours", "Duration (hours)"],
+  ["description", "Description"],
+  ["requirements", "Requirements"],
+  ["contact_name", "Contact person"],
+  ["contact_email", "Contact email"],
+  ["contact_phone", "Contact phone"],
+  ["contact_website", "Contact website"],
+  ["eligible_courses", "Eligible courses"],
+];
+
+function postingDetails(metadata) {
+  if (!metadata) return [];
+  const fields = POSTING_DETAIL_FIELDS.filter(([key]) => metadata[key] != null && metadata[key] !== "");
+  if (!metadata.eligible_courses && Array.isArray(metadata.course_ids)) {
+    fields.push(["course_ids", "Eligible course IDs"]);
+  }
+  return fields.map(([key, label]) => [label, Array.isArray(metadata[key]) ? metadata[key].join(", ") : String(metadata[key])]);
 }
 
 const defaultFilters = { actorRole: "", targetType: "", search: "" };
@@ -335,7 +359,10 @@ export default function ActivityLogsManager({ initialPage }) {
               </thead>
               <tbody>
                 {logs.map((log) => {
-                  const ip = getMetadataIp(log.metadata);
+                  const metadata = parseMetadata(log.metadata);
+                  const ip = metadata?.ip_address || metadata?.ip;
+                  const createdPosting = log.action === "internship_posting_created" && metadata?.position;
+                  const details = createdPosting ? postingDetails(metadata) : [];
                   return (
                     <tr
                       key={log.id}
@@ -353,12 +380,32 @@ export default function ActivityLogsManager({ initialPage }) {
                       </td>
                       <td className="px-4 sm:px-5 py-3 max-w-[280px]">
                         <p className="font-medium text-foreground">
-                          {toSentenceCase(log.action)}
+                          {createdPosting ? `Created internship post: ${metadata.position}` : toSentenceCase(log.action)}
                         </p>
-                        {log.description && (
+                        {log.description && !createdPosting && (
                           <p className="text-xs text-muted-foreground line-clamp-2">
                             {log.description}
                           </p>
+                        )}
+                        {createdPosting && (
+                          <>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {[metadata.company_name, metadata.location].filter(Boolean).join(" · ") || log.description}
+                            </p>
+                            {details.length > 0 && (
+                              <details className="mt-1.5 text-xs">
+                                <summary className="w-fit cursor-pointer font-semibold text-primary-emphasis">View submitted details</summary>
+                                <dl className="mt-2 space-y-1.5 rounded-lg border border-border bg-muted/40 p-2.5">
+                                  {details.map(([label, value]) => (
+                                    <div key={label} className="break-words">
+                                      <dt className="font-semibold text-foreground-soft">{label}</dt>
+                                      <dd className="whitespace-pre-wrap text-foreground">{value}</dd>
+                                    </div>
+                                  ))}
+                                </dl>
+                              </details>
+                            )}
+                          </>
                         )}
                       </td>
                       <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
