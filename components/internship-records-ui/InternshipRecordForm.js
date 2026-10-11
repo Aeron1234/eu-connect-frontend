@@ -76,6 +76,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
           lat: "",
           lon: "",
         });
+        setSelectedRegion("");
       }
     });
   }
@@ -123,14 +124,9 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
                 Region *
               </label>
 
-              <input
-                type="hidden"
-                name="region_id"
-                value={selectedRegion || ""}
-                disabled={isPending || status}
-              />
               <Select
                 name="region_id"
+                value={selectedRegion}
                 onValueChange={setSelectedRegion}
                 disabled={isPending || status}
               >
@@ -225,14 +221,9 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
                 Semester *
               </label>
 
-              <input
-                type="hidden"
-                name="semester"
-                value={internshipForm.semester || ""}
-                disabled={isPending || status}
-              />
               <Select
                 name="semester"
+                value={internshipForm.semester}
                 onValueChange={(value) =>
                   setInternshipForm((prev) => ({ ...prev, semester: value }))
                 }
