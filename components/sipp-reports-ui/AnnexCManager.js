@@ -260,9 +260,8 @@ export default function AnnexCManager({
                 <input
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
-                  disabled={!!editingReportId}
                   placeholder="e.g. 2026-2027"
-                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-60"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                 />
               </div>
               <div>
@@ -272,9 +271,8 @@ export default function AnnexCManager({
                 <input
                   value={degreeProgram}
                   onChange={(e) => setDegreeProgram(e.target.value)}
-                  disabled={!!editingReportId}
                   placeholder="e.g. BS Computer Science"
-                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent disabled:opacity-60"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                 />
               </div>
             </div>
