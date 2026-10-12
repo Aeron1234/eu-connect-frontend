@@ -9,6 +9,8 @@ import EmployerEvaluations from "./EmployerEvaluations";
 import EvaluationCard from "./EvaluationCard";
 import TabBar from "../ui/TabBar";
 import EvaluationsTabContentSkeleton from "../skeletons/EvaluationsTabContentSkeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
+import ManualDialog from "@/components/ui/ManualDialog";
 
 const tabs = [
   { value: "evaluate-supervisor", text: "Evaluate Supervisor" },
@@ -76,10 +78,7 @@ function EvaluationsManager({ initialCriteria }) {
 
       <div className="mt-2 flex flex-col gap-2">
         {loadError && !isPending ? (
-          <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
-            <p>{loadError}</p>
-            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void tabQuery.refetch()}>Try again</button>
-          </div>
+          <ErrorUI error={tabQuery.error || new Error(loadError)} reset={() => void tabQuery.refetch()} logError={false} />
         ) : isPending ? (
           <EvaluationsTabContentSkeleton tab={selectedTab} />
         ) : (
@@ -117,6 +116,23 @@ function EvaluationsManager({ initialCriteria }) {
         )}
       </div>
     </>
+  );
+}
+
+export function StudentEvaluationsHelp() {
+  return (
+    <ManualDialog title="How to use evaluations">
+      <div className="space-y-4 text-sm leading-relaxed text-foreground">
+        <p>Use the tabs to evaluate your supervisor and respond to evaluations about your work.</p>
+        <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
+          <li>In <strong>Evaluate Supervisor</strong>, review the 0–5 grade scale, choose a score for each criterion, add optional remarks, and select <strong>Submit Evaluation</strong>.</li>
+          <li>In <strong>Pending Confirmation</strong>, open an evaluation from your supervisor to review its scores and comments. Select <strong>Accept &amp; Confirm</strong> if you agree, or <strong>Dispute</strong> if you need it reviewed.</li>
+          <li>In <strong>Disputed</strong>, review a disputed evaluation. Use <strong>Restore</strong> if you want to return it to Pending Confirmation.</li>
+          <li>In <strong>Past Evaluations</strong>, review earlier results. A confirmed performance evaluation may have a <strong>Print</strong> button.</li>
+        </ol>
+        <p className="text-foreground-soft">If you submitted an evaluation that is still pending, its trash icon lets you delete it.</p>
+      </div>
+    </ManualDialog>
   );
 }
 

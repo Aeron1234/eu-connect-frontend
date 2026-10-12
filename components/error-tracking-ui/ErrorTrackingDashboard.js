@@ -8,6 +8,7 @@ import { errorGroupsOptions, errorGroupOptions, errorTrackingKeys } from "@/lib/
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 
 function when(value) {
   if (!value) return "—";
@@ -84,7 +85,7 @@ export default function ErrorTrackingDashboard() {
 
   return <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <PageTitle Icon={AlertTriangle} title="Error Tracking" description="Investigate unexpected server failures and background job errors." />
+      <PageTitle Icon={AlertTriangle} title="Error Tracking" description="Investigate unexpected server failures and background job errors." titleAction={<PageManual page="admin-error-tracking" />} />
       <button type="button" onClick={refresh} disabled={query.isFetching} className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50">
         <RefreshCw className={`size-4 ${query.isFetching ? "animate-spin" : ""}`} /> Refresh
       </button>

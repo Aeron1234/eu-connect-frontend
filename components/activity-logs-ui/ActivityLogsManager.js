@@ -10,6 +10,7 @@ import { activityLogsInfiniteOptions, activityLogsKeys } from "@/lib/cache/activ
 import { deleteActivityLog } from "@/lib/server-actions/activity-logs-actions";
 import SearchBar from "../ui/SearchBar";
 import PageTitle from "../ui/PageTitle";
+import PageManual from "../ui/PageManual";
 import DropdownFilter from "../ui/DropdownFilter";
 import Modal from "../ui/Modal";
 import DeleteForm from "../ui/DeleteForm";
@@ -252,6 +253,7 @@ export default function ActivityLogsManager({ initialPage }) {
         description={
           "Audit every action taken across EU-Connect — logins, approvals, uploads, and administrative changes."
         }
+        titleAction={<PageManual page="admin-activity-logs" />}
       />
 
       <section aria-label="Activity summary" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">

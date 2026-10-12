@@ -12,6 +12,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { getCacheMetrics } from "@/lib/server-actions/cache-metrics-actions";
 import { CACHE_EVENTS, deriveCacheView } from "@/lib/cache-metrics.mjs";
@@ -161,6 +162,7 @@ export default function CacheMonitoringDashboard({ initialSnapshot }) {
           Icon={Gauge}
           title="Cache Monitoring"
           description="See how the backend cache is behaving during real traffic."
+          titleAction={<PageManual page="admin-cache-monitoring" />}
         />
         <div className="flex flex-col gap-2 sm:flex-row">
           <button

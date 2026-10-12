@@ -1,5 +1,6 @@
 import AccountsManager from "@/components/account-ui/AccountsManager";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import { UserPlus } from "lucide-react";
 
 export const metadata = {
@@ -15,6 +16,7 @@ function CreateAccountPage() {
         description={
           "Create and manage student, employer, and department head accounts."
         }
+        titleAction={<PageManual page="admin-accounts" />}
       />
 
       <AccountsManager />

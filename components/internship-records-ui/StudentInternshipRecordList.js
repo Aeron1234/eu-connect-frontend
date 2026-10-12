@@ -14,6 +14,7 @@ import {
   LoaderCircle,
   MapPin,
   Trash2,
+  UserRoundCheck,
   XCircle,
 } from "lucide-react";
 
@@ -93,6 +94,7 @@ function Record({ record, onDeleted }) {
     date_started,
     date_ended,
     total_hours,
+    supervisor_name,
   } = record;
 
   function handleDelete(formData) {
@@ -176,6 +178,16 @@ function Record({ record, onDeleted }) {
           </span>
         )}
       </div>
+
+      {supervisor_name && (
+        <div className="mt-4 flex min-w-0 items-start gap-2.5 rounded-lg border border-border bg-secondary/50 px-3 py-2.5 text-xs sm:items-center sm:text-sm">
+          <UserRoundCheck className="mt-0.5 size-4 flex-shrink-0 text-primary-emphasis sm:mt-0" aria-hidden="true" />
+          <div className="min-w-0 sm:flex sm:items-baseline sm:gap-2">
+            <span className="block flex-shrink-0 text-foreground-soft sm:inline">Supervisor</span>
+            <span className="block break-words font-medium text-foreground sm:inline">{supervisor_name}</span>
+          </div>
+        </div>
+      )}
 
       <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground line-clamp-2">
         {description}

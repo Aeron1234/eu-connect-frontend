@@ -89,7 +89,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
       />
 
       {status && (
-        <p className="flex items-start sm:items-center gap-2 rounded-md border border-border bg-secondary/70 px-3 sm:px-4 py-3 text-xs sm:text-sm text-muted-foreground my-5 line-clamp-1">
+        <p className="my-5 flex items-start gap-2 rounded-lg border border-border bg-secondary/70 px-3 py-3 text-xs leading-relaxed text-muted-foreground sm:items-center sm:px-4 sm:text-sm">
           <span className="text-primary-emphasis flex-shrink-0">
             <CircleAlert className="h-5 w-5" />
           </span>
@@ -100,10 +100,15 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
 
       {showForm && (
         <form
-          className={`flex flex-col gap-5 sm:gap-6 ${status ? "opacity-50 pointer-events-none" : ""} z-10`}
+          className={`relative mt-5 flex min-w-0 flex-col gap-4 sm:gap-5 ${status ? "opacity-50 pointer-events-none" : ""}`}
           action={handleAction}
         >
-          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
+          <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-foreground sm:text-base">Placement details</h3>
+              <p className="mt-1 text-xs text-foreground-soft">Tell us where you will work and what your role will be.</p>
+            </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             <Input
               name={"company_name"}
               label={"Name of company *"}
@@ -119,7 +124,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
               disabled={isPending || status}
             />
 
-            <div>
+            <div className="flex min-w-0 flex-col">
               <label htmlFor="region_id" className={labelClass}>
                 Region *
               </label>
@@ -151,7 +156,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             <Input
               name={"internship_position"}
               label={"Position *"}
@@ -184,7 +189,14 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
+          </section>
+
+          <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-foreground sm:text-base">Schedule and hours</h3>
+              <p className="mt-1 text-xs text-foreground-soft">Add your expected internship dates and required hours.</p>
+            </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             <Input
               name={"date_started"}
               label={"Start date *"}
@@ -215,8 +227,8 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
           </div>
 
           {/* Total Hours and Semester */}
-          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 sm:gap-6">
-            <div>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+            <div className="flex min-w-0 flex-col">
               <label htmlFor="semester" className={labelClass}>
                 Semester *
               </label>
@@ -268,6 +280,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
             />
           </div>
 
+          </section>
+
+          <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
+            <h3 className="mb-4 text-sm font-semibold text-foreground sm:text-base">Activities</h3>
           <div className="flex flex-col">
             <label htmlFor="description" className={labelClass}>
               Description *
@@ -290,7 +306,11 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          </section>
+
+          <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
+            <h3 className="mb-4 text-sm font-semibold text-foreground sm:text-base">Company location</h3>
+          <div className="flex min-w-0 flex-col gap-3">
             <p className="flex flex-col gap-1">
               <span className={`flex items-center gap-1.5 ${labelClass}`}>
                 <MapPin className="h-4 w-4 flex-shrink-0" /> Company Location *
@@ -305,7 +325,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
               data={internshipForm}
               setData={setInternshipForm}
               formType={"internshipRecord"}
-              mapStyle={{ height: "320px", width: "100%" }}
+              mapStyle={{ height: "min(320px, 55vh)", width: "100%" }}
             />
 
             <div className="flex flex-col">
@@ -328,9 +348,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
               />
             </div>
           </div>
+          </section>
 
           <button
-            className="mt-2 inline-flex items-center justify-center gap-2 w-full sm:w-auto sm:self-end rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 sm:w-auto sm:self-end"
             disabled={isPending || status}
           >
             {isPending ? (

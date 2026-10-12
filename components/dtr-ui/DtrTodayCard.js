@@ -4,6 +4,7 @@ import BreakButton from "./BreakButton";
 import { formatDtrDate, formatDtrTime } from "@/lib/dtr-time.mjs";
 import Link from "next/link";
 import Modal from "../ui/Modal";
+import ManualDialog from "../ui/ManualDialog";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 
 function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
@@ -16,9 +17,23 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
   const today = formatDtrDate(new Date());
 
   return (
-    <section className="brand-orbit rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm">
+    <section className="brand-orbit relative rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm">
+      {hasOngoingInternship && (
+        <ManualDialog title="How to use your daily time record" triggerStyles="absolute right-5 top-5 z-10 inline-flex size-8 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-6 sm:top-6">
+          <div className="space-y-4 text-sm leading-relaxed text-foreground">
+            <p>Use this card to record your attendance for your ongoing internship.</p>
+            <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
+              <li><strong>Start your shift:</strong> At your approved DTR location, select <strong>Clock in</strong>, then confirm with <strong>Save</strong>. Allow your browser to access your current location.</li>
+              <li><strong>Take a break:</strong> While clocked in, select <strong>Start break</strong> and confirm. Select <strong>Resume duty</strong> when you return so your duty-hour timer continues.</li>
+              <li><strong>End your shift:</strong> After resuming from any break, select <strong>Clock out</strong> and confirm with <strong>Save</strong>. Your current location is checked again, so be at your approved DTR location.</li>
+              <li><strong>Check your record:</strong> This card shows today&apos;s clock-in, clock-out, and status. Your saved entries appear in <strong>Recent Time Records</strong> below.</li>
+            </ol>
+            <p className="text-foreground-soft">If your location cannot be found or a clock action fails, check your location permission and try again. If the approved pin is inaccurate, ask your department head, administrator, or supervisor to review your DTR location.</p>
+          </div>
+        </ManualDialog>
+      )}
       <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-        <div className="min-w-0 flex-1">
+        <div className={`min-w-0 flex-1 ${hasOngoingInternship ? "pr-9 sm:pr-10" : ""}`}>
           <p className="text-[11px] uppercase tracking-widest text-primary-foreground/70">
             Today
           </p>

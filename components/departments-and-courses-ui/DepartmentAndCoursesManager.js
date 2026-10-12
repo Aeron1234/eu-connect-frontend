@@ -26,6 +26,7 @@ import {
 } from "@/lib/server-actions/course-and-department-actions";
 import SearchBar from "../ui/SearchBar";
 import PageTitle from "../ui/PageTitle";
+import PageManual from "../ui/PageManual";
 import {
   Select,
   SelectContent,
@@ -323,6 +324,7 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
         description={
           "Add new departments and courses, and activate or deactivate existing ones."
         }
+        titleAction={<PageManual page="admin-departments" />}
       />
 
       {/* Add forms */}

@@ -88,6 +88,7 @@ async function UserProfilePage({ params }) {
         supervision={supervision || null}
         searchedUserId={searchedUserId}
         userRole={userRole}
+        hasOngoingInternship={hasOngoingInternship}
       />
 
       <SearchedUserRecordsManager

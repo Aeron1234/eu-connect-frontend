@@ -4,6 +4,7 @@ import { BriefcaseBusiness } from "lucide-react";
 import { Suspense } from "react";
 import InternshipPostButtonWrapper from "@/components/internship-posts-ui/InternshipPostButtonWrapper";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import InternshipPostsSkeleton from "@/components/skeletons/InternshipPostsSkeleton";
 
 export const metadata = {
@@ -23,6 +24,7 @@ async function InternshipPage({ searchParams }) {
           Icon={BriefcaseBusiness}
           title={"Internships"}
           description={"Internship opportunities for students."}
+          titleAction={<PageManual page="internships" />}
         />
 
         <InternshipPostButtonWrapper />

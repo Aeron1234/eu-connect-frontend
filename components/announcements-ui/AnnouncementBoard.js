@@ -12,6 +12,7 @@ import AnnouncementsFilter from "./AnnouncementsFilter";
 import SearchBar from "../ui/SearchBar";
 import { useUser } from "@/contexts/UserContext";
 import PageTitle from "../ui/PageTitle";
+import PageManual from "../ui/PageManual";
 import AnnouncementCardSkeleton from "../skeletons/AnnouncementCardSkeleton";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import {
@@ -186,6 +187,7 @@ function AnnouncementBoard({
           Icon={Megaphone}
           title={"Announcements"}
           description={"Stay updated with the latest internship news."}
+          titleAction={<PageManual page="announcements" />}
         />
 
         <PostAnnouncementButton
@@ -317,3 +319,4 @@ function AnnouncementBoard({
 }
 
 export default AnnouncementBoard;
+

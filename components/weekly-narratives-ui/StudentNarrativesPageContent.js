@@ -9,6 +9,7 @@ import WeeklyNarrativePostButton from "@/components/weekly-narratives-ui/WeeklyN
 import WeeklyNarrativesStats from "@/components/weekly-narratives-ui/WeeklyNarrativesStats";
 import StudentNarrativesPageSkeleton from "@/components/skeletons/StudentNarrativesPageSkeleton";
 import PageTitle from "@/components/ui/PageTitle";
+import ManualDialog from "@/components/ui/ManualDialog";
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
 
@@ -43,13 +44,31 @@ function NarrativesPage() {
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <PageTitle
-          Icon={BookOpen}
-          title="Weekly Narratives"
-          description="Journal your OJT learnings, activities, and reflections week by week."
-        />
-        {hasOngoingInternship && <WeeklyNarrativePostButton />}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <PageTitle
+            Icon={BookOpen}
+            title="Weekly Narratives"
+            description="Journal your OJT learnings, activities, and reflections week by week."
+            titleAction={hasOngoingInternship && (
+              <ManualDialog title="How to use weekly narratives">
+                <div className="space-y-4 text-sm leading-relaxed text-foreground">
+                  <p>Record what you did and learned during each week of your ongoing internship.</p>
+                  <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
+                    <li>Select <strong>New Narrative</strong> to open the entry form.</li>
+                    <li>Enter the <strong>week number</strong>, a short <strong>title</strong>, and your <strong>narrative</strong>. Describe your activities, what you learned, and any challenges or reflections. Then select <strong>Save</strong>.</li>
+                    <li>Find your saved entry in the list below. On a small screen, select <strong>See more</strong> to read a long narrative in full.</li>
+                    <li>Use the <strong>pencil</strong> on your entry to edit it, or the <strong>trash</strong> icon to delete it. Confirm the deletion when prompted.</li>
+                  </ol>
+                  <p className="text-foreground-soft">Weekly narratives are available while your internship record is ongoing.</p>
+                </div>
+              </ManualDialog>
+            )}
+          />
+        </div>
+        {hasOngoingInternship && (
+          <div className="w-full sm:w-auto"><WeeklyNarrativePostButton /></div>
+        )}
       </div>
 
       {hasOngoingInternship ? (

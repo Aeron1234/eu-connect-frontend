@@ -1,6 +1,6 @@
 import { Building2 } from "lucide-react";
 import PastInternshipsPageContent from "../../components/past-internship-ui/PastInternshipsPageContent";
-import PastInternshipPostButton from "../../components/past-internship-ui/PastInternshipPostButton";
+import PastInternshipPostButton, { PastInternshipsManual } from "../../components/past-internship-ui/PastInternshipPostButton";
 import PageTitle from "../../components/ui/PageTitle";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +19,7 @@ async function PastInternshipsPage({ searchParams }) {
           description={
             "List of past internships and companies that have accepted interns from our school."
           }
+          titleAction={<PastInternshipsManual />}
         />
 
         <PastInternshipPostButton />

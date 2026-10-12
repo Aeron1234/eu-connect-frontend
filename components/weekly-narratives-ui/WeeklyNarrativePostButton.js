@@ -37,6 +37,7 @@ function WeeklyNarrativePostButton() {
 
   return (
     <Modal
+      triggerStyles="w-full sm:w-auto"
       trigger={
         <TitleButton>
           <Plus className="w-4 h-4" /> New Narrative

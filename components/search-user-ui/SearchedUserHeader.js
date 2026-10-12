@@ -1,10 +1,10 @@
 "use client";
 
-import { ChevronLeft, User, UserCheck, Clock3, Check } from "lucide-react";
+import { ChevronLeft, User, UserCheck, Clock3 } from "lucide-react";
 import Link from "next/link";
-import { Skeleton } from "@/components/ui/skeleton";
-import useSupervisorRequestStatus from "../../lib/hooks/useSupervisorRequestStatus";
+import SupervisorRequestButton from "./SupervisorRequestButton";
 import ProgressBar from "../ui/ProgressBar";
+import PageManual from "../ui/PageManual";
 
 // Keyed by direction first, then status — the same "accepted" reads
 // differently depending on which side of the relationship is looking.
@@ -34,62 +34,12 @@ function SupervisionTag({ supervision }) {
   );
 }
 
-function SupervisorButton({ searchedUserId }) {
-  const {
-    supervisorStatus,
-    isLoadingStatus,
-    isPending,
-    sendRequest,
-    cancelRequest,
-  } = useSupervisorRequestStatus(searchedUserId);
-
-  if (isLoadingStatus) {
-    return <Skeleton className="h-10 w-40 shrink-0 rounded-lg bg-white/20" role="status" aria-label="Loading supervisor status" />;
-  }
-
-  if (!supervisorStatus || supervisorStatus.error) return null;
-  if (!supervisorStatus.hasOngoingInternship) return null;
-
-  // Already this employer's intern — tag only, no button needed.
-  if (supervisorStatus.status === "accepted") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-white ring-1 ring-white/30 shrink-0">
-        <Check className="h-3 w-3" />
-        Your Supervisor
-      </span>
-    );
-  }
-
-  if (supervisorStatus.status === "pending") {
-    return (
-      <button
-        onClick={cancelRequest}
-        disabled={isPending}
-        className="inline-flex items-center gap-2 bg-white/15 text-white ring-1 ring-white/30 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-white/25 transition cursor-pointer shrink-0 disabled:opacity-50"
-      >
-        <Clock3 className="w-3.5 h-3.5" />
-        Request Sent
-      </button>
-    );
-  }
-
-  return (
-    <button
-      onClick={sendRequest}
-      disabled={isPending}
-      className="inline-flex items-center gap-2 bg-card text-primary-emphasis px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary-50 transition cursor-pointer shrink-0 disabled:opacity-50"
-    >
-      <UserCheck className="w-3.5 h-3.5" />
-      Set as Supervisor
-    </button>
-  );
-}
-
 function SearchedUserHeader({
   userProfile = {},
   supervision = null,
   searchedUserId = "",
   userRole = "",
+  hasOngoingInternship = false,
 }) {
   const totalHours = Number(userProfile?.total_hours) || 0;
   const hoursRendered = Number(userProfile?.hours_rendered) || 0;
@@ -139,6 +89,7 @@ function SearchedUserHeader({
                 <h1 className="min-w-0 text-lg font-semibold text-white truncate">
                   {userProfile.first_name} {userProfile.last_name}
                 </h1>
+                <PageManual page="user-profile" searchedRole={userProfile?.role} hasOngoingInternship={hasOngoingInternship} supervisionStatus={supervision?.status} onBrand />
                 {!showSupervisorButton && (
                   <SupervisionTag supervision={supervision} />
                 )}
@@ -171,10 +122,7 @@ function SearchedUserHeader({
 
             {showSupervisorButton && (
               <div className="shrink-0 pb-1">
-                <SupervisorButton
-                  key={searchedUserId}
-                  searchedUserId={searchedUserId}
-                />
+                <SupervisorRequestButton employerId={searchedUserId} onBrand />
               </div>
             )}
 

@@ -16,6 +16,7 @@ import StudentInternshipRecordList from "./StudentInternshipRecordList";
 import PageTitle from "../ui/PageTitle";
 import InternshipRecordFormSkeleton from "@/components/skeletons/InternshipRecordFormSkeleton";
 import RecordCardSkeleton from "@/components/skeletons/RecordCardSkeleton";
+import ManualDialog from "@/components/ui/ManualDialog";
 
 function InternshipRecordsManager() {
   const { user } = useUser();
@@ -36,6 +37,9 @@ function InternshipRecordsManager() {
     (record) => record.status === "pending" || record.status === "ongoing",
   );
   const currentRecordStatus = visibleActiveRecord?.status || recordsQuery.data?.active?.status || "";
+  const canManageRecords = !currentRecordStatus || records.some(
+    (record) => record.status === "pending" || record.status === "rejected",
+  );
 
   function handleDeleted(recordId) {
     queryClient.setQueryData(studentRecordsKeys.records(userId), (previous) =>
@@ -65,11 +69,27 @@ function InternshipRecordsManager() {
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
-      <PageTitle
-        Icon={Briefcase}
-        title={"My Records"}
-        description={"Submit your internship details and track approval status"}
-      />
+      <div className="relative pr-11">
+        <PageTitle
+          Icon={Briefcase}
+          title="My Records"
+          description="Submit your internship details and track approval status"
+        />
+        {!recordsQuery.isPending && canManageRecords && (
+          <ManualDialog title="How to manage your internship record" triggerStyles="absolute right-0 top-0 inline-flex size-9 items-center justify-center rounded-full text-foreground-soft transition-colors hover:bg-muted hover:text-primary-emphasis focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+            <div className="space-y-4 text-sm leading-relaxed text-foreground">
+              <p>Submit your placement for review before you start tracking internship activities.</p>
+              <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
+                <li>Open the <strong>Form</strong> tab and enter your company, region, position, dates, semester, required hours, and a short description. The company website is optional.</li>
+                <li>Find your company with the map search or tap the map to place its pin. Check the selected address and correct it if needed.</li>
+                <li>Select <strong>Create Internship Record</strong>. Your submission appears under <strong>Records</strong> as <strong>Pending</strong> while your department head reviews it.</li>
+                <li>Use the <strong>Records</strong> tab to check its status. You may delete a pending or rejected record with the trash icon and submit a corrected record.</li>
+              </ol>
+              <p className="text-foreground-soft">The form is locked while you have a pending or ongoing record. Once approved, its status becomes ongoing.</p>
+            </div>
+          </ManualDialog>
+        )}
+      </div>
 
       <div className="flex gap-1 rounded-lg p-1 bg-secondary w-fit">
         <button
@@ -126,7 +146,7 @@ function InternshipRecordsManager() {
           }}>Try again</button>
         </div>
       ) : tab === "form" ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-8">
+        <div className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:p-8">
           <InternshipRecordForm
             key={currentRecordStatus || "available"}
             regions={regions}

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Clock3, UserCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import useSupervisorRequestStatus from "../../lib/hooks/useSupervisorRequestStatus";
 
 /**
@@ -13,13 +15,15 @@ import useSupervisorRequestStatus from "../../lib/hooks/useSupervisorRequestStat
  * student, target is an employer) — mount it only in that case, since it
  * fetches unconditionally as soon as it's rendered.
  */
-function SupervisorRequestControl({ employerId, rounded }) {
+function SupervisorRequestControl({ employerId, rounded, onBrand }) {
+  const [confirmingRemoval, setConfirmingRemoval] = useState(false);
   const {
     supervisorStatus,
     isLoadingStatus,
     isPending,
     sendRequest,
     cancelRequest,
+    unsetSupervisor,
   } = useSupervisorRequestStatus(employerId);
 
   function handleSetSupervisor(e) {
@@ -41,21 +45,39 @@ function SupervisorRequestControl({ employerId, rounded }) {
 
   if (supervisorStatus.status === "accepted") {
     return (
-      <span
-        className={`inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2.5 ${rounded} text-sm font-semibold shrink-0`}
-      >
-        <Check className="w-3.5 h-3.5" />
-        Your Supervisor
-      </span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`inline-flex shrink-0 items-center gap-2 border px-3 py-2 text-sm font-semibold ${rounded} ${onBrand ? "border-white/30 bg-white/15 text-white" : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"}`}>
+          <Check className="size-3.5" /> Your Supervisor
+        </span>
+        <button
+          type="button"
+          onClick={(event) => { event.stopPropagation(); setConfirmingRemoval(true); }}
+          disabled={isPending}
+          className={`shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold transition disabled:opacity-50 ${onBrand ? "border-white/30 text-white hover:bg-white/15" : "border-border text-foreground-soft hover:bg-muted"}`}
+        >
+          Remove supervisor
+        </button>
+        <ConfirmDialog
+          open={confirmingRemoval}
+          onOpenChange={setConfirmingRemoval}
+          title="Remove supervisor?"
+          description="This employer will no longer be assigned to your ongoing internship. You can request another supervisor afterward."
+          confirmLabel="Remove supervisor"
+          pending={isPending}
+          onConfirm={unsetSupervisor}
+        />
+      </div>
     );
   }
+
+  if (supervisorStatus.hasSupervisor) return null;
 
   if (supervisorStatus.status === "pending") {
     return (
       <button
         onClick={handleCancelRequest}
         disabled={isPending}
-        className={`inline-flex items-center gap-2 bg-muted text-foreground-soft border border-border px-4 py-2.5 ${rounded} text-sm font-semibold hover:bg-secondary transition cursor-pointer shrink-0 disabled:opacity-50`}
+        className={`inline-flex items-center gap-2 border px-4 py-2.5 ${rounded} text-sm font-semibold transition cursor-pointer shrink-0 disabled:opacity-50 ${onBrand ? "border-white/30 bg-white/15 text-white hover:bg-white/25" : "border-border bg-muted text-foreground-soft hover:bg-secondary"}`}
       >
         <Clock3 className="w-3.5 h-3.5" />
         Request Sent
@@ -67,7 +89,7 @@ function SupervisorRequestControl({ employerId, rounded }) {
     <button
       onClick={handleSetSupervisor}
       disabled={isPending}
-      className={`inline-flex items-center gap-2 bg-primary text-white px-4 py-2.5 ${rounded} text-sm font-semibold hover:opacity-90 transition cursor-pointer shrink-0 disabled:opacity-50`}
+      className={`inline-flex items-center gap-2 px-4 py-2.5 ${rounded} text-sm font-semibold hover:opacity-90 transition cursor-pointer shrink-0 disabled:opacity-50 ${onBrand ? "bg-card text-primary-emphasis" : "bg-primary text-white"}`}
     >
       <UserCheck className="w-3.5 h-3.5" />
       Set as Supervisor
@@ -75,12 +97,13 @@ function SupervisorRequestControl({ employerId, rounded }) {
   );
 }
 
-function SupervisorRequestButton({ employerId, rounded = "rounded-lg" }) {
+function SupervisorRequestButton({ employerId, rounded = "rounded-lg", onBrand = false }) {
   return (
     <SupervisorRequestControl
       key={employerId}
       employerId={employerId}
       rounded={rounded}
+      onBrand={onBrand}
     />
   );
 }

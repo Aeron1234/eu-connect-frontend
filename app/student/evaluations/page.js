@@ -1,4 +1,4 @@
-import EvaluationsManager from "@/components/evaluations-ui/EvaluationsManager";
+import EvaluationsManager, { StudentEvaluationsHelp } from "@/components/evaluations-ui/EvaluationsManager";
 import PageTitle from "@/components/ui/PageTitle";
 import { ClipboardCheck } from "lucide-react";
 
@@ -8,13 +8,12 @@ export const metadata = {
 
 function EvaluationsPage() {
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+    <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
       <PageTitle
         Icon={ClipboardCheck}
-        title={"Evaluations"}
-        description={
-          "Rate your supervisor, confirm evaluations submitted about you, and review past records."
-        }
+        title="Evaluations"
+        description="Rate your supervisor, confirm evaluations submitted about you, and review past records."
+        titleAction={<StudentEvaluationsHelp />}
       />
 
       <EvaluationsManager />

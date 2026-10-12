@@ -60,6 +60,7 @@ function canActuallyDelete({ item, canDelete, userRole, currentUserId }) {
 
 function SearchedStudentFiles({
   filtered,
+  emptyMessage = "No documents uploaded yet.",
   view,
   typeTone,
   getFileTypeLabel,
@@ -122,7 +123,7 @@ function SearchedStudentFiles({
   if (filtered.length === 0)
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
-        No documents match your search.
+        {emptyMessage}
       </div>
     );
 

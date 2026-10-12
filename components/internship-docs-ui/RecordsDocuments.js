@@ -151,6 +151,7 @@ function RecordsDocuments({
 
       <SearchedStudentFiles
         filtered={filtered || []}
+        emptyMessage={docs.length === 0 ? "No documents uploaded yet." : "No documents match your search or filter."}
         view={view}
         typeTone={typeTone}
         getFileTypeLabel={getFileTypeLabel}

@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Modal from "@/components/ui/Modal";
+import ManualDialog from "@/components/ui/ManualDialog";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ModalForm from "@/components/ui/ModalForm";
 import { useUser } from "@/contexts/UserContext";
@@ -101,7 +103,7 @@ function TodoPreview({ title, done }) {
 
   return (
     <div className="min-w-0 flex-1">
-      <span ref={previewRef} className={`line-clamp-2 min-w-0 break-words font-semibold ${done ? "line-through opacity-65" : ""}`}>{title}</span>
+      <span ref={previewRef} className={`line-clamp-1 min-w-0 break-words text-[11px] font-medium sm:line-clamp-2 sm:text-sm sm:font-semibold ${done ? "line-through opacity-65" : ""}`}>{title}</span>
       {isClipped && (
         <Modal
           title="To-do"
@@ -123,6 +125,7 @@ function CalendarBoard({ initialDate, initialData }) {
   const [month, setMonth] = useState(initialDate.slice(0, 7));
   const [visible, setVisible] = useState(() => ({ announcement: true, schedule: true, internship: true, todo: true }));
   const [editor, setEditor] = useState(null);
+  const [deletingEntry, setDeletingEntry] = useState(null);
   const [busy, setBusy] = useState(false);
   const agendaRef = useRef(null);
   const serverSnapshotRef = useRef(null);
@@ -184,6 +187,7 @@ function CalendarBoard({ initialDate, initialData }) {
   const marked = useMemo(() => dates.filter((day) => entriesFor(data, day).some((entry) => visible[entry.kind])).map(parseDay), [dates, data, visible]);
   const canAddTodo = role === "student" && data.internship?.date_started <= selected && data.internship?.date_ended >= selected;
   const canSchedule = role === "department_head" || role === "admin";
+  const showManual = canSchedule || (role === "student" && Boolean(data.internship));
   const activeKinds = kinds.filter((kind) => kind.id !== "todo" || role === "student").filter((kind) => kind.id !== "internship" || role === "student");
 
   async function mutate(action, successMessage) {
@@ -221,16 +225,41 @@ function CalendarBoard({ initialDate, initialData }) {
     await mutate(() => editor.item ? updateCalendarSchedule(editor.item.id, input) : createCalendarSchedule(input), editor.item ? "Schedule updated. Students were notified." : "Schedule published. Students were notified.");
   }
 
-  async function remove(entry) {
-    if (busy || !window.confirm(`Delete “${entry.title}”?`)) return;
-    await mutate(() => entry.kind === "todo" ? deleteCalendarTodo(entry.source.id) : deleteCalendarSchedule(entry.source.id), "Removed from calendar.");
+  async function confirmRemoval() {
+    if (busy || !deletingEntry) return;
+    const entry = deletingEntry;
+    const removed = await mutate(() => entry.kind === "todo" ? deleteCalendarTodo(entry.source.id) : deleteCalendarSchedule(entry.source.id), "Removed from calendar.");
+    if (removed) setDeletingEntry(null);
   }
 
   return (
     <div className="mx-auto w-full max-w-[1680px] p-3 pb-12 sm:p-6 lg:p-8">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground sm:text-3xl"><CalendarDays className="size-6 text-primary-emphasis" /> Calendar</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground sm:text-3xl"><CalendarDays className="size-6 text-primary-emphasis" /> Calendar</h1>
+            {showManual && (
+              <ManualDialog title="How to use the calendar">
+                <div className="space-y-4 text-sm leading-relaxed text-foreground">
+                  <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
+                    <li>Use the arrows to change months or <strong>Today</strong> to return to the current date. Select a day to see its announcements, schedules, and other details in the day agenda below.</li>
+                    <li>Use the checkboxes above the calendar to show or hide each type of item. Colored dots mark days with items; on larger screens, you can see a preview in each day.</li>
+                    {role === "student" ? (
+                      <>
+                        <li>Choose a day within your ongoing internship dates, then select <strong>Add to-do</strong>. Enter a task title and save it. Your to-dos are private to you.</li>
+                        <li>In the day agenda, use the checkmark to complete or reopen a to-do. Use the pencil to edit it, or the trash icon to delete it after confirmation.</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Select the date, then choose <strong>Add schedule</strong>. Enter a title, optional details, and the start and end dates. Select <strong>Publish schedule</strong> to save it and notify students.</li>
+                        <li>Open a scheduled day in the agenda to edit or delete a schedule you created. {role === "admin" ? "As an admin, you can also manage other schedules." : "Only your own schedules can be changed."}</li>
+                      </>
+                    )}
+                  </ol>
+                </div>
+              </ManualDialog>
+            )}
+          </div>
           <p className="mt-1 text-sm text-foreground-soft">Internship dates, announcements, schedules, and your daily plans.</p>
         </div>
         {(canSchedule || canAddTodo) && (
@@ -296,7 +325,7 @@ function CalendarBoard({ initialDate, initialData }) {
                 <Icon className="mt-0.5 size-4 shrink-0" />
                 <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-1 sm:gap-2">{entry.kind === "todo" ? <TodoPreview title={entry.title} done={entry.done} /> : <span className={`min-w-0 break-words font-semibold ${entry.kind === "announcement" ? "line-clamp-2" : ""}`}>{entry.title}</span>}<span className="text-[10px] opacity-75 sm:text-[11px]">{meta.label}</span></div>{entry.subtitle && <p className="mt-0.5 text-[11px] opacity-80 sm:text-xs">{entry.subtitle}</p>}{entry.detail && <p className={`mt-1 break-words text-xs opacity-85 sm:text-sm ${entry.kind === "announcement" ? "line-clamp-3 whitespace-normal" : "whitespace-pre-wrap"}`}>{entry.detail}</p>}{entry.href && <Link href={entry.href} className="mt-1 inline-block text-xs font-semibold underline">View details</Link>}</div>
                 {entry.kind === "todo" && <button type="button" disabled={busy} onClick={() => void mutate(() => updateCalendarTodo(entry.source.id, { is_done: !entry.done }), entry.done ? "Marked as pending." : "To-do completed.")} aria-label={entry.done ? "Mark to-do pending" : "Complete to-do"} className="rounded-md border border-current/25 p-1"><Check className="size-4" /></button>}
-                {(editable || entry.kind === "todo") && <div className="flex shrink-0 gap-1"><button type="button" onClick={() => setEditor({ kind: entry.kind, item: entry.source })} aria-label={`Edit ${entry.title}`} className="rounded-md p-1 hover:bg-black/10"><Pencil className="size-4" /></button><button type="button" onClick={() => void remove(entry)} aria-label={`Delete ${entry.title}`} className="rounded-md p-1 hover:bg-black/10"><Trash2 className="size-4" /></button></div>}
+                {(editable || entry.kind === "todo") && <div className="flex shrink-0 gap-1"><button type="button" onClick={() => setEditor({ kind: entry.kind, item: entry.source })} aria-label={`Edit ${entry.title}`} className="rounded-md p-1 hover:bg-black/10"><Pencil className="size-4" /></button><button type="button" disabled={busy} onClick={() => setDeletingEntry(entry)} aria-label={`Delete ${entry.title}`} className="rounded-md p-1 hover:bg-black/10"><Trash2 className="size-4" /></button></div>}
               </div>;
             })}</div>}
           </section>
@@ -310,6 +339,16 @@ function CalendarBoard({ initialDate, initialData }) {
           <div className="rounded-2xl border border-border bg-card p-4"><h3 className="font-bold text-foreground">Your calendars</h3><div className="mt-3 space-y-2">{activeKinds.map((kind) => <div key={kind.id} className="flex items-center gap-2 text-sm text-foreground-soft"><span className={`size-2 rounded-full ${kind.dot}`} />{kind.label}</div>)}</div></div>
         </aside>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deletingEntry)}
+        onOpenChange={(open) => { if (!open) setDeletingEntry(null); }}
+        title={`Delete ${deletingEntry?.kind === "todo" ? "to-do" : "schedule"}?`}
+        description={deletingEntry ? `The selected ${deletingEntry.kind === "todo" ? "to-do" : "schedule"} will be deleted.` : ""}
+        confirmLabel="Delete"
+        pending={busy}
+        onConfirm={() => void confirmRemoval()}
+      />
 
       <Dialog open={!!editor} onOpenChange={(open) => { if (!open && !busy) setEditor(null); }}>
         <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-auto p-4 sm:max-w-lg sm:p-6" aria-describedby={undefined}>

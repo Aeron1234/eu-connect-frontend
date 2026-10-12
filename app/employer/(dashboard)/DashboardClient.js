@@ -1,8 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
-import { dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries";
+import { dashboardOverviewKeys, dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries";
+import { socket } from "@/components/ui/SocketProvider";
 import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewState";
 import PageTitle from "@/components/ui/PageTitle";
 import DashboardStatsSection from "@/components/dashboard-ui/EmployerDashboardStats";
@@ -50,6 +52,16 @@ function getActivityVisual(action = "") {
 
 function EmployerDashboardPage() {
   const { user } = useUser();
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!user?.id) return;
+    const refreshSupervision = () => {
+      void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(user.id, "employer") });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard", String(user.id), "employer-interns"] });
+    };
+    socket.on("supervisor_status_changed", refreshSupervision);
+    return () => socket.off("supervisor_status_changed", refreshSupervision);
+  }, [queryClient, user?.id]);
   const query = useQuery({
     ...dashboardOverviewOptions(user?.id, "employer"),
     enabled: Boolean(user?.id),

@@ -11,6 +11,8 @@ import SearchBar from "../ui/SearchBar";
 import MapDropdownFilter from "./MapDropdownFilter";
 import ProgressBar from "../ui/ProgressBar";
 import { Skeleton } from "@/components/ui/skeleton";
+import ManualDialog from "@/components/ui/ManualDialog";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 const Map = dynamic(() => import("./Map"), {
   ssr: false,
@@ -77,6 +79,7 @@ export default function MapWrapper() {
           id: i.internship_id,
           name: i.name,
           course: i.course,
+          courseShortName: i.course_short_name,
           role: i.position,
           progress: i.percent_complete,
           period: formatPeriod(i.date_started, i.date_ended),
@@ -96,6 +99,7 @@ export default function MapWrapper() {
               (i) =>
                 i.name.toLowerCase().includes(q) ||
                 i.course.toLowerCase().includes(q) ||
+                i.courseShortName?.toLowerCase().includes(q) ||
                 s.company.toLowerCase().includes(q),
             )
           : s.interns,
@@ -104,6 +108,7 @@ export default function MapWrapper() {
   }, [companySites, regionId, query]);
 
   const selected = sites.find((s) => s.id === selectedId) ?? null;
+  const blockingError = locationsQuery.isError && !locationsQuery.data;
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
@@ -113,6 +118,19 @@ export default function MapWrapper() {
           title={"Student Map"}
           description={
             "Showing all the interns and their company across the map."
+          }
+          titleAction={
+            <ManualDialog title="How to use the student map">
+              <div className="space-y-4 text-sm leading-relaxed text-foreground">
+                <p>Explore the current internship locations and students assigned to each company.</p>
+                <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
+                  <li>Use the <strong>search box</strong> to find a student, company, or course. Choose a <strong>region</strong> to narrow the locations shown.</li>
+                  <li>In <strong>Map View</strong>, pan or zoom the map, then select a pin. The number on the pin shows how many interns are at that company.</li>
+                  <li>Read the selected company&apos;s details and each intern&apos;s progress in the panel beside or below the map. Select another pin to switch companies.</li>
+                  <li>Switch to <strong>Companies</strong> to browse the same results as cards, with each company&apos;s interns and progress listed together.</li>
+                </ol>
+              </div>
+            </ManualDialog>
           }
         />
 
@@ -134,9 +152,9 @@ export default function MapWrapper() {
         </div>
       </div>
 
-      {locationsQuery.isError && (
+      {locationsQuery.isError && locationsQuery.data && (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
-          {locationsQuery.error.message}
+          The latest map update could not be loaded. Showing the last available data.
           <button type="button" onClick={() => void locationsQuery.refetch()} className="ml-3 font-semibold text-primary-emphasis">Try again</button>
         </div>
       )}
@@ -151,7 +169,9 @@ export default function MapWrapper() {
             <Skeleton className="h-[540px] w-full rounded-xl" />
           </div>
         </div>
-      ) : !locationsQuery.isError && <div className="space-y-6">
+      ) : blockingError ? (
+        <ErrorUI error={locationsQuery.error} reset={() => void locationsQuery.refetch()} logError={false} />
+      ) : <div className="space-y-6">
         {/* Search + location filter */}
 
         <div className="flex gap-2 flex-col sm:flex-row">
