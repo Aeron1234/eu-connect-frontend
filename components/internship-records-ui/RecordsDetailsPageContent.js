@@ -14,6 +14,7 @@ import DtrPagination from "../dtr-ui/DtrPagination";
 import RecordsNarrative from "../weekly-narratives-ui/RecordsNarratives";
 import EvaluationCard from "../evaluations-ui/EvaluationCard";
 import RecordsDocuments from "../internship-docs-ui/RecordsDocuments";
+import RecordsSummaryReport from "../summary-reports-ui/RecordsSummaryReport";
 import SetDtrLocation from "../dtr-ui/SetDtrLocation";
 import TabBar from "../ui/TabBar";
 import RecordsTabContentSkeleton from "../skeletons/RecordsTabContentSkeleton";
@@ -23,6 +24,7 @@ const tabs = [
   { value: "overview", text: "Overview" },
   { value: "dtr", text: "DTR" },
   { value: "narratives", text: "Narratives" },
+  { value: "summary-report", text: "Summary Report" },
   { value: "evaluations", text: "Evaluations" },
   { value: "documents", text: "Documents" },
 ];
@@ -236,6 +238,10 @@ function RecordsDetailsPageContent({ record, internshipId }) {
                 queryKey: internshipRecordDetailsKeys.tab(user?.id, internshipId, "evaluations"),
               })}
             />
+          )}
+
+          {activeTab === "summary-report" && (
+            <RecordsSummaryReport report={data?.report || null} />
           )}
 
           {activeTab === "documents" && (

@@ -45,6 +45,11 @@ function roleRouteGroups(userRole, userDepartment) {
             icon: <BookOpen className="h-5 w-5 shrink-0" />,
           },
           {
+            name: "Summary Reports",
+            href: "/student/summary-reports",
+            icon: <FileText className="h-5 w-5 shrink-0" />,
+          },
+          {
             name: "My Records",
             href: "/student/internship-record",
             icon: <LibraryBig className="h-5 w-5 shrink-0" />,
@@ -243,20 +248,16 @@ function SideNavigationList({ fullName = "", avatar = null }) {
         ]
       : []),
     ...roleRouteGroups(userRole, userDepartment),
-    ...(userRole !== "employer"
-      ? [
-          {
-            label: "Planning",
-            routes: [
-              {
-                name: "Calendar",
-                href: "/calendar",
-                icon: <CalendarDays className="h-5 w-5 shrink-0" />,
-              },
-            ],
-          },
-        ]
-      : []),
+    {
+      label: "Planning",
+      routes: [
+        {
+          name: "Calendar",
+          href: "/calendar",
+          icon: <CalendarDays className="h-5 w-5 shrink-0" />,
+        },
+      ],
+    },
     { label: "Public", routes: publicRoutes },
   ];
 

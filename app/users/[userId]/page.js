@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
   return { title: "User Profile" };
 }
 
-async function UserProfilePage({ params }) {
+async function UserProfilePage({ params, searchParams }) {
   const resolvedParams = await params;
 
   const searchedUserId = resolvedParams.userId
@@ -59,13 +59,21 @@ async function UserProfilePage({ params }) {
     searchedUserRole === "student" &&
     supervision?.status !== "accepted";
 
-  const defaultFilter =
+  const initialFilter =
     userRole === "student" ||
     searchedUserRole !== "student" ||
     !hasOngoingInternship ||
     isEmployerNonSupervisor
       ? "info"
       : "dtr";
+  const requestedTab = (await searchParams)?.tab;
+  const defaultFilter = requestedTab === "certificates" &&
+    userRole === "employer" &&
+    searchedUserRole === "student" &&
+    hasOngoingInternship &&
+    supervision?.status === "accepted"
+      ? "certificates"
+      : initialFilter;
 
   // Seed the first page; later DTR pages are fetched by the client query.
   let initialDtrData = null;
@@ -92,7 +100,7 @@ async function UserProfilePage({ params }) {
       />
 
       <SearchedUserRecordsManager
-        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}:${hasOngoingInternship}`}
+        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}:${hasOngoingInternship}:${defaultFilter}`}
         searchedUserId={searchedUserId}
         userId={session?.user?.id || ""}
         userRole={userRole}

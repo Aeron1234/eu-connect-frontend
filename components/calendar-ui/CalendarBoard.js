@@ -183,8 +183,12 @@ function CalendarBoard({ initialDate, initialData }) {
   }
 
   const dates = useMemo(() => monthDates(month), [month]);
-  const entries = useMemo(() => entriesFor(data, selected).filter((entry) => visible[entry.kind]), [data, selected, visible]);
-  const marked = useMemo(() => dates.filter((day) => entriesFor(data, day).some((entry) => visible[entry.kind])).map(parseDay), [dates, data, visible]);
+  const visibleKinds = useMemo(() => new Set(kinds
+    .filter((kind) => role === "student" || (kind.id !== "todo" && kind.id !== "internship"))
+    .filter((kind) => visible[kind.id])
+    .map((kind) => kind.id)), [role, visible]);
+  const entries = useMemo(() => entriesFor(data, selected).filter((entry) => visibleKinds.has(entry.kind)), [data, selected, visibleKinds]);
+  const marked = useMemo(() => dates.filter((day) => entriesFor(data, day).some((entry) => visibleKinds.has(entry.kind))).map(parseDay), [dates, data, visibleKinds]);
   const canAddTodo = role === "student" && data.internship?.date_started <= selected && data.internship?.date_ended >= selected;
   const canSchedule = role === "department_head" || role === "admin";
   const showManual = canSchedule || (role === "student" && Boolean(data.internship));
@@ -260,7 +264,7 @@ function CalendarBoard({ initialDate, initialData }) {
               </ManualDialog>
             )}
           </div>
-          <p className="mt-1 text-sm text-foreground-soft">Internship dates, announcements, schedules, and your daily plans.</p>
+          <p className="mt-1 text-sm text-foreground-soft">{role === "employer" ? "View school-wide announcements and schedules." : "Internship dates, announcements, schedules, and your daily plans."}</p>
         </div>
         {(canSchedule || canAddTodo) && (
           <button type="button" onClick={() => setEditor({ kind: canSchedule ? "schedule" : "todo", item: null })} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 sm:w-auto">
@@ -299,7 +303,7 @@ function CalendarBoard({ initialDate, initialData }) {
             <div className="grid grid-cols-7 gap-px bg-border">
               {dates.map((day) => {
                 const inMonth = day.slice(0, 7) === month;
-                const items = entriesFor(data, day).filter((entry) => visible[entry.kind]);
+                const items = entriesFor(data, day).filter((entry) => visibleKinds.has(entry.kind));
                 const isSelected = selected === day;
                 return (
                   <button key={day} type="button" onClick={() => pickDay(day, items.length > 0)} aria-label={`${format(parseDay(day), "EEEE, MMMM d, yyyy")}, ${items.length} items`} aria-pressed={isSelected} className={`min-w-0 min-h-12 p-1 text-left align-top transition-colors focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-primary sm:min-h-20 sm:p-2 md:min-h-28 ${inMonth ? "bg-card" : "bg-muted/35 text-foreground-faint"} ${isSelected ? "ring-2 ring-inset ring-primary" : "hover:bg-muted/50"}`}>
@@ -320,7 +324,7 @@ function CalendarBoard({ initialDate, initialData }) {
             {monthQuery.isPending ? <div className="space-y-2" role="status" aria-label="Loading this day"><Skeleton className="h-16 w-full rounded-xl" /><Skeleton className="h-16 w-full rounded-xl" /></div> : entries.length === 0 ? <p className="rounded-xl bg-muted/45 p-4 text-sm text-foreground-soft">Nothing scheduled for this day.</p> : <div className="space-y-2">{entries.map((entry) => {
               const meta = kinds.find((kind) => kind.id === entry.kind);
               const Icon = meta.icon;
-              const editable = entry.kind === "schedule" && (role === "admin" || String(entry.source.created_by) === String(user.id));
+              const editable = canSchedule && entry.kind === "schedule" && (role === "admin" || String(entry.source.created_by) === String(user.id));
               return <div key={entry.key} className={`flex min-w-0 items-start gap-2 rounded-xl border p-2.5 text-xs sm:gap-3 sm:p-3 sm:text-sm ${meta.chip}`}>
                 <Icon className="mt-0.5 size-4 shrink-0" />
                 <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-1 sm:gap-2">{entry.kind === "todo" ? <TodoPreview title={entry.title} done={entry.done} /> : <span className={`min-w-0 break-words font-semibold ${entry.kind === "announcement" ? "line-clamp-2" : ""}`}>{entry.title}</span>}<span className="text-[10px] opacity-75 sm:text-[11px]">{meta.label}</span></div>{entry.subtitle && <p className="mt-0.5 text-[11px] opacity-80 sm:text-xs">{entry.subtitle}</p>}{entry.detail && <p className={`mt-1 break-words text-xs opacity-85 sm:text-sm ${entry.kind === "announcement" ? "line-clamp-3 whitespace-normal" : "whitespace-pre-wrap"}`}>{entry.detail}</p>}{entry.href && <Link href={entry.href} className="mt-1 inline-block text-xs font-semibold underline">View details</Link>}</div>

@@ -33,7 +33,7 @@ function WeeklyNarrativeForm({
             <ModalForm.Input
               type="text"
               name="title"
-              placeholder="Subject of the week..."
+              placeholder="Your objective for the week..."
               defaultValue={type === "edit" ? data.title : ""}
               disabled={isPending}
               maxLength={50}
@@ -45,7 +45,7 @@ function WeeklyNarrativeForm({
         <ModalForm.Field label="Narrative">
           <ModalForm.Textarea
             name="narrative"
-            placeholder="How was your week?"
+            placeholder="In paragraph form, reflect on your objective, daily accomplishments, and what you learned (knowledge, skills, and values)."
             className="min-h-28 sm:min-h-50"
             defaultValue={type === "edit" ? data.narrative : ""}
             disabled={isPending}

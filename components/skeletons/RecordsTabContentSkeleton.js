@@ -4,6 +4,7 @@ import RecordsDocumentsSkeleton from "./RecordsDocumentsSkeleton";
 import RecordsOverviewSkeleton from "./RecordsOverviewSkeleton";
 import DtrRecordsSkeleton from "./DtrRecordsSkeleton";
 import NarrativesSkeleton from "./NarrativesSkeleton";
+import RecordsSummaryReportSkeleton from "./RecordsSummaryReportSkeleton";
 
 function RecordsTabContentSkeleton({ tab }) {
   if (tab === "overview") {
@@ -28,6 +29,10 @@ function RecordsTabContentSkeleton({ tab }) {
 
   if (tab === "evaluations") {
     return <EvaluationListSkeleton />;
+  }
+
+  if (tab === "summary-report") {
+    return <RecordsSummaryReportSkeleton />;
   }
 
   // documents

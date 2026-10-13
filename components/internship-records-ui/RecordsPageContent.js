@@ -28,6 +28,7 @@ import { toastAndAction } from "../../lib/helpers";
 import { updateInternshipRecordStatus } from "@/lib/server-actions/internship-records-actions";
 import ProgressBar from "../ui/ProgressBar";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import InternshipRecordsPageSkeleton from "@/components/skeletons/InternshipRecordsPageSkeleton";
 
 const statusMeta = {
   pending: {
@@ -235,6 +236,10 @@ function RecordsPageContent({
         void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(user.id, user.role) });
       }
     });
+  }
+
+  if (recordsQuery.isPending && !recordsQuery.data) {
+    return <InternshipRecordsPageSkeleton />;
   }
 
   return (

@@ -12,7 +12,7 @@ import {
   weeklyNarrativesKeys,
 } from "@/lib/cache/weekly-narratives-queries";
 
-function WeeklyNarrativeContent({ initialPage, internshipId }) {
+function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true }) {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(null);
@@ -110,7 +110,7 @@ function WeeklyNarrativeContent({ initialPage, internshipId }) {
             <WeeklyNarrativeCard
               key={`${n.id}-${n.updated_at || n.created_at}`}
               narrative={n}
-              showActions
+              showActions={showActions}
               onUpdate={handleItemUpdate}
               onDelete={() => handleItemDelete(n.id)}
             />

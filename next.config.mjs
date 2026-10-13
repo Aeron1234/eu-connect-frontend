@@ -38,6 +38,8 @@ const nextConfig = {
     "/api/reports/student-evaluation": [
       "./node_modules/@sparticuz/chromium/**",
     ],
+    "/api/reports/summary-report": ["./node_modules/@sparticuz/chromium/**"],
+    "/api/reports/weekly-narratives": ["./node_modules/@sparticuz/chromium/**"],
   },
 
   reactCompiler: true,

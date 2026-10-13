@@ -11,7 +11,7 @@ function InternshipRecordDetailLoading() {
       </span>
 
       <RecordsHeaderSkeleton />
-      <TabBarSkeleton tabs={5} />
+      <TabBarSkeleton tabs={6} />
       <RecordsOverviewSkeleton />
     </main>
   );

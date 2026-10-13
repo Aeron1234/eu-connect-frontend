@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -22,6 +23,8 @@ import {
 } from "lucide-react";
 import { cx } from "@/lib/utils";
 import { getNotificationTargetPath } from "@/lib/notification-routes";
+import { userProfileKeys } from "@/lib/cache/user-profile-queries";
+import { useUser } from "@/contexts/UserContext";
 import { toastAndAction } from "../../lib/helpers";
 import {
   markAsRead,
@@ -41,6 +44,8 @@ const TYPE_META = {
   evaluation_submitted: { icon: ClipboardCheck, tone: "primary" },
   evaluation_deleted: { icon: ClipboardX, tone: "muted" },
   certificate_uploaded: { icon: Award, tone: "success" },
+  certificate_accepted: { icon: CheckCircle2, tone: "success" },
+  certificate_rejected: { icon: ClipboardX, tone: "destructive" },
   supervisor_request_submitted: { icon: UserPlus, tone: "primary" },
   supervisor_request_accepted: { icon: UserCheck, tone: "success" },
   supervisor_request_rejected: { icon: UserX, tone: "destructive" },
@@ -56,6 +61,8 @@ const TONE_STYLES = {
 
 function NotificationItem({ item, onChanged }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { user } = useUser();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isOpeningAnnouncement, setIsOpeningAnnouncement] = useState(false);
@@ -79,6 +86,11 @@ function NotificationItem({ item, onChanged }) {
     }
 
     if (targetPath) {
+      if ((item.type === "certificate_accepted" || item.type === "certificate_rejected") && item.link_uuid) {
+        void queryClient.invalidateQueries({
+          queryKey: userProfileKeys.tab(user.id, item.link_uuid, "certificates"),
+        });
+      }
       // Skip the optimistic local re-render here — this page is about to
       // be unmounted by the navigation anyway, so there's nothing to
       // visually update. Mutating this card's DOM node (via updateItem)

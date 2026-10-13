@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cx } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
+import { userProfileKeys } from "@/lib/cache/user-profile-queries";
 import { getNotificationTargetPath } from "@/lib/notification-routes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { socket } from "./SocketProvider";
@@ -60,6 +61,8 @@ const TYPE_META = {
   evaluation_submitted: { icon: Star, label: "Evaluation" },
   evaluation_deleted: { icon: ClipboardX, label: "Evaluation" },
   certificate_uploaded: { icon: Award, label: "Document" },
+  certificate_accepted: { icon: CheckCircle2, label: "Document" },
+  certificate_rejected: { icon: ClipboardX, label: "Document" },
   supervisor_request_submitted: { icon: UserPlus, label: "Supervisor request" },
   supervisor_request_accepted: { icon: UserCheck, label: "Supervisor request" },
   supervisor_request_rejected: { icon: UserX, label: "Supervisor request" },
@@ -133,14 +136,22 @@ function NotificationsButton() {
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") scheduleRefresh();
     };
-    socket.on("new_notification", scheduleRefresh);
+    const handleNewNotification = (notification) => {
+      scheduleRefresh();
+      if ((notification?.type === "certificate_accepted" || notification?.type === "certificate_rejected") && notification.link_uuid) {
+        void queryClient.invalidateQueries({
+          queryKey: userProfileKeys.tab(user.id, notification.link_uuid, "certificates"),
+        });
+      }
+    };
+    socket.on("new_notification", handleNewNotification);
     socket.on("connect", scheduleRefresh);
     window.addEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
     document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
       clearTimeout(timer);
-      socket.off("new_notification", scheduleRefresh);
+      socket.off("new_notification", handleNewNotification);
       socket.off("connect", scheduleRefresh);
       window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
@@ -202,6 +213,11 @@ function NotificationsButton() {
 
   function handleOpenNotification(notif) {
     setShowNotifications(false);
+    if ((notif.type === "certificate_accepted" || notif.type === "certificate_rejected") && notif.link_uuid) {
+      void queryClient.invalidateQueries({
+        queryKey: userProfileKeys.tab(user.id, notif.link_uuid, "certificates"),
+      });
+    }
     if (notif.is_read || notif.actionable) return;
     void markAsRead(notif.id).then((result) => {
       if (result?.success) notifyNotificationsChanged();

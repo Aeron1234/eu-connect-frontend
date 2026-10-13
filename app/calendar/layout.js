@@ -12,8 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function CalendarLayout({ children }) {
   const session = await getUserSession();
   if (!session?.user) redirect("/login");
-  if (session.user.role === "employer") redirect("/employer");
-  if (!["student", "department_head", "admin"].includes(session.user.role)) redirect("/login");
+  if (!["student", "employer", "department_head", "admin"].includes(session.user.role)) redirect("/login");
 
   return (
     <SocketProvider>

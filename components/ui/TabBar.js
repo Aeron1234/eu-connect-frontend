@@ -21,6 +21,7 @@ import {
 const iconMap = {
   dtr: Clock,
   narratives: FileText,
+  "summary-report": ClipboardList,
   evaluations: Star,
   certificates: FileCheck,
   info: User,

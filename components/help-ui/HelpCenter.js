@@ -40,11 +40,22 @@ const roleGuides = {
       title: "Submit weekly narratives",
       summary: "Keep a record of your internship work each week.",
       steps: [
-        "Open Narratives to write and review your weekly entries.",
-        "An ongoing internship is required. If none is available, check the status in My Records.",
+        "Open Narratives and choose an ongoing or finished internship to review its weekly entries.",
+        "An ongoing internship is required to add or change narratives. Choose Print to open all entries for the selected internship in one PDF.",
       ],
       href: "/student/narratives",
       linkText: "Open Narratives",
+    },
+    {
+      title: "Write a summary report",
+      summary: "Reflect on your internship in one editable report per placement.",
+      steps: [
+        "Open Summary Reports and choose an ongoing or finished internship.",
+        "Write paragraphs about the company, your schedule, a memorable moment, and challenges with their solutions.",
+        "Optionally attach one image or document, then submit. You can edit, delete, or print the report later.",
+      ],
+      href: "/student/summary-reports",
+      linkText: "Open Summary Reports",
     },
     {
       title: "Upload documents and complete evaluations",
