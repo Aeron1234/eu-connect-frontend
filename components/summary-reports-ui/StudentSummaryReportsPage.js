@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpenText, FileText, Paperclip, Pencil, Trash2 } from "lucide-react";
+import { BookOpenText, FileText, Paperclip, Pencil, Trash2, X } from "lucide-react";
+import Image from "next/image";
 import { useUser } from "@/contexts/UserContext";
 import { toastAndAction } from "@/lib/helpers";
 import { summaryReportKeys, summaryReportsOptions } from "@/lib/cache/summary-reports-queries";
@@ -55,13 +56,22 @@ function ReportContent({ record }) {
           </section>
         ))}
       </div>
-      {(record.memorabilia_note || record.attachment_name) && (
+      {(record.memorabilia_note || record.attachment_name || record.images?.length) && (
         <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
           <div className="mb-3 flex items-center gap-3">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary-emphasis">05</span>
             <h3 className="text-sm font-semibold text-foreground sm:text-base">Picture or multimedia memorabilia</h3>
           </div>
           {record.memorabilia_note && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground-soft">{record.memorabilia_note}</p>}
+          {record.images?.length > 0 && (
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {record.images.map((image) => (
+                <a key={image.id} href={image.url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border bg-canvas">
+                  <Image unoptimized src={image.url} alt="Internship memorabilia" width={320} height={240} className="h-32 w-full object-contain" />
+                </a>
+              ))}
+            </div>
+          )}
           {record.attachment_name && (
             <button type="button" onClick={openAttachment} className="mt-3 inline-flex max-w-full items-center gap-2 break-all rounded-lg border border-border bg-canvas px-3 py-2 text-left text-sm font-medium text-primary-emphasis hover:bg-muted">
               <Paperclip className="size-4 shrink-0" aria-hidden="true" />{record.attachment_name}
@@ -78,9 +88,13 @@ function ReportEditor({ record, onSaved, onCancel }) {
   const queryClient = useQueryClient();
   const { user } = useUser();
   const [values, setValues] = useState(() => Object.fromEntries(Object.keys(EMPTY).map((key) => [key, record[key] || ""])));
-  const [attachment, setAttachment] = useState(null);
+  const [images, setImages] = useState([]);
+  const [removeImageIds, setRemoveImageIds] = useState([]);
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [error, setError] = useState("");
+  const previewUrls = useRef([]);
+  useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
+  const retainedImages = (record.images || []).filter((image) => !removeImageIds.includes(image.id));
   const words = Object.values(values).join(" ").trim().split(/\s+/u).filter(Boolean).length;
   const mutation = useMutation({
     mutationFn: (formData) => toastAndAction({
@@ -114,9 +128,33 @@ function ReportEditor({ record, onSaved, onCancel }) {
     }
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) formData.set(key, value);
-    if (attachment) formData.set("attachment", attachment);
+    images.forEach(({ file }) => formData.append("images", file));
+    formData.set("remove_image_ids", JSON.stringify(removeImageIds));
     if (removeAttachment) formData.set("remove_attachment", "true");
     mutation.mutate(formData);
+  }
+
+  function selectImages(event) {
+    const selected = Array.from(event.target.files || []);
+    event.target.value = "";
+    if (selected.some((file) => !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024 || !file.size)) {
+      setError("Choose JPG, PNG, or WebP images up to 5 MB each.");
+      return;
+    }
+    if (retainedImages.length + images.length + selected.length > 6) {
+      setError("A report can have up to six images. Remove one before adding more.");
+      return;
+    }
+    setError("");
+    const previews = selected.map((file) => ({ file, url: URL.createObjectURL(file) }));
+    previewUrls.current.push(...previews.map(({ url }) => url));
+    setImages((current) => [...current, ...previews]);
+  }
+
+  function removeSelectedImage(url) {
+    URL.revokeObjectURL(url);
+    previewUrls.current = previewUrls.current.filter((item) => item !== url);
+    setImages((current) => current.filter((item) => item.url !== url));
   }
 
   return (
@@ -137,17 +175,33 @@ function ReportEditor({ record, onSaved, onCancel }) {
       <div className="grid gap-5 lg:grid-cols-2">
         <label className="block min-w-0 text-sm font-semibold text-foreground">
           Picture or multimedia memorabilia <span className="font-normal text-foreground-soft">(optional note)</span>
-          <span className="mt-1 block text-xs font-normal text-foreground-soft">Describe a photo, file, or memory from your internship.</span>
+          <span className="mt-1 block text-xs font-normal text-foreground-soft">Describe photos or a memory from your internship.</span>
           <textarea maxLength={2000} rows={5} value={values.memorabilia_note} onChange={(event) => setValues((current) => ({ ...current, memorabilia_note: event.target.value }))} className={fieldClass} placeholder="Describe a meaningful photo or other memorabilia..." />
         </label>
         <div className="min-w-0 text-sm font-semibold text-foreground">
-          Optional image or file
-          <p className="mt-1 text-xs font-normal text-foreground-soft">JPG, PNG, WebP, PDF, DOC, or DOCX. Maximum 20 MB.</p>
-          <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.doc,.docx" onChange={(event) => { setAttachment(event.target.files?.[0] || null); setRemoveAttachment(false); }} className={`${fieldClass} min-w-0 file:mr-3 file:rounded file:border-0 file:bg-muted file:px-2 file:py-1 file:text-foreground`} />
-          {record.attachment_name && !attachment && (
+          Optional images
+          <p className="mt-1 text-xs font-normal text-foreground-soft">Select up to six JPG, PNG, or WebP images, 5 MB each. Preview them before saving.</p>
+          <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={selectImages} disabled={retainedImages.length + images.length >= 6} className={`${fieldClass} min-w-0 file:mr-3 file:rounded file:border-0 file:bg-muted file:px-2 file:py-1 file:text-foreground disabled:opacity-60`} />
+          {(retainedImages.length > 0 || images.length > 0) && (
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {retainedImages.map((image) => (
+                <div key={image.id} className="relative overflow-hidden rounded-lg border border-border bg-canvas">
+                  <Image unoptimized src={image.url} alt="Saved internship image" width={320} height={240} className="h-28 w-full object-contain" />
+                  <button type="button" aria-label="Remove saved image" onClick={() => setRemoveImageIds((current) => [...current, image.id])} className="absolute right-1 top-1 rounded-full bg-card p-1 text-foreground shadow"><X className="size-4" /></button>
+                </div>
+              ))}
+              {images.map(({ file, url }) => (
+                <div key={url} className="relative overflow-hidden rounded-lg border border-border bg-canvas">
+                  <Image unoptimized src={url} alt={`Preview of ${file.name}`} width={320} height={240} className="h-28 w-full object-contain" />
+                  <button type="button" aria-label={`Remove ${file.name}`} onClick={() => removeSelectedImage(url)} className="absolute right-1 top-1 rounded-full bg-card p-1 text-foreground shadow"><X className="size-4" /></button>
+                </div>
+              ))}
+            </div>
+          )}
+          {record.attachment_name && (
             <label className="mt-3 flex items-start gap-2 text-xs font-normal text-foreground-soft">
               <input type="checkbox" checked={removeAttachment} onChange={(event) => setRemoveAttachment(event.target.checked)} className="mt-0.5 accent-primary" />
-              <span>Remove existing file: <span className="break-all">{record.attachment_name}</span></span>
+              <span>Remove older attachment: <span className="break-all">{record.attachment_name}</span></span>
             </label>
           )}
         </div>
@@ -213,10 +267,10 @@ export default function StudentSummaryReportsPage() {
           <ol className="list-decimal space-y-3 pl-5 text-sm leading-relaxed marker:font-semibold marker:text-primary-emphasis">
             <li>Choose the internship you want to write about. You can create one report for each eligible internship.</li>
             <li>Write paragraphs about the organization, your work schedule, a memorable moment, and difficulties with their solutions.</li>
-            <li>Optionally add a memorabilia note and one image or document.</li>
+            <li>Optionally add a memorabilia note and up to six JPG, PNG, or WebP images. Preview each image before saving.</li>
             <li>Keep the report within 900 words. Follow the school format: Times New Roman, 12 pt, 1.5 line spacing, 1-inch margins, and a maximum of three pages.</li>
             <li>Select <strong>Submit report</strong>. You can edit or delete your report later. Only one report can exist for an internship at a time.</li>
-            <li>Use <strong>Print</strong> to open the formatted PDF. An attached image appears inside the PDF; other file types remain separate attachments.</li>
+            <li>Use <strong>Print</strong> to open the formatted PDF after it is ready. Your saved images appear inside it.</li>
           </ol>
         </ManualDialog>
       )} />

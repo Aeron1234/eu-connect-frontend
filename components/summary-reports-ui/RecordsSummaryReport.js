@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FileText, Paperclip } from "lucide-react";
+import Image from "next/image";
 import { getInternshipRecordSummaryAttachmentUrl } from "@/lib/server-actions/summary-reports-actions";
 
 const sections = [
@@ -53,10 +54,19 @@ export default function RecordsSummaryReport({ report }) {
           </section>
         ))}
       </div>
-      {(report.memorabilia_note || report.attachment_name) && (
+      {(report.memorabilia_note || report.attachment_name || report.images?.length) && (
         <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
           <h3 className="text-sm font-semibold text-foreground sm:text-base">Picture or multimedia memorabilia</h3>
           {report.memorabilia_note && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground-soft">{report.memorabilia_note}</p>}
+          {report.images?.length > 0 && (
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {report.images.map((image) => (
+                <a key={image.id} href={image.url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border bg-canvas">
+                  <Image unoptimized src={image.url} alt="Internship memorabilia" width={320} height={240} className="h-32 w-full object-contain" />
+                </a>
+              ))}
+            </div>
+          )}
           {report.attachment_name && (
             <button type="button" onClick={openAttachment} className="mt-3 inline-flex max-w-full items-center gap-2 break-all rounded-lg border border-border bg-canvas px-3 py-2 text-left text-sm font-medium text-primary-emphasis hover:bg-muted">
               <Paperclip className="size-4 shrink-0" aria-hidden="true" />{report.attachment_name}

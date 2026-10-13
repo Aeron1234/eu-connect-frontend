@@ -13,16 +13,15 @@ const sections = [
   ["difficulties_solutions", "Difficulties encountered and solutions made"],
 ];
 
-export function summaryReportHtml(report, imageDataUrl = null) {
+export function summaryReportHtml(report, imageDataUrls = []) {
   const bodySections = sections.map(([key, label]) => `
     <section>
       <h2>${label}</h2>
       <p>${escapeHtml(report[key])}</p>
     </section>`).join("");
-  const image = imageDataUrl
-    ? `<figure><img src="${imageDataUrl}" alt="Internship memorabilia" /></figure>`
-    : "";
-  const attachmentText = report.attachment_name && !imageDataUrl
+  const images = (Array.isArray(imageDataUrls) ? imageDataUrls : [imageDataUrls]).filter(Boolean)
+    .map((url) => `<figure><img src="${url}" alt="Internship memorabilia" /></figure>`).join("");
+  const attachmentText = report.attachment_name
     ? `<p class="attachment">A supplemental file is available with the digital report.</p>`
     : "";
 
@@ -38,8 +37,9 @@ export function summaryReportHtml(report, imageDataUrl = null) {
     section { margin-bottom: 18px; }
     h2 { font-size: 12pt; font-weight: bold; break-after: avoid; }
     p { white-space: pre-wrap; overflow-wrap: anywhere; }
-    figure { margin-top: 10px; break-inside: avoid; }
-    img { display: block; max-width: 70mm; max-height: 55mm; width: auto; height: auto; object-fit: contain; }
+    .images { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6mm; margin-top: 10px; }
+    figure { break-inside: avoid; }
+    img { display: block; max-width: 60mm; max-height: 35mm; width: auto; height: auto; object-fit: contain; }
     .attachment { margin-top: 8px; }
   </style></head><body>
     <h1>Summary Report</h1>
@@ -47,7 +47,7 @@ export function summaryReportHtml(report, imageDataUrl = null) {
     ${bodySections}
     <section><h2>Picture or multimedia memorabilia</h2>
       ${report.memorabilia_note ? `<p>${escapeHtml(report.memorabilia_note)}</p>` : ""}
-      ${image}${attachmentText}
+      ${images ? `<div class="images">${images}</div>` : ""}${attachmentText}
     </section>
   </body></html>`;
 }

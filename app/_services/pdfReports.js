@@ -55,29 +55,24 @@ export async function generateSummaryReportPdf(internshipId, accessToken) {
   const report = records.find((item) => item.internship_id === internshipId && item.report_id);
   if (!report) return null;
 
-  let imageDataUrl = null;
-  if (report.attachment_type?.startsWith("image/")) {
-    const attachmentResponse = await fetch(`${BACKEND_URL}/api/summary-reports/${encodeURIComponent(internshipId)}/attachment`, {
-      headers,
-      cache: "no-store",
-    });
-    if (!attachmentResponse.ok) throw new Error("Could not load the report image.");
-    const { url } = await attachmentResponse.json();
-    if (!url) throw new Error("Could not load the report image.");
-    const imageResponse = await fetch(url, { cache: "no-store" });
-    if (!imageResponse.ok) throw new Error("Could not load the report image.");
-    const imageBytes = Buffer.from(await imageResponse.arrayBuffer());
-    if (imageBytes.length > 20 * 1024 * 1024) throw new Error("The report image is too large to print.");
-    imageDataUrl = `data:${report.attachment_type};base64,${imageBytes.toString("base64")}`;
-  }
+  const imageDataUrls = await Promise.all((report.images || []).map(async (image) => {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(image.type) || !image.url) {
+      throw new Error("Could not load a report image.");
+    }
+    const response = await fetch(image.url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Could not load a report image.");
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > 5 * 1024 * 1024) throw new Error("A report image is too large to print.");
+    return `data:${image.type};base64,${bytes.toString("base64")}`;
+  }));
 
-  const pdf = await renderPdf(summaryReportHtml(report, imageDataUrl), {
+  const pdf = await renderPdf(summaryReportHtml(report, imageDataUrls), {
     landscape: false,
     preferCSSPageSize: true,
-  }, Boolean(imageDataUrl));
+  }, imageDataUrls.length > 0);
   const pageCount = (Buffer.from(pdf).toString("latin1").match(/\/Type\s*\/Page\b/g) || []).length;
   if (pageCount > 3) {
-    throw Object.assign(new Error("The report exceeds three pages. Shorten the text or use a smaller image before printing."), { status: 422 });
+    throw Object.assign(new Error("The report exceeds three pages. Shorten the text or remove an image before printing."), { status: 422 });
   }
   return pdf;
 }

@@ -8,7 +8,6 @@ export default function SummaryReportPrintButton({ internshipId, className = "" 
   const [error, setError] = useState("");
 
   async function printReport() {
-    const tab = window.open("", "_blank");
     setPending(true);
     setError("");
     try {
@@ -18,11 +17,10 @@ export default function SummaryReportPrintButton({ internshipId, className = "" 
         throw new Error(data.error || "Could not generate the report PDF.");
       }
       const url = URL.createObjectURL(await response.blob());
-      if (tab) tab.location.href = url;
-      else window.location.href = url;
+      const tab = window.open(url, "_blank");
+      if (!tab) window.location.href = url;
       window.setTimeout(() => URL.revokeObjectURL(url), 10 * 60_000);
     } catch (failure) {
-      tab?.close();
       setError(failure.message || "Could not generate the report PDF.");
     } finally {
       setPending(false);

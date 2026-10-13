@@ -23,9 +23,13 @@ test("print template uses the required document format and escapes report text",
 });
 
 test("image memorabilia is embedded as an image in the printable document", () => {
-  const html = summaryReportHtml(report, "data:image/png;base64,dGVzdA==");
+  const html = summaryReportHtml({ ...report, attachment_name: null }, [
+    "data:image/png;base64,dGVzdA==",
+    "data:image/jpeg;base64,c2Vjb25k",
+  ]);
   assert.match(html, /<img src="data:image\/png;base64,dGVzdA=="/);
-  assert.match(html, /max-width: 70mm; max-height: 55mm/);
+  assert.match(html, /<img src="data:image\/jpeg;base64,c2Vjb25k"/);
+  assert.match(html, /max-width: 60mm; max-height: 35mm/);
   assert.doesNotMatch(html, /Supplemental file:/);
   assert.doesNotMatch(html, /day-one\.png/);
 });
