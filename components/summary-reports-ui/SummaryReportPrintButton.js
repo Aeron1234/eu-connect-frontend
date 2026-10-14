@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Printer } from "lucide-react";
+import { FileDown } from "lucide-react";
 
 export default function SummaryReportPrintButton({ internshipId, className = "" }) {
   const [pending, setPending] = useState(false);
@@ -30,7 +30,7 @@ export default function SummaryReportPrintButton({ internshipId, className = "" 
   return (
     <div className={className}>
       <button type="button" onClick={printReport} disabled={pending} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60 sm:w-auto">
-        <Printer className="size-4" aria-hidden="true" />{pending ? "Preparing PDF..." : "Print"}
+        <FileDown className="size-4" aria-hidden="true" />{pending ? "Preparing PDF..." : "Export PDF"}
       </button>
       {error && <p role="alert" className="mt-2 text-xs text-red-600 dark:text-red-300">{error}</p>}
     </div>

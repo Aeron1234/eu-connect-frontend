@@ -2,11 +2,21 @@
 
 import { useState, useTransition } from "react";
 import { Lock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { accountProfileKeys } from "@/lib/cache/account-profile-queries";
 // Adjust this import path to wherever this server action actually lives.
 import { updatePassword } from "@/lib/server-actions/account-actions";
 import { toastAndAction } from "../../lib/helpers";
 
-export default function SecurityCard() {
+export default function SecurityCard({ passwordChangedAt }) {
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+  const changedDate = passwordChangedAt ? new Date(passwordChangedAt) : null;
+  const lastChanged = changedDate && !Number.isNaN(changedDate.getTime())
+    ? formatDistanceToNow(changedDate, { addSuffix: true })
+    : null;
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -61,6 +71,9 @@ export default function SecurityCard() {
 
       resetFields();
       setIsChangingPassword(false);
+      await queryClient.invalidateQueries({
+        queryKey: accountProfileKeys.profile(user?.id),
+      });
     });
   };
 
@@ -143,7 +156,9 @@ export default function SecurityCard() {
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-        Last changed 3 months ago. We recommend changing it periodically.
+        {lastChanged
+          ? `Last changed ${lastChanged}. We recommend changing it periodically.`
+          : "No password change is recorded yet. Please change your password now to secure your account."}
       </p>
     </section>
   );

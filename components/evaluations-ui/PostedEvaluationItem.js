@@ -282,7 +282,7 @@ function PostedEvaluationItem({
             <ExportPdfButton
               endpoint="/api/reports/student-evaluation"
               params={{ evaluationId: ev.id }}
-              label="Print"
+              label="Export PDF"
             />
           </div>
         </div>

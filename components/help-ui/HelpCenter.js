@@ -41,7 +41,7 @@ const roleGuides = {
       summary: "Keep a record of your internship work each week.",
       steps: [
         "Open Narratives and choose an ongoing or finished internship to review its weekly entries.",
-        "An ongoing internship is required to add or change narratives. Choose Print to open all entries for the selected internship in one PDF.",
+        "An ongoing internship is required to add or change narratives. Choose Export PDF to open all entries for the selected internship in one PDF.",
       ],
       href: "/student/narratives",
       linkText: "Open Narratives",
@@ -52,7 +52,7 @@ const roleGuides = {
       steps: [
         "Open Summary Reports and choose an ongoing or finished internship.",
         "Write paragraphs about the company, your schedule, a memorable moment, and challenges with their solutions.",
-        "Optionally attach one image or document, then submit. You can edit, delete, or print the report later.",
+        "Optionally attach one image or document, then submit. You can edit, delete, or export the report as a PDF later.",
       ],
       href: "/student/summary-reports",
       linkText: "Open Summary Reports",

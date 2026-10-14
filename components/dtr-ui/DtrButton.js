@@ -9,7 +9,7 @@ import { useUser } from "@/contexts/UserContext";
 import { dtrKeys } from "@/lib/cache/dtr-queries";
 import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 
-function DtrButton({ internshipData, status }) {
+function DtrButton({ internshipData, status, disabled = false }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useUser();
@@ -38,6 +38,14 @@ function DtrButton({ internshipData, status }) {
       <LogOut className="h-5 w-5" />
     ),
   };
+
+  if (disabled) {
+    return (
+      <button type="button" disabled className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md bg-white/60 px-4 py-2.5 text-sm font-semibold text-primary/70 sm:w-auto" title="DTR is unavailable before the internship start date">
+        {theme.icon} {theme.label}
+      </button>
+    );
+  }
 
   return (
     <Modal

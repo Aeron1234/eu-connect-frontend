@@ -23,7 +23,7 @@ async function SIPPReportsPage() {
           SIPP Reports
         </h1>
         <p className="text-sm text-foreground-soft mt-1">
-          Review SIPP internship placement data and print official CHED annexes.
+          Review SIPP internship placement data and export official CHED annexes as PDFs.
         </p>
       </div>
 

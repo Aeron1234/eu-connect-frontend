@@ -7,8 +7,24 @@ import Modal from "../ui/Modal";
 import ManualDialog from "../ui/ManualDialog";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 
+function manilaDay(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(date);
+  const part = (type) => parts.find((item) => item.type === type)?.value;
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
 function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
   const hasOngoingInternship = internshipData?.status === "ongoing";
+  const startDate = internshipData?.date_started;
+  const startDay = typeof startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(startDate)
+    ? startDate
+    : startDate ? manilaDay(startDate) : null;
+  const todayDay = manilaDay(new Date());
+  const dtrAvailable = Boolean(startDay && todayDay >= startDay);
 
   const canFinish =
     status !== "CLOCKED_IN" && status !== "ON_BREAK" &&
@@ -73,6 +89,13 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
               activate a record to track your daily attendance.
             </p>
           )}
+          {hasOngoingInternship && !dtrAvailable && (
+            <p className="mt-3 text-xs text-primary-foreground/85" role="status">
+              {startDay
+                ? `DTR clock-in and clock-out become available on your internship start date (${new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "long", day: "numeric", year: "numeric" }).format(new Date(`${startDay}T00:00:00Z`))}).`
+                : "DTR is unavailable until your internship start date is set."}
+            </p>
+          )}
           <p className="flex items-center gap-1.5 mt-4 text-xs text-primary-foreground/75 ">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{" "}
             <span
@@ -110,7 +133,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
             </Modal>
           ) : (
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto">
-              <DtrButton internshipData={internshipData} status={status} />
+              <DtrButton internshipData={internshipData} status={status} disabled={!dtrAvailable} />
               <BreakButton status={status} record={dtrRecord} />
             </div>
           )

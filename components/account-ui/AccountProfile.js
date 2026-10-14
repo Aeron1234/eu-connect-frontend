@@ -161,7 +161,7 @@ function AccountProfileContent({ roleLabel, userData = {} }) {
           </div>
 
           <aside className="space-y-6">
-            <SecurityCard />
+            <SecurityCard passwordChangedAt={userData.password_changed_at} />
             <AccountSummaryCard
               roleLabel={roleLabel}
               status={

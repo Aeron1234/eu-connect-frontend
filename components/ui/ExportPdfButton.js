@@ -1,13 +1,13 @@
 "use client";
 
 import { Spinner } from "@/components/ui/spinner";
-import { Printer } from "lucide-react";
+import { FileDown } from "lucide-react";
 import { useState } from "react";
 
 export default function ExportPdfButton({
   endpoint, // e.g. "/api/reports/annex-d" or "/api/reports/annex-c"
   params = {}, // e.g. { companyKey, academicYear } or { reportId }
-  label = "Print",
+  label = "Export PDF",
 }) {
   const [isPending, setIsPending] = useState(false);
 
@@ -48,7 +48,7 @@ export default function ExportPdfButton({
         <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
       ) : (
         <>
-          <Printer className="h-4 w-4" />
+          <FileDown className="h-4 w-4" />
           {label}
         </>
       )}
