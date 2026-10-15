@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { coursesOptions } from "@/lib/cache/reference-queries";
@@ -110,10 +111,10 @@ function PastInternshipsPageContent({
   }
 
   useEffect(() => {
-    if (pastInternshipsQuery.error) {
+    if (pastInternshipsQuery.error && pastInternshipsQuery.data) {
       notifyReadError("Error loading past internships:", pastInternshipsQuery.error);
     }
-  }, [pastInternshipsQuery.error]);
+  }, [pastInternshipsQuery.error, pastInternshipsQuery.data]);
 
   useEffect(() => {
     const previous = serverSnapshotRef.current;
@@ -200,12 +201,7 @@ function PastInternshipsPageContent({
           ))}
         </div>
       ) : pastInternshipsQuery.isError && !pastInternshipsQuery.data ? (
-        <div className="py-12 text-center">
-          <p className="text-sm text-muted-foreground">Could not load past internships.</p>
-          <button type="button" onClick={() => void pastInternshipsQuery.refetch()} className="mt-3 text-sm font-semibold text-primary-emphasis">
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={pastInternshipsQuery.error} reset={() => void pastInternshipsQuery.refetch()} logError={false} />
       ) : companies.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
           <Building2 className="size-8 text-foreground-faint" />

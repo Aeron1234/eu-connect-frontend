@@ -1,4 +1,5 @@
 "use client";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -72,12 +73,7 @@ function SearchUsers() {
         </div>
       )}
       {!isSearching && historyQuery.isError && !historyQuery.data && (
-        <div role="alert" className="py-8 text-center text-sm text-foreground-subtle">
-          <p>{historyQuery.error?.message || "Could not load recently viewed users."}</p>
-          <button type="button" onClick={() => void historyQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={historyQuery.error} reset={() => void historyQuery.refetch()} logError={false} />
       )}
       {!isSearching && !historyQuery.isPending && !(historyQuery.isError && !historyQuery.data) &&
         (history.length === 0 ? (
@@ -97,12 +93,7 @@ function SearchUsers() {
         </div>
       )}
       {!searchLoading && searchError && (
-        <div role="alert" className="py-8 text-center text-sm text-red-500">
-          <p>{searchQuery.error?.message || "Could not search users."}</p>
-          <button type="button" onClick={() => void searchQuery.refetch()} className="mt-2 font-semibold underline">
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={searchQuery.error} reset={() => void searchQuery.refetch()} logError={false} />
       )}
       {isSearching && !searchLoading && !searchError && searchedUsers.length > 0 && (
         <SearchedUserList searchedUsers={searchedUsers} />

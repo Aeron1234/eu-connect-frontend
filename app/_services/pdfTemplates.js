@@ -263,7 +263,7 @@ export function studentEvaluationHtml({
     ...categories.map(
       (cat, i) => `<tr><td class="content-cell">
         <div class="section">
-          <p class="section-title">${escapeHtml(cat.category).toUpperCase()}</p>
+          <p class="section-title">${i + 1}. ${escapeHtml(String(cat.category ?? "").replace(/^\s*\d+\.\s*/, "")).toUpperCase()}</p>
           ${cat.items
             .map(
               (item, j) => `

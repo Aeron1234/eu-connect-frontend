@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, TriangleAlert, UserPlus } from "lucide-react";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { useUser } from "@/contexts/UserContext";
 import { accountsInfiniteOptions, accountsKeys } from "@/lib/cache/accounts-queries";
 import { accountFormOptions } from "@/lib/cache/account-form-queries";
@@ -130,11 +131,8 @@ function AccountsManager({ initialPage }) {
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
           {formQuery.isPending ? (
             <CreateAccountFormSkeleton />
-          ) : formQuery.isError ? (
-            <div role="alert" className="text-sm">
-              <p>{formQuery.error.message}</p>
-              <button type="button" onClick={() => void formQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">Try again</button>
-            </div>
+          ) : formQuery.isError && !formQuery.data ? (
+            <ErrorUI error={formQuery.error} reset={() => void formQuery.refetch()} logError={false} />
           ) : <CreateAccountForm
             roles={roles}
             courses={courses}
@@ -161,7 +159,7 @@ function AccountsManager({ initialPage }) {
             />
           </div>
 
-          {listError && (
+          {listError && accountsQuery.data && (
             <div role="alert" className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-2">
                 <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
@@ -193,6 +191,8 @@ function AccountsManager({ initialPage }) {
 
           {isFiltering ? (
             <ExistingAccountListSkeleton rows={10} />
+          ) : listError && !accountsQuery.data ? (
+            <ErrorUI error={accountsQuery.error} reset={() => void accountsQuery.refetch()} logError={false} />
           ) : accounts.length > 0 ? (
             <ExistingAccountList
               filteredAccounts={accounts}

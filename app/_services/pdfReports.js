@@ -135,7 +135,7 @@ export async function generateAnnexCPdf(reportId, accessToken) {
       solutions: e.solution,
       recommendations: e.recommendation,
     })),
-    preparedBy: data.prepared_by || "",
+    preparedBy: data.prepared_by_export || data.prepared_by || "",
     certifiedBy: data.certified_by || "",
   });
 

@@ -258,7 +258,7 @@ export default function StudentSummaryReportsPage() {
   }
 
   if (reports.isPending) return <SummaryReportsSkeleton />;
-  if (reports.isError) return <ErrorUI error={reports.error} reset={() => reports.refetch()} logError={false} />;
+  if (reports.isError && !reports.data) return <ErrorUI error={reports.error} reset={() => reports.refetch()} logError={false} />;
 
   return (
     <main className="space-y-6 p-4 sm:p-6 lg:p-8">

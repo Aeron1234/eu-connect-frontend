@@ -5,6 +5,7 @@ import { useUser } from "@/contexts/UserContext";
 import { fileRequirementTypesOptions } from "@/lib/cache/reference-queries";
 import { activeStorageRecordOptions, pastStorageRecordsOptions } from "@/lib/cache/student-storage-queries";
 import Modal from "@/components/ui/Modal";
+import ErrorUI from "@/components/ui/ErrorUI";
 import ManualDialog from "@/components/ui/ManualDialog";
 import StorageUploadForm from "@/components/internship-docs-ui/StorageUploadForm";
 import RecordsDocuments from "@/components/internship-docs-ui/RecordsDocuments";
@@ -26,6 +27,12 @@ function StoragePage() {
   const pastQuery = useQuery({ ...pastStorageRecordsOptions(currentUserId), enabled: Boolean(currentUserId) });
   const ongoing = activeQuery.data;
   const fileRequirementTypes = typesQuery.data || [];
+  const currentError = (activeQuery.isError && activeQuery.data === undefined) ||
+    (typesQuery.isError && typesQuery.data === undefined);
+  const pastError = pastQuery.isError && pastQuery.data === undefined;
+  const refreshError = (activeQuery.isError && activeQuery.data !== undefined) ||
+    (typesQuery.isError && typesQuery.data !== undefined) ||
+    (pastQuery.isError && pastQuery.data !== undefined);
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
@@ -73,7 +80,7 @@ function StoragePage() {
         </Modal></div> : null}
       </div>
 
-      {(activeQuery.isError || typesQuery.isError || pastQuery.isError) && (
+      {refreshError && (
         <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
           <p>{activeQuery.error?.message || typesQuery.error?.message || pastQuery.error?.message}</p>
           <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => {
@@ -84,19 +91,26 @@ function StoragePage() {
         </div>
       )}
 
-      {(activeQuery.isPending || typesQuery.isPending) && (
+      {currentError ? (
+        <ErrorUI error={activeQuery.error || typesQuery.error} reset={() => {
+          if (activeQuery.isError) void activeQuery.refetch();
+          if (typesQuery.isError) void typesQuery.refetch();
+        }} logError={false} />
+      ) : (activeQuery.isPending || typesQuery.isPending) && (
         <div role="status" aria-label="Loading current internship documents"><RecordsDocumentsSkeleton /></div>
       )}
-      {pastQuery.isPending && (
+      {pastError ? (
+        <ErrorUI error={pastQuery.error} reset={() => void pastQuery.refetch()} logError={false} />
+      ) : pastQuery.isPending && (
         <div role="status" aria-label="Loading past internship documents"><PastInternshipDocumentsSkeleton /></div>
       )}
 
-      {!activeQuery.isPending && !activeQuery.isError && !typesQuery.isPending && !typesQuery.isError && <CurrentInternshipDocs
+      {!activeQuery.isPending && !typesQuery.isPending && !currentError && <CurrentInternshipDocs
         ongoing={ongoing}
         requirementTypes={fileRequirementTypes}
         currentUserId={currentUserId}
       />}
-      {!pastQuery.isPending && !pastQuery.isError && (
+      {!pastQuery.isPending && !pastError && (
         <PastInternshipDocuments records={pastQuery.data || []} currentUserId={currentUserId} />
       )}
     </main>

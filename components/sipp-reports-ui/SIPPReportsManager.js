@@ -1,4 +1,5 @@
 "use client";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -43,11 +44,8 @@ function SIPPReportsManager({
           address={address}
           initialPage={initialAnnexC}
         />
-      ) : yearsQuery.isError ? (
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
-          <p>{yearsQuery.error.message}</p>
-          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void yearsQuery.refetch()}>Try again</button>
-        </div>
+      ) : yearsQuery.isError && !yearsQuery.data ? (
+        <ErrorUI error={yearsQuery.error} reset={() => void yearsQuery.refetch()} logError={false} />
       ) : (
         <AnnexDHteList
           availableAcadYear={yearsQuery.data || availableAcadYear}

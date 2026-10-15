@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -146,10 +147,10 @@ export default function ActivityLogsManager({ initialPage }) {
   }
 
   useEffect(() => {
-    if (!isChangingFilters && logsQuery.error) {
+    if (!isChangingFilters && logsQuery.error && logsQuery.data) {
       notifyReadError("Error loading activity logs:", logsQuery.error);
     }
-  }, [isChangingFilters, logsQuery.error]);
+  }, [isChangingFilters, logsQuery.error, logsQuery.data]);
 
   // A server action can stream a fresh first page without remounting the list.
   useEffect(() => {
@@ -313,7 +314,7 @@ export default function ActivityLogsManager({ initialPage }) {
       </div>
 
       {/* Table */}
-      {!isChangingFilters && logsQuery.error && (
+      {!isChangingFilters && logsQuery.error && logsQuery.data && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
           <span className="flex items-center gap-2 text-foreground-soft">
             <TriangleAlert className="size-4 text-destructive" aria-hidden="true" />
@@ -333,6 +334,8 @@ export default function ActivityLogsManager({ initialPage }) {
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <ActivityLogsTableSkeleton />
         </div>
+      ) : logsQuery.error && !logsQuery.data ? (
+        <ErrorUI error={logsQuery.error} reset={() => void logsQuery.refetch()} logError={false} />
       ) : logsQuery.error && logs.length === 0 ? null : logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-24 text-center shadow-sm">
           <ScrollText className="size-8 text-foreground-faint" />

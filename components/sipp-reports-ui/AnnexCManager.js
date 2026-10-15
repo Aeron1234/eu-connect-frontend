@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -105,8 +106,8 @@ export default function AnnexCManager({
   }
 
   useEffect(() => {
-    if (reportsQuery.error) notifyReadError("Error loading Annex C reports:", reportsQuery.error);
-  }, [reportsQuery.error]);
+    if (reportsQuery.error && reportsQuery.data) notifyReadError("Error loading Annex C reports:", reportsQuery.error);
+  }, [reportsQuery.error, reportsQuery.data]);
 
   useEffect(() => {
     if (!initialPage || serverSnapshotRef.current === initialPage || !userId) return;
@@ -508,7 +509,7 @@ export default function AnnexCManager({
             ))}
           </div>
 
-          {!isChangingFilters && reportsQuery.error && (
+          {!isChangingFilters && reportsQuery.error && reportsQuery.data && (
             <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
               <span className="flex items-center gap-2 text-foreground-soft"><TriangleAlert className="size-4 text-destructive" />{reportsQuery.error.message}</span>
               <button type="button" onClick={() => reportsQuery.isFetchNextPageError ? reportsQuery.fetchNextPage() : reportsQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
@@ -517,7 +518,9 @@ export default function AnnexCManager({
 
           {isPending ? (
             <AnnualReportSkeleton />
-          ) : reportsQuery.error && reports.length === 0 ? null
+          ) : reportsQuery.error && !reportsQuery.data ? (
+            <ErrorUI error={reportsQuery.error} reset={() => void reportsQuery.refetch()} logError={false} />
+          )
           : reports.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
               <ClipboardList className="size-8 text-foreground-faint" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import {
@@ -137,14 +138,12 @@ function InternshipRecordsManager() {
             {Array.from({ length: 3 }, (_, index) => <RecordCardSkeleton key={index} />)}
           </div>
         )
-      ) : (recordsQuery.isError || regionsQuery.isError) ? (
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-5 text-sm">
-          <p>{recordsQuery.error?.message || regionsQuery.error?.message}</p>
-          <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => {
+      ) : ((recordsQuery.isError && recordsQuery.data === undefined) ||
+        (regionsQuery.isError && regionsQuery.data === undefined)) ? (
+        <ErrorUI error={recordsQuery.isError && recordsQuery.data === undefined ? recordsQuery.error : regionsQuery.error} logError={false} reset={() => {
             if (recordsQuery.isError) void recordsQuery.refetch();
             if (regionsQuery.isError) void regionsQuery.refetch();
-          }}>Try again</button>
-        </div>
+          }} />
       ) : tab === "form" ? (
         <div className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:p-8">
           <InternshipRecordForm

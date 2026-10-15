@@ -46,7 +46,9 @@ function NarrativesPage() {
   if (activeQuery.isPending || pastQuery.isPending) {
     return <StudentNarrativesPageSkeleton />;
   }
-  if (activeQuery.isError || pastQuery.isError || (narrativesQuery.isError && !narrativesQuery.data)) {
+  if ((activeQuery.isError && activeQuery.data === undefined) ||
+    (pastQuery.isError && pastQuery.data === undefined) ||
+    (narrativesQuery.isError && !narrativesQuery.data)) {
     return <ErrorUI error={activeQuery.error || pastQuery.error || narrativesQuery.error} reset={() => {
       if (activeQuery.isError) void activeQuery.refetch();
       if (pastQuery.isError) void pastQuery.refetch();

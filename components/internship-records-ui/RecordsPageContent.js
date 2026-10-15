@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { format } from "date-fns";
 import {
@@ -147,10 +148,10 @@ function RecordsPageContent({
     recordsQuery.isPlaceholderData;
 
   useEffect(() => {
-    if (recordsQuery.error) {
+    if (recordsQuery.error && recordsQuery.data) {
       notifyReadError("Error loading internship records:", recordsQuery.error);
     }
-  }, [recordsQuery.error]);
+  }, [recordsQuery.error, recordsQuery.data]);
 
   useEffect(() => {
     if (!Array.isArray(initialData) || serverSnapshotRef.current === initialData) return;
@@ -240,6 +241,10 @@ function RecordsPageContent({
 
   if (recordsQuery.isPending && !recordsQuery.data) {
     return <InternshipRecordsPageSkeleton />;
+  }
+
+  if (recordsQuery.isError && !recordsQuery.data) {
+    return <ErrorUI error={recordsQuery.error} reset={() => void recordsQuery.refetch()} logError={false} />;
   }
 
   return (
@@ -365,15 +370,7 @@ function RecordsPageContent({
             </article>
           ))}
 
-          {recordsQuery.isError && records.length === 0 && !isSearching ? (
-            <button
-              type="button"
-              onClick={() => void recordsQuery.refetch()}
-              className="text-sm font-medium text-primary-emphasis hover:underline"
-            >
-              Could not load internship records. Try again.
-            </button>
-          ) : records.length === 0 && !isSearching ? (
+          {records.length === 0 && !isSearching ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
               <p className="text-sm text-muted-foreground">
                 No internship records match your filters.

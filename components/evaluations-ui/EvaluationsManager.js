@@ -49,8 +49,8 @@ function EvaluationsManager({ initialCriteria }) {
   }, [selectedTab, activeTab]);
 
   useEffect(() => {
-    if (tabQuery.error) notifyReadError(tabQuery.error.message || "Could not load evaluations.");
-  }, [tabQuery.error]);
+    if (tabQuery.error && tabQuery.data) notifyReadError(tabQuery.error.message || "Could not load evaluations.");
+  }, [tabQuery.error, tabQuery.data]);
 
   function handleTabClick(value) {
     setSelectedTab(value);
@@ -66,7 +66,7 @@ function EvaluationsManager({ initialCriteria }) {
   }
 
   const isSwitching = selectedTab !== activeTab;
-  const loadError = !isSwitching && tabQuery.isError
+  const loadError = !isSwitching && tabQuery.isError && !tabQuery.data
     ? tabQuery.error?.message || "Could not load evaluations."
     : "";
   const isPending = isSwitching || tabQuery.isPending;

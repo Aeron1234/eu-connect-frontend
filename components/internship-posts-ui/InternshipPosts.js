@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -139,10 +140,10 @@ function InternshipPosts({
   const isPending = isChangingFilters || postsQuery.isPending || postsQuery.isPlaceholderData;
 
   useEffect(() => {
-    if (postsQuery.error) {
+    if (postsQuery.error && postsQuery.data) {
       notifyReadError("Error loading internship posts:", postsQuery.error);
     }
-  }, [postsQuery.error]);
+  }, [postsQuery.error, postsQuery.data]);
 
   // revalidatePath can stream a fresh first page while this component remains
   // mounted. Reconcile that snapshot without discarding stable loaded pages.
@@ -310,14 +311,8 @@ function InternshipPosts({
             <InternshipPostsListSkeleton key={i} />
           ))}
         </div>
-      ) : postsQuery.isError && internshipPosts.length === 0 ? (
-        <button
-          type="button"
-          onClick={() => void postsQuery.refetch()}
-          className="text-sm font-medium text-primary-emphasis hover:underline"
-        >
-          Could not load internship listings. Try again.
-        </button>
+      ) : postsQuery.isError && !postsQuery.data ? (
+        <ErrorUI error={postsQuery.error} reset={() => void postsQuery.refetch()} logError={false} />
       ) : (
         <div className="space-y-4 sm:space-y-6">
           {internshipPosts.map((item) => (

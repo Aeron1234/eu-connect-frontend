@@ -10,6 +10,11 @@ export default function ExportPdfButton({
   label = "Export PDF",
 }) {
   const [isPending, setIsPending] = useState(false);
+  const [requestError, setRequestError] = useState(null);
+
+  // Event-handler errors do not reach Next.js error boundaries. Throw on the
+  // next render so the page's existing themed error UI can handle the failure.
+  if (requestError) throw requestError;
 
   const handleExport = async () => {
     try {
@@ -24,15 +29,16 @@ export default function ExportPdfButton({
         const { error } = await res
           .json()
           .catch(() => ({ error: "Failed to generate PDF" }));
-        throw new Error(error);
+        const requestFailure = new Error(error || `PDF export failed (${res.status}).`);
+        requestFailure.status = res.status;
+        throw requestFailure;
       }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (err) {
-      console.error(err);
-      alert(err.message || "Something went wrong generating the PDF.");
+      setRequestError(err instanceof Error ? err : new Error("Could not generate the PDF."));
     } finally {
       setIsPending(false);
     }

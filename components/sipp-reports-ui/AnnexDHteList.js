@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -65,8 +66,8 @@ export function AnnexDHteList({
   }
 
   useEffect(() => {
-    if (companiesQuery.error) notifyReadError("Error loading HTE companies:", companiesQuery.error);
-  }, [companiesQuery.error]);
+    if (companiesQuery.error && companiesQuery.data) notifyReadError("Error loading HTE companies:", companiesQuery.error);
+  }, [companiesQuery.error, companiesQuery.data]);
 
   useEffect(() => {
     if (!initialPage || serverSnapshotRef.current === initialPage || !userId) return;
@@ -154,7 +155,7 @@ export function AnnexDHteList({
         />
       </div>
 
-      {!isChangingFilters && companiesQuery.error && (
+      {!isChangingFilters && companiesQuery.error && companiesQuery.data && (
         <div role="alert" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
           <span className="flex items-center gap-2 text-foreground-soft"><TriangleAlert className="size-4 text-destructive" />{companiesQuery.error.message}</span>
           <button type="button" onClick={() => companiesQuery.isFetchNextPageError ? companiesQuery.fetchNextPage() : companiesQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
@@ -163,7 +164,9 @@ export function AnnexDHteList({
 
       {isPending ? (
         <HTEListSkeleton />
-      ) : companiesQuery.error && companies.length === 0 ? null
+      ) : companiesQuery.error && !companiesQuery.data ? (
+        <ErrorUI error={companiesQuery.error} reset={() => void companiesQuery.refetch()} logError={false} />
+      )
       : companies.length === 0 ? (
         <div className="mt-6 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
           <FileText className="size-8 text-foreground-faint" />

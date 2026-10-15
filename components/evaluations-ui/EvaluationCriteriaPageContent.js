@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import {
   ClipboardList,
@@ -45,14 +46,14 @@ function buildFormData(fields) {
   return fd;
 }
 
-function addToGroups(groups, category, item) {
+function addToGroups(groups, category, item, preserveOrder = false) {
   if (groups.some((group) => group.category === category)) {
     return groups.map((group) => group.category === category
       ? { ...group, items: [...group.items, item] }
       : group);
   }
-  return [...groups, { category, items: [item] }]
-    .sort((a, b) => a.category.localeCompare(b.category));
+  const next = [...groups, { category, items: [item] }];
+  return preserveOrder ? next : next.sort((a, b) => a.category.localeCompare(b.category));
 }
 
 function setCriterionActive(groups, id, isActive) {
@@ -124,8 +125,8 @@ export default function EvaluationCriteriaPageContent({
   }, [formType, activeType]);
 
   useEffect(() => {
-    if (criteriaQuery.error) notifyReadError("Error loading evaluation criteria:", criteriaQuery.error);
-  }, [criteriaQuery.error]);
+    if (criteriaQuery.error && criteriaQuery.data) notifyReadError("Error loading evaluation criteria:", criteriaQuery.error);
+  }, [criteriaQuery.error, criteriaQuery.data]);
 
   useEffect(() => {
     if (!Array.isArray(initialCriteria) || serverSnapshotRef.current === initialCriteria || !userId) return;
@@ -184,7 +185,7 @@ export default function EvaluationCriteriaPageContent({
       `add:${category}`,
       addCriterion,
       { category, type: activeType, criterion_name: label },
-      (groups) => addToGroups(groups, category, { id: tempId, name: label, is_active: true }),
+      (groups) => addToGroups(groups, category, { id: tempId, name: label, is_active: true }, activeType === "student"),
       {
         onError: () => {
           if (!wasDraft) return;
@@ -269,7 +270,9 @@ export default function EvaluationCriteriaPageContent({
   }, [sections, draftSections, filter]);
 
   const addSection = () => {
-    const title = newSection.trim();
+    const title = formType === "student"
+      ? newSection.trim().replace(/^\d+\.\s*/, "").trim()
+      : newSection.trim();
     if (!title) return;
     if (
       sections.some((s) => s.title === title) ||
@@ -337,7 +340,7 @@ export default function EvaluationCriteriaPageContent({
         </div>
       )}
 
-      {!isSwitchingType && criteriaQuery.error && (
+      {!isSwitchingType && criteriaQuery.error && criteriaQuery.data && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
           <span>{criteriaQuery.error.message || "Could not load evaluation criteria."}</span>
           <button type="button" onClick={() => criteriaQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
@@ -346,7 +349,9 @@ export default function EvaluationCriteriaPageContent({
 
       {isSwitchingType ? (
         <EvaluationCriteriaListSkeleton />
-      ) : criteriaQuery.error && !criteriaQuery.data ? null
+      ) : criteriaQuery.error && !criteriaQuery.data ? (
+        <ErrorUI error={criteriaQuery.error} reset={() => void criteriaQuery.refetch()} logError={false} />
+      )
       : (
         <>
           <div className="space-y-4">

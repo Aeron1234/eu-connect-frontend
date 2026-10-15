@@ -20,6 +20,15 @@ function classifyError(error) {
   const status = error?.status || error?.cause?.status;
   const message = (error?.message || "").toLowerCase();
 
+  if (status === 404) {
+    return {
+      icon: AlertTriangle,
+      title: "Not Found",
+      description: "This page or item could not be found.",
+      tone: "stone",
+    };
+  }
+
   if (
     status === 403 ||
     message.includes("forbidden") ||

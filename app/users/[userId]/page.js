@@ -38,7 +38,7 @@ async function UserProfilePage({ params, searchParams }) {
     : null;
 
   if (!searchedUserId) {
-    return <div className="p-6 text-red-500">User not found</div>;
+    notFound();
   }
 
   const session = await getUserSession();

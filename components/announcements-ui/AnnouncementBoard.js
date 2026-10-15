@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -125,10 +126,10 @@ function AnnouncementBoard({
   }
 
   useEffect(() => {
-    if (announcementsQuery.error) {
+    if (announcementsQuery.error && announcementsQuery.data) {
       notifyReadError("Error loading announcements:", announcementsQuery.error);
     }
-  }, [announcementsQuery.error]);
+  }, [announcementsQuery.error, announcementsQuery.data]);
 
   useEffect(() => {
     const previous = serverSnapshotRef.current;
@@ -221,6 +222,8 @@ function AnnouncementBoard({
         <section aria-label="Selected announcement" className="space-y-3">
           {targetQuery.isPending ? (
             <AnnouncementCardSkeleton showEventDate />
+          ) : targetQuery.isError && ![403, 404].includes(targetQuery.error?.status) ? (
+            <ErrorUI error={targetQuery.error} reset={() => void targetQuery.refetch()} logError={false} />
           ) : targetQuery.isError ? (
             <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
               This announcement is unavailable or you do not have access to it.
@@ -245,12 +248,7 @@ function AnnouncementBoard({
           ))}
         </div>
       ) : announcementsQuery.isError && !announcementsQuery.data ? (
-        <div className="py-12 text-center">
-          <p className="text-sm text-muted-foreground">Could not load announcements.</p>
-          <button type="button" onClick={() => void announcementsQuery.refetch()} className="mt-3 text-sm font-semibold text-primary-emphasis">
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={announcementsQuery.error} reset={() => void announcementsQuery.refetch()} logError={false} />
       ) : (
         <div className="space-y-6">
           {isPinnedExist && (

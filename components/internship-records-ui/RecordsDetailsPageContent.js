@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 import {
   internshipRecordDetailsKeys,
   internshipRecordDetailsTabOptions,
@@ -71,8 +72,8 @@ function RecordsDetailsPageContent({ record, internshipId }) {
   }, [selectedTab, activeTab]);
 
   useEffect(() => {
-    if (tabQuery.error) notifyReadError(tabQuery.error.message || "Could not load this section.");
-  }, [tabQuery.error]);
+    if (tabQuery.error && tabQuery.data) notifyReadError(tabQuery.error.message || "Could not load this section.");
+  }, [tabQuery.error, tabQuery.data]);
 
   function handleTabClick(value) {
     setSelectedTab(value);
@@ -104,9 +105,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
   const isSwitching = selectedTab !== activeTab;
   const isPending =
     isSwitching || (activeTab !== "overview" && tabQuery.isPending);
-  const loadError = !isSwitching && tabQuery.isError
-    ? tabQuery.error?.message || "Could not load this section."
-    : "";
+  const loadError = !isSwitching && tabQuery.isError && !tabQuery.data;
   const data = tabQuery.data;
 
   const pct = Math.min(
@@ -119,12 +118,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
       <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={handleTabClick} />
 
       {loadError && !isPending ? (
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
-          <p>{loadError}</p>
-          <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void tabQuery.refetch()}>
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} logError={false} />
       ) : isPending ? (
         <RecordsTabContentSkeleton tab={selectedTab} />
       ) : (

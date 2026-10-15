@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageTitle from "@/components/ui/PageTitle";
 import PageManual from "@/components/ui/PageManual";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function when(value) {
   if (!value) return "—";
@@ -119,7 +120,7 @@ export default function ErrorTrackingDashboard() {
     {query.data && <p className="text-xs text-muted-foreground">{query.data.stats.totalOccurrences} occurrences across {query.data.stats.totalGroups} groups in this view.</p>}
     {query.isError && query.data && <p role="alert" className="text-xs text-destructive">Refresh failed. Showing the last loaded results. <button type="button" onClick={refresh} className="font-semibold underline">Try again</button></p>}
     {query.isPending ? <LoadingRows />
-      : query.isError && !query.data ? <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-5 text-sm"><p>{query.error.message}</p><button type="button" onClick={refresh} className="mt-2 font-semibold text-primary-emphasis">Try again</button></div>
+      : query.isError && !query.data ? <ErrorUI error={query.error} reset={refresh} logError={false} />
         : query.data.data.length === 0 ? <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No errors match these filters.</div>
           : <div className="space-y-3">{query.data.data.map((item) => <div key={item.fingerprint} className="space-y-3"><button type="button" onClick={() => setSelected(selected === item.fingerprint ? null : item.fingerprint)} aria-expanded={selected === item.fingerprint} className={`w-full rounded-xl border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/50 sm:p-5 ${selected === item.fingerprint ? "border-primary" : "border-border"}`}>
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">

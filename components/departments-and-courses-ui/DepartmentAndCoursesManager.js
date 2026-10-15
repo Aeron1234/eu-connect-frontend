@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Building2, GraduationCap, Layers, Pencil, Power } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   adminCoursesOptions,
@@ -303,6 +304,11 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
     }
   }
 
+  const visibleQuery = view === "departments" ? departmentsQuery : coursesQuery;
+  if (visibleQuery.isError && !visibleQuery.data) {
+    return <ErrorUI error={visibleQuery.error} reset={() => void visibleQuery.refetch()} logError={false} />;
+  }
+
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
       <ConfirmDialog open={Boolean(confirmDepartment)} onOpenChange={(open) => { if (!open) setConfirmDepartment(null); }} title="Deactivate department?" description={confirmDepartment ? `Deactivate ${confirmDepartment.name}? Its courses will no longer be offered for new selections.` : ""} confirmLabel="Deactivate" destructive pending={Boolean(confirmDepartment && pendingIds.has(`department:${confirmDepartment.id}`))} onConfirm={async () => { if (!confirmDepartment) return; await handleToggleDepartment(confirmDepartment); setConfirmDepartment(null); }} />
@@ -531,15 +537,6 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
             <tbody className="max-2xl:grid max-2xl:gap-3 lg:max-2xl:grid-cols-2">
               {departmentsQuery.isPending ? (
                 <LoadingRows />
-              ) : departmentsQuery.isError && !departmentsQuery.data ? (
-                <tr className="max-2xl:col-span-full max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:border-border max-2xl:bg-card">
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm max-2xl:block">
-                    <p>{departmentsQuery.error?.message || "Could not load departments."}</p>
-                    <button type="button" onClick={() => void departmentsQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
-                      Try again
-                    </button>
-                  </td>
-                </tr>
               ) : filteredDepartments.map((d) => (
                 <tr key={d.id} className="border-b border-border last:border-0 max-2xl:grid max-2xl:min-w-0 max-2xl:grid-cols-2 max-2xl:gap-x-3 max-2xl:gap-y-4 max-2xl:rounded-xl max-2xl:border max-2xl:bg-card max-2xl:p-4 max-2xl:shadow-sm">
                   <td className="px-5 py-3 font-medium text-foreground max-2xl:col-span-2 max-2xl:p-0 max-2xl:text-base max-2xl:leading-snug">
@@ -608,15 +605,6 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
             <tbody className="max-2xl:grid max-2xl:gap-3 lg:max-2xl:grid-cols-2">
               {coursesQuery.isPending ? (
                 <LoadingRows />
-              ) : coursesQuery.isError && !coursesQuery.data ? (
-                <tr className="max-2xl:col-span-full max-2xl:block max-2xl:rounded-xl max-2xl:border max-2xl:border-border max-2xl:bg-card">
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm max-2xl:block">
-                    <p>{coursesQuery.error?.message || "Could not load courses."}</p>
-                    <button type="button" onClick={() => void coursesQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
-                      Try again
-                    </button>
-                  </td>
-                </tr>
               ) : filteredCourses.map((c) => (
                 <tr key={c.id} className="border-b border-border last:border-0 max-2xl:grid max-2xl:min-w-0 max-2xl:grid-cols-2 max-2xl:gap-x-3 max-2xl:gap-y-4 max-2xl:rounded-xl max-2xl:border max-2xl:bg-card max-2xl:p-4 max-2xl:shadow-sm">
                   <td className="px-5 py-3 font-medium text-foreground max-2xl:col-span-2 max-2xl:p-0 max-2xl:text-base max-2xl:leading-snug">

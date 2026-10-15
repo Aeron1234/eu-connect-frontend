@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, BellRing, Inbox } from "lucide-react";
@@ -84,10 +85,10 @@ function NotificationList({ inboxData: initialData }) {
   }, [initialData, queryClient, user.id]);
 
   useEffect(() => {
-    if (inboxQuery.error) {
+    if (inboxQuery.error && inboxQuery.data) {
       notifyReadError("Could not load notifications:", inboxQuery.error);
     }
-  }, [inboxQuery.error]);
+  }, [inboxQuery.error, inboxQuery.data]);
 
   useEffect(() => {
     let timer;
@@ -162,12 +163,7 @@ function NotificationList({ inboxData: initialData }) {
           {Array.from({ length: 5 }, (_, index) => <NotificationItemSkeleton key={index} />)}
         </div>
       ) : inboxQuery.isError && !inboxQuery.data ? (
-        <div className="rounded-xl border border-border bg-card px-6 py-16 text-center text-sm text-muted-foreground">
-          <p>Could not load notifications.</p>
-          <button type="button" onClick={() => void inboxQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={inboxQuery.error} reset={() => void inboxQuery.refetch()} logError={false} />
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-16 sm:py-20 text-center">
           <Inbox className="size-8 text-foreground-faint" />

@@ -1,4 +1,5 @@
 "use client";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
@@ -189,13 +190,8 @@ export default function AccountProfile({ roleLabel }) {
   if (profileQuery.isPending) {
     return <AccountLoading />;
   }
-  if (profileQuery.isError) {
-    return (
-      <main role="alert" className="flex-1 p-4 text-sm sm:p-6 lg:p-8">
-        <p>{profileQuery.error.message}</p>
-        <button type="button" onClick={() => void profileQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis">Try again</button>
-      </main>
-    );
+  if (profileQuery.isError && !profileQuery.data) {
+    return <ErrorUI error={profileQuery.error} reset={() => void profileQuery.refetch()} logError={false} />;
   }
   return <AccountProfileContent roleLabel={roleLabel} userData={profileQuery.data} />;
 }

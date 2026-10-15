@@ -1,5 +1,7 @@
 "use client";
 
+import ErrorUI from "@/components/ui/ErrorUI";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
@@ -8,7 +10,6 @@ import {
   HardDrive,
   RefreshCw,
   Search,
-  Server,
   TriangleAlert,
 } from "lucide-react";
 import PageTitle from "@/components/ui/PageTitle";
@@ -189,7 +190,7 @@ export default function CacheMonitoringDashboard({ initialSnapshot }) {
         </div>
       </div>
 
-      {error && (
+      {error && snapshot && (
         <div role="alert" className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-foreground">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
           <span>{error}{snapshot ? " Showing the last successful snapshot." : ""}</span>
@@ -197,11 +198,7 @@ export default function CacheMonitoringDashboard({ initialSnapshot }) {
       )}
 
       {!snapshot ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center shadow-sm">
-          <Server className="mx-auto h-9 w-9 text-primary-emphasis" aria-hidden="true" />
-          <p className="mt-3 font-semibold text-foreground">Cache metrics are unavailable</p>
-          <p className="mt-1 text-sm text-foreground-soft">Try refreshing after the backend is reachable.</p>
-        </div>
+        <ErrorUI error={new Error(error || "Cache metrics are unavailable.")} reset={refresh} logError={false} />
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-border bg-card px-4 py-3 text-xs text-foreground-soft shadow-sm sm:px-5">

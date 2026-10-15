@@ -1,6 +1,7 @@
 "use client";
 
 import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { evaluationsKeys } from "@/lib/cache/evaluations-queries";
@@ -113,9 +114,9 @@ function SearchedUserRecordsManager({
 
   useEffect(() => {
     if (tabQuery.error) {
-      notifyReadError(tabQuery.error.message || "Could not load this section.");
+      if (tabQuery.data) notifyReadError(tabQuery.error.message || "Could not load this section.");
     }
-  }, [tabQuery.error]);
+  }, [tabQuery.error, tabQuery.data]);
 
   useEffect(() => {
     if (!userId || !initialDtrData) return;
@@ -178,9 +179,7 @@ function SearchedUserRecordsManager({
 
   const isSwitching = selectedTab !== activeTab;
   const isPending = isSwitching || (activeTab !== "info" && tabQuery.isPending);
-  const loadError = !isSwitching && tabQuery.isError
-    ? tabQuery.error?.message || "Could not load this section."
-    : "";
+  const loadError = !isSwitching && tabQuery.isError && !tabQuery.data;
   const data = tabQuery.data;
 
   return (
@@ -195,10 +194,7 @@ function SearchedUserRecordsManager({
 
       <div className={hideTabs ? "" : "mt-6"}>
         {loadError && !isPending ? (
-          <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
-            <p>{loadError}</p>
-            <button type="button" className="mt-3 font-semibold text-primary-emphasis" onClick={() => void tabQuery.refetch()}>Try again</button>
-          </div>
+          <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} logError={false} />
         ) : isPending ? (
           <TabContentSkeleton tab={selectedTab} userRole={userRole} />
         ) : (

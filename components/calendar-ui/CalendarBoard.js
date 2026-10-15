@@ -8,6 +8,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Check, ClipboardList, Megaphon
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 import Modal from "@/components/ui/Modal";
 import ManualDialog from "@/components/ui/ManualDialog";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -151,8 +152,8 @@ function CalendarBoard({ initialDate, initialData }) {
   }, [initialData, initialMonth, queryClient, role, user.department_id, user.id]);
 
   useEffect(() => {
-    if (monthQuery.error) toast.error(monthQuery.error.message);
-  }, [monthQuery.error]);
+    if (monthQuery.error && monthQuery.data) toast.error(monthQuery.error.message);
+  }, [monthQuery.error, monthQuery.data]);
 
   useEffect(() => {
     const refreshForCalendarNotification = (notification) => {
@@ -236,6 +237,10 @@ function CalendarBoard({ initialDate, initialData }) {
     if (removed) setDeletingEntry(null);
   }
 
+  if (monthQuery.isError && !monthQuery.data) {
+    return <ErrorUI error={monthQuery.error} reset={() => void monthQuery.refetch()} logError={false} />;
+  }
+
   return (
     <div className="mx-auto w-full max-w-[1680px] p-3 pb-12 sm:p-6 lg:p-8">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -291,12 +296,6 @@ function CalendarBoard({ initialDate, initialData }) {
               {activeKinds.map((kind) => <label key={kind.id} className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-foreground-soft"><input type="checkbox" checked={visible[kind.id]} onChange={(event) => setVisible((old) => ({ ...old, [kind.id]: event.target.checked }))} className="accent-primary" /><span className={`size-2 rounded-full ${kind.dot}`} />{kind.label}</label>)}
             </div>
             {loading && <div className="h-1 w-full animate-pulse bg-primary" role="status" aria-label="Loading calendar" />}
-            {monthQuery.isError && !monthQuery.data && (
-              <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2 text-sm text-muted-foreground sm:px-5">
-                <span>Could not load this month.</span>
-                <button type="button" onClick={() => void monthQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
-              </div>
-            )}
             <div className="grid grid-cols-7 border-b border-border bg-muted/35 text-center text-[10px] font-semibold uppercase tracking-wide text-foreground-subtle sm:text-xs">
               {weekdays.map((day) => <div key={day} className="py-2">{day}</div>)}
             </div>
