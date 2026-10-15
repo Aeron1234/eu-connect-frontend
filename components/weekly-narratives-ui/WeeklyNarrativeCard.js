@@ -66,7 +66,7 @@ function WeeklyNarrativeCard({ narrative, showActions = false, onUpdate, onDelet
         </div>
         {showActions && (
           <div className="absolute right-3 top-3 flex items-center gap-1 sm:right-4 sm:top-4">
-            <Modal
+            <Modal variant="form"
               title="Update your narrative"
               trigger={
                 <div aria-label="Edit" className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
@@ -76,7 +76,7 @@ function WeeklyNarrativeCard({ narrative, showActions = false, onUpdate, onDelet
             >
               <WeeklyNarrativeEditForm narrative={narrative} onSuccess={onUpdate} />
             </Modal>
-            <Modal
+            <Modal variant="confirmation"
               title={<span className="text-red-600">Delete Narrative</span>}
               trigger={
                 <div aria-label="Delete" className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition hover:bg-red-50 hover:text-red-600">

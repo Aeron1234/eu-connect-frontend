@@ -1,60 +1,90 @@
+"use client";
+
 import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { Info } from "lucide-react";
-
-const controlClass =
-  "mt-1 min-h-11 w-full rounded-xl border border-border/80 bg-muted/40 px-3 py-2 text-sm text-foreground shadow-sm outline-none transition-[background-color,border-color,box-shadow] placeholder:text-foreground-subtle focus:border-primary/60 focus:bg-card focus:ring-2 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-50 sm:mt-1.5 sm:px-3.5 sm:py-2.5 sm:focus:ring-4 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:font-semibold file:text-primary-emphasis";
+import { Children, isValidElement } from "react";
+import { Info, LayoutList } from "lucide-react";
+import {
+  controlClass,
+  modalFormLabelClass,
+  modalFormPrimaryClass,
+  modalFormCancelClass,
+  modalFormFooterClass,
+} from "./modalFormStyles";
+import {
+  useConfirmationLayout,
+  confirmationActionGroupClass,
+  confirmationCancelClass,
+  confirmationPrimaryClass,
+} from "./ConfirmationContent";
 
 function Root({ children, className, ...props }) {
+  const confirmation = useConfirmationLayout();
+  if (confirmation) {
+    return (
+      <form className={cn("flex min-w-0 flex-1 flex-col gap-4 sm:gap-5", className)} {...props}>
+        {children}
+      </form>
+    );
+  }
+
+  const content = Children.toArray(children);
+  const isFooter = (child) => isValidElement(child) && (child.type === Actions || child.type === Footer);
   return (
-    <form className={cn("flex min-w-0 flex-1 flex-col gap-4 sm:gap-6", className)} {...props}>
-      {children}
+    <form className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", className)} {...props}>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-4 py-5 sm:gap-6 sm:px-6 sm:py-6">
+        {content.filter((child) => !isFooter(child))}
+      </div>
+      {content.filter(isFooter)}
     </form>
   );
 }
 
-function Section({ title, optional = false, children, className }) {
+function Section({ title, description, optional = false, children, className }) {
   return (
     <section
       className={cn(
-        "min-w-0 border-l-2 pl-2.5 sm:pl-5",
-        optional ? "border-border" : "border-primary/60",
+        "min-w-0 border-b border-dashed border-border/80 pb-5 last:border-0 last:pb-0 sm:pb-6",
         className,
       )}
     >
-      <div className="mb-3 flex flex-wrap items-center gap-2 sm:mb-5">
-        <h3 className="text-sm font-bold text-foreground">
+      <div className="mb-4 flex items-center gap-2.5">
+        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-primary/8 text-primary-emphasis" aria-hidden="true">
+          <LayoutList className="size-3.5" />
+        </span>
+        <h3 className="min-w-0 text-[13px] font-semibold text-foreground sm:text-sm">
           {title ?? (optional ? "Optional Information" : "Required Information")}
         </h3>
         {optional && title !== "Optional Information" && (
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground-subtle">
+          <span className="ml-auto rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground-subtle">
             Optional
           </span>
         )}
       </div>
-      <div className="flex min-w-0 flex-col gap-3 sm:gap-5">{children}</div>
+      {description && <p className="-mt-2 mb-4 text-xs leading-relaxed text-foreground-subtle">{description}</p>}
+      <div className="flex min-w-0 flex-col gap-4">{children}</div>
     </section>
   );
 }
 
 function Row({ children, className }) {
-  return <div className={cn("flex min-w-0 gap-3 max-sm:flex-col sm:gap-5", className)}>{children}</div>;
+  return <div className={cn("flex min-w-0 flex-col gap-4 sm:flex-row", className)}>{children}</div>;
 }
 
 function Field({ label, children, className, as = "label" }) {
   const Component = as;
   return (
     <Component className={cn("flex min-w-0 flex-1 flex-col", className)}>
-      <span className="text-xs font-semibold tracking-wide text-foreground-soft">{label}</span>
+      <span className={modalFormLabelClass}>{label}</span>
       {children}
     </Component>
   );
 }
 
 function Input({ className, ...props }) {
-  return <input className={cn(controlClass, className)} {...props} />;
+  return <input className={cn(controlClass, props.type === "file" && "border-dashed bg-muted/20 py-3", className)} {...props} />;
 }
 
 function Textarea({ className, ...props }) {
@@ -70,7 +100,19 @@ function Select({ className, ...props }) {
   return <select className={cn(controlClass, className)} {...props} />;
 }
 
+function Footer({ children, className }) {
+  return <DialogFooter className={cn(modalFormFooterClass, className)}>{children}</DialogFooter>;
+}
+
 function Confirmation({ children, title = "Confirm Action" }) {
+  const confirmation = useConfirmationLayout();
+  if (confirmation) {
+    return (
+      <p id={confirmation.descriptionId} className="break-words text-center text-xs leading-relaxed text-foreground-soft sm:text-sm">
+        {children}
+      </p>
+    );
+  }
   return (
     <div className="flex gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3 sm:gap-3 sm:p-5">
       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary-emphasis sm:size-9">
@@ -94,14 +136,15 @@ function Actions({
   closeOnSubmit = true,
   disableCancelWhilePending = false,
 }) {
+  const confirmation = useConfirmationLayout();
   const submitButton = (
     <Button
       type="submit"
-      className={cn("min-h-9 w-auto shrink-0 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 sm:min-h-11 sm:px-6 sm:text-sm", submitClassName)}
+      className={cn(confirmation ? confirmationPrimaryClass : modalFormPrimaryClass, submitClassName)}
       disabled={isPending}
     >
       {isPending ? (
-        <Spinner className="size-6 stroke-3 stroke-primary-50" />
+        <Spinner className="size-4" />
       ) : (
         children ?? submitLabel
       )}
@@ -109,13 +152,13 @@ function Actions({
   );
 
   return (
-    <DialogFooter className="mt-1 border-t border-border pt-3 sm:pt-5">
-      <div className={cn("flex w-full items-center justify-end gap-2 font-medium sm:gap-2.5", className)}>
+    <DialogFooter className={confirmation ? "w-full" : modalFormFooterClass}>
+      <div className={cn(confirmation ? confirmationActionGroupClass : "flex min-w-0 w-full items-stretch justify-end gap-2", className)}>
         <DialogClose asChild>
           <Button
             variant="outline"
             type="button"
-            className="min-h-9 w-auto shrink-0 rounded-xl px-3 text-xs sm:min-h-11 sm:px-5 sm:text-sm"
+            className={confirmation ? confirmationCancelClass : modalFormCancelClass}
             disabled={disableCancelWhilePending && isPending}
           >
             {cancelLabel}
@@ -137,6 +180,7 @@ const ModalForm = {
   Select,
   Confirmation,
   Actions,
+  Footer,
 };
 
 export { controlClass };

@@ -46,7 +46,8 @@ function BreakAction({ label, action, Icon }) {
   }
 
   return (
-    <Modal
+    <Modal variant="confirmation"
+      intent={label === "Start break" ? "break" : "resume"}
       triggerStyles="w-full sm:w-auto"
       trigger={
         <div className="flex w-full items-center justify-center gap-2 rounded-md bg-white px-3 py-2.5 text-sm font-semibold text-primary-500 transition-colors hover:brightness-95 sm:w-auto xl:px-5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Megaphone, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Modal from "../ui/Modal";
 import AnnouncementForm from "../announcements-ui/AnnouncementForm";
 import { useTransition } from "react";
@@ -33,23 +33,18 @@ function PostAnnouncementButton({ categories, onPosted, categoriesLoading = fals
   }
 
   return (
-    <Modal
+    <Modal variant="form"
       trigger={
         <TitleButton>
           <Plus className="w-4 h-4" /> Announce
         </TitleButton>
       }
       title="Post Announcement"
-      titleIcon={
-        <span className="text-primary-emphasis">
-          <Megaphone className="h-5 w-5" />
-        </span>
-      }
     >
       {categoriesLoading ? (
         <ModalFormSkeleton />
       ) : categoriesError ? (
-        <div role="alert" className="text-sm">
+        <div role="alert" className="overflow-y-auto p-4 text-sm sm:p-6">
           <p>{categoriesError}</p>
           <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={onRetryCategories}>Try again</button>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 import ModalForm, { controlClass } from "@/components/ui/ModalForm";
+import { modalFormSelectContentClass } from "@/components/ui/modalFormStyles";
 import {
   Select,
   SelectContent,
@@ -67,6 +68,8 @@ function CreateUpdateAnnouncementForm({
   const isEdit = type === "edit";
   const { user } = useUser();
   const isAdmin = user?.role === "admin";
+  const [eventDate, setEventDate] = useState(isEdit ? data.event_date?.slice(0, 10) || "" : "");
+  const [eventEndDate, setEventEndDate] = useState(isEdit ? data.event_end_date?.slice(0, 10) || "" : "");
 
   // Admin can only ever post/edit General-category announcements — find
   // that category's real id from whatever the backend returned, rather
@@ -89,8 +92,8 @@ function CreateUpdateAnnouncementForm({
 
       <ModalForm.Section title="Announcement Details">
         <ModalForm.Row>
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Title
             </span>
             <ModalForm.Input
@@ -103,8 +106,8 @@ function CreateUpdateAnnouncementForm({
             />
           </label>
 
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Categories
             </span>
             <input
@@ -118,7 +121,7 @@ function CreateUpdateAnnouncementForm({
             {isAdmin ? (
               // Admin has no department, so Department-category is never a
               // valid choice — no picker at all, just a locked display.
-              <div className="mt-1 flex min-h-11 w-full items-center rounded-xl border border-border/80 bg-muted/40 px-3 text-sm text-muted-foreground sm:mt-1.5 sm:px-3.5">
+              <div className={`${controlClass} flex items-center text-foreground-subtle`}>
                 General
               </div>
             ) : (
@@ -131,12 +134,12 @@ function CreateUpdateAnnouncementForm({
                 <SelectTrigger className={controlClass}>
                   <SelectValue placeholder={"Select category"} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" align="start" className={modalFormSelectContentClass}>
                   <SelectGroup>
                     <SelectLabel>Categories</SelectLabel>
                     {categories.length > 0
                       ? categories.map((category) => (
-                          <SelectItem key={category.id} value={`${category.id}`}>
+                          <SelectItem key={category.id} value={`${category.id}`} className="whitespace-normal break-words py-2">
                             {category.name}
                           </SelectItem>
                         ))
@@ -148,17 +151,37 @@ function CreateUpdateAnnouncementForm({
           </label>
         </ModalForm.Row>
 
-        <ModalForm.Field label="Event date (optional)">
-          <ModalForm.Input
-            type="date"
-            name="event_date"
-            defaultValue={isEdit ? data.event_date?.slice(0, 10) || "" : ""}
-            disabled={isPending}
-          />
-        </ModalForm.Field>
+        <ModalForm.Row>
+          <ModalForm.Field label="Event date (optional)">
+            <ModalForm.Input
+              type="date"
+              name="event_date"
+              value={eventDate}
+              onChange={(event) => {
+                const next = event.target.value;
+                setEventDate(next);
+                if (!next) setEventEndDate("");
+              }}
+              disabled={isPending}
+            />
+          </ModalForm.Field>
+          <ModalForm.Field label="Until date (optional)">
+            <ModalForm.Input
+              type="date"
+              name="event_end_date"
+              value={eventEndDate}
+              min={eventDate || undefined}
+              onChange={(event) => setEventEndDate(event.target.value)}
+              disabled={isPending || !eventDate}
+            />
+          </ModalForm.Field>
+        </ModalForm.Row>
+        <p className="text-xs text-foreground-subtle">
+          Leave Until date blank for a one-day event. A range includes both the event date and the until date.
+        </p>
 
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Content
           </span>
           <ModalForm.Textarea

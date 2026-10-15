@@ -30,6 +30,11 @@ function RecordsOverviewSkeleton() {
           ))}
         </div>
       </div>
+      <div className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:col-span-2 sm:p-5">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="mt-2 h-4 w-full max-w-md" />
+        <Skeleton className="mt-4 h-[280px] w-full rounded-xl sm:h-[360px]" />
+      </div>
     </div>
   );
 }

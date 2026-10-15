@@ -5,16 +5,16 @@ import { toastAndAction } from "../../lib/helpers";
 import DeleteForm from "../ui/DeleteForm";
 import { deleteFile } from "@/lib/server-actions/internship-docs-actions";
 
-function StorageDeleteFile({ fileId = "", fileUrl = "", onDeleted }) {
+function StorageDeleteFile({ fileId = "", fileUrl = "", onDeleted, pendingReview = false }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
     formData.append("fileUrl", fileUrl);
 
     const handlers = {
-      loadingLabel: "Deleting file...",
-      successLabel: "File deleted.",
-      errorLabel: "Failed to delete.",
+      loadingLabel: pendingReview ? "Declining document..." : "Deleting file...",
+      successLabel: pendingReview ? "Document declined." : "File deleted.",
+      errorLabel: pendingReview ? "Failed to decline document." : "Failed to delete.",
       action: deleteFile,
       formData,
     };
@@ -31,6 +31,8 @@ function StorageDeleteFile({ fileId = "", fileUrl = "", onDeleted }) {
       id={fileId}
       isPending={isPending}
       name={"fileId"}
+      description={pendingReview ? "This pending document will be deleted. The employer who uploaded it will be notified that you declined it." : undefined}
+      submitLabel={pendingReview ? "Decline document" : undefined}
     />
   );
 }

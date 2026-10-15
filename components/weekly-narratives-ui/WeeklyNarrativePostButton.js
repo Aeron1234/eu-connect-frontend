@@ -36,7 +36,7 @@ function WeeklyNarrativePostButton() {
   }
 
   return (
-    <Modal
+    <Modal variant="form"
       triggerStyles="w-full sm:w-auto"
       trigger={
         <TitleButton>

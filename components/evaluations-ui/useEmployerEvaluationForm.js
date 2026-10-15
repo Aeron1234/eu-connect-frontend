@@ -1,0 +1,72 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { toastAndAction } from "@/lib/helpers";
+import { postEmployerEvaluation } from "@/lib/server-actions/evaluations-actions";
+
+export default function useEmployerEvaluationForm({ employerEvaluationCriterias, onSubmitted }) {
+  const [evaluationGrades, setEvaluationGrades] = useState(() => {
+    const initialState = {};
+    employerEvaluationCriterias.forEach((cat) => {
+      cat.items.forEach((item) => {
+        initialState[item.id] = null;
+      });
+    });
+
+    return initialState;
+  });
+  const [remarks, setRemarks] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const grades = [0, 1, 2, 3, 4, 5];
+
+  async function handleEvaluation(e) {
+    e.preventDefault();
+
+    const formData = {
+      scores: [],
+      other_remarks: remarks,
+    };
+
+    for (const [key, value] of Object.entries(evaluationGrades)) {
+      formData.scores.push({ criterion_name: key, score: value });
+    }
+
+    startTransition(async () => {
+      const result = await toastAndAction({
+        loadingLabel: "Posting supervisor/employer evaluation...",
+        successLabel: "Supervisor/employer evaluation posted!",
+        errorLabel: "Posting supervisor/employer evaluation failed.",
+        action: postEmployerEvaluation,
+        formData,
+      });
+
+      if (!result?.success) {
+        return;
+      }
+
+      onSubmitted?.();
+
+      setEvaluationGrades(() => {
+        const initialState = {};
+        employerEvaluationCriterias.forEach((cat) => {
+          cat.items.forEach((item) => {
+            initialState[item.id] = null;
+          });
+        });
+        return initialState;
+      });
+
+      setRemarks("");
+    });
+  }
+  return {
+    evaluationGrades,
+    setEvaluationGrades,
+    grades,
+    remarks,
+    setRemarks,
+    isPending,
+    handleEvaluation,
+  };
+}

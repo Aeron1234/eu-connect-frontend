@@ -1,13 +1,12 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import ModalForm from "@/components/ui/ModalForm";
+import { useState } from "react";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
+import ConfirmationContent, {
+  confirmationActionGroupClass,
+  confirmationCancelClass,
+  confirmationPrimaryClass,
+} from "./ConfirmationContent";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -19,37 +18,55 @@ export default function ConfirmDialog({
   confirmLabel = "Confirm",
   onConfirm,
   pending = false,
+  intent = "warning",
 }) {
-  const confirmationTitle = confirmLabel.startsWith("Delete")
-    ? "Confirm Deletion"
-    : confirmLabel.startsWith("Remove")
-      ? "Confirm Removal"
-      : confirmLabel.startsWith("Deactivate")
-        ? "Confirm Deactivation"
-        : confirmLabel.startsWith("Reject")
-          ? "Confirm Rejection"
-        : "Confirm Action";
+  const [lastOpenContent, setLastOpenContent] = useState({ title, description, confirmLabel, intent });
+
+  // Radix keeps the content mounted during its exit animation. Callers may
+  // clear their selected action immediately, but its presentation must stay.
+  if (open && (
+    lastOpenContent.title !== title ||
+    lastOpenContent.description !== description ||
+    lastOpenContent.confirmLabel !== confirmLabel ||
+    lastOpenContent.intent !== intent
+  )) {
+    setLastOpenContent({ title, description, confirmLabel, intent });
+  }
+  const content = open ? { title, description, confirmLabel, intent } : lastOpenContent;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!pending) onOpenChange(next); }}>
-      <DialogContent
-        className="flex max-h-[calc(100dvh-1rem)] max-w-xl flex-col gap-3 overflow-auto p-3.5 sm:gap-4 sm:p-6"
+    <Dialog
+      open={open}
+      onOpenChange={(next) => { if (!pending) onOpenChange(next); }}
+    >
+      <ConfirmationContent
+        title={content.title}
+        description={content.description}
         showCloseButton={!pending}
-        aria-describedby={undefined}
+        intent={content.intent}
       >
-        <DialogHeader className="text-left">
-          <DialogTitle className="pr-6 text-left text-sm text-primary-emphasis sm:text-base">{title}</DialogTitle>
-        </DialogHeader>
-        <ModalForm.Confirmation title={confirmationTitle}>{description}</ModalForm.Confirmation>
-        <DialogFooter className="mt-1 border-t border-border pt-3 sm:pt-5">
-          <div className="flex w-full items-center justify-end gap-2 font-medium sm:gap-2.5">
-            <Button type="button" variant="outline" disabled={pending} onClick={() => onOpenChange(false)} className="min-h-9 w-auto shrink-0 rounded-xl px-3 text-xs sm:min-h-11 sm:px-5 sm:text-sm">Cancel</Button>
-            <Button type="button" disabled={pending} onClick={onConfirm} className="min-h-9 w-auto shrink-0 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 sm:min-h-11 sm:px-6 sm:text-sm">
-              {pending ? <Spinner className="size-6 stroke-3 stroke-primary-50" /> : confirmLabel}
+        <DialogFooter className="w-full">
+          <div className={confirmationActionGroupClass}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => onOpenChange(false)}
+              className={confirmationCancelClass}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={pending}
+              onClick={onConfirm}
+              className={confirmationPrimaryClass}
+            >
+              {pending ? <Spinner className="size-4" /> : content.confirmLabel}
             </Button>
           </div>
         </DialogFooter>
-      </DialogContent>
+      </ConfirmationContent>
     </Dialog>
   );
 }

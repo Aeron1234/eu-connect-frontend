@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ModalForm, { controlClass } from "@/components/ui/ModalForm";
+import { modalFormSelectContentClass } from "@/components/ui/modalFormStyles";
 import {
   Select,
   SelectContent,
@@ -27,9 +28,9 @@ function PastInternshipPostEditForm({
     <ModalForm.Root action={handleAction}>
       {/* Required fields */}
       <ModalForm.Section title="Required Information">
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Alumni Name
             </span>
             <ModalForm.Input
@@ -43,8 +44,8 @@ function PastInternshipPostEditForm({
             />
           </label>
 
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Company Name
             </span>
             <ModalForm.Input
@@ -59,9 +60,9 @@ function PastInternshipPostEditForm({
           </label>
         </div>
 
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Industry
             </span>
             <ModalForm.Input
@@ -75,8 +76,8 @@ function PastInternshipPostEditForm({
             />
           </label>
 
-          <div className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Course
             </span>
 
@@ -98,7 +99,7 @@ function PastInternshipPostEditForm({
               <SelectTrigger className={controlClass}>
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" align="start" className={modalFormSelectContentClass}>
                 <SelectGroup>
                   <SelectLabel>Courses</SelectLabel>
                   {courses.map((course) => (
@@ -113,7 +114,7 @@ function PastInternshipPostEditForm({
         </div>
 
         <label className="flex flex-col">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Company Address
           </span>
           <ModalForm.Input
@@ -127,9 +128,9 @@ function PastInternshipPostEditForm({
           />
         </label>
 
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Batch Year
             </span>
             <ModalForm.Input
@@ -144,8 +145,8 @@ function PastInternshipPostEditForm({
             />
           </label>
 
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Academic Year
             </span>
             <ModalForm.Input
@@ -166,7 +167,7 @@ function PastInternshipPostEditForm({
       {/* Optional fields */}
       <ModalForm.Section optional title="Optional Information">
         <label className="flex flex-col">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Internship Position
           </span>
           <ModalForm.Input
@@ -179,9 +180,9 @@ function PastInternshipPostEditForm({
           />
         </label>
 
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Total Hours
             </span>
             <ModalForm.Input
@@ -195,8 +196,8 @@ function PastInternshipPostEditForm({
             />
           </label>
 
-          <label className="flex flex-col flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Accumulated Hours
             </span>
             <ModalForm.Input
@@ -212,7 +213,7 @@ function PastInternshipPostEditForm({
         </div>
 
         <label className="flex flex-col">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Supervisor Name
           </span>
           <ModalForm.Input
@@ -226,7 +227,7 @@ function PastInternshipPostEditForm({
         </label>
 
         <label className="flex flex-col">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Notes
           </span>
           <ModalForm.Textarea

@@ -88,7 +88,17 @@ function RecordsHeader({ record, internshipId }) {
 
   return (
     <div className="brand-orbit rounded-xl bg-primary p-6 text-primary-foreground">
-      <ConfirmDialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open) setConfirmation(null); }} title={`${confirmation?.label || "Update"} internship record?`} description={`This will change ${record.student_name}'s internship status.`} confirmLabel={confirmation?.label || "Confirm"} destructive={confirmation?.status === "rejected"} pending={isPending} onConfirm={() => confirmation && handleStatus(confirmation.status)} />
+      <ConfirmDialog
+        open={Boolean(confirmation)}
+        onOpenChange={(open) => { if (!open) setConfirmation(null); }}
+        title={`${confirmation?.label || "Update"} internship record?`}
+        description={`This will change ${record.student_name}'s internship status.`}
+        confirmLabel={confirmation?.label || "Confirm"}
+        destructive={confirmation?.status === "rejected"}
+        intent={confirmation?.status === "rejected" ? "decline" : confirmation?.status === "ongoing" ? "approve" : "restore"}
+        pending={isPending}
+        onConfirm={() => confirmation && handleStatus(confirmation.status)}
+      />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">

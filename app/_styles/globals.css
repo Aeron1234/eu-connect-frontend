@@ -311,6 +311,20 @@
   }
 }
 
+/* Radix dialogs/selects lock body scrolling with react-remove-scroll. Its
+   scrollbar compensation must not shrink the sidebar/page shell, whose
+   scrolling lives inside main. Keep native scrollbars reserved where supported
+   so body-scrolling pages also stay stable as a modal opens and closes. */
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 /* Legacy status utilities still appear in data-driven badges. Keep their
    meaning while the surrounding cards use the semantic surface tokens. */
 @layer utilities {

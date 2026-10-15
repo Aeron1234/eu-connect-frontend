@@ -1,6 +1,10 @@
 import { generateAnnexCPdf } from "@/app/_services/pdfReports";
 import { getAccessToken } from "@/lib/server-actions/auth";
 import { NextResponse } from "next/server";
+import { pdfErrorResponse } from "@/app/_services/pdfResponse.mjs";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -28,10 +32,10 @@ export async function GET(req) {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="annex-c-${reportId}.pdf"`,
+        "Cache-Control": "private, no-store",
       },
     });
   } catch (err) {
-    const status = err.message.includes("authorized") ? 403 : 500;
-    return NextResponse.json({ error: err.message }, { status });
+    return pdfErrorResponse(err, "Could not generate the annual report PDF.");
   }
 }

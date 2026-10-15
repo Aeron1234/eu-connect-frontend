@@ -69,11 +69,11 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
   }
 
   return (
-    <Modal
+    <Modal variant="form"
       trigger={trigger}
       title={<span className="text-primary-emphasis">Choose Avatar</span>}
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex min-h-0 flex-col gap-5 overflow-y-auto p-4 sm:p-6">
         {isLoading ? (
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-5" role="status" aria-label="Loading avatars">
             {Array.from({ length: 10 }, (_, index) => <Skeleton key={index} className="aspect-square w-full rounded-xl" />)}

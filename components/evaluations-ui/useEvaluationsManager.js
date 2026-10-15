@@ -1,0 +1,78 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { notifyReadError } from "@/lib/client-read-error";
+import { evaluationsKeys, evaluationsTabOptions } from "@/lib/cache/evaluations-queries";
+
+const tabs = [
+  { value: "evaluate-supervisor", text: "Evaluate Supervisor" },
+  { value: "pending-confirmation", text: "Pending Confirmation" },
+  { value: "past-evaluations", text: "Past Evaluations" },
+  { value: "disputed", text: "Disputed" },
+];
+const changedEvaluationTabs = ["pending-confirmation", "past-evaluations", "disputed"];
+export default function useEvaluationsManager(initialCriteria) {
+  const { user } = useUser();
+  const queryClient = useQueryClient();
+  const serverSnapshotRef = useRef(null);
+  const [selectedTab, setSelectedTab] = useState("evaluate-supervisor");
+  const [activeTab, setActiveTab] = useState("evaluate-supervisor");
+  const tabQuery = useQuery({
+    ...evaluationsTabOptions(user.id, activeTab),
+    initialData: activeTab === "evaluate-supervisor" && Array.isArray(initialCriteria)
+      ? { criteria: initialCriteria }
+      : undefined,
+  });
+
+  useEffect(() => {
+    if (!Array.isArray(initialCriteria) || serverSnapshotRef.current === initialCriteria) return;
+    serverSnapshotRef.current = initialCriteria;
+    queryClient.setQueryData(
+      evaluationsKeys.tab(user.id, "evaluate-supervisor"),
+      { criteria: initialCriteria },
+    );
+  }, [initialCriteria, queryClient, user.id]);
+
+  useEffect(() => {
+    if (selectedTab === activeTab) return;
+    const timeout = setTimeout(() => setActiveTab(selectedTab), 300);
+    return () => clearTimeout(timeout);
+  }, [selectedTab, activeTab]);
+
+  useEffect(() => {
+    if (tabQuery.error && tabQuery.data) notifyReadError(tabQuery.error.message || "Could not load evaluations.");
+  }, [tabQuery.error, tabQuery.data]);
+
+  function handleTabClick(value) {
+    setSelectedTab(value);
+    if (queryClient.getQueryData(evaluationsKeys.tab(user.id, value))) {
+      setActiveTab(value);
+    }
+  }
+
+  function refreshEvaluations() {
+    for (const tab of changedEvaluationTabs) {
+      void queryClient.invalidateQueries({ queryKey: evaluationsKeys.tab(user.id, tab) });
+    }
+  }
+
+  const isSwitching = selectedTab !== activeTab;
+  const loadError = !isSwitching && tabQuery.isError && !tabQuery.data
+    ? tabQuery.error?.message || "Could not load evaluations."
+    : "";
+  const isPending = isSwitching || tabQuery.isPending;
+  const data = tabQuery.data;
+  return {
+    tabs,
+    selectedTab,
+    activeTab,
+    tabQuery,
+    handleTabClick,
+    refreshEvaluations,
+    loadError,
+    isPending,
+    data,
+  };
+}

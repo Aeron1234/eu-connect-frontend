@@ -160,7 +160,7 @@ function AlumniRow({
 
         {isAuthorizedStaff ? (
           <div className="flex gap-3 flex-shrink-0">
-            <Modal
+            <Modal variant="form"
               title={
                 <span className="text-primary-emphasis">Update Record</span>
               }
@@ -188,7 +188,7 @@ function AlumniRow({
               />
             </Modal>
 
-            <Modal
+            <Modal variant="confirmation"
               title={<span className="text-red-600">Delete Record</span>}
               trigger={
                 <div

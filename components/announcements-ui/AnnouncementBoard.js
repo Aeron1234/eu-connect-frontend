@@ -1,185 +1,37 @@
 "use client";
 
-import { notifyReadError } from "@/lib/client-read-error";
 import ErrorUI from "@/components/ui/ErrorUI";
-
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { announcementCategoriesOptions } from "@/lib/cache/reference-queries";
 import { Megaphone } from "lucide-react";
 import PostAnnouncementButton from "../internship-records-ui/PostAnnouncementButton";
-import AnnouncementCard from "./AnnouncementCard";
-import AnnouncementsFilter from "./AnnouncementsFilter";
-import SearchBar from "../ui/SearchBar";
-import { useUser } from "@/contexts/UserContext";
 import PageTitle from "../ui/PageTitle";
 import PageManual from "../ui/PageManual";
 import AnnouncementCardSkeleton from "../skeletons/AnnouncementCardSkeleton";
-import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
-import {
-  announcementByIdOptions,
-  announcementsInfiniteOptions,
-  announcementsKeys,
-} from "@/lib/cache/announcements-queries";
+import useAnnouncementBoard from "./useAnnouncementBoard";
+import SelectedAnnouncement from "./SelectedAnnouncement";
+import AnnouncementGroups from "./AnnouncementGroups";
+import AnnouncementBoardFilters from "./AnnouncementBoardFilters";
 
-const defaultFilters = { category: "all", search: "" };
-
-function AnnouncementBoard({
-  targetId = null,
-  categories: initialCategories,
-  initialPinned,
-  initialRegular,
-  initialTotalPages = 1,
-  initialTotalRecords = 0,
-}) {
-  const { user } = useUser();
-  const userRole = user.role;
-  const categoriesQuery = useQuery({
-    ...announcementCategoriesOptions(user.id),
-    enabled: Boolean(user.id),
-  });
-  const categories = categoriesQuery.data || initialCategories || [];
-  const queryClient = useQueryClient();
-  const targetRef = useRef(null);
-  const [highlightTarget, setHighlightTarget] = useState(false);
-  const targetQuery = useQuery({
-    ...announcementByIdOptions(user.id, targetId),
-    enabled: Boolean(user.id && targetId),
-  });
-  const targetAnnouncement = targetQuery.data;
-
-  useEffect(() => {
-    if (!targetId || !targetAnnouncement?.id || !targetRef.current) return;
-    const frame = requestAnimationFrame(() => {
-      targetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      setHighlightTarget(true);
-    });
-    const timer = setTimeout(() => setHighlightTarget(false), 250);
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(timer);
-    };
-  }, [targetId, targetAnnouncement?.id]);
-
-  const [category, setCategory] = useState("all");
-  const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState(defaultFilters);
-  const serverSnapshotRef = useRef({ initialPinned, initialRegular, initialTotalPages, initialTotalRecords });
-
-  useEffect(() => {
-    const trimmedSearch = search.trim();
-    if (filters.category === category && filters.search === trimmedSearch) return;
-    const timeout = setTimeout(() => setFilters({ category, search: trimmedSearch }), 300);
-    return () => clearTimeout(timeout);
-  }, [category, search, filters.category, filters.search]);
-
-  const announcementsQuery = useInfiniteQuery({
-    ...announcementsInfiniteOptions(user.id, filters),
-    initialData:
-      Array.isArray(initialPinned) && Array.isArray(initialRegular) && filters.category === "all" && filters.search === ""
-        ? {
-            pages: [{
-              pinned: initialPinned,
-              regular: initialRegular,
-              totalPages: initialTotalPages,
-              totalRecords: initialTotalRecords,
-              currentPage: 1,
-            }],
-            pageParams: [1],
-          }
-        : undefined,
-  });
-
-  const pinned = announcementsQuery.data?.pages[0]?.pinned ?? [];
-  const regular = useMemo(() => {
-    const seen = new Set();
-    return (announcementsQuery.data?.pages ?? []).flatMap((result) =>
-      result.regular.filter((announcement) => {
-        if (seen.has(announcement.id)) return false;
-        seen.add(announcement.id);
-        return true;
-      }),
-    );
-  }, [announcementsQuery.data]);
-  const isLoadingMore = announcementsQuery.isFetchingNextPage;
-  const isSearching =
-    filters.category !== category ||
-    filters.search !== search.trim() ||
-    announcementsQuery.isPending ||
-    announcementsQuery.isPlaceholderData;
-
-  function showCachedFilters(nextFilters) {
-    if (user?.id && queryClient.getQueryData(announcementsKeys.list(user.id, nextFilters))?.pages?.length) {
-      setFilters(nextFilters);
-    }
-  }
-
-  function handleSearchChange(event) {
-    const value = event.target.value;
-    setSearch(value);
-    showCachedFilters({ category, search: value.trim() });
-  }
-
-  function handleCategoryChange(value) {
-    setCategory(value);
-    showCachedFilters({ category: value, search: search.trim() });
-  }
-
-  useEffect(() => {
-    if (announcementsQuery.error && announcementsQuery.data) {
-      notifyReadError("Error loading announcements:", announcementsQuery.error);
-    }
-  }, [announcementsQuery.error, announcementsQuery.data]);
-
-  useEffect(() => {
-    const previous = serverSnapshotRef.current;
-    if (!Array.isArray(initialPinned) || !Array.isArray(initialRegular)) return;
-    if (
-      previous.initialPinned === initialPinned &&
-      previous.initialRegular === initialRegular &&
-      previous.initialTotalPages === initialTotalPages &&
-      previous.initialTotalRecords === initialTotalRecords
-    ) return;
-    serverSnapshotRef.current = { initialPinned, initialRegular, initialTotalPages, initialTotalRecords };
-    queryClient.setQueryData(announcementsKeys.list(user.id, defaultFilters), (old) => {
-      const firstPage = {
-        pinned: initialPinned,
-        regular: initialRegular,
-        totalPages: initialTotalPages,
-        totalRecords: initialTotalRecords,
-        currentPage: 1,
-      };
-      if (!old?.pages?.length) return { pages: [firstPage], pageParams: [1] };
-      const previousFirstPage = old.pages[0];
-      const samePinned =
-        previousFirstPage.pinned.length === initialPinned.length &&
-        previousFirstPage.pinned.every((item, index) => item.id === initialPinned[index].id);
-      const keepLoaded = samePinned && canKeepLoadedPages(
-        previousFirstPage.regular.map((item) => item.id),
-        previousFirstPage.totalRecords,
-        initialRegular,
-        initialTotalRecords,
-      );
-      return {
-        pages: keepLoaded ? [firstPage, ...old.pages.slice(1)] : [firstPage],
-        pageParams: keepLoaded ? old.pageParams : [1],
-      };
-    });
-  }, [initialPinned, initialRegular, initialTotalPages, initialTotalRecords, queryClient, user.id]);
-
-  function refreshList() {
-    queryClient.setQueriesData({ queryKey: announcementsKeys.all(user.id) }, (old) =>
-      old?.pages?.length
-        ? { pages: [old.pages[0]], pageParams: [1] }
-        : old,
-    );
-    void queryClient.invalidateQueries({ queryKey: announcementsKeys.all(user.id) });
-  }
-
-  const visiblePinned = pinned.filter((item) => item.id !== targetAnnouncement?.id);
-  const pinnedIds = new Set(pinned.map((p) => p.id));
-  const filteredRegular = regular.filter((a) => !pinnedIds.has(a.id) && a.id !== targetAnnouncement?.id);
-  const isPinnedExist = visiblePinned.length > 0;
+export default function AnnouncementBoard(props) {
+  const { targetId = null } = props;
+  const {
+    categoriesQuery,
+    categories,
+    targetRef,
+    highlightTarget,
+    targetQuery,
+    targetAnnouncement,
+    category,
+    search,
+    announcementsQuery,
+    isLoadingMore,
+    isSearching,
+    handleSearchChange,
+    handleCategoryChange,
+    refreshList,
+    visiblePinned,
+    filteredRegular,
+    isPinnedExist,
+  } = useAnnouncementBoard(props);
 
   return (
     <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
@@ -200,46 +52,23 @@ function AnnouncementBoard({
         />
       </div>
 
-      <div
-        className={`flex ${userRole !== "employer" ? "flex-col gap-4 sm:flex-row sm:items-center" : ""}`}
-      >
-        <SearchBar
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Search announcements..."
-          ariaLabel="Search announcements"
-          position={userRole !== "employer" ? "right" : "left"}
-        />
+      <AnnouncementBoardFilters
+        search={search}
+        handleSearchChange={handleSearchChange}
+        categories={categories}
+        category={category}
+        handleCategoryChange={handleCategoryChange}
+      />
 
-        <AnnouncementsFilter
-          categories={categories || []}
-          category={category}
-          setCategory={handleCategoryChange}
-        />
-      </div>
-
-      {targetId && (
-        <section aria-label="Selected announcement" className="space-y-3">
-          {targetQuery.isPending ? (
-            <AnnouncementCardSkeleton showEventDate />
-          ) : targetQuery.isError && ![403, 404].includes(targetQuery.error?.status) ? (
-            <ErrorUI error={targetQuery.error} reset={() => void targetQuery.refetch()} logError={false} />
-          ) : targetQuery.isError ? (
-            <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-              This announcement is unavailable or you do not have access to it.
-            </p>
-          ) : (
-            <div ref={targetRef} className="scroll-mt-6">
-              <AnnouncementCard
-                announcement={targetAnnouncement}
-                categories={categories}
-                onChanged={refreshList}
-                highlighted={highlightTarget}
-              />
-            </div>
-          )}
-        </section>
-      )}
+      <SelectedAnnouncement
+        targetId={targetId}
+        targetQuery={targetQuery}
+        targetAnnouncement={targetAnnouncement}
+        targetRef={targetRef}
+        highlightTarget={highlightTarget}
+        categories={categories}
+        refreshList={refreshList}
+      />
 
       {isSearching ? (
         <div className="space-y-3">
@@ -250,56 +79,14 @@ function AnnouncementBoard({
       ) : announcementsQuery.isError && !announcementsQuery.data ? (
         <ErrorUI error={announcementsQuery.error} reset={() => void announcementsQuery.refetch()} logError={false} />
       ) : (
-        <div className="space-y-6">
-          {isPinnedExist && (
-            <div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary-emphasis">
-                Pinned
-              </p>
-              <ul className="flex flex-col gap-3">
-                {visiblePinned.map((announcement) => (
-                  <li key={`pinned-${announcement.id}`}>
-                    <AnnouncementCard
-                      announcement={announcement}
-                      categories={categories}
-                      onChanged={refreshList}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {filteredRegular.length > 0 ? (
-            <div>
-              {isPinnedExist && (
-                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-foreground-subtle">
-                  Earlier
-                </p>
-              )}
-              <ul className="flex flex-col gap-3">
-                {filteredRegular.map((announcement) => (
-                  <li key={`reg-${announcement.id}`}>
-                    <AnnouncementCard
-                      announcement={announcement}
-                      categories={categories}
-                      onChanged={refreshList}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            !isPinnedExist && !targetAnnouncement && (
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
-                <Megaphone className="size-8 text-foreground-faint" />
-                <p className="text-sm text-muted-foreground">
-                  No announcements found.
-                </p>
-              </div>
-            )
-          )}
-        </div>
+        <AnnouncementGroups
+          isPinnedExist={isPinnedExist}
+          visiblePinned={visiblePinned}
+          filteredRegular={filteredRegular}
+          targetAnnouncement={targetAnnouncement}
+          categories={categories}
+          refreshList={refreshList}
+        />
       )}
 
       {!isSearching && announcementsQuery.hasNextPage && (
@@ -315,6 +102,3 @@ function AnnouncementBoard({
     </main>
   );
 }
-
-export default AnnouncementBoard;
-

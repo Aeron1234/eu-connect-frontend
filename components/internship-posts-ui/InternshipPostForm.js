@@ -1,6 +1,8 @@
 "use client";
 
-import ModalForm from "@/components/ui/ModalForm";
+import ModalForm, { controlClass } from "@/components/ui/ModalForm";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { modalFormSelectContentClass } from "@/components/ui/modalFormStyles";
 
 const WORK_TYPES = [
   { value: "on-site", label: "On-site" },
@@ -18,9 +20,9 @@ function InternshipPostForm({
   return (
     <ModalForm.Root action={handleAction}>
       <ModalForm.Section title="Internship Details">
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Company Name
             </span>
             <ModalForm.Input
@@ -34,8 +36,8 @@ function InternshipPostForm({
             />
           </label>
 
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Position Title
             </span>
             <ModalForm.Input
@@ -50,9 +52,9 @@ function InternshipPostForm({
           </label>
         </div>
 
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Vacancies
             </span>
             <ModalForm.Input
@@ -66,8 +68,8 @@ function InternshipPostForm({
             />
           </label>
 
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Location
             </span>
             <ModalForm.Input
@@ -82,27 +84,30 @@ function InternshipPostForm({
           </label>
         </div>
 
-        <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Work Type
             </span>
-            <ModalForm.Select
+            <Select
               name="work_type"
               defaultValue={type === "edit" ? data.work_type : "on-site"}
               disabled={isPending}
               required
             >
-              {WORK_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </ModalForm.Select>
+              <SelectTrigger className={controlClass}>
+                <SelectValue placeholder="Select work type" />
+              </SelectTrigger>
+              <SelectContent position="popper" align="start" className={modalFormSelectContentClass}>
+                {WORK_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value} className="whitespace-normal break-words py-2">{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
 
-          <label className="flex flex-col gap-1 flex-1">
-            <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <label className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-xs font-medium leading-5 text-foreground-soft">
               Duration (hours)
             </span>
             <ModalForm.Input
@@ -117,7 +122,7 @@ function InternshipPostForm({
         </div>
 
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Description
           </span>
           <ModalForm.Textarea
@@ -132,7 +137,7 @@ function InternshipPostForm({
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Requirements
           </span>
           <ModalForm.Textarea
@@ -148,7 +153,7 @@ function InternshipPostForm({
         </label>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <span className="text-xs font-medium leading-5 text-foreground-soft">
             Eligible Courses
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -177,9 +182,9 @@ function InternshipPostForm({
       </ModalForm.Section>
       <ModalForm.Section title="Contact Information">
 
-          <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-            <label className="flex flex-col gap-1 flex-1">
-              <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+            <label className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="text-xs font-medium leading-5 text-foreground-soft">
                 Contact Person
               </span>
               <ModalForm.Input
@@ -192,8 +197,8 @@ function InternshipPostForm({
               />
             </label>
 
-            <label className="flex flex-col gap-1 flex-1">
-              <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+            <label className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="text-xs font-medium leading-5 text-foreground-soft">
                 Email
               </span>
               <ModalForm.Input
@@ -208,9 +213,9 @@ function InternshipPostForm({
             </label>
           </div>
 
-          <div className="flex gap-2.5 max-sm:flex-col sm:gap-4">
-            <label className="flex flex-col gap-1 flex-1">
-              <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
+            <label className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="text-xs font-medium leading-5 text-foreground-soft">
                 Phone
               </span>
               <ModalForm.Input
@@ -223,8 +228,8 @@ function InternshipPostForm({
               />
             </label>
 
-            <label className="flex flex-col gap-1 flex-1">
-              <span className="text-xs font-semibold tracking-wide text-foreground-soft">
+            <label className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="text-xs font-medium leading-5 text-foreground-soft">
                 Website
               </span>
               <ModalForm.Input

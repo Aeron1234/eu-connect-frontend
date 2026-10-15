@@ -1,6 +1,10 @@
 import { generateWeeklyNarrativesPdf } from "@/app/_services/pdfReports";
 import { getAccessToken } from "@/lib/server-actions/auth";
 import { NextResponse } from "next/server";
+import { pdfErrorResponse } from "@/app/_services/pdfResponse.mjs";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function GET(request) {
   const internshipId = new URL(request.url).searchParams.get("internshipId");
@@ -21,7 +25,6 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    const status = error?.status || 500;
-    return NextResponse.json({ error: status < 500 ? error.message : "Could not generate the weekly narratives PDF." }, { status });
+    return pdfErrorResponse(error, "Could not generate the weekly narratives PDF.");
   }
 }

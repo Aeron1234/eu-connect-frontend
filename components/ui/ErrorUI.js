@@ -20,6 +20,24 @@ function classifyError(error) {
   const status = error?.status || error?.cause?.status;
   const message = (error?.message || "").toLowerCase();
 
+  if (status === 503 && error?.code === "PDF_BUSY") {
+    return {
+      icon: RefreshCw,
+      title: "PDF Export Busy",
+      description: "Other PDFs are being prepared. Please wait a moment and try again.",
+      tone: "blue",
+    };
+  }
+
+  if (status === 504 && error?.code === "PDF_TIMEOUT") {
+    return {
+      icon: RefreshCw,
+      title: "PDF Export Timed Out",
+      description: "Preparing the PDF took too long. Please try again.",
+      tone: "stone",
+    };
+  }
+
   if (status === 404) {
     return {
       icon: AlertTriangle,

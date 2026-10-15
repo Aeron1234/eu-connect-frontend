@@ -11,6 +11,8 @@ import logo from "@/public/logo.png";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LoginForm from "@/components/auth-ui/LoginForm";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { modalFormContentClass } from "@/components/ui/modalFormStyles";
 
 const navLinks = [
   { label: "How it works", href: "#how-it-works" },
@@ -217,7 +219,7 @@ export default function LoginLanding({ initialSignInOpen = false }) {
         </div>
       </footer>
     </div>
-    <DialogContent overlayClassName="bg-black/45 backdrop-blur-[3px]" className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-lg overflow-y-auto rounded-2xl border-border/70 bg-card/90 p-0 shadow-2xl backdrop-blur-xl sm:max-w-lg sm:rounded-3xl" aria-describedby="login-dialog-description">
+    <DialogContent overlayClassName="bg-black/45 backdrop-blur-[3px]" className={cn(modalFormContentClass, "block overflow-y-auto")} aria-describedby="login-dialog-description">
       <DialogTitle className="sr-only">Sign in to EU-Connect</DialogTitle>
       <DialogDescription id="login-dialog-description" className="sr-only">Enter your school credentials to open your OJT workspace.</DialogDescription>
       <LoginForm />

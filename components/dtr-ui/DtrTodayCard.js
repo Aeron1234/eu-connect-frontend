@@ -111,7 +111,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
 
         {hasOngoingInternship ? (
           canFinish ? (
-            <Modal
+            <Modal variant="confirmation"
               triggerStyles="w-full sm:w-auto"
               trigger={
                 <div

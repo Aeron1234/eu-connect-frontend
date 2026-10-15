@@ -48,7 +48,8 @@ function DtrButton({ internshipData, status, disabled = false }) {
   }
 
   return (
-    <Modal
+    <Modal variant="confirmation"
+      intent={isOut ? "clock-in" : "clock-out"}
       open={open}
       onOpenChange={setOpen}
       triggerStyles="w-full sm:w-auto"

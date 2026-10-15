@@ -126,7 +126,7 @@ function Record({ record, onDeleted }) {
         </div>
 
         {(status === "pending" || status === "rejected") && (
-          <Modal
+          <Modal variant="confirmation"
             trigger={
               <>
                 <Trash2 className="size-4" />

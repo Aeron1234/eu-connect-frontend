@@ -1,6 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
+import { formatCompactEventDateRange, formatEventDateRange } from "@/lib/announcement-event-dates.mjs";
 import { Calendar, CalendarDays, Pencil, Pin, Trash2 } from "lucide-react";
 import Modal from "../ui/Modal";
 import AnnouncementTogglePin from "./AnnouncementTogglePin";
@@ -20,6 +21,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
     is_pinned,
     created_at,
     event_date,
+    event_end_date,
     category,
     color,
     text_color,
@@ -79,7 +81,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
             )}
             {canManage && (
               <div className={`flex items-center gap-1.5 ${isPinned ? "text-white" : "text-muted-foreground"}`}>
-                <Modal
+                <Modal variant="confirmation"
                   trigger={
                     <div
                       title="pin announcement"
@@ -98,7 +100,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
                 </Modal>
 
                 {isAuthor && (
-                  <Modal
+                  <Modal variant="form"
                     trigger={
                       <div
                         title="update announcement"
@@ -117,7 +119,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
                   </Modal>
                 )}
 
-                <Modal
+                <Modal variant="confirmation"
                   trigger={
                     <div
                       title="delete announcement"
@@ -166,7 +168,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
         <Modal
           title={title}
           trigger={<span>See more &rarr;</span>}
-          triggerStyles={`mt-2 max-sm:block max-sm:w-fit text-left text-xs font-semibold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${isPinned ? "text-white" : "text-primary-emphasis"}`}
+          triggerStyles={`mt-2 block w-fit text-left text-xs font-semibold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${isPinned ? "text-white" : "text-primary-emphasis"}`}
         >
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -181,9 +183,9 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
                 Posted {format(new Date(created_at), "MMM d, yyyy")}
               </time>
               {event_date && (
-                <time dateTime={event_date} className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <CalendarDays className="size-3.5" aria-hidden="true" />
-                  Event {format(new Date(`${event_date}T00:00:00`), "MMM d, yyyy")}
+                <time dateTime={event_date} className="inline-flex items-start gap-1 text-[10px] font-normal leading-relaxed text-muted-foreground sm:text-xs">
+                  <CalendarDays className="mt-0.5 size-3 shrink-0 sm:size-3.5" aria-hidden="true" />
+                  Event {formatCompactEventDateRange(event_date, event_end_date)}
                 </time>
               )}
             </div>
@@ -203,14 +205,18 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
       {event_date && (
         <time
           dateTime={event_date}
-          className={`mt-3 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
+          className={`mt-3 inline-flex max-w-full items-start gap-1.5 rounded-md border px-2 py-1 text-[10px] font-normal leading-relaxed sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs sm:font-semibold ${
             isPinned
               ? "border-white/30 bg-white/15 text-white"
               : "border-primary/20 bg-primary/5 text-primary-emphasis"
           }`}
         >
-          <CalendarDays className="size-3.5" aria-hidden="true" />
-          Event date: {format(new Date(`${event_date}T00:00:00`), "MMMM d, yyyy")}
+          <CalendarDays className="mt-0.5 size-3 shrink-0 sm:size-3.5" aria-hidden="true" />
+          <span className="min-w-0 break-words">
+            {event_end_date && event_end_date !== event_date ? "Event dates: " : "Event date: "}
+            <span className="sm:hidden">{formatCompactEventDateRange(event_date, event_end_date)}</span>
+            <span className="hidden sm:inline">{formatEventDateRange(event_date, event_end_date, "MMMM d, yyyy")}</span>
+          </span>
         </time>
       )}
 

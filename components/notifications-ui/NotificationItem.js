@@ -1,185 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import {
-  Award,
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  ClipboardCheck,
-  ClipboardX,
-  FileText,
-  MapPin,
-  Megaphone,
-  UserCheck,
-  UserPlus,
-  UserX,
-  X,
-  XCircle,
-} from "lucide-react";
 import { cx } from "@/lib/utils";
-import { getNotificationTargetPath } from "@/lib/notification-routes";
-import { userProfileKeys } from "@/lib/cache/user-profile-queries";
-import { useUser } from "@/contexts/UserContext";
-import { toastAndAction } from "../../lib/helpers";
-import {
-  markAsRead,
-  deleteNotification,
-  openAnnouncementNotification,
-} from "@/lib/server-actions/notifications-actions";
-import { respondToSupervisorRequest } from "@/lib/server-actions/supervisor-actions";
-
-const TYPE_META = {
-  announcement: { icon: Megaphone, tone: "primary" },
-  calendar_schedule: { icon: CalendarDays, tone: "success" },
-  internship_record_request: { icon: FileText, tone: "primary" },
-  internship_record_approved: { icon: CheckCircle2, tone: "success" },
-  internship_record_rejected: { icon: XCircle, tone: "destructive" },
-  internship_record_finished: { icon: CheckCircle2, tone: "success" },
-  internship_record_force_finished: { icon: CheckCircle2, tone: "success" },
-  evaluation_submitted: { icon: ClipboardCheck, tone: "primary" },
-  evaluation_deleted: { icon: ClipboardX, tone: "muted" },
-  certificate_uploaded: { icon: Award, tone: "success" },
-  certificate_accepted: { icon: CheckCircle2, tone: "success" },
-  certificate_rejected: { icon: ClipboardX, tone: "destructive" },
-  supervisor_request_submitted: { icon: UserPlus, tone: "primary" },
-  supervisor_request_accepted: { icon: UserCheck, tone: "success" },
-  supervisor_request_rejected: { icon: UserX, tone: "destructive" },
-  dtr_location_set: { icon: MapPin, tone: "primary" },
-};
-
-const TONE_STYLES = {
-  primary: "bg-primary/10 text-primary-emphasis",
-  success: "bg-emerald-50 text-emerald-600",
-  destructive: "bg-red-50 text-red-600",
-  muted: "bg-secondary text-muted-foreground",
-};
+import { getNotificationItemMeta, TONE_STYLES } from "./notificationMetadata";
+import NotificationResponseActions from "./NotificationResponseActions";
+import useNotificationItem from "./useNotificationItem";
 
 function NotificationItem({ item, onChanged }) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const { user } = useUser();
-  const [isPending, startTransition] = useTransition();
-  const [isDeleting, startDeleteTransition] = useTransition();
-  const [isOpeningAnnouncement, setIsOpeningAnnouncement] = useState(false);
-
-  // Hide response actions immediately after submitting, before the refresh.
-  // The parent remounts this item when the server's actionable state changes.
-  const [respondedOverride, setRespondedOverride] = useState(null);
-  const isActionable = respondedOverride === false ? false : item.actionable;
-
-  const meta = TYPE_META[item.type] ?? { icon: FileText, tone: "muted" };
+  const {
+    isPending, isDeleting, isOpeningAnnouncement, isActionable, isClickable,
+    handleOpen, handleRespond, handleDelete,
+  } = useNotificationItem(item, onChanged);
+  const meta = getNotificationItemMeta(item.type);
   const Icon = meta.icon;
-  const targetPath = getNotificationTargetPath(item);
-  const isClickable = !isActionable && (!item.is_read || Boolean(targetPath));
-
-  function handleOpen() {
-    if (isActionable) return;
-
-    if (item.type === "announcement") {
-      void handleOpenAnnouncement();
-      return;
-    }
-
-    if (targetPath) {
-      if ((item.type === "certificate_accepted" || item.type === "certificate_rejected") && item.link_uuid) {
-        void queryClient.invalidateQueries({
-          queryKey: userProfileKeys.tab(user.id, item.link_uuid, "certificates"),
-        });
-      }
-      // Skip the optimistic local re-render here — this page is about to
-      // be unmounted by the navigation anyway, so there's nothing to
-      // visually update. Mutating this card's DOM node (via updateItem)
-      // in the same tick as router.push is what causes Next's "Cannot
-      // read properties of undefined (reading 'startTime')" crash — a
-      // known web-vitals/INP timing bug when the clicked element gets
-      // removed before its interaction entry finishes being read.
-      if (!item.is_read) {
-        void markAsRead(item.id).then((result) => {
-          if (result?.success) onChanged?.();
-        });
-      }
-      router.push(targetPath);
-      return;
-    }
-
-    if (!item.is_read) {
-      void markAsRead(item.id).then((result) => {
-        if (result?.success) onChanged?.();
-      });
-    }
-  }
-
-  async function handleOpenAnnouncement() {
-    if (isOpeningAnnouncement) return;
-    setIsOpeningAnnouncement(true);
-    try {
-      const result = await openAnnouncementNotification(item.id);
-      if (result.status === 410) {
-        toast.info(result.error || "This announcement is no longer available.");
-        onChanged?.();
-        return;
-      }
-      if (!result.success || !result.announcementId) {
-        toast.error(result.error || "Could not open this announcement.");
-        return;
-      }
-      router.push(`/announcements?announcement=${encodeURIComponent(result.announcementId)}`);
-      window.setTimeout(() => onChanged?.(), 250);
-    } catch (error) {
-      console.error("Could not open announcement notification:", error);
-      toast.error("Could not open this announcement. Please try again.");
-    } finally {
-      setIsOpeningAnnouncement(false);
-    }
-  }
-
-  function handleRespond(decision) {
-    const formData = new FormData();
-    formData.append("requestId", item.link_uuid || item.link);
-    formData.append("decision", decision);
-
-    startTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel:
-          decision === "accept"
-            ? "Accepting request..."
-            : "Declining request...",
-        successLabel:
-          decision === "accept" ? "Request accepted." : "Request declined.",
-        errorLabel: "Failed to respond to request.",
-        action: respondToSupervisorRequest,
-        formData,
-      });
-
-      if (result?.success) {
-        setRespondedOverride(false);
-        onChanged?.();
-      }
-    });
-  }
-
-  function handleDelete(e) {
-    e.stopPropagation();
-
-    const formData = new FormData();
-    formData.append("notificationId", item.id);
-
-    startDeleteTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel: "Deleting notification...",
-        successLabel: "Notification deleted.",
-        errorLabel: "Failed to delete notification.",
-        action: deleteNotification,
-        formData,
-      });
-      if (result?.success) onChanged?.();
-    });
-  }
 
   return (
     <div
@@ -222,24 +56,7 @@ function NotificationItem({ item, onChanged }) {
         </p>
 
         {isActionable && (
-          <div className="mt-3 flex gap-2" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={() => handleRespond("accept")}
-              disabled={isPending}
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-            >
-              <Check className="size-3.5" /> Accept
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRespond("reject")}
-              disabled={isPending}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-secondary disabled:opacity-50"
-            >
-              <X className="size-3.5" /> Decline
-            </button>
-          </div>
+          <NotificationResponseActions handleRespond={handleRespond} isPending={isPending} />
         )}
       </div>
 

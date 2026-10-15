@@ -64,7 +64,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
               </td>
               {allowDelete && (
                 <td className="py-3 pl-2 text-right">
-                  <Modal
+                  <Modal variant="confirmation"
                     trigger={
                       <div className="flex items-center justify-center">
                         <Trash2 className="size-4" />

@@ -17,6 +17,7 @@ export default function WeeklyNarrativesPrintButton({ internshipId, className = 
         const data = await response.json().catch(() => ({}));
         const failure = new Error(data.error || "Could not generate the narratives PDF.");
         failure.status = response.status;
+        failure.code = data.code;
         throw failure;
       }
       const url = URL.createObjectURL(await response.blob());

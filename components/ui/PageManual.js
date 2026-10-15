@@ -57,7 +57,7 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
   } else if (page === "announcements" && ["admin", "department_head"].includes(role)) {
     title = "How to manage announcements";
     steps = [
-      <>Select <strong>Announce</strong>, enter the announcement details and event date if needed, then post it.</>,
+      <>Select <strong>Announce</strong> and enter the announcement details. Optionally add an <strong>Event date</strong> and an <strong>Until date</strong> for a multi-day event. Leave Until date blank for a one-day event, then post it.</>,
       <>Use search and the category filter to find an announcement. Select <strong>See more</strong> to read long posts.</>,
       <>Use the controls on an announcement you can manage to edit, pin or unpin, or delete it. Confirm deletion in the dialog.</>,
     ];

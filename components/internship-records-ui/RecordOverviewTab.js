@@ -1,0 +1,83 @@
+"use client";
+
+import { format } from "date-fns";
+import ProgressBar from "../ui/ProgressBar";
+import RecordsCompanyMap from "./RecordsCompanyMap";
+
+export default function RecordOverviewTab({ record, internshipId }) {
+  const pct = Math.min(
+    100,
+    Math.round((record.accumulated_hours / record.total_hours) * 100),
+  );
+  return (
+    <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+      <div className="rounded-xl border border-border shadow-sm bg-card p-4 sm:p-5">
+        <h3 className="text-base sm:text-lg font-bold text-primary-emphasis">
+          Internship Details
+        </h3>
+        <dl className="mt-3 space-y-2 text-sm">
+          {[
+            ["Company", record.company_name],
+            [
+              "Supervisor",
+              `${record.supervisor_name ? record.supervisor_name : "–"}`,
+            ],
+            [
+              "Duration",
+              record.status === "ongoing"
+                ? `${format(new Date(record.date_started), "MMMM-dd-yyyy")} – ${record.status === "ongoing" ? "still ongoing" : ` ${format(new Date(record.date_ended), "MMMM-dd-yyyy")}`}`
+                : "–",
+            ],
+            [
+              "Submitted",
+              `${format(new Date(record.created_at), "MMMM-dd-yyyy")}`,
+            ],
+          ].map(([k, v]) => (
+            <div key={k} className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="text-right font-medium text-foreground">
+                {v}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div className="rounded-xl border border-border shadow-sm bg-card p-4 sm:p-5">
+        <h3 className="text-base sm:text-lg font-bold text-primary-emphasis">
+          Hours Rendered
+        </h3>
+        <p className="mt-3 text-2xl sm:text-3xl font-bold text-primary-emphasis">
+          {record.accumulated_hours.toFixed(1)}
+          <span className="text-sm sm:text-base font-normal text-muted-foreground">
+            /{record.total_hours} hrs
+          </span>
+        </p>
+        <ProgressBar
+          value={pct}
+          label="Required internship hours completed"
+          className="mt-3"
+        />
+        <p className="mt-2 text-xs text-muted-foreground">
+          {pct}% of required hours completed
+        </p>
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 text-center text-xs">
+          <Stat label="DTR entries" value={record.dtr_count} />
+          <Stat label="Narratives" value={record.narrative_count} />
+          <Stat label="Documents" value={record.document_count} />
+        </div>
+      </div>
+      <RecordsCompanyMap record={record} internshipId={internshipId} />
+    </div>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="rounded-lg bg-muted py-2">
+      <p className="text-base sm:text-lg font-bold text-primary-emphasis">
+        {value}
+      </p>
+      <p className="text-muted-foreground">{label}</p>
+    </div>
+  );
+}

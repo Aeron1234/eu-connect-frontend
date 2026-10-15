@@ -25,7 +25,7 @@ function MarkAllAsReadButton({ data, unreadCount, onChanged }) {
   }
 
   return (
-    <Modal
+    <Modal variant="confirmation"
       trigger={
         <>
           <ListChecks className="h-4 w-4" />

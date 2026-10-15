@@ -1,55 +1,32 @@
 "use client";
 
 import { useUser } from "@/contexts/UserContext";
-import { cx } from "@/lib/utils";
+import DropdownFilter from "../ui/DropdownFilter";
 
 function AnnouncementsFilter({ categories, category, setCategory }) {
   const { user } = useUser();
 
-  const userRole = user.role;
+  const userRole = user?.role;
+  const isRegistrar = userRole === "department_head" && user?.department_code === "REG";
 
   if (!["student", "department_head", "admin"].includes(userRole)) return null;
+  if (isRegistrar) return null;
 
   if (!categories || categories.length === 0) return null;
 
+  const options = [
+    { value: "all", label: "All Categories" },
+    ...categories.map((cat) => ({ value: cat.name.toLowerCase(), label: cat.name })),
+  ];
+
   return (
-    <ul className="flex items-center gap-1 font-medium">
-      <li>
-        <button
-          type="button"
-          onClick={() => setCategory("all")}
-          className={cx(
-            "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-            category === "all"
-              ? "text-white bg-primary"
-              : "hover:bg-secondary",
-          )}
-        >
-          All
-        </button>
-      </li>
-      {categories.length > 0
-        ? categories.map((cat) => {
-            const value = cat.name.toLowerCase();
-            return (
-              <li key={cat.id}>
-                <button
-                  type="button"
-                  onClick={() => setCategory(value)}
-                  className={cx(
-                    "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                    category === value
-                      ? "text-white bg-primary"
-                      : "hover:bg-secondary",
-                  )}
-                >
-                  {cat.name}
-                </button>
-              </li>
-            );
-          })
-        : null}
-    </ul>
+    <DropdownFilter
+      value={category}
+      onValueChange={setCategory}
+      options={options}
+      placeholder="Category"
+      className="h-10 w-full rounded-md bg-card p-2 text-xs sm:w-[200px]"
+    />
   );
 }
 

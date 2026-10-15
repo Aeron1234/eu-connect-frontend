@@ -5,29 +5,30 @@ import { useActionState, useState } from "react";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, TriangleAlert, UserRound } from "lucide-react";
 import { login } from "@/lib/server-actions/auth";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
+import { controlClass, modalFormLabelClass, modalFormPrimaryClass } from "@/components/ui/modalFormStyles";
 
-const inputClassName =
-  "h-11 w-full rounded-xl border border-input bg-background pl-10 pr-3 text-[13px] text-foreground outline-none transition-colors placeholder:text-foreground-subtle focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 sm:h-14 sm:pl-12 sm:pr-4 sm:text-sm";
+const inputClassName = cn(controlClass, "mt-0 pl-10");
 
 export default function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, null);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="w-full bg-transparent px-4 py-5 sm:px-10 sm:py-10">
+    <div className="w-full bg-card px-4 py-5 sm:px-6 sm:py-6">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary-emphasis sm:gap-2 sm:px-3 sm:py-1.5 sm:text-xs">
             <ShieldCheck className="size-3.5 sm:size-4" aria-hidden="true" /> Secure school access
           </div>
-          <h2 className="mt-4 text-xl font-bold tracking-tight text-foreground sm:mt-5 sm:text-4xl">Welcome back.</h2>
+          <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">Welcome back.</h2>
           <p className="mt-2 text-[13px] leading-5 text-foreground-soft sm:mt-3 sm:text-sm sm:leading-7">
             Sign in with your EU-Connect credentials to continue your OJT work.
           </p>
 
-          <form action={formAction} className="mt-5 space-y-3 sm:mt-8 sm:space-y-5">
+          <form action={formAction} className="mt-5 space-y-4 sm:mt-6">
             <div>
-              <label htmlFor="username" className="block text-[13px] font-semibold text-foreground sm:text-sm">Username</label>
+              <label htmlFor="username" className={`block ${modalFormLabelClass}`}>Username</label>
               <div className="relative mt-1.5 sm:mt-2">
-                <UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-foreground-subtle sm:left-4 sm:size-5" aria-hidden="true" />
+                <UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-foreground-subtle" aria-hidden="true" />
                 <input
                   id="username"
                   name="username"
@@ -42,13 +43,13 @@ export default function LoginForm() {
 
             <div>
               <div className="flex items-center justify-between gap-3">
-                <label htmlFor="password" className="text-[13px] font-semibold text-foreground sm:text-sm">Password</label>
+                <label htmlFor="password" className={modalFormLabelClass}>Password</label>
                 <Link href="/forgot-password" className="text-xs font-semibold text-primary-emphasis underline-offset-4 hover:underline focus-visible:underline">
                   Forgot password?
                 </Link>
               </div>
               <div className="relative mt-1.5 sm:mt-2">
-                <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-foreground-subtle sm:left-4 sm:size-5" aria-hidden="true" />
+                <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-foreground-subtle" aria-hidden="true" />
                 <input
                   id="password"
                   name="password"
@@ -56,14 +57,14 @@ export default function LoginForm() {
                   autoComplete="current-password"
                   placeholder="Enter your password"
                   disabled={isPending}
-                  className={`${inputClassName} pr-14`}
+                  className={cn(inputClassName, "pr-12")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   disabled={isPending}
-                  className="absolute right-2 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-foreground-subtle transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-60"
+                  className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-foreground-subtle transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-60"
                 >
                   {showPassword ? <EyeOff className="size-5" aria-hidden="true" /> : <Eye className="size-5" aria-hidden="true" />}
                 </button>
@@ -79,7 +80,7 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-[13px] font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:h-14 sm:px-5 sm:text-sm"
+              className={`${modalFormPrimaryClass} inline-flex w-full items-center justify-center gap-2`}
             >
               {isPending ? <><Spinner className="size-5 stroke-3 stroke-primary-50" /> Signing in...</> : <>Sign in <ArrowRight className="size-4" aria-hidden="true" /></>}
             </button>
