@@ -15,7 +15,7 @@ function StudentEvaluationDeleteForm({ evaluationId, status, onSuccess }) {
         successLabel: "Evaluation deleted.",
         errorLabel: "Failed to delete.",
         action: deletePendingStudentEvaluation,
-        formData,
+        args: [formData],
       });
       if (result?.success) onSuccess?.();
     });

@@ -18,7 +18,6 @@ function MarkAllAsReadButton({ data, unreadCount, onChanged }) {
         successLabel: "All notifications marked as read.",
         errorLabel: "Failed to mark all as read.",
         action: markAllAsRead,
-        formData: null,
       });
       if (result?.success) onChanged?.();
     });

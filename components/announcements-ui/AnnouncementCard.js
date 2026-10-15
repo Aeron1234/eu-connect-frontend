@@ -58,7 +58,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
 
   return (
     <article
-      className={`rounded-xl border p-4 shadow-sm transition-[border-color,box-shadow] duration-[1800ms] ease-out sm:p-5 ${
+      className={`rounded-xl border p-4 shadow-sm transition-[border-color,box-shadow] ${highlighted ? "duration-150" : "duration-[1800ms]"} ease-out motion-reduce:transition-none sm:p-5 ${
         isPinned ? "bg-primary" : "bg-card"
       } ${highlighted ? "border-primary ring-4 ring-primary/50" : isPinned ? "border-primary" : "border-border"}`}
     >

@@ -31,7 +31,7 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
         successLabel: "Account created successfully.",
         errorLabel: "Failed to create new account.",
         action: createUser,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {

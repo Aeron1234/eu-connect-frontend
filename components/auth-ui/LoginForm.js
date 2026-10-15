@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, TriangleAlert, UserRound } from "lucide-react";
-import { login } from "@/lib/server-actions/auth";
+import { loginFormAction } from "@/lib/server-actions/auth-form-actions";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { controlClass, modalFormLabelClass, modalFormPrimaryClass } from "@/components/ui/modalFormStyles";
@@ -11,7 +11,10 @@ import { controlClass, modalFormLabelClass, modalFormPrimaryClass } from "@/comp
 const inputClassName = cn(controlClass, "mt-0 pl-10");
 
 export default function LoginForm() {
-  const [state, formAction, isPending] = useActionState(login, null);
+  const [state, formAction, isPending] = useActionState(
+    loginFormAction,
+    null,
+  );
   const [showPassword, setShowPassword] = useState(false);
 
   return (

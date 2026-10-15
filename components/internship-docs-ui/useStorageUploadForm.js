@@ -20,7 +20,7 @@ export default function useStorageUploadForm({ fileRequirementTypes, currentUser
         successLabel: "File was added.",
         errorLabel: "Upload failed.",
         action: uploadInternshipFile,
-        formData,
+        args: [formData],
       });
       if (result?.success && currentUserId && internshipId) {
         void invalidateCurrentInternshipDocuments(queryClient, currentUserId, internshipId);

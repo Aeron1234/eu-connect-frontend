@@ -12,17 +12,26 @@ export default function useSummaryReportPdf(internshipId) {
     setPending(true);
     setError(null);
     try {
-      const response = await fetch(`/api/reports/summary-report?internshipId=${encodeURIComponent(internshipId)}`, { cache: "no-store" });
+      const response = await fetch(
+        `/api/reports/summary-report?internshipId=${encodeURIComponent(internshipId)}`,
+        { cache: "no-store" },
+      );
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        const failure = new Error(data.error || "Could not generate the report PDF.");
+        const failure = new Error(
+          data.error || "Could not generate the report PDF.",
+        );
         failure.status = response.status;
         failure.code = data.code;
         throw failure;
       }
       openPdfBlob(await response.blob());
     } catch (failure) {
-      setError(failure instanceof Error ? failure : new Error("Could not generate the report PDF."));
+      setError(
+        failure instanceof Error
+          ? failure
+          : new Error("Could not generate the report PDF."),
+      );
     } finally {
       setPending(false);
     }

@@ -7,6 +7,7 @@ import { announcementCategoriesOptions } from "@/lib/cache/reference-queries";
 import { useUser } from "@/contexts/UserContext";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import { calendarKeys } from "@/lib/cache/calendar-queries";
+import { getAnnouncementFeed } from "@/lib/announcement-feed.mjs";
 import {
   announcementByIdOptions,
   announcementsInfiniteOptions,
@@ -30,31 +31,29 @@ export default function useAnnouncementBoard({
   });
   const categories = categoriesQuery.data || initialCategories || [];
   const queryClient = useQueryClient();
+  const boardRef = useRef(null);
   const targetRef = useRef(null);
-  const [highlightTarget, setHighlightTarget] = useState(false);
+  const scrolledTargetRef = useRef(null);
+  const [highlightedId, setHighlightedId] = useState(null);
+  const [navigationTargetId, setNavigationTargetId] = useState(targetId);
   const targetQuery = useQuery({
     ...announcementByIdOptions(user.id, targetId),
     enabled: Boolean(user.id && targetId),
   });
-  const targetAnnouncement = targetQuery.data;
-
-  useEffect(() => {
-    if (!targetId || !targetAnnouncement?.id || !targetRef.current) return;
-    const frame = requestAnimationFrame(() => {
-      targetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      setHighlightTarget(true);
-    });
-    const timer = setTimeout(() => setHighlightTarget(false), 250);
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(timer);
-    };
-  }, [targetId, targetAnnouncement?.id]);
+  // Legacy numeric links resolve to the public ID used by feed cards.
+  const focusedAnnouncementId = targetQuery.data?.id ?? targetId;
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(defaultFilters);
   const serverSnapshotRef = useRef({ initialPinned, initialRegular, initialTotalPages, initialTotalRecords });
+
+  useEffect(() => {
+    if (!targetId) return;
+
+    // The layout owns the scroll container, so navigation starts at its top.
+    boardRef.current?.parentElement?.scrollTo({ top: 0, behavior: "instant" });
+  }, [targetId]);
 
   useEffect(() => {
     const trimmedSearch = search.trim();
@@ -80,23 +79,56 @@ export default function useAnnouncementBoard({
         : undefined,
   });
 
-  const pinned = announcementsQuery.data?.pages[0]?.pinned ?? [];
-  const regular = useMemo(() => {
-    const seen = new Set();
-    return (announcementsQuery.data?.pages ?? []).flatMap((result) =>
-      result.regular.filter((announcement) => {
-        if (seen.has(announcement.id)) return false;
-        seen.add(announcement.id);
-        return true;
-      }),
-    );
-  }, [announcementsQuery.data]);
+  const { pinned: visiblePinned, regular: filteredRegular, hasTarget } = useMemo(
+    () => getAnnouncementFeed(announcementsQuery.data?.pages, focusedAnnouncementId),
+    [announcementsQuery.data, focusedAnnouncementId],
+  );
   const isLoadingMore = announcementsQuery.isFetchingNextPage;
   const isSearching =
     filters.category !== category ||
     filters.search !== search.trim() ||
     announcementsQuery.isPending ||
     announcementsQuery.isPlaceholderData;
+
+  const isNavigatingToTarget = Boolean(
+    targetId && navigationTargetId === targetId && targetQuery.isSuccess &&
+    category === "all" && !search.trim() && !isSearching,
+  );
+  const { fetchNextPage, hasNextPage, isFetching, isError } = announcementsQuery;
+
+  useEffect(() => {
+    if (
+      !isNavigatingToTarget || hasTarget || !hasNextPage || isFetching || isError ||
+      scrolledTargetRef.current === targetId
+    ) return;
+
+    // Keep every preceding page in place instead of promoting the linked card.
+    void fetchNextPage({ cancelRefetch: false });
+  }, [isNavigatingToTarget, hasTarget, hasNextPage, isFetching, isError, fetchNextPage, targetId]);
+
+  useEffect(() => {
+    if (
+      !isNavigatingToTarget || !hasTarget || !targetRef.current ||
+      scrolledTargetRef.current === targetId
+    ) return;
+
+    const frame = requestAnimationFrame(() => {
+      if (!targetRef.current) return;
+      scrolledTargetRef.current = targetId;
+      targetRef.current.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+        block: "start",
+      });
+      setHighlightedId(focusedAnnouncementId);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isNavigatingToTarget, hasTarget, targetId, focusedAnnouncementId]);
+
+  useEffect(() => {
+    if (!highlightedId) return;
+    const timer = setTimeout(() => setHighlightedId(null), 4_000);
+    return () => clearTimeout(timer);
+  }, [highlightedId]);
 
   function showCachedFilters(nextFilters) {
     if (user?.id && queryClient.getQueryData(announcementsKeys.list(user.id, nextFilters))?.pages?.length) {
@@ -105,12 +137,16 @@ export default function useAnnouncementBoard({
   }
 
   function handleSearchChange(event) {
+    setNavigationTargetId(null);
+    setHighlightedId(null);
     const value = event.target.value;
     setSearch(value);
     showCachedFilters({ category, search: value.trim() });
   }
 
   function handleCategoryChange(value) {
+    setNavigationTargetId(null);
+    setHighlightedId(null);
     setCategory(value);
     showCachedFilters({ category: value, search: search.trim() });
   }
@@ -167,18 +203,16 @@ export default function useAnnouncementBoard({
     void queryClient.invalidateQueries({ queryKey: calendarKeys.all(user.id) });
   }
 
-  const visiblePinned = pinned.filter((item) => item.id !== targetAnnouncement?.id);
-  const pinnedIds = new Set(pinned.map((p) => p.id));
-  const filteredRegular = regular.filter((a) => !pinnedIds.has(a.id) && a.id !== targetAnnouncement?.id);
   const isPinnedExist = visiblePinned.length > 0;
 
   return {
     categoriesQuery,
     categories,
+    boardRef,
     targetRef,
-    highlightTarget,
+    highlightTarget: highlightedId === focusedAnnouncementId && highlightedId != null,
     targetQuery,
-    targetAnnouncement,
+    focusedAnnouncementId,
     category,
     search,
     announcementsQuery,

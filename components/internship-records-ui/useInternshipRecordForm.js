@@ -34,7 +34,7 @@ export default function useInternshipRecordForm(recordStatus, onCreated) {
       successLabel: "Good luck on your internship!",
       errorLabel: "Creating internship record failed.",
       action: createInternshipRecord,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

@@ -16,7 +16,7 @@ function DtrDeleteForm({ dtrId, onDeleted }) {
         successLabel: "Record deleted.",
         errorLabel: "Failed to delete.",
         action: deleteDtr,
-        formData,
+        args: [formData],
       });
       if (result?.success) onDeleted?.(dtrId);
     });

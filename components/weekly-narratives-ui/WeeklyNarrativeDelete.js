@@ -14,7 +14,7 @@ function WeeklyNarrativeDelete({ narrativeId, onSuccess }) {
         successLabel: "Narrative deleted.",
         errorLabel: "Failed to delete narrative.",
         action: deleteWeeklyNarrative,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) onSuccess?.();

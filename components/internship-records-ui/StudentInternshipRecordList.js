@@ -104,7 +104,7 @@ function Record({ record, onDeleted }) {
         successLabel: "Internship record deleted.",
         errorLabel: "Failed to delete internship record.",
         action: deleteOwnInternshipRecord,
-        formData,
+        args: [formData],
       });
       if (result?.success) onDeleted?.(record.id);
     });

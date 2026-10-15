@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
-import Modal from "../ui/Modal";
+import NarrativePreview from "./NarrativePreview";
 
 function RecordsNarrative({ narrative }) {
   return (
@@ -18,34 +18,7 @@ function RecordsNarrative({ narrative }) {
             </p>
           </div>
         </div>
-        <p className="text-sm text-foreground-soft leading-relaxed mt-3 line-clamp-3">
-          {narrative.narrative}
-        </p>
-
-        <Modal
-          title={
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(narrative.created_at), "MMMM d, yyyy")} · Week{" "}
-              {narrative.week_number}
-            </p>
-          }
-          description={
-            <span className="text-lg font-bold text-foreground block">
-              {narrative.title || "Untitled"}
-            </span>
-          }
-          trigger={
-            <div className="text-xs font-semibold text-primary-emphasis hover:underline mt-3 cursor-pointer">
-              Read more →
-            </div>
-          }
-        >
-          <div className="bg-card rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {narrative.narrative}
-            </p>
-          </div>
-        </Modal>
+        <NarrativePreview narrative={narrative} />
       </article>
     </li>
   );

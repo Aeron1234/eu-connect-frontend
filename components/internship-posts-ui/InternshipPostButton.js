@@ -21,7 +21,7 @@ function InternshipPostButton({ courses, onSuccess = null }) {
         successLabel: "Internship posted.",
         errorLabel: "Failed to post internship.",
         action: createInternshipPosting,
-        formData,
+        args: [formData],
       });
       if (result?.success) {
         void queryClient.invalidateQueries({

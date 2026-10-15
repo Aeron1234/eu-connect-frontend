@@ -12,14 +12,20 @@ import AnnouncementGroups from "./AnnouncementGroups";
 import AnnouncementBoardFilters from "./AnnouncementBoardFilters";
 
 export default function AnnouncementBoard(props) {
+  // A new deep link starts with clear filters and its own scroll/highlight state.
+  return <AnnouncementBoardContent key={props.targetId ?? "feed"} {...props} />;
+}
+
+function AnnouncementBoardContent(props) {
   const { targetId = null } = props;
   const {
     categoriesQuery,
     categories,
+    boardRef,
     targetRef,
     highlightTarget,
     targetQuery,
-    targetAnnouncement,
+    focusedAnnouncementId,
     category,
     search,
     announcementsQuery,
@@ -34,7 +40,7 @@ export default function AnnouncementBoard(props) {
   } = useAnnouncementBoard(props);
 
   return (
-    <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+    <main ref={boardRef} className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitle
           Icon={Megaphone}
@@ -60,15 +66,7 @@ export default function AnnouncementBoard(props) {
         handleCategoryChange={handleCategoryChange}
       />
 
-      <SelectedAnnouncement
-        targetId={targetId}
-        targetQuery={targetQuery}
-        targetAnnouncement={targetAnnouncement}
-        targetRef={targetRef}
-        highlightTarget={highlightTarget}
-        categories={categories}
-        refreshList={refreshList}
-      />
+      <SelectedAnnouncement targetId={targetId} targetQuery={targetQuery} />
 
       {isSearching ? (
         <div className="space-y-3">
@@ -83,7 +81,9 @@ export default function AnnouncementBoard(props) {
           isPinnedExist={isPinnedExist}
           visiblePinned={visiblePinned}
           filteredRegular={filteredRegular}
-          targetAnnouncement={targetAnnouncement}
+          focusedAnnouncementId={focusedAnnouncementId}
+          targetRef={targetRef}
+          highlightTarget={highlightTarget}
           categories={categories}
           refreshList={refreshList}
         />

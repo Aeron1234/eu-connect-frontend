@@ -72,7 +72,7 @@ function NarrativesPage() {
                     <li>Choose an internship record to view its weekly narratives. Finished records can be viewed and printed.</li>
                     <li>For your ongoing internship, select <strong>New Narrative</strong> to open the entry form.</li>
                     <li>Enter the <strong>week number</strong>, a short <strong>title</strong>, and your <strong>narrative</strong>. Describe your activities, what you learned, and any challenges or reflections. Then select <strong>Save</strong>.</li>
-                    <li>Find your saved entry in the list below. On a small screen, select <strong>See more</strong> to read a long narrative in full.</li>
+                    <li>Find your saved entry in the list below. Entries show up to three lines. Select <strong>See more</strong> when an entry is truncated to read the full narrative.</li>
                     <li>Use the <strong>pencil</strong> on your entry to edit it, or the <strong>trash</strong> icon to delete it. Confirm the deletion when prompted.</li>
                     <li>Select <strong>Export PDF</strong> to open one PDF containing every narrative for the selected internship.</li>
                   </ol>

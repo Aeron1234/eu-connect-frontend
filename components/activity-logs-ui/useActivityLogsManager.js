@@ -151,7 +151,7 @@ export default function useActivityLogsManager(initialPage) {
         successLabel: "Log entry deleted.",
         errorLabel: "Failed to delete.",
         action: deleteActivityLog,
-        formData,
+        args: [formData],
       });
 
       if (!result?.success) {

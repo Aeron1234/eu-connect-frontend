@@ -27,7 +27,7 @@ function InternshipRecordFinishForm({ internshipId }) {
       successLabel: "Congrats!",
       errorLabel: "Finishing internship record failed.",
       action: finishInternshipRecord,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

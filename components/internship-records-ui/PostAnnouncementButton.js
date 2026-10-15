@@ -23,7 +23,7 @@ function PostAnnouncementButton({ categories, onPosted, categoriesLoading = fals
       successLabel: "Announcement was posted.",
       errorLabel: "Posting announcement failed.",
       action: createAnnouncement,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

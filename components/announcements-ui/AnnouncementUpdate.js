@@ -16,7 +16,7 @@ function AnnouncementUpdate({ data = null, categories, onChanged }) {
       successLabel: "Announcement was posted.",
       errorLabel: "Updating announcement failed.",
       action: updateAnnouncement,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

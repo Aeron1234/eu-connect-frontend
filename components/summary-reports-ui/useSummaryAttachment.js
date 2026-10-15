@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
-export default function useSummaryAttachment(internshipId, getAttachmentUrl, clearBeforeOpen = false) {
+export default function useSummaryAttachment(
+  internshipId,
+  getAttachmentUrl,
+  clearBeforeOpen = false,
+) {
   const [attachmentError, setAttachmentError] = useState("");
 
   async function openAttachment() {

@@ -30,7 +30,7 @@ export default function useInternshipPostActions({
         successLabel: "Post deleted.",
         errorLabel: "Failed to delete post.",
         action: deleteInternshipPosting,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {
@@ -48,7 +48,7 @@ export default function useInternshipPostActions({
         successLabel: "Post updated.",
         errorLabel: "Failed to update post.",
         action: updateInternshipPosting,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {

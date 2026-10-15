@@ -16,7 +16,7 @@ function StorageDeleteFile({ fileId = "", fileUrl = "", onDeleted, pendingReview
       successLabel: pendingReview ? "Document declined." : "File deleted.",
       errorLabel: pendingReview ? "Failed to decline document." : "Failed to delete.",
       action: deleteFile,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

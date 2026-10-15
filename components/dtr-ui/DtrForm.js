@@ -28,7 +28,7 @@ function DtrForm({ isOut, onSuccess }) {
         successLabel: isOut ? "Clocked in!" : "Clocked out!",
         errorLabel: isOut ? "Failed to clock in." : "Failed to clock out.",
         action,
-        formData,
+        args: [formData],
       });
       if (result?.success) onSuccess?.();
     } catch (error) {

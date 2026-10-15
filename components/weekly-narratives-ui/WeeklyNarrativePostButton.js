@@ -22,7 +22,7 @@ function WeeklyNarrativePostButton() {
         successLabel: "Narrative saved.",
         errorLabel: "Failed to save narrative.",
         action: createWeeklyNarrative,
-        formData,
+        args: [formData],
       });
       if (result?.success) {
         queryClient.setQueriesData({ queryKey: weeklyNarrativesKeys.all(user.id) }, (old) =>

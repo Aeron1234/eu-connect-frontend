@@ -1,52 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { Calendar, Edit2, Trash2 } from "lucide-react";
 import Modal from "../ui/Modal";
 import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
 import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
-
-function NarrativePreview({ narrative }) {
-  const previewRef = useRef(null);
-  const [isClipped, setIsClipped] = useState(false);
-
-  useEffect(() => {
-    const preview = previewRef.current;
-    if (!preview) return;
-
-    const measure = () => setIsClipped(preview.scrollHeight > preview.clientHeight + 1);
-    const frame = requestAnimationFrame(measure);
-    const observer = new ResizeObserver(measure);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-    };
-  }, [narrative.narrative]);
-
-  return (
-    <>
-      <p ref={previewRef} className="mt-3 line-clamp-3 break-words whitespace-pre-wrap text-sm leading-relaxed text-foreground-soft md:line-clamp-none">
-        {narrative.narrative}
-      </p>
-      {isClipped && (
-        <Modal
-          title={narrative.title || "Untitled"}
-          trigger={<span>See more &rarr;</span>}
-          triggerStyles="mt-2 text-left text-xs font-semibold text-primary-emphasis hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
-        >
-          <p className="text-xs text-muted-foreground">
-            {format(new Date(narrative.created_at), "MMMM d, yyyy")} · Week {narrative.week_number}
-          </p>
-          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
-            {narrative.narrative}
-          </p>
-        </Modal>
-      )}
-    </>
-  );
-}
+import NarrativePreview from "./NarrativePreview";
 
 function WeeklyNarrativeCard({ narrative, showActions = false, onUpdate, onDelete }) {
   return (

@@ -45,7 +45,7 @@ export default function useStudentEvaluationForm({ studentEvaluationCriterias, s
         successLabel: "Student evaluation posted!",
         errorLabel: "Posting student evaluation failed.",
         action: postStudentEvaluation,
-        formData,
+        args: [formData],
       });
 
       if (!result?.success) {

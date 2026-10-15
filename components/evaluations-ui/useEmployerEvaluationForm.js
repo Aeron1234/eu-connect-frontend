@@ -38,7 +38,7 @@ export default function useEmployerEvaluationForm({ employerEvaluationCriterias,
         successLabel: "Supervisor/employer evaluation posted!",
         errorLabel: "Posting supervisor/employer evaluation failed.",
         action: postEmployerEvaluation,
-        formData,
+        args: [formData],
       });
 
       if (!result?.success) {

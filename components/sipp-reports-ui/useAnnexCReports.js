@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { notifyReadError } from "@/lib/client-read-error";
+import { toastAndAction } from "@/lib/helpers";
 import { annexCReportsInfiniteOptions, sippReportsKeys } from "@/lib/cache/sipp-reports-queries";
 import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
 import { saveAnnexCReport, deleteAnnexCReport } from "@/lib/server-actions/sipp-hte-actions";
@@ -29,6 +30,7 @@ export default function useAnnexCReports(initialPage) {
   const [preparedBy, setPreparedBy] = useState("");
   const [certifiedBy, setCertifiedBy] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formError, setFormError] = useState("");
   const [editingReportId, setEditingReportId] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
@@ -217,13 +219,27 @@ export default function useAnnexCReports(initialPage) {
   }
 
   async function handleDelete(reportId) {
-    const result = await deleteAnnexCReport(reportId);
-    if (result?.error) {
-      notifyReadError(result.error);
-      return;
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      const result = await toastAndAction({
+        loadingLabel: "Deleting annual report...",
+        successLabel: "Annual report deleted.",
+        errorLabel: "Failed to delete annual report.",
+        action: async () => {
+          try {
+            return await deleteAnnexCReport(reportId);
+          } catch {
+            return { success: false, error: "Could not delete the report. Please try again." };
+          }
+        },
+      });
+      if (!result?.success) return;
+      if (editingReportId === reportId) resetForm();
+      refreshReportsCache(reportId);
+    } finally {
+      setIsDeleting(false);
     }
-    if (editingReportId === reportId) resetForm();
-    refreshReportsCache(reportId);
   }
 
   return {
@@ -257,7 +273,7 @@ export default function useAnnexCReports(initialPage) {
       description: confirmation?.kind === "delete" ? "This report will be permanently deleted." : "Submitting Annex C will finalize this report.",
       confirmLabel: confirmation?.kind === "delete" ? "Delete report" : "Submit report",
       destructive: confirmation?.kind === "delete",
-      pending: isSaving,
+      pending: isSaving || isDeleting,
       onConfirm: () => {
         const choice = confirmation;
         setConfirmation(null);

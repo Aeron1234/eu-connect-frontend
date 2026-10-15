@@ -90,7 +90,7 @@ export default function useNotificationItem(item, onChanged) {
           decision === "accept" ? "Request accepted." : "Request declined.",
         errorLabel: "Failed to respond to request.",
         action: respondToSupervisorRequest,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {
@@ -112,7 +112,7 @@ export default function useNotificationItem(item, onChanged) {
         successLabel: "Notification deleted.",
         errorLabel: "Failed to delete notification.",
         action: deleteNotification,
-        formData,
+        args: [formData],
       });
       if (result?.success) onChanged?.();
     });

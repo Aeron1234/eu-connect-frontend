@@ -56,7 +56,7 @@ function PastInternshipPostButton() {
         successLabel: "Record posted.",
         errorLabel: "Failed to post record.",
         action: postAlumniRecord,
-        formData,
+        args: [formData],
       });
       if (result?.success) {
         queryClient.setQueriesData({ queryKey: pastInternshipsKeys.all(user.id) }, (old) =>

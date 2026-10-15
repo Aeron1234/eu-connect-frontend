@@ -59,7 +59,7 @@ export default function SecurityCard({ passwordChangedAt }) {
         successLabel: "Password was updated!",
         errorLabel: "Updating password failed.",
         action: updatePassword,
-        formData,
+        args: [formData],
       };
 
       const result = await toastAndAction(handlers);

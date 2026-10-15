@@ -51,7 +51,7 @@ export default function useSetDtrLocation({ studentId, dataLocation = {}, onSave
       successLabel: "DTR location setted!",
       errorLabel: "Setting DTR location failed.",
       action: setStudentDtrLocation,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

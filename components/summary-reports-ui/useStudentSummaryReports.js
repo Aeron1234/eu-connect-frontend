@@ -28,7 +28,7 @@ export default function useStudentSummaryReports() {
           return { success: false, error: "Could not delete the report. Please try again." };
         }
       },
-      id: internshipId,
+      args: [internshipId],
     }),
   });
 

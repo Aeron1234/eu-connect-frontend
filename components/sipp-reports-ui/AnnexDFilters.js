@@ -1,12 +1,12 @@
 "use client";
 
 import SearchBar from "../ui/SearchBar";
-import { cx } from "@/lib/utils";
+import DropdownFilter from "../ui/DropdownFilter";
 
-export default function AnnexDFilters({ query, setQuery, year, setYear, showCachedFilters, availableAcadYear }) {
+export default function AnnexDFilters({ query, setQuery, year, setYear, showCachedFilters, availableAcadYear = [] }) {
   return (
-    <div className="flex gap-2 flex-col sm:flex-row">
-      <div className="items-start">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="w-full sm:w-64 sm:shrink-0">
         <SearchBar
           value={query}
           onChange={(e) => {
@@ -15,30 +15,24 @@ export default function AnnexDFilters({ query, setQuery, year, setYear, showCach
             showCachedFilters({ academicYear: year, search: search.trim() });
           }}
           placeholder="Search company or student name..."
+          position="right"
+          ariaLabel="Search Annex D companies or students"
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {["All", ...availableAcadYear].map((ay) => (
-          <button
-            key={ay}
-            type="button"
-            onClick={() => {
-              const academicYear = ay === "All" ? "" : ay;
-              setYear(academicYear);
-              showCachedFilters({ academicYear, search: query.trim() });
-            }}
-            className={cx(
-              "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-              (ay === "All" && !year) || year === ay
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:text-primary-emphasis",
-            )}
-          >
-            {ay}
-          </button>
-        ))}
-      </div>
+      <DropdownFilter
+        value={year}
+        onValueChange={(academicYear) => {
+          setYear(academicYear);
+          showCachedFilters({ academicYear, search: query.trim() });
+        }}
+        options={[
+          { value: "", label: "All academic years" },
+          ...availableAcadYear.map((academicYear) => ({ value: academicYear, label: academicYear })),
+        ]}
+        placeholder="Academic year"
+        className="h-10 w-full min-w-0 rounded-md bg-card px-3 text-xs sm:w-44"
+      />
     </div>
   );
 }

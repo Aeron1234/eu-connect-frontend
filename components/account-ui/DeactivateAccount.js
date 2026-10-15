@@ -21,7 +21,7 @@ function DeactivateAccount({ id, accountName, onSuccess }) {
         successLabel: "Account deactivated.",
         errorLabel: "Failed to deactivate account.",
         action: deactivateAccount,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {

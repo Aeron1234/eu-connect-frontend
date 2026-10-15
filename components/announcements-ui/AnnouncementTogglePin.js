@@ -14,7 +14,7 @@ function AnnouncementTogglePin({ announcementId, is_pinned, onChanged }) {
       successLabel: `Announcement was ${!is_pinned ? "pinned" : "unpinned"}.`,
       errorLabel: `Failed to ${!is_pinned ? "pin" : "unpin"} the announcement.`,
       action: togglePinAnnouncement,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

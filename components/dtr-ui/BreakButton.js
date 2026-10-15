@@ -28,14 +28,13 @@ function BreakAction({ label, action, Icon }) {
   const queryClient = useQueryClient();
   const { user } = useUser();
 
-  function handleAction(formData) {
+  function handleAction() {
     startTransition(async () => {
       const result = await toastAndAction({
         loadingLabel: `${label}...`,
         successLabel: label === "Start break" ? "Break started." : "Duty resumed.",
         errorLabel: `Failed to ${label.toLowerCase()}.`,
         action,
-        formData,
       });
       if (result?.success) {
         void queryClient.invalidateQueries({

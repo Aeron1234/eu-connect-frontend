@@ -236,7 +236,7 @@ export default function useNotificationsDropdown() {
           successLabel: "Notification deleted.",
           errorLabel: "Failed to delete notification.",
           action: deleteNotification,
-          formData,
+          args: [formData],
         });
         if (!result?.success) return;
         const target = notifications.find((item) => String(item.id) === String(id));

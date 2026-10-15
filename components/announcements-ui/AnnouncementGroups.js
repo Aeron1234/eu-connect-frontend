@@ -5,7 +5,9 @@ export default function AnnouncementGroups({
   isPinnedExist,
   visiblePinned,
   filteredRegular,
-  targetAnnouncement,
+  focusedAnnouncementId,
+  targetRef,
+  highlightTarget,
   categories,
   refreshList,
 }) {
@@ -18,11 +20,16 @@ export default function AnnouncementGroups({
           </p>
           <ul className="flex flex-col gap-3">
             {visiblePinned.map((announcement) => (
-              <li key={`pinned-${announcement.id}`}>
+              <li
+                key={`pinned-${announcement.id}`}
+                ref={announcement.id === focusedAnnouncementId ? targetRef : null}
+                className="scroll-mt-24"
+              >
                 <AnnouncementCard
                   announcement={announcement}
                   categories={categories}
                   onChanged={refreshList}
+                  highlighted={announcement.id === focusedAnnouncementId && highlightTarget}
                 />
               </li>
             ))}
@@ -39,18 +46,23 @@ export default function AnnouncementGroups({
           )}
           <ul className="flex flex-col gap-3">
             {filteredRegular.map((announcement) => (
-              <li key={`reg-${announcement.id}`}>
+              <li
+                key={`reg-${announcement.id}`}
+                ref={announcement.id === focusedAnnouncementId ? targetRef : null}
+                className="scroll-mt-24"
+              >
                 <AnnouncementCard
                   announcement={announcement}
                   categories={categories}
                   onChanged={refreshList}
+                  highlighted={announcement.id === focusedAnnouncementId && highlightTarget}
                 />
               </li>
             ))}
           </ul>
         </div>
       ) : (
-        !isPinnedExist && !targetAnnouncement && (
+        !isPinnedExist && (
           <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card border-border py-16 text-center">
             <Megaphone className="size-8 text-foreground-faint" />
             <p className="text-sm text-muted-foreground">

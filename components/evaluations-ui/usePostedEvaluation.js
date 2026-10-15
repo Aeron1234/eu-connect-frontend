@@ -54,7 +54,7 @@ export default function usePostedEvaluation({
         successLabel: `Student evaluation was ${isAccepted ? "Accepted!" : "Disputed!"}`,
         errorLabel: `${isAccepted ? "Accepting" : "Disputing"} student evaluation failed.`,
         action: respondToStudentEvaluation,
-        formData,
+        args: [formData],
       });
 
       if (!result?.success) {
@@ -81,7 +81,7 @@ export default function usePostedEvaluation({
         successLabel: `Student evaluation was restored!`,
         errorLabel: `Restoring student evaluation failed.`,
         action: restoreDisputedEvaluation,
-        formData,
+        args: [formData],
       });
 
       if (!result?.success) {
@@ -103,7 +103,7 @@ export default function usePostedEvaluation({
         successLabel: `Student evaluation was restored!`,
         errorLabel: `Restoring student evaluation failed.`,
         action: reviewDisputedEvaluation,
-        formData,
+        args: [formData],
       });
       if (result?.success) onChanged?.();
     });

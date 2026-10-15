@@ -16,7 +16,7 @@ function ReactivateAccount({ id, onSuccess }) {
         successLabel: "Account reactivated.",
         errorLabel: "Failed to reactivate account.",
         action: reactivateAccount,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {

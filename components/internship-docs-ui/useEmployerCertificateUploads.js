@@ -57,7 +57,7 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
       successLabel: "Certificate uploaded — awaiting student confirmation.",
       errorLabel: "Failed to upload certificate.",
       action: uploadCertificateOfCompletion,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {
@@ -91,7 +91,7 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
       successLabel: "Certificate opened.",
       errorLabel: "Failed to open certificate.",
       action: downloadSearchedStudentFiles,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {
@@ -112,7 +112,7 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
       successLabel: "Certificate deleted.",
       errorLabel: "Failed to delete certificate.",
       action: deleteEmployerCertificate,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

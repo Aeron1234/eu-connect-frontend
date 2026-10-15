@@ -156,7 +156,7 @@ export default function useRecordsList({
         successLabel: "Record updated.",
         errorLabel: "Failed to update record.",
         action: updateInternshipRecordStatus,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {

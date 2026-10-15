@@ -73,7 +73,7 @@ function RecordsHeader({ record, internshipId }) {
           status === "restore"
             ? restoreInternshipRecord
             : updateInternshipRecordStatus,
-        formData,
+        args: [formData],
       });
       if (result?.success) {
         await queryClient.invalidateQueries({

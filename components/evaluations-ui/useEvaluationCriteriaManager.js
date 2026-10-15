@@ -83,7 +83,7 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
     setError(null);
     startTransition(async () => {
       try {
-        const result = await action(null, buildFormData(fields));
+        const result = await action(buildFormData(fields));
         if (!result?.success) {
           queryClient.setQueryData(queryKey, previous);
           setError(result?.error || "Could not update criteria. Please try again.");

@@ -101,7 +101,7 @@ function AccountProfileContent({ roleLabel, userData = {} }) {
         formData.append(key, value ?? "");
       });
 
-      const result = await updateUserInfo(null, formData);
+      const result = await updateUserInfo(formData);
 
       if (!result?.success) {
         setSaveError(result?.error || "Failed to update profile.");

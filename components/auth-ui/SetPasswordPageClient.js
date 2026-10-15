@@ -3,13 +3,13 @@
 import { useActionState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { KeyRound, TriangleAlert } from "lucide-react";
-import { setPassword } from "@/lib/server-actions/auth";
+import { setPasswordFormAction } from "@/lib/server-actions/auth-form-actions";
 
 const initialState = {};
 
 export default function SetPasswordPageClient() {
   const [state, formAction, isPending] = useActionState(
-    setPassword,
+    setPasswordFormAction,
     initialState,
   );
 

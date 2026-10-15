@@ -113,7 +113,7 @@ function AlumniRow({
         successLabel: "Record deleted.",
         errorLabel: "Failed to delete record.",
         action: deleteAlumniRecord,
-        formData,
+        args: [formData],
       });
       if (result?.success) {
         onDelete?.(alumni.id);
@@ -129,7 +129,7 @@ function AlumniRow({
       successLabel: "Record was updated.",
       errorLabel: "Updating record failed.",
       action: updateAlumniRecord,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

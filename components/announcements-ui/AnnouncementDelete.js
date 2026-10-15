@@ -14,7 +14,7 @@ function AnnouncementDelete({ announcementId, onChanged }) {
       successLabel: "Announcement deleted.",
       errorLabel: "Failed to delete.",
       action: deleteAnnouncement,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

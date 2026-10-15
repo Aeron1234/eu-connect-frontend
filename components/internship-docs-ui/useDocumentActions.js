@@ -26,7 +26,7 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
         downloadAction === null
           ? downloadInternshipRecordDocuments
           : downloadAction,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {
@@ -45,7 +45,7 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
       successLabel: "Document approved.",
       errorLabel: "Failed to approve document.",
       action: approveInternshipDocument,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

@@ -1,13 +1,16 @@
 "use client";
 
-import { forgotPassword } from "@/lib/server-actions/auth";
+import { forgotPasswordFormAction } from "@/lib/server-actions/auth-form-actions";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionState } from "react";
 import { ArrowRight, CheckCircle2, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 
 function ForgotPasswordPageClient() {
-  const [state, formAction, isPending] = useActionState(forgotPassword, null);
+  const [state, formAction, isPending] = useActionState(
+    forgotPasswordFormAction,
+    null,
+  );
 
   return (
     <main className="flex items-center justify-center bg-canvas px-6 py-16">

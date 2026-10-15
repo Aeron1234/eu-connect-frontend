@@ -1,10 +1,21 @@
 "use client";
 
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import ProgressBar from "../ui/ProgressBar";
 import RecordsCompanyMap from "./RecordsCompanyMap";
 
+function formatOverviewDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return isValid(date) ? format(date, "MMMM d, yyyy") : null;
+}
+
 export default function RecordOverviewTab({ record, internshipId }) {
+  const startDate = formatOverviewDate(record.date_started);
+  const endDate = record.status === "ongoing"
+    ? "still ongoing"
+    : formatOverviewDate(record.date_ended) || "End date unavailable";
+  const duration = startDate ? `${startDate} – ${endDate}` : "–";
   const pct = Math.min(
     100,
     Math.round((record.accumulated_hours / record.total_hours) * 100),
@@ -22,16 +33,8 @@ export default function RecordOverviewTab({ record, internshipId }) {
               "Supervisor",
               `${record.supervisor_name ? record.supervisor_name : "–"}`,
             ],
-            [
-              "Duration",
-              record.status === "ongoing"
-                ? `${format(new Date(record.date_started), "MMMM-dd-yyyy")} – ${record.status === "ongoing" ? "still ongoing" : ` ${format(new Date(record.date_ended), "MMMM-dd-yyyy")}`}`
-                : "–",
-            ],
-            [
-              "Submitted",
-              `${format(new Date(record.created_at), "MMMM-dd-yyyy")}`,
-            ],
+            ["Duration", duration],
+            ["Submitted", formatOverviewDate(record.created_at) || "–"],
           ].map(([k, v]) => (
             <div key={k} className="flex justify-between gap-4">
               <dt className="text-muted-foreground">{k}</dt>

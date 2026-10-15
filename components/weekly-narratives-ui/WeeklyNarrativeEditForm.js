@@ -13,7 +13,7 @@ function WeeklyNarrativeEditForm({ narrative, onSuccess }) {
       successLabel: "Narrative was updated.",
       errorLabel: "Updating narrative failed.",
       action: editWeeklyNarrative,
-      formData,
+      args: [formData],
     };
 
     startTransition(async () => {

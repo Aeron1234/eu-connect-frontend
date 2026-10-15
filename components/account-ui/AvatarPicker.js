@@ -39,7 +39,7 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
         successLabel: "Avatar updated.",
         errorLabel: "Failed to update avatar.",
         action: updateUserAvatar,
-        formData,
+        args: [formData],
       });
 
       if (result?.success) {
@@ -57,7 +57,6 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
         successLabel: "Avatar removed.",
         errorLabel: "Failed to remove avatar.",
         action: deleteUserAvatar,
-        formData: new FormData(),
       });
 
       if (result?.success) {
