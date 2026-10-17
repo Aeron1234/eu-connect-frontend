@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { activityLogsInfiniteOptions, activityLogsKeys } from "@/lib/cache/activity-logs-queries";
-import { deleteActivityLog } from "@/lib/server-actions/activity-logs-actions";
+import { deleteActivityLog, deleteActivityLogsByDateRange } from "@/lib/server-actions/activity-logs-actions";
+import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { toastAndAction } from "../../lib/helpers";
 import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
 import { ROLE_LABELS, toTitleCase } from "./activityLogFormatting";
@@ -18,7 +19,10 @@ export default function useActivityLogsManager(initialPage) {
   const userId = user?.id;
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(initialPage);
-  const [isDeleting, startTransition] = useTransition();
+  const [isDeletingOne, startTransition] = useTransition();
+  const [isBatchDeleting, setIsBatchDeleting] = useState(false);
+  const batchDeletingRef = useRef(false);
+  const isDeleting = isDeletingOne || isBatchDeleting;
   const [actorRole, setActorRole] = useState("");
   const [targetType, setTargetType] = useState("");
   const [query, setQuery] = useState("");
@@ -116,6 +120,7 @@ export default function useActivityLogsManager(initialPage) {
   }
 
   async function handleDelete(formData) {
+    if (isDeleting || batchDeletingRef.current) return;
     const logId = formData.get("logId");
     startTransition(async () => {
       const queryKey = activityLogsKeys.all(userId);
@@ -167,6 +172,40 @@ export default function useActivityLogsManager(initialPage) {
     });
   }
 
+  async function handleBatchDelete(range) {
+    if (isDeleting || batchDeletingRef.current) return;
+    batchDeletingRef.current = true;
+    setIsBatchDeleting(true);
+    const queryKey = activityLogsKeys.all(userId);
+    try {
+      await queryClient.cancelQueries({ queryKey });
+      const result = await toastAndAction({
+        loadingLabel: "Deleting activity logs...",
+        successLabel: "Activity logs deleted.",
+        errorLabel: "Failed to delete activity logs.",
+        action: deleteActivityLogsByDateRange,
+        args: [{ fromDate: range.fromDate, throughDate: range.throughDate }],
+      });
+      if (!result?.success) return result;
+      // Rows shift across every cached filter and offset page after deletion.
+      await queryClient.cancelQueries({ queryKey });
+      queryClient.setQueriesData({ queryKey }, (old) => old?.pages?.length
+        ? { pages: [old.pages[0]], pageParams: [1] }
+        : old);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey }),
+        queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.all(userId) }),
+      ]);
+      return result;
+    } catch {
+      // toastAndAction already reports unexpected mutation failures.
+      return { success: false };
+    } finally {
+      batchDeletingRef.current = false;
+      setIsBatchDeleting(false);
+    }
+  }
+
   return {
     logsQuery,
     logs,
@@ -175,6 +214,8 @@ export default function useActivityLogsManager(initialPage) {
     isFiltering,
     isChangingFilters,
     isDeleting,
+    isBatchDeleting,
+    handleBatchDelete,
     query,
     setQuery,
     actorRole,

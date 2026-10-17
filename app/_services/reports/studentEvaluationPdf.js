@@ -5,7 +5,7 @@ import { studentEvaluationHtml } from "../pdfTemplates.js";
 export async function generateStudentEvaluationPdf(evaluationId, accessToken) {
   return runPdfJob(async ({ signal, renderPdf }) => {
     const url = new URL(
-      `${BACKEND_URL}/api/evaluations/student/${evaluationId}/print`,
+      `${BACKEND_URL}/evaluations/student/${evaluationId}/print`,
     );
 
     const res = await fetch(url, {

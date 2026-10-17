@@ -9,6 +9,7 @@ import useActivityLogsManager from "./useActivityLogsManager";
 import ActivityLogsSummary from "./ActivityLogsSummary";
 import ActivityLogsFilters from "./ActivityLogsFilters";
 import ActivityLogsTable from "./ActivityLogsTable";
+import ActivityLogsBatchDelete from "./ActivityLogsBatchDelete";
 
 export default function ActivityLogsManager({ initialPage }) {
   const {
@@ -19,6 +20,8 @@ export default function ActivityLogsManager({ initialPage }) {
     isFiltering,
     isChangingFilters,
     isDeleting,
+    isBatchDeleting,
+    handleBatchDelete,
     query,
     setQuery,
     actorRole,
@@ -34,14 +37,19 @@ export default function ActivityLogsManager({ initialPage }) {
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
-      <PageTitle
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <PageTitle
         Icon={Activity}
         title={"Activity Logs"}
         description={
           "Audit every action taken across EU-Connect — logins, approvals, uploads, and administrative changes."
         }
         titleAction={<PageManual page="admin-activity-logs" />}
-      />
+        />
+        <div className="shrink-0">
+          <ActivityLogsBatchDelete disabled={isDeleting} pending={isBatchDeleting} onDelete={handleBatchDelete} />
+        </div>
+      </div>
 
       <ActivityLogsSummary total={total} stats={stats} />
 

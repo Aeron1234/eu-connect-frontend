@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from "@/lib/api-base-url.mjs";
 import { NextResponse } from "next/server";
 import { getAccessToken } from "@/lib/server-actions/auth";
 
@@ -11,7 +12,7 @@ export async function POST() {
   }
 
   try {
-    const res = await fetch(`${process.env.API_BASE_URL}/api/auth/socket-ticket`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/socket-ticket`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: "no-store",

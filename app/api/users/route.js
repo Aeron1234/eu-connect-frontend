@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from "@/lib/api-base-url.mjs";
 // app/api/users/route.js
 import { getAccessToken } from "@/lib/server-actions/auth";
 import { NextResponse } from "next/server";
@@ -21,8 +22,8 @@ export async function GET(request) {
   }
 
   // 3. Server-secret environment variables
-  const backendUrl = process.env.API_BASE_URL;
-  const queryPath = `/api/search-users?q=${encodeURIComponent(q)}`;
+  const backendUrl = getApiBaseUrl();
+  const queryPath = `/search-users?q=${encodeURIComponent(q)}`;
 
   try {
     // 4. Secure server-to-server fetch

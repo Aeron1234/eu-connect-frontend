@@ -4,7 +4,7 @@ import { annexDHtml } from "../pdfTemplates.js";
 
 export async function generateAnnexDPdf(companyKey, academicYear, accessToken) {
   return runPdfJob(async ({ signal, renderPdf }) => {
-    const url = new URL(`${BACKEND_URL}/api/reports/hte-annual/company`);
+    const url = new URL(`${BACKEND_URL}/reports/hte-annual/company`);
     url.searchParams.set("academicYear", academicYear);
     url.searchParams.set("companyKey", companyKey);
 

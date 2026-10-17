@@ -4,7 +4,7 @@ import { annexCHtml } from "../pdfTemplates.js";
 
 export async function generateAnnexCPdf(reportId, accessToken) {
   return runPdfJob(async ({ signal, renderPdf }) => {
-    const url = new URL(`${BACKEND_URL}/api/reports/annex-c/${reportId}`);
+    const url = new URL(`${BACKEND_URL}/reports/annex-c/${reportId}`);
 
     const res = await fetch(url, {
       signal,

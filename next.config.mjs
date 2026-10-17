@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from "./lib/api-base-url.mjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
@@ -20,13 +22,12 @@ const nextConfig = {
   },
 
   async rewrites() {
-    const SOCKET_URL =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:7000";
+    const backendApi = getApiBaseUrl(
+      process.env.API_BASE_URL || process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:7000",
+    );
     return [
-      {
-        source: "/eu-connect/api/:path*",
-        destination: `${SOCKET_URL}/eu-connect/api/:path*`,
-      },
+      { source: "/api/v1/:path*", destination: `${backendApi}/:path*` },
+      { source: "/eu-connect/api/:path*", destination: `${backendApi}/:path*` },
     ];
   },
 

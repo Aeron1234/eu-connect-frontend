@@ -6,7 +6,7 @@ import { summaryReportHtml } from "../summaryReportTemplate.js";
 export async function generateSummaryReportPdf(internshipId, accessToken) {
   return runPdfJob(async ({ signal, renderPdf }) => {
     const headers = { Authorization: `Bearer ${accessToken}` };
-    const listResponse = await fetch(`${BACKEND_URL}/api/summary-reports`, {
+    const listResponse = await fetch(`${BACKEND_URL}/summary-reports`, {
       headers,
       cache: "no-store",
       signal,

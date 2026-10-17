@@ -34,3 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Backend API configuration
+
+Set the full backend API base in `.env.local` for local development and in the hosting environment for production:
+
+```dotenv
+API_BASE_URL=http://localhost:7000/api/v1
+# Production example: API_BASE_URL=https://your-backend.example/api/v1
+```
+
+`lib/api-base-url.mjs` resolves the base for all server actions, backend proxies and PDF data requests. Callers append resource paths such as `/auth/login`, without adding another `/api`. Previous settings ending in `/eu-connect` or `/eu-connect/api` are accepted during migration and resolve to `/api/v1`.
+
+Deploy/restart the backend before the frontend. Next.js rewrites both `/api/v1/:path*` and the legacy `/eu-connect/api/:path*` to the canonical backend. The backend keeps both prefixes available during rollout, sharing cache entries, invalidation and request limits. Next.js-owned `/api/reports/*`, `/api/users` and `/api/socket-ticket` URLs, page routes and Socket.IO remain unchanged. No database migration is required.

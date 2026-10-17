@@ -5,7 +5,7 @@ import { weeklyNarrativesHtml } from "../weeklyNarrativesTemplate.js";
 export async function generateWeeklyNarrativesPdf(internshipId, accessToken) {
   return runPdfJob(async ({ signal, renderPdf }) => {
     const response = await fetch(
-      `${BACKEND_URL}/api/weekly-narratives/print/${encodeURIComponent(internshipId)}`,
+      `${BACKEND_URL}/weekly-narratives/print/${encodeURIComponent(internshipId)}`,
       { headers: { Authorization: `Bearer ${accessToken}` }, cache: "no-store", signal },
     );
     if (response.status === 404) return null;
