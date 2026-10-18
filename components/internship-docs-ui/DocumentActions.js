@@ -1,11 +1,10 @@
 "use client";
 
-import { Check, Download, Trash2, X } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import { useState } from "react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import Modal from "../ui/Modal";
 import StorageDeleteFile from "./StorageDeleteFile";
-import { canActuallyDelete } from "./documentPermissions";
+import { canActuallyApprove, canActuallyDelete, isStudentDocumentOwner } from "./documentPermissions";
 
 export default function DocumentActions({
   item,
@@ -20,9 +19,9 @@ export default function DocumentActions({
   className = "flex items-center gap-1",
 }) {
   const [confirmingApproval, setConfirmingApproval] = useState(false);
-  const showApprove = canApprove && item.verification_status === "pending";
-  // Student uploads have no verification status; pending documents are employer uploads.
-  const pendingReview = userRole === "student" && item.verification_status === "pending";
+  const showApprove = canActuallyApprove({ item, canApprove, userRole, currentUserId });
+  const pendingReview = isStudentDocumentOwner({ item, userRole, currentUserId }) &&
+    item.uploaded_by_role === "employer" && item.verification_status === "pending";
   const showDelete = canActuallyDelete({
     item,
     canDelete,
@@ -34,22 +33,22 @@ export default function DocumentActions({
       <ConfirmDialog
         open={Boolean(showApprove && confirmingApproval)}
         onOpenChange={setConfirmingApproval}
-        title="Approve document?"
-        description={`Accept “${item.file_name}” as an internship document? The employer who uploaded it will be notified.`}
-        confirmLabel="Approve document"
+        title="Accept document?"
+        description={`Accept “${item.file_name}” as an internship document? The employer who uploaded it will be notified. You can delete this file later.`}
+        confirmLabel="Accept document"
         intent="approve"
         pending={isPending}
         onConfirm={() => {
           if (!showApprove || isPending) return;
-          setConfirmingApproval(false);
-          handleApprove(item.id);
+          handleApprove(item.id, () => setConfirmingApproval(false));
         }}
       />
       {showApprove && (
         <button
           type="button"
-          className="p-1.5 rounded-md text-muted-foreground hover:text-green-600 hover:bg-green-50 transition-colors"
-          aria-label="Approve"
+          className="p-1.5 rounded-md text-muted-foreground hover:text-green-700 hover:bg-green-50 dark:hover:text-green-300 dark:hover:bg-green-500/15 transition-colors disabled:opacity-50"
+          aria-label="Accept document"
+          title="Accept document"
           onClick={() => setConfirmingApproval(true)}
           disabled={isPending}
         >
@@ -57,6 +56,7 @@ export default function DocumentActions({
         </button>
       )}
       <button
+        type="button"
         className="p-1.5 rounded-md text-muted-foreground hover:text-primary-emphasis hover:bg-primary/10 transition-colors"
         aria-label="Download"
         onClick={() => handleDownload(item.id)}
@@ -65,24 +65,13 @@ export default function DocumentActions({
         <Download className="w-4 h-4" />
       </button>
       {showDelete && (
-        <Modal variant="confirmation" intent={pendingReview ? "decline" : "warning"}
-          trigger={
-            <span
-              aria-label={pendingReview ? "Decline document" : "Delete file"}
-              title={pendingReview ? "Decline document" : "Delete file"}
-              className={`p-1.5 block cursor-pointer rounded-md text-muted-foreground transition-colors ${pendingReview ? "hover:text-amber-700 hover:bg-amber-50 dark:hover:text-amber-300 dark:hover:bg-amber-500/15" : "hover:text-red-600 hover:bg-red-50"}`}
-            >
-              {pendingReview ? <X className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}
-            </span>
-          }
-          title={pendingReview ? "Decline document?" : <span className="text-red-600">Delete File</span>}
-        >
-          <StorageDeleteFile
-            fileId={item.id}
-            pendingReview={pendingReview}
-            onDeleted={() => onChanged?.({ type: "deleted", fileId: item.id })}
-          />
-        </Modal>
+        <StorageDeleteFile
+          fileId={item.id}
+          fileName={item.file_name}
+          pendingReview={pendingReview}
+          disabled={isPending}
+          onDeleted={() => onChanged?.({ type: "deleted", fileId: item.id })}
+        />
       )}
     </div>
   );

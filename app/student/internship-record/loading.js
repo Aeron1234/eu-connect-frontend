@@ -12,7 +12,7 @@ function InternshipRecordLoading() {
         <Skeleton className="h-9 w-24 rounded-md" />
       </div>
 
-      <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-8">
+      <div className="min-w-0">
         <InternshipRecordFormSkeleton />
       </div>
     </main>

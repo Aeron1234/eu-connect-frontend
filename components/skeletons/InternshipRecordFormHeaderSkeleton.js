@@ -1,20 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, ChevronDown } from "lucide-react";
 
-function InternshipRecordFormHeaderSkeleton() {
+export default function InternshipRecordFormHeaderSkeleton() {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0 flex-1 pr-2 space-y-1.5">
-        <span className="flex items-center gap-2">
-          <Plus className="h-5 w-5 flex-shrink-0 text-foreground-faint" />
-          <Skeleton className="h-4 w-40" />
-        </span>
-        <Skeleton className="h-3 w-64" />
-      </div>
-
-      <ChevronDown className="h-5 w-5 flex-shrink-0 text-foreground-faint" />
+    <div className="min-w-0 space-y-2">
+      <Skeleton className="mb-3 h-2.5 w-28" />
+      <Skeleton className="h-6 w-56 max-w-full" />
+      <Skeleton className="h-4 w-full max-w-xl" />
+      <Skeleton className="h-4 w-3/4 max-w-md sm:hidden" />
     </div>
   );
 }
-
-export default InternshipRecordFormHeaderSkeleton;

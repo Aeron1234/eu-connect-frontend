@@ -16,7 +16,6 @@ const EMPTY_ACCOUNT_FORM = {
 export default function useCreateAccountForm({ roles, courses, departments, onCreated }) {
   const [isPending, startTransition] = useTransition();
 
-  const [isFocused, setIsFocused] = useState(false);
   const [show, setShow] = useState(false);
   const [accountForm, setAccountForm] = useState(EMPTY_ACCOUNT_FORM);
   const [selectedCourseId, setSelectedCourseId] = useState("");
@@ -47,12 +46,12 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
 
   function handleSelectCourse(name) {
     const course = courses.find((c) => c.course_name === name);
-    if (course) setSelectedCourseId(course.id);
+    setSelectedCourseId(course?.id ?? "");
   }
 
   function handleSelectDepartment(name) {
     const department = departments.find((d) => d.name === name);
-    if (department) setSelectedDepartmentId(department.id);
+    setSelectedDepartmentId(department?.id ?? "");
   }
 
   function formatRolesForSelect(role) {
@@ -77,13 +76,24 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
     handleAction,
     isPending,
     showConditionalRow,
+    selectedRoleName,
+    roleProps: {
+      roles, selectedRole, setSelectedRole, isPending, formatRolesForSelect,
+    },
+    previewProps: {
+      accountForm, selectedRoleName,
+      roleLabel: formatRolesForSelect(selectedRoleName),
+      course: courses.find(course => String(course.id) === String(selectedCourseId)),
+      department: departments.find(department => String(department.id) === String(showCourse
+        ? courses.find(course => String(course.id) === String(selectedCourseId))?.department_id
+        : selectedDepartmentId)),
+    },
     identityProps: {
-      accountForm, setAccountForm, isPending, roles,
-      selectedRole, setSelectedRole, formatRolesForSelect,
+      accountForm, setAccountForm, isPending,
     },
     credentialsProps: {
       accountForm, setAccountForm, isPending,
-      isFocused, setIsFocused, show, setShow,
+      show, setShow,
     },
     assignmentProps: {
       showCourse, showDepartment, showGender, courses, departments, isPending,

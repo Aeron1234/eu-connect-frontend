@@ -14,8 +14,9 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
     steps = [
       <>The backend records unexpected HTTP failures and reported background-job errors. Similar failures are grouped together, so <strong>groups</strong> counts distinct problems while <strong>occurrences</strong> counts how many times they happened.</>,
       <>Search for a route, error code, or message. Narrow the results by date range, HTTP method, source, or status code, then use the page controls to browse older groups.</>,
-      <>Select a group to see up to 25 recent occurrences. Check the time, route and method, message, code location, and request ID to trace a failure. Background jobs show a source instead of an HTTP route.</>,
-      <>Select <strong>Refresh</strong> to check for newer errors. This page is read-only and keeps events for 30 days. A fatal process crash may appear only in hosting logs if the database write could not finish during shutdown.</>,
+      <>Select a group to expand up to 25 recent occurrences inside its card. Select it again to collapse the details. Check the time, route and method, message, code location, and request ID to trace a failure. Background jobs show a source instead of an HTTP route.</>,
+      <>Use a group&apos;s delete button and confirm to permanently remove all its recorded occurrences, including ones outside the current filters. New occurrences of the same problem can still be recorded.</>,
+      <>Select <strong>Refresh</strong> to check for newer errors. Events are automatically kept for 30 days unless deleted earlier. A fatal process crash may appear only in hosting logs if the database write could not finish during shutdown.</>,
     ];
   } else if (page === "admin-cache-monitoring" && role === "admin") {
     title = "How cache monitoring works";

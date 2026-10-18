@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronLeft, ChevronRight, RefreshCw, Search, X } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
-import { errorGroupsOptions, errorGroupOptions, errorTrackingKeys } from "@/lib/cache/error-tracking-queries";
+import { errorGroupsOptions, errorTrackingKeys } from "@/lib/cache/error-tracking-queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageTitle from "@/components/ui/PageTitle";
 import PageManual from "@/components/ui/PageManual";
 import ErrorUI from "@/components/ui/ErrorUI";
-
-function when(value) {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
-}
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { toastAndAction } from "@/lib/helpers";
+import { deleteErrorGroup } from "@/lib/server-actions/error-tracking-actions";
+import { removeErrorGroupFromResult } from "@/lib/error-tracking-results.mjs";
+import ErrorGroupCard from "./ErrorGroupCard";
 
 function LoadingRows() {
   return <div className="space-y-3" role="status" aria-label="Loading errors">
@@ -25,39 +24,6 @@ function LoadingRows() {
       <Skeleton className="mt-3 h-3 w-1/2 max-w-48" />
     </div>)}
   </div>;
-}
-
-function ErrorDetails({ fingerprint, userId, onClose }) {
-  const query = useQuery({ ...errorGroupOptions(userId, fingerprint), enabled: Boolean(userId && fingerprint) });
-  return <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6" aria-label="Error group details">
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <h2 className="text-base font-semibold text-foreground">Recent occurrences</h2>
-        <p className="mt-1 text-xs text-muted-foreground">Group {fingerprint.slice(0, 12)} · up to 25 latest occurrences</p>
-      </div>
-      <button type="button" onClick={onClose} aria-label="Close details" className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><X className="size-4" /></button>
-    </div>
-    {query.isPending ? <div className="mt-5"><LoadingRows /></div>
-      : query.isError ? <div role="alert" className="mt-5 text-sm text-muted-foreground">{query.error.message} <button type="button" onClick={() => void query.refetch()} className="font-semibold text-primary-emphasis">Try again</button></div>
-        : <div className="mt-5 space-y-3">
-          <p className="text-xs text-muted-foreground">{query.data.count} occurrence{query.data.count === 1 ? "" : "s"} · first seen {when(query.data.first_seen)} · last seen {when(query.data.last_seen)}</p>
-          {query.data.occurrences.map((item) => <div key={item.id} className="min-w-0 rounded-lg border border-border p-3 text-xs sm:p-4">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-medium text-foreground">
-              <span>{when(item.created_at)}</span>
-              <span>{item.status_code || item.source}</span>
-              {item.method && <span>{item.method} {item.route_pattern}</span>}
-            </div>
-            <p className="mt-2 break-words text-foreground-soft">{item.message}</p>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
-              {item.error_code && <span>Code: {item.error_code}</span>}
-              {item.code_location && <span className="break-all">Location: {item.code_location}</span>}
-              {item.request_id && <span className="break-all">Request ID: {item.request_id}</span>}
-              {item.actor_role && <span>Role: {item.actor_role}</span>}
-              {item.actor_id && <span className="break-all">User ID: {item.actor_id}</span>}
-            </div>
-          </div>)}
-        </div>}
-  </section>;
 }
 
 export default function ErrorTrackingDashboard() {
@@ -71,6 +37,9 @@ export default function ErrorTrackingDashboard() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
+  const [confirmation, setConfirmation] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deletingRef = useRef(false);
   const filters = { days, method, source, status, search, page };
   const query = useQuery({ ...errorGroupsOptions(user?.id, filters), enabled: Boolean(user?.id) });
 
@@ -84,7 +53,53 @@ export default function ErrorTrackingDashboard() {
     void queryClient.invalidateQueries({ queryKey: errorTrackingKeys.all(user?.id) });
   }
 
+  async function confirmDelete() {
+    if (!confirmation || deletingRef.current) return;
+    const fingerprint = confirmation.fingerprint;
+    deletingRef.current = true;
+    setIsDeleting(true);
+    const queryKey = errorTrackingKeys.all(user?.id);
+    try {
+      await queryClient.cancelQueries({ queryKey });
+      const result = await toastAndAction({
+        loadingLabel: "Deleting error group...",
+        successLabel: "Error group deleted.",
+        errorLabel: "Could not delete the error group.",
+        action: deleteErrorGroup,
+        args: [fingerprint],
+      });
+      if (!result?.success) return;
+      queryClient.setQueriesData({ queryKey: [...queryKey, "list"] }, old =>
+        removeErrorGroupFromResult(old, fingerprint));
+      const updated = queryClient.getQueryData(errorTrackingKeys.list(user?.id, filters));
+      const lastPage = Math.max(1, updated?.pagination.totalPages ?? page);
+      if (page > lastPage) setPage(lastPage);
+      setSelected(current => current === fingerprint ? null : current);
+      setConfirmation(null);
+      queryClient.removeQueries({ queryKey: errorTrackingKeys.detail(user?.id, fingerprint), exact: true });
+      await queryClient.invalidateQueries({ queryKey });
+    } catch (error) {
+      // toastAndAction already replaces its loading toast with the failure.
+      console.error("Delete error group failed:", error);
+    } finally {
+      deletingRef.current = false;
+      setIsDeleting(false);
+    }
+  }
+
   return <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+    <ConfirmDialog
+      open={Boolean(confirmation)}
+      onOpenChange={(open) => { if (!open && !isDeleting) setConfirmation(null); }}
+      title="Delete error group?"
+      description={confirmation
+        ? 'Delete all recorded occurrences for "' + (confirmation.route_pattern || confirmation.source) + '", including occurrences outside the current filters? This cannot be undone. New errors can still be recorded.'
+        : ""}
+      confirmLabel="Delete group"
+      intent="warning"
+      pending={isDeleting}
+      onConfirm={confirmDelete}
+    />
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <PageTitle Icon={AlertTriangle} title="Error Tracking" description="Investigate unexpected server failures and background job errors." titleAction={<PageManual page="admin-error-tracking" />} />
       <button type="button" onClick={refresh} disabled={query.isFetching} className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50">
@@ -122,16 +137,17 @@ export default function ErrorTrackingDashboard() {
     {query.isPending ? <LoadingRows />
       : query.isError && !query.data ? <ErrorUI error={query.error} reset={refresh} logError={false} />
         : query.data.data.length === 0 ? <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No errors match these filters.</div>
-          : <div className="space-y-3">{query.data.data.map((item) => <div key={item.fingerprint} className="space-y-3"><button type="button" onClick={() => setSelected(selected === item.fingerprint ? null : item.fingerprint)} aria-expanded={selected === item.fingerprint} className={`w-full rounded-xl border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/50 sm:p-5 ${selected === item.fingerprint ? "border-primary" : "border-border"}`}>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="rounded-full bg-primary/10 px-2 py-1 text-primary-emphasis">{item.status_code || item.source}</span>
-              {item.method && <span className="rounded-full bg-muted px-2 py-1 text-foreground-soft">{item.method}</span>}
-              <span className="text-muted-foreground">{item.occurrences} time{item.occurrences === 1 ? "" : "s"}</span>
-            </div>
-            <p className="mt-2 break-all text-sm font-semibold text-foreground">{item.route_pattern || item.source}</p>
-            <p className="mt-1 line-clamp-2 break-words text-xs text-foreground-soft sm:text-sm">{item.context ? `${item.context} — ` : ""}{item.message}</p>
-            <p className="mt-2 text-xs text-muted-foreground">Last seen {when(item.last_seen)}{item.error_code ? ` · ${item.error_code}` : ""}</p>
-          </button>{selected === item.fingerprint && <ErrorDetails fingerprint={selected} userId={user?.id} onClose={() => setSelected(null)} />}</div>)}</div>}
+          : <div className="space-y-3">{query.data.data.map(item => (
+            <ErrorGroupCard
+              key={item.fingerprint}
+              item={item}
+              userId={user?.id}
+              expanded={selected === item.fingerprint}
+              onToggle={() => setSelected(current => current === item.fingerprint ? null : item.fingerprint)}
+              onDelete={setConfirmation}
+              deleting={isDeleting}
+            />
+          ))}</div>}
 
     {query.data?.pagination?.totalPages > 1 && <div className="flex items-center justify-end gap-3 text-sm">
       <button type="button" onClick={() => { setPage((value) => Math.max(1, value - 1)); setSelected(null); }} disabled={page <= 1} aria-label="Previous page" className="rounded-md border border-border p-2 disabled:opacity-40"><ChevronLeft className="size-4" /></button>

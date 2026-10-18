@@ -1,5 +1,7 @@
 "use client";
 
+import InternshipFormSection from "./InternshipFormSection";
+
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Input from "./InternshipFormInput";
 import { labelClass, selectTriggerClass } from "./internshipFormStyles";
@@ -9,11 +11,7 @@ export default function InternshipPlacementFields({
   isPending, status,
 }) {
   return (
-    <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-foreground sm:text-base">Placement details</h3>
-        <p className="mt-1 text-xs text-foreground-soft">Tell us where you will work and what your role will be.</p>
-      </div>
+    <InternshipFormSection number="01" title="Placement details" description="Tell us where you will work and what your role will be.">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
         <Input
           name={"company_name"}
@@ -43,7 +41,7 @@ export default function InternshipPlacementFields({
           >
             <SelectTrigger
               id="region_id"
-              className={`mt-1 ${selectTriggerClass}`}
+              className={selectTriggerClass}
             >
               <SelectValue placeholder="Select Region" />
             </SelectTrigger>
@@ -95,6 +93,6 @@ export default function InternshipPlacementFields({
         />
       </div>
 
-    </section>
+    </InternshipFormSection>
   );
 }

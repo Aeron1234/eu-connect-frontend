@@ -36,21 +36,24 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
     });
   }
 
-  function handleApprove(id) {
+  function handleApprove(id, onAccepted) {
     const formData = new FormData();
     formData.set("fileId", id);
 
     const handlers = {
-      loadingLabel: "Approving document...",
-      successLabel: "Document approved.",
-      errorLabel: "Failed to approve document.",
+      loadingLabel: "Accepting document...",
+      successLabel: "Document accepted.",
+      errorLabel: "Failed to accept document.",
       action: approveInternshipDocument,
       args: [formData],
     };
 
     startTransition(async () => {
       const result = await toastAndAction(handlers);
-      if (result?.success) onChanged?.({ type: "approved", fileId: id });
+      if (result?.success) {
+        onAccepted?.();
+        onChanged?.({ type: "approved", fileId: id });
+      }
     });
   }
   return { isPending, handleDownload, handleApprove };

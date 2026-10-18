@@ -1,64 +1,63 @@
 "use client";
 
-import { CircleAlert } from "lucide-react";
-import SpinnerMini from "../ui/SpinnerMini";
+import { ArrowRight, Save } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import InternshipRecordFormHeader from "./InternshipRecordFormHeader";
 import InternshipPlacementFields from "./InternshipPlacementFields";
 import InternshipScheduleFields from "./InternshipScheduleFields";
 import InternshipActivitiesFields from "./InternshipActivitiesFields";
 import InternshipLocationFields from "./InternshipLocationFields";
+import InternshipFormPreview from "./InternshipFormPreview";
 import useInternshipRecordForm from "./useInternshipRecordForm";
 
-function InternshipRecordForm({ regions = [], recordStatus = "", onCreated }) {
+function InternshipRecordForm({ regions = [], recordStatus = "", activeRecord = null, onCreated, onUpdated, onConflict }) {
   const {
-    status, showForm, setShowForm, isPending, handleAction, fieldProps, regionProps,
-  } = useInternshipRecordForm(recordStatus, onCreated);
+    status, isEditing, isCurrentRecord, isPending, handleAction, fieldProps, regionProps,
+  } = useInternshipRecordForm({ recordStatus, onCreated, onUpdated, onConflict, activeRecord });
 
   return (
-    <>
-      <InternshipRecordFormHeader
-        showForm={showForm}
-        setShowForm={setShowForm}
-      />
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-sm shadow-sm">
+      <InternshipRecordFormHeader locked={status} recordStatus={recordStatus} />
 
-      {status && (
-        <p className="my-5 flex items-start gap-2 rounded-lg border border-border bg-secondary/70 px-3 py-3 text-xs leading-relaxed text-muted-foreground sm:items-center sm:px-4 sm:text-sm">
-          <span className="text-primary-emphasis flex-shrink-0">
-            <CircleAlert className="h-5 w-5" />
-          </span>
-          The form is locked because you currently have an ongoing or pending
-          internship record.
-        </p>
-      )}
-
-      {showForm && (
         <form
-          className={`relative mt-5 flex min-w-0 flex-col gap-4 sm:gap-5 ${status ? "opacity-50 pointer-events-none" : ""}`}
+          id="internship-record-form"
+          className="border-t border-border"
           action={handleAction}
+          aria-busy={isPending}
         >
-          <InternshipPlacementFields regions={regions} {...fieldProps} {...regionProps} />
-
-          <InternshipScheduleFields {...fieldProps} />
-
-          <InternshipActivitiesFields {...fieldProps} />
-
-          <InternshipLocationFields {...fieldProps} />
-
-          <button
-            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 sm:w-auto sm:self-end"
-            disabled={isPending || status}
-          >
-            {isPending ? (
-              <span className="flex w-full justify-center">
-                <SpinnerMini />
-              </span>
-            ) : (
-              "Create Internship Record"
+          <div className="grid min-w-0 xl:grid-cols-[minmax(0,1fr)_17rem]">
+            <fieldset disabled={isPending || status} className={`min-w-0 space-y-7 p-5 sm:space-y-8 sm:p-6 lg:p-7 ${status ? "opacity-50 pointer-events-none" : ""}`}>
+              <legend className="sr-only">Internship record details</legend>
+              <InternshipPlacementFields regions={regions} {...fieldProps} {...regionProps} />
+              <div className="border-t border-border" />
+              <InternshipScheduleFields {...fieldProps} />
+              <div className="border-t border-border" />
+              <InternshipActivitiesFields {...fieldProps} />
+              <div className="border-t border-border" />
+              <InternshipLocationFields {...fieldProps} />
+            </fieldset>
+            <InternshipFormPreview internshipForm={fieldProps.internshipForm} recordStatus={recordStatus} region={regions.find((region) => String(region.id) === regionProps.selectedRegion)} />
+          </div>
+          <div className="flex flex-col gap-3 border-t border-border bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <p className="text-xs leading-relaxed text-muted-foreground">{status ? "Your saved internship details are shown above." : <><span className="font-semibold text-primary-emphasis">*</span> Required fields. Company website is optional.</>}</p>
+            {(!isCurrentRecord || isEditing) && (
+            <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <button
+              type="submit"
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              disabled={isPending || status}
+            >
+              {isPending ? (
+                <><Spinner className="size-4" /> {isEditing ? "Saving changes..." : "Creating record..."}</>
+              ) : (
+                isEditing ? <>Save changes <Save className="size-4" aria-hidden="true" /></> : <>Create Internship Record <ArrowRight className="size-4" aria-hidden="true" /></>
+              )}
+            </button>
+            </div>
             )}
-          </button>
+          </div>
         </form>
-      )}
-    </>
+    </div>
   );
 }
 

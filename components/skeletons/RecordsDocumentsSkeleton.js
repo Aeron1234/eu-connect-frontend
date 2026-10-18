@@ -9,16 +9,13 @@ function RecordsDocumentsSkeleton({ items = 6 }) {
         <InternshipRequirementsTypeSkeleton />
       </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3 mt-5">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Skeleton className="h-7 w-24 rounded-full" />
-          <Skeleton className="h-7 w-32 rounded-full" />
-          <Skeleton className="h-7 w-32 rounded-full" />
-        </div>
-
-        <div className="flex items-center gap-2 lg:ml-auto">
-          <Skeleton className="h-9 w-full lg:w-56 rounded-lg" />
-          <Skeleton className="h-9 w-[68px] rounded-lg" />
+      <div className="mt-5 flex justify-start">
+        <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:w-auto">
+          <div className="col-span-2 min-w-0 sm:w-56">
+            <Skeleton className="h-9 w-full rounded-lg" />
+          </div>
+          <Skeleton className="h-9 w-full min-w-0 rounded-md sm:w-[200px]" />
+          <Skeleton className="h-[34px] w-[66px] shrink-0 rounded-lg" />
         </div>
       </div>
 

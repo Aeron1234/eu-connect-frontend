@@ -13,9 +13,7 @@ function CreateAccountLoading() {
           <Skeleton className="h-9 w-20 rounded-md" />
         </div>
 
-        <div className="rounded-xl border border-border bg-card shadow-sm p-5 sm:p-6">
-          <CreateAccountFormSkeleton />
-        </div>
+        <CreateAccountFormSkeleton />
       </div>
     </main>
   );

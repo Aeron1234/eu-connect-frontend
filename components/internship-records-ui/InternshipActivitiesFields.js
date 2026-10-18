@@ -1,11 +1,12 @@
 "use client";
 
+import InternshipFormSection from "./InternshipFormSection";
+
 import { labelClass, textareaClass } from "./internshipFormStyles";
 
 export default function InternshipActivitiesFields({ internshipForm, setInternshipForm, isPending, status }) {
   return (
-    <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
-      <h3 className="mb-4 text-sm font-semibold text-foreground sm:text-base">Activities</h3>
+    <InternshipFormSection number="03" title="Activities" description="Describe the work and responsibilities you expect during your internship.">
       <div className="flex flex-col">
         <label htmlFor="description" className={labelClass}>
           Description *
@@ -14,9 +15,9 @@ export default function InternshipActivitiesFields({ internshipForm, setInternsh
           name="description"
           placeholder="Assisting developers on front-end development..."
           id="description"
-          rows={3}
+          rows={4}
           className={textareaClass}
-          defaultValue={internshipForm.description}
+          value={internshipForm.description}
           onChange={(e) =>
             setInternshipForm({
               ...internshipForm,
@@ -28,6 +29,6 @@ export default function InternshipActivitiesFields({ internshipForm, setInternsh
         />
       </div>
 
-    </section>
+    </InternshipFormSection>
   );
 }

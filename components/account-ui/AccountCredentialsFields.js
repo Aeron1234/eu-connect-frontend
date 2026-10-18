@@ -1,91 +1,23 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { labelClass, inputClass } from "./accountFormStyles";
+import { hintClass, inputClass, labelClass } from "./accountFormStyles";
 
-export default function AccountCredentialsFields({
-  accountForm, setAccountForm, isPending,
-  isFocused, setIsFocused, show, setShow,
-}) {
+export default function AccountCredentialsFields({ accountForm, setAccountForm, isPending, show, setShow }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6 items-start">
-      <div>
-        <label htmlFor="username" className={labelClass}>
-          Username *
-        </label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="jdc_cnahs"
-          className={inputClass}
-          value={accountForm.username}
-          onChange={(e) =>
-            setAccountForm((prev) => ({
-              ...prev,
-              username: e.target.value,
-            }))
-          }
-          disabled={isPending}
-          required
-        />
+    <div className="grid min-w-0 grid-cols-1 items-start gap-5 sm:grid-cols-2">
+      <div className="min-w-0">
+        <label htmlFor="username" className={labelClass}>Username <span className="text-primary-emphasis">*</span></label>
+        <input type="text" id="username" name="username" placeholder="juan.delacruz" className={inputClass} value={accountForm.username} onChange={event => setAccountForm(previous => ({ ...previous, username: event.target.value }))} disabled={isPending} autoComplete="off" spellCheck={false} autoCapitalize="none" required />
+        <p className={hintClass}>Used to sign in to EU-Connect.</p>
       </div>
-
-      <div>
-        <label htmlFor="password" className={labelClass}>
-          Temporary Password *
-        </label>
-        <div
-          className={`mt-1 flex h-10 items-center gap-1 w-full rounded-md border border-border bg-background px-3 shadow-none ${isFocused ? "outline-none ring-2 ring-primary-300 border-transparent" : ""} transition-all`}
-        >
-          <input
-            type={!show ? "password" : "text"}
-            id="password"
-            name="password"
-            placeholder="minimum 8 characters"
-            className="flex-1 outline-none bg-transparent text-sm"
-            minLength={8}
-            value={accountForm.password}
-            onChange={(e) =>
-              setAccountForm((prev) => ({
-                ...prev,
-                password: e.target.value,
-              }))
-            }
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            disabled={isPending}
-            required
-          />
-          <div
-            className={`justify-self-end cursor-pointer hover:bg-secondary rounded-md p-1 transition-all text-muted-foreground ${isPending ? "pointer-events-none hidden cursor-normal opacity-0" : ""}`}
-            onClick={() => setShow((val) => !val)}
-          >
-            {show ? (
-              <EyeOff className="h-4 w-5" />
-            ) : (
-              <Eye className="h-4 w-5" />
-            )}
-          </div>
+      <div className="min-w-0">
+        <label htmlFor="password" className={labelClass}>Temporary password <span className="text-primary-emphasis">*</span></label>
+        <div className="flex h-11 min-w-0 items-center rounded-lg border border-border bg-background shadow-xs transition-[border-color,box-shadow] hover:border-primary/30 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+          <input type={show ? "text" : "password"} id="password" name="password" placeholder="At least 8 characters" className="h-full min-w-0 flex-1 bg-transparent pl-3.5 pr-1 text-sm text-foreground outline-none placeholder:text-foreground-subtle disabled:cursor-not-allowed disabled:opacity-50" minLength={8} value={accountForm.password} onChange={event => setAccountForm(previous => ({ ...previous, password: event.target.value }))} disabled={isPending} autoComplete="new-password" aria-describedby="account-password-help" required />
+          <button type="button" onClick={() => setShow(value => !value)} disabled={isPending} aria-label={show ? "Hide temporary password" : "Show temporary password"} aria-pressed={show} className="mr-1 flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50">{show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
         </div>
-      </div>
-
-      <div>
-        <label htmlFor="email" className={labelClass}>
-          Email Address (optional)
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="user@email.com"
-          className={inputClass}
-          value={accountForm.email}
-          onChange={(e) =>
-            setAccountForm((prev) => ({ ...prev, email: e.target.value }))
-          }
-          disabled={isPending}
-        />
+        <p id="account-password-help" className={hintClass}>At least 8 characters. The account holder can change it later.</p>
       </div>
     </div>
   );

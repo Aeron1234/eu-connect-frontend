@@ -13,7 +13,7 @@ export default function InternshipFormInput({
   required = true,
 }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex min-w-0 flex-col">
       <label htmlFor={name} className={labelClass}>
         {label}
       </label>

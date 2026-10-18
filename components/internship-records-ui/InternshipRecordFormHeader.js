@@ -1,31 +1,36 @@
-import { ChevronDown, Plus } from "lucide-react";
+import { CircleCheck, Clock3, LockKeyhole } from "lucide-react";
 
-function InternshipRecordFormHeader({ showForm, setShowForm }) {
+export default function InternshipRecordFormHeader({ locked = false, recordStatus = "" }) {
+  const ongoing = recordStatus === "ongoing";
+  const pending = recordStatus === "pending";
+  const hasStatus = pending || ongoing;
+  const StatusIcon = ongoing ? CircleCheck : Clock3;
+
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0 flex-1 pr-2">
-        <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold lg:text-base">
-          <Plus className="h-5 w-5 flex-shrink-0" />
-          New Internship Record
-        </h2>
-        <p className="text-xs text-foreground-soft line-clamp-2 lg:text-sm">
-          Provide your placement details for review by your department head
-        </p>
+    <header className="relative min-w-0 bg-linear-to-br from-primary/6 via-card to-card p-5 sm:p-6">
+      <div className="min-w-0">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-emphasis">Your placement</p>
+          <div className="relative flex min-h-8 items-center">
+            <h2 className={`min-w-0 w-full truncate text-sm font-medium tracking-tight text-foreground sm:text-xl sm:font-semibold ${hasStatus ? "pr-28 sm:pr-40" : ""}`}>{pending ? "Pending internship" : ongoing ? "Current internship" : "New internship record"}</h2>
+            {hasStatus && (
+              <span className={`absolute right-0 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full border px-2 py-1.5 text-[10px] font-medium sm:gap-1.5 sm:px-3 sm:text-[11px] sm:font-semibold ${ongoing ? "border-emerald-600/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-amber-600/20 bg-amber-500/10 text-amber-800 dark:text-amber-300"}`}>
+                <StatusIcon className="size-3 sm:size-3.5" aria-hidden="true" />
+                {ongoing ? "Ongoing" : "Pending approval"}
+              </span>
+            )}
+          </div>
+          <p className="mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
+            {pending ? "Your placement is waiting for approval. Update its details below and select Save changes before it is reviewed." : locked
+              ? "Your approved placement is active. Review your internship details below."
+              : "Tell us about your company, schedule, and responsibilities to submit your placement for review."}
+          </p>
       </div>
-
-      <button
-        type="button"
-        title={showForm ? "Hide" : "Show"}
-        onClick={() => setShowForm((val) => !val)}
-        className="flex flex-shrink-0 items-center gap-1 rounded-sm px-2 py-1 text-sm font-semibold transition-all hover:bg-red-100 hover:text-primary-emphasis lg:text-base"
-      >
-        <ChevronDown
-          className={`h-5 w-5 transition-transform ${showForm ? "rotate-180" : ""}`}
-        />
-        <span className="hidden sm:inline">{showForm ? "Hide" : "Show"}</span>
-      </button>
-    </div>
+      {locked && (
+        <div className="mt-5 flex items-start gap-2 border-t border-border/70 pt-3.5 text-xs leading-relaxed" role="status">
+          <LockKeyhole className="mt-0.5 size-3.5 shrink-0 text-primary-emphasis" aria-hidden="true" />
+          <p className="text-muted-foreground">{ongoing ? <><span className="font-medium text-foreground">Read-only record.</span> Approved internship records can no longer be edited.</> : "Loading your submitted record. Editing will be available when its details finish loading."}</p>
+        </div>
+      )}
+    </header>
   );
 }
-
-export default InternshipRecordFormHeader;

@@ -18,6 +18,8 @@ import PageTitle from "../ui/PageTitle";
 import InternshipRecordFormSkeleton from "@/components/skeletons/InternshipRecordFormSkeleton";
 import RecordCardSkeleton from "@/components/skeletons/RecordCardSkeleton";
 import ManualDialog from "@/components/ui/ManualDialog";
+import { getCurrentInternshipRecord } from "./internshipRecordFormData.mjs";
+import { calendarKeys } from "@/lib/cache/calendar-queries";
 
 function InternshipRecordsManager() {
   const { user } = useUser();
@@ -34,10 +36,8 @@ function InternshipRecordsManager() {
   const [tab, setTab] = useState("form");
   const records = recordsQuery.data?.records || [];
   const regions = regionsQuery.data || [];
-  const visibleActiveRecord = records.find(
-    (record) => record.status === "pending" || record.status === "ongoing",
-  );
-  const currentRecordStatus = visibleActiveRecord?.status || recordsQuery.data?.active?.status || "";
+  const activeRecord = getCurrentInternshipRecord(records, recordsQuery.data?.active);
+  const currentRecordStatus = activeRecord?.status || "";
   const canManageRecords = !currentRecordStatus || records.some(
     (record) => record.status === "pending" || record.status === "rejected",
   );
@@ -59,13 +59,22 @@ function InternshipRecordsManager() {
     void queryClient.invalidateQueries({ queryKey: studentStorageKeys.active(userId) });
   }
 
-  function handleCreated() {
+  function handleCreated(submittedRecord) {
     queryClient.setQueryData(studentRecordsKeys.records(userId), (previous) =>
-      previous ? { ...previous, active: { status: "pending" } } : previous,
+      previous ? {
+        ...previous,
+        active: { ...submittedRecord, status: "pending" },
+        records: previous.records.map((record) => submittedRecord.id != null && String(record.id) === String(submittedRecord.id) ? { ...record, ...submittedRecord } : record),
+      } : previous,
     );
     void queryClient.invalidateQueries({ queryKey: studentRecordsKeys.records(userId) });
     void queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.role(userId, "student") });
     void queryClient.invalidateQueries({ queryKey: studentStorageKeys.active(userId) });
+    void queryClient.invalidateQueries({ queryKey: calendarKeys.all(userId) });
+  }
+
+  function handleConflict() {
+    void queryClient.invalidateQueries({ queryKey: studentRecordsKeys.records(userId) });
   }
 
   return (
@@ -84,9 +93,9 @@ function InternshipRecordsManager() {
                 <li>Open the <strong>Form</strong> tab and enter your company, region, position, dates, semester, required hours, and a short description. The company website is optional.</li>
                 <li>Find your company with the map search or tap the map to place its pin. Check the selected address and correct it if needed.</li>
                 <li>Select <strong>Create Internship Record</strong>. Your submission appears under <strong>Records</strong> as <strong>Pending</strong> while your department head reviews it.</li>
-                <li>Use the <strong>Records</strong> tab to check its status. You may delete a pending or rejected record with the trash icon and submit a corrected record.</li>
+                <li>While the record is <strong>Pending</strong>, update its details in the Form tab and select <strong>Save changes</strong>. You may also delete a pending or rejected record from Records.</li>
               </ol>
-              <p className="text-foreground-soft">The form is locked while you have a pending or ongoing record. Once approved, its status becomes ongoing.</p>
+              <p className="text-foreground-soft">Pending records remain editable until reviewed. Once approved, the record becomes ongoing and the form is locked.</p>
             </div>
           </ManualDialog>
         )}
@@ -130,7 +139,7 @@ function InternshipRecordsManager() {
 
       {(recordsQuery.isPending || regionsQuery.isPending) ? (
         tab === "form" ? (
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-8" role="status" aria-label="Loading internship records">
+          <div className="min-w-0" role="status" aria-label="Loading internship records">
             <InternshipRecordFormSkeleton />
           </div>
         ) : (
@@ -145,12 +154,15 @@ function InternshipRecordsManager() {
             if (regionsQuery.isError) void regionsQuery.refetch();
           }} />
       ) : tab === "form" ? (
-        <div className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:p-8">
+        <div className="min-w-0">
           <InternshipRecordForm
-            key={currentRecordStatus || "available"}
+            key={activeRecord?.id || currentRecordStatus || "available"}
             regions={regions}
             recordStatus={currentRecordStatus}
+            activeRecord={activeRecord}
             onCreated={handleCreated}
+            onUpdated={handleCreated}
+            onConflict={handleConflict}
           />
         </div>
       ) : (

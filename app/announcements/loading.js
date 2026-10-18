@@ -1,6 +1,6 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
 import AnnouncementCardSkeleton from "@/components/skeletons/AnnouncementCardSkeleton";
+import AnnouncementBoardFiltersSkeleton from "@/components/skeletons/AnnouncementBoardFiltersSkeleton";
 
 function AnnouncementsLoading() {
   return (
@@ -9,10 +9,7 @@ function AnnouncementsLoading() {
         <PageTitleSkeleton />
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <Skeleton className="h-10 w-full sm:w-64 rounded-md" />
-        <Skeleton className="h-10 w-full sm:w-40 rounded-md" />
-      </div>
+      <AnnouncementBoardFiltersSkeleton />
 
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (

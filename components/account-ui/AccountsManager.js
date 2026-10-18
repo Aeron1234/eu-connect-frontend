@@ -128,7 +128,7 @@ function AccountsManager({ initialPage }) {
       </div>
 
       {tab === "Form" ? (
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+        <div>
           {formQuery.isPending ? (
             <CreateAccountFormSkeleton />
           ) : formQuery.isError && !formQuery.data ? (

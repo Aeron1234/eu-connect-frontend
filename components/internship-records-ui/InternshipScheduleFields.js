@@ -1,16 +1,14 @@
 "use client";
 
+import InternshipFormSection from "./InternshipFormSection";
+
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Input from "./InternshipFormInput";
 import { labelClass, selectTriggerClass } from "./internshipFormStyles";
 
 export default function InternshipScheduleFields({ internshipForm, setInternshipForm, isPending, status }) {
   return (
-    <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-foreground sm:text-base">Schedule and hours</h3>
-        <p className="mt-1 text-xs text-foreground-soft">Add your expected internship dates and required hours.</p>
-      </div>
+    <InternshipFormSection number="02" title="Schedule and hours" description="Add your expected internship dates and required hours.">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
         <Input
           name={"date_started"}
@@ -58,7 +56,7 @@ export default function InternshipScheduleFields({ internshipForm, setInternship
           >
             <SelectTrigger
               id="semester"
-              className={`mt-1 ${selectTriggerClass}`}
+              className={selectTriggerClass}
             >
               <SelectValue placeholder="Select Semester" />
             </SelectTrigger>
@@ -95,6 +93,6 @@ export default function InternshipScheduleFields({ internshipForm, setInternship
         />
       </div>
 
-    </section>
+    </InternshipFormSection>
   );
 }

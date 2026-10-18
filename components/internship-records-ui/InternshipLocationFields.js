@@ -1,23 +1,15 @@
 "use client";
 
-import { MapPin } from "lucide-react";
+import InternshipFormSection from "./InternshipFormSection";
+
 import MapFormContainer from "../map-ui/MapFormContainer";
 import { labelClass, textareaClass } from "./internshipFormStyles";
 
 export default function InternshipLocationFields({ internshipForm, setInternshipForm, isPending, status }) {
   return (
-    <section className="min-w-0 rounded-xl border border-border bg-background/60 p-4 sm:p-5">
-      <h3 className="mb-4 text-sm font-semibold text-foreground sm:text-base">Company location</h3>
+    <InternshipFormSection number="04" title="Company location" description="Find your company on the map and check the selected address.">
       <div className="flex min-w-0 flex-col gap-3">
-        <p className="flex flex-col gap-1">
-          <span className={`flex items-center gap-1.5 ${labelClass}`}>
-            <MapPin className="h-4 w-4 flex-shrink-0" /> Company Location *
-          </span>
-          <span className="text-xs text-muted-foreground">
-            Use the search bar inside the map to find your company, or click
-            directly on the map to drop a pin.
-          </span>
-        </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">Use the search bar inside the map to find your company, or click directly on the map to drop a pin. *</p>
   
         <MapFormContainer
           data={internshipForm}
@@ -40,12 +32,12 @@ export default function InternshipLocationFields({ internshipForm, setInternship
                 company_address: e.target.value,
               }))
             }
-            placeholder="Selecting a location on the map fills this in — you can also edit it manually."
+            placeholder="Choose a location on the map to fill in the address. You can also edit it manually."
             className={textareaClass}
             disabled={isPending || status}
           />
         </div>
       </div>
-    </section>
+    </InternshipFormSection>
   );
 }
