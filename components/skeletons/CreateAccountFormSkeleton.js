@@ -15,7 +15,7 @@ function SectionSkeleton({ credentials = false }) {
 }
 
 export default function CreateAccountFormSkeleton() {
-  return <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm" role="status" aria-label="Loading account form">
+  return <div className="relative min-w-0 overflow-clip rounded-2xl border border-border bg-card shadow-sm" role="status" aria-label="Loading account form">
     <div className="border-b border-border p-5 sm:p-6">
       <Skeleton className="h-4 w-44" /><Skeleton className="mt-2 h-3 w-3/4 max-w-80" />
       <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-20 rounded-xl sm:h-32" />)}</div>

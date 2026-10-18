@@ -15,7 +15,7 @@ export default function AccountAssignmentFields({
   return (
     <div className="grid min-w-0 grid-cols-1 items-start gap-5 sm:grid-cols-2">
       {showCourse && (
-        <div className="min-w-0">
+        <div className="relative min-w-0">
           <input type="hidden" name="course" value={selectedCourseId} disabled={isPending} />
           <label htmlFor="course" className={labelClass}>Course <span className="text-primary-emphasis">*</span></label>
           <Combobox items={courses.map(item => item.course_name)} value={course?.course_name ?? null} disabled={isPending} onValueChange={handleSelectCourse}>
@@ -29,7 +29,7 @@ export default function AccountAssignmentFields({
         </div>
       )}
       {showDepartment && (
-        <div className="min-w-0 sm:col-span-2">
+        <div className="relative min-w-0 sm:col-span-2">
           <input type="hidden" name="department" value={selectedDepartmentId} disabled={isPending} />
           <label htmlFor="department" className={labelClass}>Department <span className="text-primary-emphasis">*</span></label>
           <Combobox items={departments.map(item => item.name)} value={department?.name ?? null} disabled={isPending} onValueChange={handleSelectDepartment}>
@@ -42,7 +42,7 @@ export default function AccountAssignmentFields({
         </div>
       )}
       {showGender && (
-        <div className="min-w-0">
+        <div className="relative min-w-0">
           <input type="hidden" name="gender" value={selectedGender} disabled={isPending} />
           <label htmlFor="gender" className={labelClass}>Gender <span className="text-primary-emphasis">*</span></label>
           <Select value={selectedGender} onValueChange={setSelectedGender} disabled={isPending} required>

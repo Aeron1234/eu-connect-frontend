@@ -17,7 +17,7 @@ function CreateAccountForm({ roles, courses, departments, onCreated }) {
   } = useCreateAccountForm({ roles, courses, departments, onCreated });
 
   return (
-    <form className="overflow-hidden rounded-2xl border border-border bg-card text-sm shadow-sm" action={handleAction} aria-busy={isPending}>
+    <form className="relative min-w-0 overflow-clip rounded-2xl border border-border bg-card text-sm shadow-sm" action={handleAction} aria-busy={isPending}>
       <div className="border-b border-border p-5 sm:p-6">
         <AccountRoleFields {...roleProps} />
       </div>
