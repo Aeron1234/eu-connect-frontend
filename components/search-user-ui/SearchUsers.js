@@ -75,6 +75,9 @@ function SearchUsers() {
       {!isSearching && historyQuery.isError && !historyQuery.data && (
         <ErrorUI error={historyQuery.error} reset={() => void historyQuery.refetch()} logError={false} />
       )}
+      {!isSearching && historyQuery.isError && historyQuery.data && (
+        <ErrorUI error={historyQuery.error} reset={() => void historyQuery.refetch()} compact logError={false} />
+      )}
       {!isSearching && !historyQuery.isPending && !(historyQuery.isError && !historyQuery.data) &&
         (history.length === 0 ? (
           <HistoryLoadingCard />
@@ -94,6 +97,9 @@ function SearchUsers() {
       )}
       {!searchLoading && searchError && (
         <ErrorUI error={searchQuery.error} reset={() => void searchQuery.refetch()} logError={false} />
+      )}
+      {isSearching && !searchLoading && searchQuery.isError && searchQuery.data && (
+        <ErrorUI error={searchQuery.error} reset={() => void searchQuery.refetch()} compact logError={false} />
       )}
       {isSearching && !searchLoading && !searchError && searchedUsers.length > 0 && (
         <SearchedUserList searchedUsers={searchedUsers} />

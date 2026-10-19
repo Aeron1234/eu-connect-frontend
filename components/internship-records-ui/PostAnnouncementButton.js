@@ -9,6 +9,7 @@ import { toastAndAction } from "../../lib/helpers";
 import { useUser } from "@/contexts/UserContext";
 import TitleButton from "../ui/TitleButton";
 import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function PostAnnouncementButton({ categories, onPosted, categoriesLoading = false, categoriesError, onRetryCategories }) {
   const [isPending, startTransition] = useTransition();
@@ -44,9 +45,8 @@ function PostAnnouncementButton({ categories, onPosted, categoriesLoading = fals
       {categoriesLoading ? (
         <ModalFormSkeleton />
       ) : categoriesError ? (
-        <div role="alert" className="overflow-y-auto p-4 text-sm sm:p-6">
-          <p>{categoriesError}</p>
-          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={onRetryCategories}>Try again</button>
+        <div className="overflow-y-auto p-4 sm:p-6">
+          <ErrorUI error={typeof categoriesError === "string" ? new Error(categoriesError) : categoriesError} reset={onRetryCategories} compact logError={false} />
         </div>
       ) : <AnnouncementForm
         categories={categories}

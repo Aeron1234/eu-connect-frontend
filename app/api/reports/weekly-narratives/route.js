@@ -20,7 +20,7 @@ export async function GET(request) {
     return new NextResponse(pdf, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="weekly-narratives-${internshipId}.pdf"`,
+        "Content-Disposition": `attachment; filename="weekly-narratives-${internshipId}.pdf"`,
         "Cache-Control": "private, no-store",
       },
     });

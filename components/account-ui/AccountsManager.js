@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { RefreshCw, TriangleAlert, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import ErrorUI from "@/components/ui/ErrorUI";
 import { useUser } from "@/contexts/UserContext";
 import { accountsInfiniteOptions, accountsKeys } from "@/lib/cache/accounts-queries";
@@ -127,6 +127,10 @@ function AccountsManager({ initialPage }) {
         ))}
       </div>
 
+      {formQuery.isError && (formQuery.data !== undefined || tab === "Accounts") && (
+        <ErrorUI error={formQuery.error} reset={() => void formQuery.refetch()} compact logError={false} />
+      )}
+
       {tab === "Form" ? (
         <div>
           {formQuery.isPending ? (
@@ -160,33 +164,10 @@ function AccountsManager({ initialPage }) {
           </div>
 
           {listError && accountsQuery.data && (
-            <div role="alert" className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-2">
-                <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
-                <div>
-                  <p className="font-semibold">
-                    {listError.status === 429 ? "Too many requests" : "Accounts could not be updated"}
-                  </p>
-                  <p className="mt-1 text-foreground-soft">{listError.message}</p>
-                  {accounts.length > 0 && (
-                    <p className="mt-1 text-xs text-foreground-soft">Previously loaded accounts are still shown.</p>
-                  )}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (listError.operation === "page") {
-                    void accountsQuery.fetchNextPage();
-                  } else {
-                    void accountsQuery.refetch();
-                  }
-                }}
-                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 font-semibold hover:bg-accent"
-              >
-                <RefreshCw className="size-4" aria-hidden="true" /> Retry
-              </button>
-            </div>
+            <ErrorUI error={accountsQuery.error} compact logError={false} reset={() => {
+              if (listError.operation === "page") void accountsQuery.fetchNextPage();
+              else void accountsQuery.refetch();
+            }} />
           )}
 
           {isFiltering ? (

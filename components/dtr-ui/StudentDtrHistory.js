@@ -7,6 +7,7 @@ import { dtrKeys, studentDtrPageOptions } from "@/lib/cache/dtr-queries";
 import DtrTable from "./DtrTable";
 import DtrPagination from "./DtrPagination";
 import DtrRecordsSkeleton from "@/components/skeletons/DtrRecordsSkeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function StudentDtrHistory({ internshipId, initialPage }) {
   const { user } = useUser();
@@ -36,10 +37,7 @@ function StudentDtrHistory({ internshipId, initialPage }) {
   }
   if (pageQuery.isError) {
     return (
-      <div role="alert" className="py-6 text-center text-sm">
-        <p>{pageQuery.error?.message || "Could not load time records."}</p>
-        <button type="button" onClick={() => void pageQuery.refetch()} className="mt-2 font-medium text-primary-emphasis">Try again</button>
-      </div>
+      <ErrorUI error={pageQuery.error} reset={() => void pageQuery.refetch()} compact logError={false} />
     );
   }
 

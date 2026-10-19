@@ -227,6 +227,7 @@ export default function useInternshipPosts({
     setFavorite,
     userRole,
     courses,
+    coursesQuery,
     postsQuery,
     internshipPosts,
     total,

@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, TriangleAlert } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import ErrorUI from "@/components/ui/ErrorUI";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import TabBar from "../ui/TabBar";
@@ -35,10 +35,10 @@ export default function AnnexCManager({ hei, address, initialPage }) {
           <AnnexCReportFilters {...filterProps} />
 
           {!isChangingFilters && reportsQuery.error && reportsQuery.data && (
-            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-              <span className="flex items-center gap-2 text-foreground-soft"><TriangleAlert className="size-4 text-destructive" />{reportsQuery.error.message}</span>
-              <button type="button" onClick={() => reportsQuery.isFetchNextPageError ? reportsQuery.fetchNextPage() : reportsQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
-            </div>
+            <ErrorUI error={reportsQuery.error} compact logError={false} reset={() => {
+              if (reportsQuery.isFetchNextPageError) void reportsQuery.fetchNextPage();
+              else void reportsQuery.refetch();
+            }} />
           )}
 
           {isPending ? (

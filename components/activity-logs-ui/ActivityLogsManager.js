@@ -1,7 +1,7 @@
 "use client";
 
 import ErrorUI from "@/components/ui/ErrorUI";
-import { Activity, ScrollText, TriangleAlert } from "lucide-react";
+import { Activity, ScrollText } from "lucide-react";
 import PageTitle from "../ui/PageTitle";
 import PageManual from "../ui/PageManual";
 import ActivityLogsTableSkeleton from "../skeletons/ActivityLogsTableSkeleton";
@@ -68,19 +68,10 @@ export default function ActivityLogsManager({ initialPage }) {
 
       {/* Table */}
       {!isChangingFilters && logsQuery.error && logsQuery.data && (
-        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-          <span className="flex items-center gap-2 text-foreground-soft">
-            <TriangleAlert className="size-4 text-destructive" aria-hidden="true" />
-            {logsQuery.error.message || "Activity logs could not be updated."}
-          </span>
-          <button
-            type="button"
-            onClick={() => logsQuery.isFetchNextPageError ? logsQuery.fetchNextPage() : logsQuery.refetch()}
-            className="font-semibold text-primary-emphasis hover:underline"
-          >
-            Try again
-          </button>
-        </div>
+        <ErrorUI error={logsQuery.error} compact logError={false} reset={() => {
+          if (logsQuery.isFetchNextPageError) void logsQuery.fetchNextPage();
+          else void logsQuery.refetch();
+        }} />
       )}
 
       {isFiltering ? (

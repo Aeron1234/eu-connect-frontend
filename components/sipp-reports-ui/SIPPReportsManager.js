@@ -38,6 +38,10 @@ function SIPPReportsManager({
         <TabBar tabs={scopeTabs} selectedTab={scope} onSelect={setScope} />
       </div>
 
+      {scope === "annex-d" && yearsQuery.isError && yearsQuery.data && (
+        <ErrorUI error={yearsQuery.error} reset={() => void yearsQuery.refetch()} compact logError={false} />
+      )}
+
       {scope === "annex-c" ? (
         <AnnexCManager
           hei={hei}

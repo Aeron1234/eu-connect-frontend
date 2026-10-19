@@ -19,7 +19,7 @@ export async function GET(request) {
     return new NextResponse(pdf, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="summary-report-${internshipId}.pdf"`,
+        "Content-Disposition": `attachment; filename="summary-report-${internshipId}.pdf"`,
         "Cache-Control": "private, no-store",
       },
     });

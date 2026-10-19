@@ -32,14 +32,7 @@ export default function MapWrapper() {
       <StudentMapHeader tabs={tabs} tab={tab} setTab={setTab} />
 
       {locationsQuery.isError && locationsQuery.data && (
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
-          The latest map update could not be loaded. Showing the last available data.
-          <button
-            type="button"
-            onClick={() => void locationsQuery.refetch()}
-            className="ml-3 font-semibold text-primary-emphasis"
-          >Try again</button>
-        </div>
+        <ErrorUI error={locationsQuery.error} reset={() => void locationsQuery.refetch()} compact logError={false} />
       )}
       {locationsQuery.isPending ? (
         <MapLocationsLoading />

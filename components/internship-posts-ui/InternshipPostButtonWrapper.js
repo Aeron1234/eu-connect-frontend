@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { coursesOptions } from "@/lib/cache/reference-queries";
 import TitleButton from "../ui/TitleButton";
 import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function InternshipPostButtonWrapper() {
   const { user } = useUser();
@@ -31,9 +32,8 @@ function InternshipPostButtonWrapper() {
       {coursesQuery.isPending ? (
         <ModalFormSkeleton />
       ) : coursesQuery.isError ? (
-        <div role="alert" className="overflow-y-auto p-4 text-sm sm:p-6">
-          <p>{coursesQuery.error.message}</p>
-          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void coursesQuery.refetch()}>Try again</button>
+        <div className="overflow-y-auto p-4 sm:p-6">
+          <ErrorUI error={coursesQuery.error} reset={() => void coursesQuery.refetch()} compact logError={false} />
         </div>
       ) : <InternshipPostButton courses={coursesQuery.data} />}
     </Modal>

@@ -1,6 +1,6 @@
 import { CircleCheck, Clock3, LockKeyhole } from "lucide-react";
 
-export default function InternshipRecordFormHeader({ locked = false, recordStatus = "" }) {
+export default function InternshipRecordFormHeader({ locked = false, recordStatus = "", isEditing = false, canEdit = false }) {
   const ongoing = recordStatus === "ongoing";
   const pending = recordStatus === "pending";
   const hasStatus = pending || ongoing;
@@ -20,7 +20,7 @@ export default function InternshipRecordFormHeader({ locked = false, recordStatu
             )}
           </div>
           <p className="mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
-            {pending ? "Your placement is waiting for approval. Update its details below and select Save changes before it is reviewed." : locked
+            {pending ? isEditing ? "Update your placement details below, then select Save changes. Cancel discards your unsaved changes." : "Your placement is waiting for approval. Select Edit below to update its details before it is reviewed." : locked
               ? "Your approved placement is active. Review your internship details below."
               : "Tell us about your company, schedule, and responsibilities to submit your placement for review."}
           </p>
@@ -28,7 +28,7 @@ export default function InternshipRecordFormHeader({ locked = false, recordStatu
       {locked && (
         <div className="mt-5 flex items-start gap-2 border-t border-border/70 pt-3.5 text-xs leading-relaxed" role="status">
           <LockKeyhole className="mt-0.5 size-3.5 shrink-0 text-primary-emphasis" aria-hidden="true" />
-          <p className="text-muted-foreground">{ongoing ? <><span className="font-medium text-foreground">Read-only record.</span> Approved internship records can no longer be edited.</> : "Loading your submitted record. Editing will be available when its details finish loading."}</p>
+          <p className="text-muted-foreground">{ongoing ? <><span className="font-medium text-foreground">Read-only record.</span> Approved internship records can no longer be edited.</> : canEdit ? <><span className="font-medium text-foreground">View mode.</span> Select Edit to unlock your pending record.</> : "Loading your submitted record. Editing will be available when its details finish loading."}</p>
         </div>
       )}
     </header>

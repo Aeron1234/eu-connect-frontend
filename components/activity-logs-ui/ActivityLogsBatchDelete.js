@@ -115,9 +115,7 @@ export default function ActivityLogsBatchDelete({ disabled, onDelete, pending })
                 </div>
               )}
               {error && (
-                <div className="[&>div]:min-h-0 [&>div]:p-0 [&>div>div]:p-4">
-                  <ErrorUI error={error} reset={() => void checkRange()} logError={false} />
-                </div>
+                <ErrorUI error={error} reset={() => void checkRange()} compact logError={false} />
               )}
             </ModalForm.Section>
             <ModalForm.Footer>

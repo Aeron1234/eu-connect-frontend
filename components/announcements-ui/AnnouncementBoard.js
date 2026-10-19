@@ -52,7 +52,7 @@ function AnnouncementBoardContent(props) {
         <PostAnnouncementButton
           categories={categories || []}
           categoriesLoading={categoriesQuery.isPending}
-          categoriesError={categoriesQuery.error?.message}
+          categoriesError={categoriesQuery.error}
           onRetryCategories={() => void categoriesQuery.refetch()}
           onPosted={refreshList}
         />
@@ -67,6 +67,16 @@ function AnnouncementBoardContent(props) {
       />
 
       <SelectedAnnouncement targetId={targetId} targetQuery={targetQuery} />
+
+      {categoriesQuery.isError && (
+        <ErrorUI error={categoriesQuery.error} reset={() => void categoriesQuery.refetch()} compact logError={false} />
+      )}
+      {!isSearching && announcementsQuery.isError && announcementsQuery.data && (
+        <ErrorUI error={announcementsQuery.error} compact logError={false} reset={() => {
+          if (announcementsQuery.isFetchNextPageError) void announcementsQuery.fetchNextPage();
+          else void announcementsQuery.refetch();
+        }} />
+      )}
 
       {isSearching ? (
         <div className="space-y-3">

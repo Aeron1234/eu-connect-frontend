@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { openPdfBlob } from "./openPdfBlob";
+import { downloadPdf } from "./downloadPdf";
 
 export default function useExportPdf({ endpoint, params }) {
   const [isPending, setIsPending] = useState(false);
@@ -30,8 +30,7 @@ export default function useExportPdf({ endpoint, params }) {
         throw requestFailure;
       }
 
-      const blob = await res.blob();
-      openPdfBlob(blob);
+      await downloadPdf(res);
     } catch (err) {
       setRequestError(err instanceof Error ? err : new Error("Could not generate the PDF."));
     } finally {

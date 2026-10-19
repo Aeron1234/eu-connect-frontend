@@ -19,6 +19,7 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import { shiftHoursMonthOptions } from "@/lib/cache/shift-hours-queries";
 import { Skeleton } from "@/components/ui/skeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 const monthNames = [
   "January",
@@ -106,16 +107,10 @@ function ShiftHoursChart({
         )}
       </div>
 
-      {monthQuery.isError && !monthQuery.data ? (
-        <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm text-red-600">{monthQuery.error?.message || "Could not load shift hours."}</p>
-            <button type="button" onClick={() => void monthQuery.refetch()} className="mt-2 text-xs font-semibold text-primary-emphasis">
-              Try again
-            </button>
-          </div>
-        </div>
-      ) : selectedKey && monthQuery.isPending ? (
+      {monthQuery.isError && (
+        <ErrorUI error={monthQuery.error} reset={() => void monthQuery.refetch()} compact logError={false} />
+      )}
+      {monthQuery.isError && !monthQuery.data ? null : selectedKey && monthQuery.isPending ? (
         <Skeleton className="h-64 w-full rounded-lg" role="status" aria-label="Loading shift hours" />
       ) : weeks.length === 0 ? (
         <div className="h-64 w-full bg-muted rounded-lg flex items-center justify-center">

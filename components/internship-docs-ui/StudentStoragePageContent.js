@@ -20,6 +20,9 @@ function StoragePage() {
     pastError,
     refreshError,
   } = useStudentStorage();
+  const failedRefresh = [activeQuery, typesQuery, pastQuery].find(
+    (query) => query.isError && query.data !== undefined,
+  );
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
@@ -32,18 +35,15 @@ function StoragePage() {
       />
 
       {refreshError && (
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-4 text-sm">
-          <p>{activeQuery.error?.message || typesQuery.error?.message || pastQuery.error?.message}</p>
-          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => {
+        <ErrorUI error={failedRefresh?.error} compact logError={false} reset={() => {
             if (activeQuery.isError) void activeQuery.refetch();
             if (typesQuery.isError) void typesQuery.refetch();
             if (pastQuery.isError) void pastQuery.refetch();
-          }}>Try again</button>
-        </div>
+          }} />
       )}
 
       {currentError ? (
-        <ErrorUI error={activeQuery.error || typesQuery.error} reset={() => {
+        <ErrorUI error={[activeQuery, typesQuery].find((query) => query.isError && query.data === undefined)?.error} reset={() => {
           if (activeQuery.isError) void activeQuery.refetch();
           if (typesQuery.isError) void typesQuery.refetch();
         }} logError={false} />

@@ -59,7 +59,7 @@ export default function DocumentActions({
         type="button"
         className="p-1.5 rounded-md text-muted-foreground hover:text-primary-emphasis hover:bg-primary/10 transition-colors"
         aria-label="Download"
-        onClick={() => handleDownload(item.id)}
+        onClick={() => handleDownload(item.id, item)}
         disabled={isPending}
       >
         <Download className="w-4 h-4" />

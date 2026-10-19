@@ -79,27 +79,25 @@ function InternshipRecordsManager() {
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
-      <div className="relative pr-11">
-        <PageTitle
-          Icon={Briefcase}
-          title="My Records"
-          description="Submit your internship details and track approval status"
-        />
-        {!recordsQuery.isPending && canManageRecords && (
-          <ManualDialog title="How to manage your internship record" triggerStyles="absolute right-0 top-0 inline-flex size-9 items-center justify-center rounded-full text-foreground-soft transition-colors hover:bg-muted hover:text-primary-emphasis focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+      <PageTitle
+        Icon={Briefcase}
+        title="My Records"
+        description="Submit your internship details and track approval status"
+        titleAction={!recordsQuery.isPending && canManageRecords && (
+          <ManualDialog title="How to manage your internship record">
             <div className="space-y-4 text-sm leading-relaxed text-foreground">
               <p>Submit your placement for review before you start tracking internship activities.</p>
               <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
                 <li>Open the <strong>Form</strong> tab and enter your company, region, position, dates, semester, required hours, and a short description. The company website is optional.</li>
                 <li>Find your company with the map search or tap the map to place its pin. Check the selected address and correct it if needed.</li>
                 <li>Select <strong>Create Internship Record</strong>. Your submission appears under <strong>Records</strong> as <strong>Pending</strong> while your department head reviews it.</li>
-                <li>While the record is <strong>Pending</strong>, update its details in the Form tab and select <strong>Save changes</strong>. You may also delete a pending or rejected record from Records.</li>
+                <li>While the record is <strong>Pending</strong>, select <strong>Edit</strong> at the bottom of the Form tab to unlock its details. Select <strong>Save changes</strong> to save, or <strong>Cancel</strong> to discard your changes. You may also delete a pending or rejected record from Records.</li>
               </ol>
-              <p className="text-foreground-soft">Pending records remain editable until reviewed. Once approved, the record becomes ongoing and the form is locked.</p>
+              <p className="text-foreground-soft">Pending records open in view mode and can be edited until reviewed. Once approved, the record becomes ongoing and the form is locked.</p>
             </div>
           </ManualDialog>
         )}
-      </div>
+      />
 
       <div className="flex gap-1 rounded-lg p-1 bg-secondary w-fit">
         <button

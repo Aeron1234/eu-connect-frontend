@@ -8,6 +8,7 @@ import PastInternshipFilesSkeleton from "./PastInternshipFilesSkeleton";
 import usePastInternshipFiles from "./usePastInternshipFiles";
 import { downloadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 import { getFileTypeLabel, typeTone } from "@/lib/utils";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 export default function PastInternshipDocumentRow({ record, currentUserId }) {
   const { expanded, setExpanded, filesQuery, handleFilesChanged } = usePastInternshipFiles(record, currentUserId);
@@ -55,17 +56,12 @@ export default function PastInternshipDocumentRow({ record, currentUserId }) {
           {filesQuery.isPending ? (
             <PastInternshipFilesSkeleton />
           ) : filesQuery.isError && !filesQuery.data ? (
-            <div role="alert" className="p-4 text-sm text-foreground">
-              <p>{filesQuery.error?.message || "Could not load files. Please try again."}</p>
-              <button
-                type="button"
-                className="mt-2 font-semibold text-primary-emphasis"
-                onClick={() => void filesQuery.refetch()}
-              >
-                Try again
-              </button>
-            </div>
+            <ErrorUI error={filesQuery.error} reset={() => void filesQuery.refetch()} compact logError={false} />
           ) : (
+            <>
+            {filesQuery.isError && (
+              <ErrorUI error={filesQuery.error} reset={() => void filesQuery.refetch()} compact logError={false} />
+            )}
             <SearchedStudentFiles
               filtered={filesQuery.data || []}
               view="list"
@@ -77,6 +73,7 @@ export default function PastInternshipDocumentRow({ record, currentUserId }) {
               downloadAction={downloadInternshipFile}
               onChanged={handleFilesChanged}
             />
+            </>
           )}
         </div>
       )}

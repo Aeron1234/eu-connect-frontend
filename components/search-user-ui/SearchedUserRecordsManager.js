@@ -42,6 +42,9 @@ function SearchedUserRecordsManager({
       )}
 
       <div className={hideTabs ? "" : "mt-6"}>
+        {!isPending && tabQuery.isError && tabQuery.data && (
+          <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} compact logError={false} />
+        )}
         {loadError && !isPending ? (
           <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} logError={false} />
         ) : isPending ? (

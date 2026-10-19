@@ -15,6 +15,7 @@ import useDepartmentCoursesManager from "./useDepartmentCoursesManager";
 export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
   const manager = useDepartmentCoursesManager(currentUserId);
   const visibleQuery = manager.view === "departments" ? manager.departmentsQuery : manager.coursesQuery;
+  const secondaryQuery = manager.view === "departments" ? manager.coursesQuery : manager.departmentsQuery;
   if (visibleQuery.isError && !visibleQuery.data) {
     return <ErrorUI error={visibleQuery.error} reset={() => void visibleQuery.refetch()} logError={false} />;
   }
@@ -41,6 +42,12 @@ export default function DepartmentsAndCoursesManager({ currentUserId = "" }) {
         <CourseForm {...manager.courseForm} />
       </div>
       <DepartmentCourseFilters {...manager.filters} />
+      {visibleQuery.isError && visibleQuery.data && (
+        <ErrorUI error={visibleQuery.error} reset={() => void visibleQuery.refetch()} compact logError={false} />
+      )}
+      {secondaryQuery.isError && (
+        <ErrorUI error={secondaryQuery.error} reset={() => void secondaryQuery.refetch()} compact logError={false} />
+      )}
       {manager.view === "departments" ? (
         <DepartmentsTable {...manager.departmentTable} />
       ) : (

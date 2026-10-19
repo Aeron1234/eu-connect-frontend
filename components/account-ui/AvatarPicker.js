@@ -15,6 +15,7 @@ import {
   deleteUserAvatar,
 } from "@/lib/server-actions/account-actions";
 import { toastAndAction } from "../../lib/helpers";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
   const router = useRouter();
@@ -26,7 +27,6 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
   });
   const avatars = avatarsQuery.data || [];
   const isLoading = avatarsQuery.isPending;
-  const loadError = avatarsQuery.error?.message;
   const [isPending, startTransition] = useTransition();
 
   function handleSelect(avatarName) {
@@ -77,13 +77,8 @@ function AvatarPicker({ currentAvatar, onAvatarChange, trigger }) {
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-5" role="status" aria-label="Loading avatars">
             {Array.from({ length: 10 }, (_, index) => <Skeleton key={index} className="aspect-square w-full rounded-xl" />)}
           </div>
-        ) : loadError ? (
-          <div role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm">
-            <p>{loadError}</p>
-            <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void avatarsQuery.refetch()}>
-              Try again
-            </button>
-          </div>
+        ) : avatarsQuery.isError ? (
+          <ErrorUI error={avatarsQuery.error} reset={() => void avatarsQuery.refetch()} compact logError={false} />
         ) : (
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
             {avatars.map((avatarName) => {

@@ -1,7 +1,6 @@
 "use client";
 
 import ErrorUI from "@/components/ui/ErrorUI";
-import { TriangleAlert } from "lucide-react";
 import useCacheMonitoring from "./useCacheMonitoring";
 import CacheMonitoringHeader from "./CacheMonitoringHeader";
 import CacheProcessStatus from "./CacheProcessStatus";
@@ -38,10 +37,7 @@ export default function CacheMonitoringDashboard({ initialSnapshot }) {
       />
 
       {error && snapshot && (
-        <div role="alert" className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-foreground">
-          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
-          <span>{error}{snapshot ? " Showing the last successful snapshot." : ""}</span>
-        </div>
+        <ErrorUI error={new Error(error)} reset={refresh} compact logError={false} />
       )}
 
       {!snapshot ? (

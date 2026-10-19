@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { errorGroupOptions } from "@/lib/cache/error-tracking-queries";
 import { Skeleton } from "@/components/ui/skeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function when(value) {
   if (!value) return "—";
@@ -21,12 +22,10 @@ function ErrorDetails({ fingerprint, userId, id }) {
         <div className="mt-4 space-y-3" role="status" aria-label="Loading error details">
           {Array.from({ length: 2 }, (_, index) => <Skeleton key={index} className="h-24 w-full rounded-lg" />)}
         </div>
-      ) : query.isError ? (
-        <div role="alert" className="mt-4 text-sm text-muted-foreground">
-          {query.error.message}{" "}
-          <button type="button" onClick={() => void query.refetch()} className="font-semibold text-primary-emphasis">Try again</button>
-        </div>
       ) : (
+        <>
+        {query.isError && <ErrorUI error={query.error} reset={() => void query.refetch()} compact logError={false} />}
+        {query.data && (
         <div className="mt-4 space-y-3">
           <p className="text-xs text-muted-foreground">{query.data.count} occurrence{query.data.count === 1 ? "" : "s"} · first seen {when(query.data.first_seen)} · last seen {when(query.data.last_seen)}</p>
           {query.data.occurrences.map(item => (
@@ -47,6 +46,8 @@ function ErrorDetails({ fingerprint, userId, id }) {
             </div>
           ))}
         </div>
+        )}
+        </>
       )}
     </section>
   );

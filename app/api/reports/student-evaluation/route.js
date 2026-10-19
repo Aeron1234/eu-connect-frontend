@@ -34,7 +34,7 @@ export async function GET(req) {
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="student-evaluation-${evaluationId}.pdf"`,
+        "Content-Disposition": `attachment; filename="student-evaluation-${evaluationId}.pdf"`,
         "Cache-Control": "private, no-store",
       },
     });

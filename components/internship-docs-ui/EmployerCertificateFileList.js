@@ -53,7 +53,9 @@ export default function EmployerCertificateFileList({ files, isUploading, handle
               </p>
             </div>
             <button
-              onClick={() => handleDownload(f.id)}
+              type="button"
+              aria-label="Download"
+              onClick={() => handleDownload(f.id, f)}
               disabled={isUploading}
               className="p-1.5 rounded-md text-foreground-subtle hover:bg-muted hover:text-foreground transition-colors disabled:opacity-40"
             >

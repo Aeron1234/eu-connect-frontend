@@ -134,7 +134,7 @@ const toneStyles = {
   stone: { bg: "bg-muted", text: "text-muted-foreground", ring: "ring-ring" },
 };
 
-export default function ErrorBoundary({ error, reset, logError = true }) {
+export default function ErrorBoundary({ error, reset, logError = true, compact = false }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -151,7 +151,7 @@ export default function ErrorBoundary({ error, reset, logError = true }) {
   const styles = toneStyles[tone] || toneStyles.red;
 
   return (
-    <div className="flex min-h-[70vh] items-center justify-center p-4 sm:p-6">
+    <div role="alert" className={compact ? "flex min-w-0 items-center justify-center py-4" : "flex min-h-[70vh] items-center justify-center p-4 sm:p-6"}>
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 sm:p-8 text-center shadow-sm">
         <div
           className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${styles.bg} ring-8 ${styles.ring}`}

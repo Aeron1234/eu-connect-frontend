@@ -13,6 +13,7 @@ import { pastInternshipsKeys } from "@/lib/cache/past-internships-queries";
 import { toastAndAction } from "../../lib/helpers";
 import TitleButton from "../ui/TitleButton";
 import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 export function PastInternshipsManual() {
   const { user } = useUser();
@@ -83,9 +84,8 @@ function PastInternshipPostButton() {
       {coursesQuery.isPending ? (
         <ModalFormSkeleton />
       ) : coursesQuery.isError ? (
-        <div role="alert" className="overflow-y-auto p-4 text-sm sm:p-6">
-          <p>{coursesQuery.error.message}</p>
-          <button type="button" className="mt-2 font-semibold text-primary-emphasis" onClick={() => void coursesQuery.refetch()}>Try again</button>
+        <div className="overflow-y-auto p-4 sm:p-6">
+          <ErrorUI error={coursesQuery.error} reset={() => void coursesQuery.refetch()} compact logError={false} />
         </div>
       ) : <PastInternshipPostEditForm
         courses={courses}

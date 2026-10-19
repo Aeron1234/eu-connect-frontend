@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, Clock, Mail, Eye, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 import Link from "next/link";
 import { useUser } from "@/contexts/UserContext";
 import {
@@ -70,7 +71,7 @@ function InternsSupervisedCard({ initialPage }) {
   }, [initialPage, queryClient, user?.id]);
 
   const isLoading = pageQuery.isPending;
-  const hasError = pageQuery.isError;
+  const hasError = pageQuery.isError && !pageQuery.data;
   const pageData = pageQuery.data;
   const interns = (pageData?.interns || []).map(mapIntern);
 
@@ -99,6 +100,9 @@ function InternsSupervisedCard({ initialPage }) {
         </div>
       </div>
 
+      {pageQuery.isError && (
+        <ErrorUI error={pageQuery.error} reset={() => void pageQuery.refetch()} compact logError={false} />
+      )}
       <div className="space-y-3" aria-live="polite" aria-busy={isLoading}>
         {isLoading ? (
           Array.from({ length: 4 }, (_, index) => (
@@ -112,20 +116,7 @@ function InternsSupervisedCard({ initialPage }) {
               <Skeleton className="h-3 w-16" />
             </div>
           ))
-        ) : hasError ? (
-          <div className="py-6 text-center text-sm">
-            <p className="text-red-600">
-              {pageQuery.error?.message || "Could not load interns. Please try again."}
-            </p>
-            <button
-              type="button"
-              onClick={() => void pageQuery.refetch()}
-              className="mt-2 font-medium text-primary-emphasis hover:underline"
-            >
-              Try again
-            </button>
-          </div>
-        ) : interns.length === 0 ? (
+        ) : hasError ? null : interns.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
             No interns in this category.
           </p>

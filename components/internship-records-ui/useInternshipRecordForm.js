@@ -8,13 +8,29 @@ import { internshipRecordFields } from "./internshipRecordFormData.mjs";
 export default function useInternshipRecordForm({ recordStatus, onCreated, onUpdated, onConflict, activeRecord = null }) {
   const currentStatus = recordStatus || activeRecord?.status || "";
   const isCurrentRecord = currentStatus === "pending" || currentStatus === "ongoing";
-  const isEditing = currentStatus === "pending";
-  const status = currentStatus === "ongoing" || (isEditing && !activeRecord?.id);
+  const canEdit = currentStatus === "pending" && Boolean(activeRecord?.id);
+  const [editingRecordId, setEditingRecordId] = useState(null);
+  const isEditing = canEdit && editingRecordId === activeRecord.id;
+  const status = isCurrentRecord && !isEditing;
   const [draft, setInternshipForm] = useState(() => internshipRecordFields(activeRecord || {}));
   const [draftRegion, setSelectedRegion] = useState(() => String(activeRecord?.region_id ?? ""));
   const [isPending, startTransition] = useTransition();
   const internshipForm = status && activeRecord ? internshipRecordFields(activeRecord) : draft;
   const selectedRegion = status ? String(activeRecord?.region_id ?? "") : draftRegion;
+
+  function startEditing() {
+    if (!canEdit || isPending) return;
+    setInternshipForm(internshipRecordFields(activeRecord));
+    setSelectedRegion(String(activeRecord.region_id ?? ""));
+    setEditingRecordId(activeRecord.id);
+  }
+
+  function cancelEditing() {
+    if (isPending) return;
+    setInternshipForm(internshipRecordFields(activeRecord || {}));
+    setSelectedRegion(String(activeRecord?.region_id ?? ""));
+    setEditingRecordId(null);
+  }
 
   function handleAction(formData) {
     if (status || isPending) return;
@@ -42,6 +58,7 @@ export default function useInternshipRecordForm({ recordStatus, onCreated, onUpd
           setInternshipForm(internshipRecordFields(saved));
           setSelectedRegion(String(saved.region_id ?? ""));
           onUpdated?.(saved);
+          setEditingRecordId(null);
         } else {
           onCreated?.(submittedRecord);
           setInternshipForm(internshipRecordFields());
@@ -54,7 +71,7 @@ export default function useInternshipRecordForm({ recordStatus, onCreated, onUpd
   }
 
   return {
-    status, isEditing, isCurrentRecord, isPending, handleAction,
+    status, canEdit, isEditing, isCurrentRecord, isPending, handleAction, startEditing, cancelEditing,
     fieldProps: { internshipForm, setInternshipForm, isPending, status },
     regionProps: { selectedRegion, setSelectedRegion },
   };

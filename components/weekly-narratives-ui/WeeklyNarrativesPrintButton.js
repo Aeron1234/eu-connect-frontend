@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FileDown } from "lucide-react";
+import { downloadPdf } from "../ui/downloadPdf";
 
 export default function WeeklyNarrativesPrintButton({ internshipId, className = "" }) {
   const [pending, setPending] = useState(false);
@@ -20,10 +21,7 @@ export default function WeeklyNarrativesPrintButton({ internshipId, className = 
         failure.code = data.code;
         throw failure;
       }
-      const url = URL.createObjectURL(await response.blob());
-      const tab = window.open(url, "_blank");
-      if (!tab) window.location.href = url;
-      window.setTimeout(() => URL.revokeObjectURL(url), 10 * 60_000);
+      await downloadPdf(response, `weekly-narratives-${internshipId}.pdf`);
     } catch (failure) {
       setError(failure instanceof Error ? failure : new Error("Could not generate the narratives PDF."));
     } finally {

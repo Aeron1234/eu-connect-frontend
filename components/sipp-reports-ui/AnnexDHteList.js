@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, TriangleAlert } from "lucide-react";
+import { FileText } from "lucide-react";
 import ErrorUI from "@/components/ui/ErrorUI";
 import HTEListSkeleton from "../skeletons/HTEListSkeleton";
 import AnnexDFilters from "./AnnexDFilters";
@@ -22,10 +22,10 @@ export function AnnexDHteList({ availableAcadYear = [], initialPage }) {
       <AnnexDStats {...statsProps} />
 
       {!isChangingFilters && companiesQuery.error && companiesQuery.data && (
-        <div role="alert" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-          <span className="flex items-center gap-2 text-foreground-soft"><TriangleAlert className="size-4 text-destructive" />{companiesQuery.error.message}</span>
-          <button type="button" onClick={() => companiesQuery.isFetchNextPageError ? companiesQuery.fetchNextPage() : companiesQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
-        </div>
+        <ErrorUI error={companiesQuery.error} compact logError={false} reset={() => {
+          if (companiesQuery.isFetchNextPageError) void companiesQuery.fetchNextPage();
+          else void companiesQuery.refetch();
+        }} />
       )}
 
       {isPending ? (

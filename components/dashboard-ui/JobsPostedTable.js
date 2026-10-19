@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Briefcase, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { useUser } from "@/contexts/UserContext";
 import { dashboardListsKeys, employerJobsPageOptions } from "@/lib/cache/dashboard-lists-queries";
 
@@ -69,7 +70,10 @@ function JobsPostedTable({ initialPage }) {
         <Briefcase className="w-4 h-4 text-primary-emphasis" />
         Jobs You Posted
       </h3>
-      <div className="overflow-x-auto" aria-busy={isLoading}>
+      {jobsQuery.isError && (
+        <ErrorUI error={jobsQuery.error} reset={() => void jobsQuery.refetch()} compact logError={false} />
+      )}
+      {!hasError && <div className="overflow-x-auto" aria-busy={isLoading}>
         <table className="w-2xl md:w-full text-sm">
           <thead>
             <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -91,15 +95,6 @@ function JobsPostedTable({ initialPage }) {
                   <td className="py-3"><Skeleton className="ml-auto h-3.5 w-20" /></td>
                 </tr>
               ))
-            ) : hasError ? (
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-sm text-foreground">
-                  <p>{jobsQuery.error?.message || "Could not load posted jobs."}</p>
-                  <button type="button" onClick={() => void jobsQuery.refetch()} className="mt-2 font-semibold text-primary-emphasis hover:underline">
-                    Try again
-                  </button>
-                </td>
-              </tr>
             ) : jobs.map((job) => (
               <tr
                 key={job.id}
@@ -148,7 +143,7 @@ function JobsPostedTable({ initialPage }) {
             )}
           </tbody>
         </table>
-      </div>
+      </div>}
 
       {(totalPages > 1 || page > 1) && (
         <div className="mt-6 flex items-center justify-end gap-4 text-sm font-semibold text-muted-foreground">

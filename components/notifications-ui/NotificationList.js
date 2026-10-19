@@ -52,6 +52,13 @@ function NotificationList({ inboxData: initialData }) {
 
       <NotificationInboxStats totalRecords={totalRecords} unreadCount={unreadCount} selectedScope={selectedScope} inboxQuery={inboxQuery} />
 
+      {inboxQuery.isError && inboxQuery.data && (
+        <ErrorUI error={inboxQuery.error} compact logError={false} reset={() => {
+          if (inboxQuery.isFetchNextPageError) void inboxQuery.fetchNextPage();
+          else void inboxQuery.refetch();
+        }} />
+      )}
+
       {inboxQuery.isPending ? (
         <div className="flex flex-col gap-2" role="status" aria-label="Loading notifications">
           {Array.from({ length: 5 }, (_, index) => <NotificationItemSkeleton key={index} />)}

@@ -38,6 +38,12 @@ function RecordsPageContent(props) {
         totalItems={total}
       />
 
+      {!isSearching && recordsQuery.isError && recordsQuery.data && (
+        <ErrorUI error={recordsQuery.error} compact logError={false} reset={() => {
+          if (recordsQuery.isFetchNextPageError) void recordsQuery.fetchNextPage();
+          else void recordsQuery.refetch();
+        }} />
+      )}
       <div className="space-y-3" aria-busy={isSearching}>
           {records.map((r) => (
             <RecordListCard key={r.id} record={r} {...cardProps} />

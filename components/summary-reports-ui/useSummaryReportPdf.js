@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { openPdfBlob } from "../ui/openPdfBlob";
+import { downloadPdf } from "../ui/downloadPdf";
 
 export default function useSummaryReportPdf(internshipId) {
   const [pending, setPending] = useState(false);
@@ -25,7 +25,7 @@ export default function useSummaryReportPdf(internshipId) {
         failure.code = data.code;
         throw failure;
       }
-      openPdfBlob(await response.blob());
+      await downloadPdf(response, `summary-report-${internshipId}.pdf`);
     } catch (failure) {
       setError(
         failure instanceof Error

@@ -5,6 +5,7 @@ import SearchedStudentFiles from "./SearchedStudentFiles";
 import RecordsDocumentsSkeleton from "../skeletons/RecordsDocumentsSkeleton";
 import DocumentsToolbar from "./DocumentsToolbar";
 import useRecordsDocuments from "./useRecordsDocuments";
+import ErrorUI from "@/components/ui/ErrorUI";
 import { getFileTypeLabel, typeTone } from "@/lib/utils";
 
 function RecordsDocuments({
@@ -37,21 +38,15 @@ function RecordsDocuments({
 
   if (isCurrentStorage && filesQuery.isError && !filesQuery.data) {
     return (
-      <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-6 text-sm">
-        <p>{filesQuery.error?.message || "Could not load internship documents."}</p>
-        <button
-          type="button"
-          className="mt-3 font-semibold text-primary-emphasis"
-          onClick={() => void filesQuery.refetch()}
-        >
-          Try again
-        </button>
-      </div>
+      <ErrorUI error={filesQuery.error} reset={() => void filesQuery.refetch()} compact logError={false} />
     );
   }
 
   return (
     <>
+      {isCurrentStorage && filesQuery.isError && (
+        <ErrorUI error={filesQuery.error} reset={() => void filesQuery.refetch()} compact logError={false} />
+      )}
       <div className="rounded-xl bg-card border border-border p-5 sm:p-6">
         <InternshipRequirementsType
           requirementTypes={requirementTypes || []}

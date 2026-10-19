@@ -31,6 +31,10 @@ function RecordsDetailsPageContent({ record, internshipId }) {
     <>
       <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={handleTabClick} />
 
+      {!isPending && tabQuery.isError && tabQuery.data && (
+        <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} compact logError={false} />
+      )}
+
       {loadError && !isPending ? (
         <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} logError={false} />
       ) : isPending ? (

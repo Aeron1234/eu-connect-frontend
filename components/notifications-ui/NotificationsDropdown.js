@@ -5,6 +5,7 @@ import { ArrowUpRight, Bell, X } from "lucide-react";
 import NotificationDropdownSkeleton from "./NotificationDropdownSkeleton";
 import NotificationDropdownItem from "./NotificationDropdownItem";
 import NotificationDropdownPagination from "./NotificationDropdownPagination";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 export default function NotificationsDropdown({
   unreadCount, setShowNotifications, inboxStatus, handleMarkAllRead, isMarkingAll,
@@ -60,19 +61,16 @@ export default function NotificationsDropdown({
         className="max-h-[min(20rem,calc(100vh-13rem))] min-h-28 overflow-y-auto custom-scrollbar"
         aria-busy={inboxStatus === "loading"}
       >
+        {inboxStatus !== "loading" && inboxQuery.isError && inboxQuery.data && (
+          <ErrorUI error={inboxQuery.error} compact logError={false} reset={() => {
+            if (inboxQuery.isFetchNextPageError) void handlePageChange(page + 1);
+            else void inboxQuery.refetch();
+          }} />
+        )}
         {inboxStatus === "loading" ? (
           <NotificationDropdownSkeleton />
         ) : inboxStatus === "error" ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            <p>Could not load notifications.</p>
-            <button
-              type="button"
-              onClick={() => void inboxQuery.refetch()}
-              className="mt-2 font-semibold text-primary-emphasis hover:underline"
-            >
-              Try again
-            </button>
-          </div>
+          <ErrorUI error={inboxQuery.error} reset={() => void inboxQuery.refetch()} compact logError={false} />
         ) : notifications.length > 0 ? (
           <ul className="divide-y divide-border/70">
             {notifications.map((notif) => (

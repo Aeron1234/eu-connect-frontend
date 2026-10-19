@@ -1,6 +1,7 @@
 "use client";
 
-import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
+import WeeklyNarrativeListSkeleton from "@/components/skeletons/WeeklyNarrativeListSkeleton";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef } from "react";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
@@ -36,15 +37,6 @@ function StudentNarratives({ initialPage, searchedUserId, viewerId }) {
   }, [narrativesQuery.data]);
 
   useEffect(() => {
-    if (narrativesQuery.error) {
-      notifyReadError(
-        "Error loading more weekly narratives:",
-        narrativesQuery.error.message,
-      );
-    }
-  }, [narrativesQuery.error]);
-
-  useEffect(() => {
     if (!initialPage || serverSnapshotRef.current === initialPage) return;
     serverSnapshotRef.current = initialPage;
     queryClient.setQueryData(queryKey, (old) => {
@@ -72,6 +64,11 @@ function StudentNarratives({ initialPage, searchedUserId, viewerId }) {
   }
 
   const isPending = narrativesQuery.isFetchingNextPage;
+
+  if (narrativesQuery.isPending) return <WeeklyNarrativeListSkeleton />;
+  if (narrativesQuery.isError && !narrativesQuery.data) {
+    return <ErrorUI error={narrativesQuery.error} reset={() => void narrativesQuery.refetch()} compact logError={false} />;
+  }
 
   return (
     <div className="relative">
@@ -106,6 +103,12 @@ function StudentNarratives({ initialPage, searchedUserId, viewerId }) {
           </li>
         )}
       </ul>
+      {narrativesQuery.isError && (
+        <ErrorUI error={narrativesQuery.error} compact logError={false} reset={() => {
+          if (narrativesQuery.isFetchNextPageError) void narrativesQuery.fetchNextPage();
+          else void narrativesQuery.refetch();
+        }} />
+      )}
     </div>
   );
 }

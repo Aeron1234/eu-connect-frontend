@@ -21,6 +21,7 @@ export default function InternshipPosts(props) {
     setFavorite,
     userRole,
     courses,
+    coursesQuery,
     postsQuery,
     internshipPosts,
     total,
@@ -54,6 +55,16 @@ export default function InternshipPosts(props) {
       <p className="text-xs text-muted-foreground">
         {total ? total : null} listings
       </p>
+
+      {coursesQuery.isError && (
+        <ErrorUI error={coursesQuery.error} reset={() => void coursesQuery.refetch()} compact logError={false} />
+      )}
+      {!isPending && postsQuery.isError && postsQuery.data && (
+        <ErrorUI error={postsQuery.error} compact logError={false} reset={() => {
+          if (postsQuery.isFetchNextPageError) void postsQuery.fetchNextPage();
+          else void postsQuery.refetch();
+        }} />
+      )}
 
       {isPending && internshipPosts.length === 0 ? (
         <div className="space-y-4 sm:space-y-6">

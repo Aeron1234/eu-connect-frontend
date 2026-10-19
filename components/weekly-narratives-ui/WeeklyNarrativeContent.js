@@ -1,6 +1,7 @@
 "use client";
 
-import { notifyReadError } from "@/lib/client-read-error";
+import ErrorUI from "@/components/ui/ErrorUI";
+import WeeklyNarrativeListSkeleton from "@/components/skeletons/WeeklyNarrativeListSkeleton";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 
@@ -37,17 +38,6 @@ function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true 
       }),
     );
   }, [narrativesQuery.data]);
-
-  useEffect(() => {
-    if (narrativesQuery.error) {
-      notifyReadError(
-        narrativesQuery.isFetchNextPageError
-          ? "Error loading more weekly narratives:"
-          : "Error loading weekly narratives:",
-        narrativesQuery.error,
-      );
-    }
-  }, [narrativesQuery.error, narrativesQuery.isFetchNextPageError]);
 
   useEffect(() => {
     if (serverSnapshotRef.current === initialPage || !initialPage) return;
@@ -95,6 +85,11 @@ function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true 
     void queryClient.invalidateQueries({ queryKey });
   }
 
+  if (narrativesQuery.isPending) return <WeeklyNarrativeListSkeleton />;
+  if (narrativesQuery.isError && !narrativesQuery.data) {
+    return <ErrorUI error={narrativesQuery.error} reset={() => void narrativesQuery.refetch()} compact logError={false} />;
+  }
+
   return (
     <div className="relative">
       {narratives.length > 0 && (
@@ -129,6 +124,12 @@ function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true 
           </li>
         )}
       </ul>
+      {narrativesQuery.isError && (
+        <ErrorUI error={narrativesQuery.error} reset={() => {
+          if (narrativesQuery.isFetchNextPageError) void narrativesQuery.fetchNextPage();
+          else void narrativesQuery.refetch();
+        }} compact logError={false} />
+      )}
     </div>
   );
 }

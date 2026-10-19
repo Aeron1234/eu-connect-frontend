@@ -194,6 +194,16 @@ function PastInternshipsPageContent({
         />
       </div>
 
+      {coursesQuery.isError && (
+        <ErrorUI error={coursesQuery.error} reset={() => void coursesQuery.refetch()} compact logError={false} />
+      )}
+      {!isSearching && pastInternshipsQuery.isError && pastInternshipsQuery.data && (
+        <ErrorUI error={pastInternshipsQuery.error} compact logError={false} reset={() => {
+          if (pastInternshipsQuery.isFetchNextPageError) void pastInternshipsQuery.fetchNextPage();
+          else void pastInternshipsQuery.refetch();
+        }} />
+      )}
+
       {isSearching ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, index) => (

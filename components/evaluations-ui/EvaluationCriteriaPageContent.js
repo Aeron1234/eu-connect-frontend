@@ -30,10 +30,7 @@ export default function EvaluationCriteriaPageContent({ initialCriteria }) {
       )}
 
       {!isSwitchingType && criteriaQuery.error && criteriaQuery.data && (
-        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-          <span>{criteriaQuery.error.message || "Could not load evaluation criteria."}</span>
-          <button type="button" onClick={() => criteriaQuery.refetch()} className="font-semibold text-primary-emphasis hover:underline">Try again</button>
-        </div>
+        <ErrorUI error={criteriaQuery.error} reset={() => void criteriaQuery.refetch()} compact logError={false} />
       )}
 
       {isSwitchingType ? (

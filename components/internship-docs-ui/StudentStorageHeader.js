@@ -22,7 +22,7 @@ export default function StudentStorageHeader({ ongoing, fileRequirementTypes, cu
                 <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
                   <li>Check the <strong>Before Deployment</strong> and <strong>After Deployment</strong> requirement lists to see which documents you still need to submit.</li>
                   <li>Select <strong>Upload File</strong>. Enter the company and file names, choose a PDF, text, Word, or Excel file, and select its requirement category. Select <strong>Save</strong> to upload it.</li>
-                  <li>Use the category filters, search box, or grid/list buttons to find a document. Select the download icon to open or download it.</li>
+                  <li>Use the category filters, search box, or grid/list buttons to find a document. Select the download icon to download a PDF directly, or open or download another file type.</li>
                   <li>Use the trash icon to delete a document you uploaded, if deletion is available. If a supervisor-uploaded document is pending your review, use its check icon to approve it.</li>
                 </ol>
                 <p className="text-foreground-soft">Documents from earlier internships appear in the past-internship section below.</p>

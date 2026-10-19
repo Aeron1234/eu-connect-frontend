@@ -28,6 +28,9 @@ function CalendarBoard({ initialDate, initialData }) {
   return (
     <div className="mx-auto w-full max-w-[1680px] p-3 pb-12 sm:p-6 lg:p-8">
       <CalendarBoardHeader {...headerProps} />
+      {monthQuery.isError && monthQuery.data && (
+        <ErrorUI error={monthQuery.error} reset={() => void monthQuery.refetch()} compact logError={false} />
+      )}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_270px]">
         <div className="min-w-0 space-y-4">
           <CalendarMonthView {...monthProps} />

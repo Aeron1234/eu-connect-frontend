@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import ProgressBar from "../ui/ProgressBar";
 import { Skeleton } from "@/components/ui/skeleton";
+import ErrorUI from "@/components/ui/ErrorUI";
 
 function StudentHoursTracker({ initialPage, courses = [] }) {
   const { user } = useUser();
@@ -40,6 +41,7 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
     ? "Searching students..."
     : "Loading student hours...";
   const pageData = pageQuery.data;
+  const hasError = pageQuery.isError && !pageData;
 
   useEffect(() => {
     if (!user?.id || !initialPage) return;
@@ -128,6 +130,9 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
         />
       </div>
 
+      {!isPending && pageQuery.isError && (
+        <ErrorUI error={pageQuery.error} reset={() => void pageQuery.refetch()} compact logError={false} />
+      )}
       <div
         ref={listRef}
         className="min-w-0 space-y-3 max-h-[420px] overflow-x-hidden overflow-y-auto pr-1"
@@ -149,20 +154,7 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
               </div>
             </div>
           ))
-        ) : pageQuery.isError ? (
-          <div className="py-6 text-center text-sm">
-            <p className="text-red-600">
-              {pageQuery.error?.message || "Could not load student hours. Please try again."}
-            </p>
-            <button
-              type="button"
-              onClick={() => void pageQuery.refetch()}
-              className="mt-2 font-medium text-primary-emphasis hover:underline"
-            >
-              Try again
-            </button>
-          </div>
-        ) : !pageData?.students?.length ? (
+        ) : hasError ? null : !pageData?.students?.length ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
             {query.courseId === "all" && !query.search
               ? "No active interns yet."
@@ -230,7 +222,7 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
         <span>
           {isPending
             ? "Loading..."
-            : pageQuery.isError
+            : hasError
               ? "Unavailable"
               : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}
         </span>
@@ -238,7 +230,7 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
           <button
             type="button"
             onClick={() => changePage(-1)}
-            disabled={isPending || pageQuery.isError || query.page <= 1}
+            disabled={isPending || hasError || query.page <= 1}
             className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
             Previous
@@ -251,7 +243,7 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
             onClick={() => changePage(1)}
             disabled={
               isPending ||
-              pageQuery.isError ||
+              hasError ||
               query.page >= (pageData?.totalPages ?? 1)
             }
             className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"

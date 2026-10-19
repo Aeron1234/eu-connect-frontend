@@ -7,7 +7,7 @@ function previewDate(value) {
   return isValid(date) ? format(date, "MMM d, yyyy") : "Not set yet";
 }
 
-export default function InternshipFormPreview({ internshipForm, region, recordStatus = "" }) {
+export default function InternshipFormPreview({ internshipForm, region, recordStatus = "", isEditing = false }) {
   return (
     <aside className="min-w-0 border-t border-border bg-muted/20 p-5 sm:p-6 xl:border-l xl:border-t-0" aria-label={recordStatus ? "Internship details" : "Placement preview"}>
       <div className="xl:sticky xl:top-6">
@@ -32,7 +32,7 @@ export default function InternshipFormPreview({ internshipForm, region, recordSt
         </dl>
         <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-border bg-card p-3.5">
           <ClipboardCheck className="mt-0.5 size-4 shrink-0 text-primary-emphasis" aria-hidden="true" />
-          <p className="text-xs leading-relaxed text-muted-foreground">{recordStatus === "pending" ? "Changes appear here as you edit. Select Save changes to update your pending record before it is reviewed." : recordStatus === "ongoing" ? "Your internship is ongoing. You can create another record once this internship is finished." : "Review your details before submitting. Your department head will review and approve your internship record."}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{recordStatus === "pending" ? isEditing ? "Changes appear here as you edit. Select Save changes to update your pending record, or Cancel to discard your changes." : "These are your saved placement details. Select Edit to update your pending record before it is reviewed." : recordStatus === "ongoing" ? "Your internship is ongoing. You can create another record once this internship is finished." : "Review your details before submitting. Your department head will review and approve your internship record."}</p>
         </div>
       </div>
     </aside>

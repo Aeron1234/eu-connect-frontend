@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Save } from "lucide-react";
+import { ArrowRight, Pencil, Save } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import InternshipRecordFormHeader from "./InternshipRecordFormHeader";
 import InternshipPlacementFields from "./InternshipPlacementFields";
@@ -12,12 +12,12 @@ import useInternshipRecordForm from "./useInternshipRecordForm";
 
 function InternshipRecordForm({ regions = [], recordStatus = "", activeRecord = null, onCreated, onUpdated, onConflict }) {
   const {
-    status, isEditing, isCurrentRecord, isPending, handleAction, fieldProps, regionProps,
+    status, canEdit, isEditing, isCurrentRecord, isPending, handleAction, startEditing, cancelEditing, fieldProps, regionProps,
   } = useInternshipRecordForm({ recordStatus, onCreated, onUpdated, onConflict, activeRecord });
 
   return (
     <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-sm shadow-sm">
-      <InternshipRecordFormHeader locked={status} recordStatus={recordStatus} />
+      <InternshipRecordFormHeader locked={status} recordStatus={recordStatus} isEditing={isEditing} canEdit={canEdit} />
 
         <form
           id="internship-record-form"
@@ -36,13 +36,35 @@ function InternshipRecordForm({ regions = [], recordStatus = "", activeRecord = 
               <div className="border-t border-border" />
               <InternshipLocationFields {...fieldProps} />
             </fieldset>
-            <InternshipFormPreview internshipForm={fieldProps.internshipForm} recordStatus={recordStatus} region={regions.find((region) => String(region.id) === regionProps.selectedRegion)} />
+            <InternshipFormPreview internshipForm={fieldProps.internshipForm} recordStatus={recordStatus} isEditing={isEditing} region={regions.find((region) => String(region.id) === regionProps.selectedRegion)} />
           </div>
           <div className="flex flex-col gap-3 border-t border-border bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p className="text-xs leading-relaxed text-muted-foreground">{status ? "Your saved internship details are shown above." : <><span className="font-semibold text-primary-emphasis">*</span> Required fields. Company website is optional.</>}</p>
-            {(!isCurrentRecord || isEditing) && (
+            {(!isCurrentRecord || canEdit) && (
             <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center">
+            {isEditing && (
+              <button
+                type="button"
+                onClick={cancelEditing}
+                disabled={isPending}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                Cancel
+              </button>
+            )}
+            {canEdit && !isEditing ? (
+              <button
+                key="edit"
+                type="button"
+                onClick={(event) => { event.preventDefault(); startEditing(); }}
+                disabled={isPending}
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                Edit <Pencil className="size-4" aria-hidden="true" />
+              </button>
+            ) : (
             <button
+              key="submit"
               type="submit"
               className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               disabled={isPending || status}
@@ -53,6 +75,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", activeRecord = 
                 isEditing ? <>Save changes <Save className="size-4" aria-hidden="true" /></> : <>Create Internship Record <ArrowRight className="size-4" aria-hidden="true" /></>
               )}
             </button>
+            )}
             </div>
             )}
           </div>

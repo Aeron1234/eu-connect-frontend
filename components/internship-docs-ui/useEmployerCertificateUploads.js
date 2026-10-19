@@ -8,6 +8,7 @@ import {
   downloadSearchedStudentFiles,
 } from "@/lib/server-actions/internship-docs-actions";
 import { toastAndAction } from "@/lib/helpers";
+import useDocumentActions from "./useDocumentActions";
 
 export default function useEmployerCertificateUploads({ searchedUserId, company, uploadedFiles, onChanged }) {
   const [filesOverride, setFilesOverride] = useState(null);
@@ -18,6 +19,9 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
   const [companyName, setCompanyName] = useState(company || "");
   const [pending, setPending] = useState(null);
   const [isUploading, startTransition] = useTransition();
+  const { isPending: isDownloading, handleDownload } = useDocumentActions({
+    downloadAction: ({ fileId }) => downloadSearchedStudentFiles({ searchedUserId, fileId }),
+  });
 
   const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles.length > 0) {
@@ -83,25 +87,6 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
     });
   }
 
-  function handleDownload(fileId) {
-    const formData = { searchedUserId, fileId };
-
-    const handlers = {
-      loadingLabel: "Opening certificate...",
-      successLabel: "Certificate opened.",
-      errorLabel: "Failed to open certificate.",
-      action: downloadSearchedStudentFiles,
-      args: [formData],
-    };
-
-    startTransition(async () => {
-      const result = await toastAndAction(handlers);
-      if (!result?.success) return;
-
-      window.open(result.url, "_blank", "noopener,noreferrer");
-    });
-  }
-
   function handleDelete(fileId) {
     const formData = new FormData();
     formData.append("searchedUserId", searchedUserId);
@@ -134,7 +119,7 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
     setCompanyName,
     pending,
     setPending,
-    isUploading,
+    isUploading: isUploading || isDownloading,
     getRootProps,
     getInputProps,
     isDragActive,

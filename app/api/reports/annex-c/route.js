@@ -31,7 +31,7 @@ export async function GET(req) {
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="annex-c-${reportId}.pdf"`,
+        "Content-Disposition": `attachment; filename="annex-c-${reportId}.pdf"`,
         "Cache-Control": "private, no-store",
       },
     });

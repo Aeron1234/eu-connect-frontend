@@ -25,7 +25,7 @@ export default [
     summary: "Keep a record of your internship work each week.",
     steps: [
       "Open Narratives and choose an ongoing or finished internship to review its weekly entries.",
-      "An ongoing internship is required to add or change narratives. Choose Export PDF to open all entries for the selected internship in one PDF.",
+      "An ongoing internship is required to add or change narratives. Choose Export PDF to download all entries for the selected internship in one PDF.",
     ],
     href: "/student/narratives",
     linkText: "Open Narratives",

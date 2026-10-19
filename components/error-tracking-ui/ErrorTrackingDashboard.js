@@ -133,7 +133,7 @@ export default function ErrorTrackingDashboard() {
     </form>
 
     {query.data && <p className="text-xs text-muted-foreground">{query.data.stats.totalOccurrences} occurrences across {query.data.stats.totalGroups} groups in this view.</p>}
-    {query.isError && query.data && <p role="alert" className="text-xs text-destructive">Refresh failed. Showing the last loaded results. <button type="button" onClick={refresh} className="font-semibold underline">Try again</button></p>}
+    {query.isError && query.data && <ErrorUI error={query.error} reset={refresh} compact logError={false} />}
     {query.isPending ? <LoadingRows />
       : query.isError && !query.data ? <ErrorUI error={query.error} reset={refresh} logError={false} />
         : query.data.data.length === 0 ? <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No errors match these filters.</div>
