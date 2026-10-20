@@ -52,47 +52,71 @@ function position(point) {
   return { left: `${point.x / 520 * 100}%`, top: `${point.y / 640 * 100}%` };
 }
 
+const ROUTE_DURATION_MS = 1800;
+const ROUTE_OVERLAP_MS = 100;
+const MAX_ACTIVE_ROUTES = 11; // Two groups of up to five, plus a selected pin's pulse.
+
 export default function PhilippinesNetwork() {
   const [selectedId, setSelectedId] = useState(null);
-  const [flight, setFlight] = useState(null);
+  const [flights, setFlights] = useState([]);
   const sequence = useRef(0);
-  const lastDestination = useRef(null);
   const selected = locations.find(location => location.id === selectedId);
-  const destination = locations.find(location => location.id === flight?.id);
+  const activeLocationIds = new Set(flights.map(flight => flight.id));
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let timer;
+    const expiryTimers = new Set();
+    let nextTimer;
+    let previousIds = new Set();
 
     function animate() {
-      const choices = locations.filter(location => location.id !== lastDestination.current);
-      const next = choices[Math.floor(Math.random() * choices.length)];
-      lastDestination.current = next.id;
-      setFlight({ id: next.id, sequence: ++sequence.current });
-      timer = window.setTimeout(animate, 3200 + Math.random() * 1400);
+      const choices = locations.filter(location => !previousIds.has(location.id));
+      const count = 2 + Math.floor(Math.random() * 4);
+      const batch = Array.from({ length: count }, () => {
+        const [location] = choices.splice(Math.floor(Math.random() * choices.length), 1);
+        return { id: location.id, path: location.path, sequence: ++sequence.current };
+      });
+      previousIds = new Set(batch.map(flight => flight.id));
+      const batchKeys = new Set(batch.map(flight => flight.sequence));
+      setFlights(current => [...current, ...batch].slice(-MAX_ACTIVE_ROUTES));
+
+      const expiryTimer = window.setTimeout(() => {
+        expiryTimers.delete(expiryTimer);
+        setFlights(current => current.filter(flight => !batchKeys.has(flight.sequence)));
+      }, ROUTE_DURATION_MS);
+      expiryTimers.add(expiryTimer);
+      nextTimer = window.setTimeout(animate, ROUTE_DURATION_MS - ROUTE_OVERLAP_MS);
+    }
+
+    function clearTimers() {
+      window.clearTimeout(nextTimer);
+      for (const timer of expiryTimers) window.clearTimeout(timer);
+      expiryTimers.clear();
     }
 
     function updateMotion() {
-      window.clearTimeout(timer);
-      if (!motion.matches) timer = window.setTimeout(animate, selectedId ? 4200 : 900);
+      clearTimers();
+      setFlights([]);
+      previousIds = new Set();
+      if (!motion.matches) nextTimer = window.setTimeout(animate, 300);
     }
 
-    updateMotion();
+    if (!motion.matches) nextTimer = window.setTimeout(animate, 300);
     motion.addEventListener("change", updateMotion);
     return () => {
-      window.clearTimeout(timer);
+      clearTimers();
       motion.removeEventListener("change", updateMotion);
     };
-  }, [selectedId]);
+  }, []);
 
   function selectLocation(location) {
     setSelectedId(location.id);
-    lastDestination.current = location.id;
-    setFlight({ id: location.id, sequence: ++sequence.current });
+    const pulse = { id: location.id, path: location.path, sequence: ++sequence.current, manual: true };
+    setFlights(current => [...current.filter(flight => !flight.manual), pulse].slice(-MAX_ACTIVE_ROUTES));
   }
 
   return (
-    <figure className="landing-network" aria-label="MSEUF-Candelaria connected to company locations across the Philippines">
+    <figure className="landing-network" style={{ "--network-route-duration": `${ROUTE_DURATION_MS}ms` }} aria-label="MSEUF-Candelaria connected to company locations across the Philippines">
       <div className="landing-network-heading">
         <div>
           <p className="landing-network-eyebrow">Our OJT community</p>
@@ -115,7 +139,15 @@ export default function PhilippinesNetwork() {
 
         <svg className="landing-network-routes" viewBox="0 0 520 640" fill="none" aria-hidden="true">
           {locations.map(location => <path key={location.id} d={location.path} className="landing-network-route-base" />)}
-          {destination && <path key={flight.sequence} d={destination.path} pathLength="1" className="landing-network-route-active" />}
+          {flights.map(flight => (
+            <path
+              key={flight.sequence}
+              d={flight.path}
+              pathLength="1"
+              className="landing-network-route-active"
+              onAnimationEnd={() => setFlights(current => current.filter(item => item.sequence !== flight.sequence))}
+            />
+          ))}
           {selected && <path d={selected.path} className="landing-network-route-selected" />}
           <g className="landing-network-island-labels">
             <text x="312" y="178">LUZON</text>
@@ -130,7 +162,7 @@ export default function PhilippinesNetwork() {
             type="button"
             className="landing-network-pin"
             style={position(location)}
-            data-active={destination?.id === location.id || undefined}
+            data-active={activeLocationIds.has(location.id) || undefined}
             aria-pressed={selectedId === location.id}
             aria-label={`Company location: ${location.name}. Highlight connection from MSEUF-Candelaria.`}
             title={`${location.name}, ${location.province}`}
@@ -146,7 +178,7 @@ export default function PhilippinesNetwork() {
           className="landing-network-campus"
           style={position(campus)}
           aria-label="MSEUF-Candelaria campus, Candelaria, Quezon. Clear selected connection."
-          onClick={() => { setSelectedId(null); setFlight(null); }}
+          onClick={() => { setSelectedId(null); setFlights([]); }}
         >
           <span className="landing-network-campus-ring" aria-hidden="true" />
           <Image src={logo} alt="MSEUF-Candelaria school seal" width={48} height={48} draggable={false} />
