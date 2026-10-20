@@ -20,9 +20,9 @@ function MapSmallContainer({
   const [sharedLocation, setSharedLocation] = useState(null);
 
   return (
-    <div className="flex h-full min-h-64 w-full flex-col">
+    <div className="flex min-w-0 w-full flex-col">
       <LiveDtrLocationShare onLocation={setSharedLocation} />
-      <div className="min-h-64 flex-1">
+      <div className="h-64 w-full shrink-0">
         <MapSmall
           latitude={latitude}
           longitude={longitude}

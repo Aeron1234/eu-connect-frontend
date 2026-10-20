@@ -87,7 +87,7 @@ export default function ErrorTrackingDashboard() {
     }
   }
 
-  return <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+  return <div className="min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
     <ConfirmDialog
       open={Boolean(confirmation)}
       onOpenChange={(open) => { if (!open && !isDeleting) setConfirmation(null); }}
@@ -154,5 +154,5 @@ export default function ErrorTrackingDashboard() {
       <span>Page {page} of {query.data.pagination.totalPages}</span>
       <button type="button" onClick={() => { setPage((value) => value + 1); setSelected(null); }} disabled={page >= query.data.pagination.totalPages} aria-label="Next page" className="rounded-md border border-border p-2 disabled:opacity-40"><ChevronRight className="size-4" /></button>
     </div>}
-  </main>;
+  </div>;
 }

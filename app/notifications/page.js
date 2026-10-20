@@ -8,7 +8,7 @@ export const metadata = {
 
 function NotificationsPage() {
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitle
           Icon={Bell}
@@ -18,7 +18,7 @@ function NotificationsPage() {
       </div>
 
       <NotificationList />
-    </main>
+    </div>
   );
 }
 

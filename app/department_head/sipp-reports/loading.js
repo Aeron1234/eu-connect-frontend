@@ -3,7 +3,7 @@ import SIPPReportsManagerSkeleton from "@/components/skeletons/SIPPReportsManage
 
 export default function Loading() {
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
           <FileText className="w-7 h-7 text-primary-emphasis" />
@@ -15,6 +15,6 @@ export default function Loading() {
       </div>
 
       <SIPPReportsManagerSkeleton />
-    </main>
+    </div>
   );
 }

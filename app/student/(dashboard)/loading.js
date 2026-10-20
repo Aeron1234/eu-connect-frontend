@@ -101,11 +101,11 @@ function StudentDashboardLoading() {
 
       {/* Activity + sidebar row */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
+        <div className="order-2 min-w-0 self-start lg:order-1 lg:col-span-2 lg:self-stretch">
           <RecentActivityCardSkeleton />
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="order-1 flex min-w-0 flex-col gap-5 lg:order-2">
           {/* Internship progress */}
           <div className="rounded-xl bg-primary p-5">
             <Skeleton className="h-3.5 w-32 bg-white/25" />
@@ -121,8 +121,12 @@ function StudentDashboardLoading() {
           </div>
 
           {/* Map */}
-          <div className="rounded-xl bg-card border border-border shadow-sm h-64 lg:h-full min-h-64 overflow-hidden">
-            <Skeleton className="h-full w-full rounded-xl" />
+          <div className="rounded-xl bg-card border border-border shadow-sm overflow-hidden">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
+              <Skeleton className="h-8 w-56 max-w-full" />
+              <Skeleton className="h-7 w-28" />
+            </div>
+            <Skeleton className="h-64 w-full rounded-none" />
           </div>
         </div>
       </section>

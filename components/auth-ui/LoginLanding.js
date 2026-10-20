@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useState } from "react";
 import {
-  ArrowDownRight, ArrowRight, BookOpenText, BriefcaseBusiness, Check,
-  ClipboardCheck, Clock3, FileCheck2, FolderOpen, GraduationCap,
-  MapPin, Megaphone, ShieldCheck, UsersRound,
+  ArrowDownRight, ArrowRight, BookOpenText, BriefcaseBusiness, CalendarDays, Check,
+  ClipboardCheck, Clock3, FileCheck2, FileText, FolderOpen, GraduationCap,
+  ShieldCheck, UserRoundCheck, UsersRound,
 } from "lucide-react";
 import logo from "@/public/logo.png";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LoginForm from "@/components/auth-ui/LoginForm";
+import PhilippinesNetwork from "@/components/auth-ui/PhilippinesNetwork";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { modalFormContentClass } from "@/components/ui/modalFormStyles";
@@ -20,13 +21,6 @@ const navLinks = [
   { label: "For everyone", href: "#for-everyone" },
 ];
 
-const workspace = [
-  { Icon: Clock3, title: "Time records", detail: "Record each duty day" },
-  { Icon: BookOpenText, title: "Weekly narratives", detail: "Document your learning" },
-  { Icon: FolderOpen, title: "Requirements", detail: "Keep documents together" },
-  { Icon: ClipboardCheck, title: "Evaluations", detail: "Follow your progress" },
-];
-
 const steps = [
   { Icon: BriefcaseBusiness, title: "Find your place", detail: "Explore internship opportunities and begin your internship record." },
   { Icon: FolderOpen, title: "Prepare together", detail: "Keep requirements, announcements, and placement details in reach." },
@@ -35,12 +29,15 @@ const steps = [
 ];
 
 const features = [
-  { Icon: MapPin, title: "Time and attendance", detail: "Clock in and out with location checks, take a break, and follow your rendered hours." },
+  { Icon: Clock3, title: "Daily Time Records (DTR)", detail: "Clock in and out at your approved location, record breaks, and track daily attendance and total rendered hours." },
+  { Icon: BriefcaseBusiness, title: "Internship records", detail: "Submit your placement, update pending details, and follow its approval status through to completion." },
   { Icon: BookOpenText, title: "Weekly narratives", detail: "Record what you accomplished and learned each week in one organized history." },
-  { Icon: FolderOpen, title: "Documents in one place", detail: "Submit internship requirements and follow their review without losing track of files." },
+  { Icon: FileText, title: "Summary reports", detail: "Write your internship summary, attach supporting images, and download a PDF copy of your report." },
+  { Icon: FolderOpen, title: "Documents and requirements", detail: "Upload requirements, review documents shared by your supervisor, and keep accepted files organized." },
   { Icon: BriefcaseBusiness, title: "Internship opportunities", detail: "Browse postings, save favorites, and explore potential placements." },
-  { Icon: ClipboardCheck, title: "Meaningful evaluations", detail: "Bring structured feedback and internship progress into the same workflow." },
-  { Icon: Megaphone, title: "Our school, connected", detail: "Keep MSEUF-CI students, partner companies, and departments informed with shared updates." },
+  { Icon: UserRoundCheck, title: "Supervisor connections", detail: "Find your company supervisor, send a supervision request, and connect once your request is accepted." },
+  { Icon: ClipboardCheck, title: "Evaluations and feedback", detail: "Complete internship evaluations and review feedback shared by students and company supervisors." },
+  { Icon: CalendarDays, title: "Announcements and calendar", detail: "Follow school updates, department schedules, and important internship dates in one shared workspace." },
 ];
 
 const roles = [
@@ -76,12 +73,12 @@ export default function LoginLanding({ initialSignInOpen = false }) {
         </div>
       </header>
 
-      <main id="top">
+      <main id="top" className="scroll-mt-16 sm:scroll-mt-18">
         <section className="landing-hero relative isolate overflow-hidden bg-primary text-primary-foreground">
           <div className="landing-hero-grid pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
           <div className="pointer-events-none absolute -left-28 top-8 size-80 rounded-full border border-white/15" aria-hidden="true" />
           <div className="pointer-events-none absolute -right-48 -top-48 size-130 rounded-full border border-white/15" aria-hidden="true" />
-          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-10 pt-9 sm:gap-14 sm:px-8 sm:pb-24 sm:pt-24 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-20 lg:px-12 lg:py-28">
+          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-8 sm:gap-14 sm:px-8 sm:py-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-20 lg:px-12 lg:py-12">
             <div className="max-w-2xl">
               <p className="landing-enter inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.16em]">
                 <span className="size-1.5 rounded-full bg-[#b5cf50]" aria-hidden="true" />
@@ -106,36 +103,8 @@ export default function LoginLanding({ initialSignInOpen = false }) {
               </p>
             </div>
 
-            <div className="landing-enter landing-delay-2 relative mx-auto hidden w-full max-w-xl sm:block" aria-label="An overview of the internship workspace">
-              <div className="landing-board-shell rounded-[1.8rem] border border-white/35 bg-white/12 p-3 backdrop-blur-xl sm:p-4">
-                <div className="rounded-[1.25rem] bg-card p-5 text-foreground shadow-xl sm:p-7">
-                  <div className="flex items-start justify-between gap-3 border-b border-border pb-5">
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground"><GraduationCap className="size-5" aria-hidden="true" /></span>
-                      <div><p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary-emphasis">Your workspace</p><p className="mt-1 text-base font-bold">Everything in its place</p></div>
-                    </div>
-                    <span className="hidden rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground-soft sm:inline-flex">OJT journey</span>
-                  </div>
-                  <div className="mt-5 grid grid-cols-2 gap-3">
-                    {workspace.map(({ Icon, title, detail }, index) => (
-                      <div key={title} className="landing-workspace-card min-w-0 rounded-xl border border-border bg-canvas p-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary-emphasis"><Icon className="size-4" aria-hidden="true" /></span>
-                          <span className="text-xs font-semibold text-foreground-faint">0{index + 1}</span>
-                        </div>
-                        <p className="mt-4 text-sm font-bold leading-tight">{title}</p>
-                        <p className="mt-1 text-xs leading-snug text-foreground-soft">{detail}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-5 flex items-center gap-3 rounded-xl bg-primary px-4 py-3 text-primary-foreground">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/15"><Check className="size-4" aria-hidden="true" /></span>
-                    <p className="text-xs font-medium sm:text-sm">A clearer path from start to finish.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="landing-float absolute -bottom-5 -left-3 hidden items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-xl sm:flex lg:-left-9" aria-hidden="true"><span className="size-2 rounded-full bg-primary" /> Students</div>
-              <div className="landing-float landing-float-right absolute -right-3 -top-5 hidden items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-xl sm:flex lg:-right-9" aria-hidden="true"><span className="size-2 rounded-full bg-primary" /> Campus &amp; companies</div>
+            <div className="landing-enter landing-delay-2 relative mx-auto w-full min-w-0 max-w-xl">
+              <PhilippinesNetwork />
             </div>
           </div>
         </section>
@@ -173,7 +142,7 @@ export default function LoginLanding({ initialSignInOpen = false }) {
 
         <section id="features" className="scroll-mt-16 bg-canvas py-12 sm:scroll-mt-18 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
-            <div className="max-w-2xl"><p className="landing-eyebrow">The essentials, together</p><h2 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:mt-4 sm:text-5xl">Built around the work that matters.</h2><p className="mt-4 text-sm leading-6 text-foreground-soft sm:mt-5 sm:text-base sm:leading-8">Practical tools for the day-to-day details of an internship, from finding an opportunity to keeping a complete record.</p></div>
+            <div className="max-w-2xl"><p className="landing-eyebrow">The essentials, together</p><h2 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:mt-4 sm:text-5xl">Built around the work that matters.</h2><p className="mt-4 text-sm leading-6 text-foreground-soft sm:mt-5 sm:text-base sm:leading-8">Manage each part of your internship, from daily time records and placement approval to reports, requirements, and feedback.</p></div>
             <div className="mt-7 grid gap-3 sm:mt-11 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
               {features.map(({ Icon, title, detail }) => (
                 <article key={title} className="landing-feature rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-7">

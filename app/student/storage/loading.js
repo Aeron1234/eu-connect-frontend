@@ -5,7 +5,7 @@ import PastInternshipDocumentsSkeleton from "@/components/skeletons/PastInternsh
 
 function StorageLoading() {
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitleSkeleton />
         <Skeleton className="h-11 w-full sm:w-36 rounded-md" />
@@ -13,7 +13,7 @@ function StorageLoading() {
 
       <RecordsDocumentsSkeleton />
       <PastInternshipDocumentsSkeleton />
-    </main>
+    </div>
   );
 }
 

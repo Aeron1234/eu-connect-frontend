@@ -4,7 +4,7 @@ import AnnouncementBoardFiltersSkeleton from "@/components/skeletons/Announcemen
 
 function AnnouncementsLoading() {
   return (
-    <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitleSkeleton />
       </div>
@@ -16,7 +16,7 @@ function AnnouncementsLoading() {
           <AnnouncementCardSkeleton key={i} showEventDate={i % 2 === 0} />
         ))}
       </div>
-    </main>
+    </div>
   );
 }
 

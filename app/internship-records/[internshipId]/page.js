@@ -37,7 +37,7 @@ async function InternshipRecordsDetailsPage({ params }) {
     : null;
 
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <Link
         href={`/internship-records`}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -51,7 +51,7 @@ async function InternshipRecordsDetailsPage({ params }) {
         record={overviewData || {}}
         internshipId={internshipId}
       />
-    </main>
+    </div>
   );
 }
 

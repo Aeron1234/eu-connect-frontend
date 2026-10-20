@@ -8,7 +8,7 @@ export const metadata = {
 
 function EvaluationsPage() {
   return (
-    <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
       <PageTitle
         Icon={ClipboardCheck}
         title="Evaluations"
@@ -17,7 +17,7 @@ function EvaluationsPage() {
       />
 
       <EvaluationsManager />
-    </main>
+    </div>
   );
 }
 

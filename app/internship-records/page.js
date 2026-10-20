@@ -9,11 +9,11 @@ async function InternshipRecordsPage({ searchParams }) {
   const filter = sParams.filter || "all";
 
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <RecordsPageContent
         filter={filter}
       />
-    </main>
+    </div>
   );
 }
 

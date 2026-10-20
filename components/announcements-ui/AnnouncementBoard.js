@@ -40,7 +40,7 @@ function AnnouncementBoardContent(props) {
   } = useAnnouncementBoard(props);
 
   return (
-    <main ref={boardRef} className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8">
+    <div ref={boardRef} className="min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitle
           Icon={Megaphone}
@@ -109,6 +109,6 @@ function AnnouncementBoardContent(props) {
           {isLoadingMore ? "Loading..." : "See more"}
         </button>
       )}
-    </main>
+    </div>
   );
 }

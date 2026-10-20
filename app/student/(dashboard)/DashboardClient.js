@@ -112,17 +112,17 @@ function StudentDashboardPage() {
 
       {/* Activity + sidebar row */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="order-2 lg:order-1 lg:col-span-2">
+        <div className="order-2 min-w-0 self-start lg:order-1 lg:col-span-2 lg:self-stretch">
           <RecentActivityCard activities={activities} />
         </div>
 
-        <div className="order-1 flex flex-col gap-5 lg:order-2">
+        <div className="order-1 flex min-w-0 flex-col gap-5 lg:order-2">
           <InternshipProgress
             accumulated_hours={internshipData?.accumulated_hours || 0}
             total_hours={internshipData?.total_hours || 0}
           />
 
-          <div className="flex min-h-64 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:h-full">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <MapSmallContainer
               latitude={locationData?.lat || 0}
               longitude={locationData?.lon || 0}

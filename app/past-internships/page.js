@@ -11,7 +11,7 @@ async function PastInternshipsPage({ searchParams }) {
   const yearFilter = sParams.filter || "all";
 
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitle
           Icon={Building2}
@@ -38,7 +38,7 @@ async function PastInternshipsPage({ searchParams }) {
           yearFilter={yearFilter}
         />
       </Suspense>
-    </main>
+    </div>
   );
 }
 

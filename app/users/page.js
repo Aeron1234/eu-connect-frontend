@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 function UsersPage() {
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <PageTitle
         title={"Search Users"}
         description={
@@ -22,7 +22,7 @@ function UsersPage() {
       />
 
       <SearchUsers />
-    </main>
+    </div>
   );
 }
 

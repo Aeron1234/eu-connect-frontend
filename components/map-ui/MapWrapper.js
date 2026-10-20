@@ -28,7 +28,7 @@ export default function MapWrapper() {
   } = useMapLocationsView();
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <StudentMapHeader tabs={tabs} tab={tab} setTab={setTab} />
 
       {locationsQuery.isError && locationsQuery.data && (
@@ -68,6 +68,6 @@ export default function MapWrapper() {
           </div>
         )}
       </div>}
-    </main>
+    </div>
   );
 }

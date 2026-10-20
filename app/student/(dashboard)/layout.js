@@ -8,7 +8,7 @@ async function DashboardLayout({ children }) {
   if (!user || role !== "student") return null;
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">{children}</main>
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8">{children}</div>
   );
 }
 

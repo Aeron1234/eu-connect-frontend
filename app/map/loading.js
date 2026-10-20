@@ -4,7 +4,7 @@ import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
 
 function MapLoading() {
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <PageTitleSkeleton />
 
@@ -46,7 +46,7 @@ function MapLoading() {
           </aside>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

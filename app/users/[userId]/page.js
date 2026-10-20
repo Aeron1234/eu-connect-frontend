@@ -90,7 +90,7 @@ async function UserProfilePage({ params, searchParams }) {
   }
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <SearchedUserHeader
         userProfile={header}
         supervision={supervision || null}
@@ -112,7 +112,7 @@ async function UserProfilePage({ params, searchParams }) {
         initialDtrData={initialDtrData}
         initialDtrLocation={initialDtrLocation}
       />
-    </main>
+    </div>
   );
 }
 

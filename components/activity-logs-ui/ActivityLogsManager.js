@@ -36,7 +36,7 @@ export default function ActivityLogsManager({ initialPage }) {
   } = useActivityLogsManager(initialPage);
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <PageTitle
         Icon={Activity}
@@ -110,6 +110,6 @@ export default function ActivityLogsManager({ initialPage }) {
           </button>
         </div>
       )}
-    </main>
+    </div>
   );
 }

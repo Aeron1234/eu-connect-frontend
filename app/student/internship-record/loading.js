@@ -4,7 +4,7 @@ import InternshipRecordFormSkeleton from "@/components/skeletons/InternshipRecor
 
 function InternshipRecordLoading() {
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
+    <div className="flex min-w-0 flex-col gap-6 p-4 sm:p-6 lg:p-8">
       <PageTitleSkeleton />
 
       <div className="flex gap-1 rounded-lg p-1 bg-secondary w-fit">
@@ -15,7 +15,7 @@ function InternshipRecordLoading() {
       <div className="min-w-0">
         <InternshipRecordFormSkeleton />
       </div>
-    </main>
+    </div>
   );
 }
 

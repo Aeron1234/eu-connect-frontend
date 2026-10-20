@@ -78,7 +78,7 @@ function InternshipRecordsManager() {
   }
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto flex flex-col gap-6">
+    <div className="flex min-w-0 flex-col gap-6 p-4 sm:p-6 lg:p-8">
       <PageTitle
         Icon={Briefcase}
         title="My Records"
@@ -169,7 +169,7 @@ function InternshipRecordsManager() {
           onDeleted={handleDeleted}
         />
       )}
-    </main>
+    </div>
   );
 }
 

@@ -5,7 +5,7 @@ import WeeklyNarrativeListSkeleton from "./WeeklyNarrativeListSkeleton";
 
 function StudentNarrativesPageSkeleton() {
   return (
-    <main className="flex-1 space-y-6 overflow-auto p-4 sm:p-6 lg:p-8" aria-busy="true">
+    <div className="min-w-0 space-y-6 p-4 sm:p-6 lg:p-8" aria-busy="true">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <PageTitleSkeleton />
         <Skeleton className="h-10 w-40 rounded-md" />
@@ -16,7 +16,7 @@ function StudentNarrativesPageSkeleton() {
       </div>
 
       <WeeklyNarrativeListSkeleton />
-    </main>
+    </div>
   );
 }
 

@@ -4,7 +4,7 @@ import EvaluationCriteriaListSkeleton from "@/components/skeletons/EvaluationCri
 
 function EvaluationCriteriaLoading() {
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <PageTitleSkeleton />
 
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -37,7 +37,7 @@ function EvaluationCriteriaLoading() {
         <Skeleton className="h-11 flex-1 rounded-lg" />
         <Skeleton className="h-11 w-full sm:w-40 rounded-lg" />
       </div>
-    </main>
+    </div>
   );
 }
 

@@ -5,7 +5,7 @@ import RecordsOverviewSkeleton from "@/components/skeletons/RecordsOverviewSkele
 
 function InternshipRecordDetailLoading() {
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <span className="inline-flex items-center gap-2 text-sm text-foreground-subtle">
         <ChevronLeft className="h-4 w-4" /> Back to records
       </span>
@@ -13,7 +13,7 @@ function InternshipRecordDetailLoading() {
       <RecordsHeaderSkeleton />
       <TabBarSkeleton tabs={6} />
       <RecordsOverviewSkeleton />
-    </main>
+    </div>
   );
 }
 

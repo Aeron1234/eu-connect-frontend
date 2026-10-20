@@ -125,7 +125,7 @@ function AccountProfileContent({ roleLabel, userData = {} }) {
   };
 
   return (
-    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8">
       <Link
         href="/"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary-emphasis mb-4 hover:underline"
@@ -176,7 +176,7 @@ function AccountProfileContent({ roleLabel, userData = {} }) {
           </aside>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
