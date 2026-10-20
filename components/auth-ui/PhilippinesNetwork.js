@@ -37,6 +37,7 @@ const locations = [
   ["cotabato", "Cotabato", "Maguindanao del Norte", 124.25, 7.22],
   ["davao", "Davao", "Davao del Sur", 125.46, 7.19],
   ["general-santos", "General Santos", "South Cotabato", 125.17, 6.12],
+  ["manila", "Manila", "Metro Manila", 120.9842, 14.5995],
 ].map(([id, name, province, longitude, latitude], index) => {
   const point = project(longitude, latitude);
   const dx = point.x - campus.x;
@@ -161,6 +162,7 @@ export default function PhilippinesNetwork() {
             key={location.id}
             type="button"
             className="landing-network-pin"
+            data-location={location.id}
             style={position(location)}
             data-active={activeLocationIds.has(location.id) || undefined}
             aria-pressed={selectedId === location.id}

@@ -79,6 +79,9 @@
 
 .landing-network-pin svg { position: relative; width: 13px; height: 16px; overflow: visible; fill: #f5c4b3; stroke: #800000; stroke-width: 1.7; transition: fill 180ms ease, filter 180ms ease, transform 180ms ease; }
 .landing-network-pin > * { pointer-events: none; }
+/* Lift Manila clear of the nearby campus seal; the leader retains its map position. */
+.landing-network-pin[data-location="manila"] { margin-top: -14px; }
+.landing-network-pin[data-location="manila"]::after { content: ""; position: absolute; z-index: -1; top: 50%; left: 50%; width: 1px; height: 14px; background: rgb(245 196 179 / 55%); pointer-events: none; }
 .landing-network-pin-glow { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: rgb(255 189 133 / 12%); box-shadow: 0 0 9px rgb(255 189 133 / 20%); transition: box-shadow 200ms ease, background 200ms ease; }
 .landing-network-pin:hover svg,
 .landing-network-pin:focus-visible svg,

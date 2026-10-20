@@ -129,7 +129,7 @@ export default function LoginLanding({ initialSignInOpen = false }) {
             <div className="mt-7 grid gap-3 sm:mt-12 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
               {steps.map(({ Icon, title, detail }, index) => (
                 <article key={title} className="landing-step relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
-                  <span className="absolute right-5 top-3 text-6xl font-bold tracking-tighter text-primary/8" aria-hidden="true">0{index + 1}</span>
+                  <span className="absolute right-5 top-3 text-6xl font-bold tracking-tighter text-primary/8 dark:text-primary-emphasis/50" aria-hidden="true">0{index + 1}</span>
                   <span className="relative flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground sm:size-12"><Icon className="size-4 sm:size-5" aria-hidden="true" /></span>
                   <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.15em] text-primary-emphasis sm:mt-8 sm:text-xs sm:tracking-[0.18em]">Step 0{index + 1}</p>
                   <h3 className="mt-1.5 text-lg font-bold sm:mt-2 sm:text-xl">{title}</h3>
