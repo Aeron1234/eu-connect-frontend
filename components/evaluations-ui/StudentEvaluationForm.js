@@ -17,8 +17,8 @@ function StudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onS
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
-        title="Submit supervisor evaluation?"
-        description="Review your scores and remarks before submitting this evaluation."
+        title="Submit student evaluation?"
+        description="Review your scores and remarks. This evaluation is sent privately to the student's department head."
         confirmLabel="Submit evaluation"
         pending={isPending}
         onConfirm={submitEvaluation}

@@ -17,12 +17,14 @@ export default function useStorageUploadForm({ fileRequirementTypes, currentUser
     startTransition(async () => {
       const result = await toastAndAction({
         loadingLabel: "Uploading file...",
+        timeoutMs: 120000,
+        timeoutLabel: "Upload confirmation timed out. Refresh this page before trying again.",
         successLabel: "File was added.",
         errorLabel: "Upload failed.",
         action: uploadInternshipFile,
         args: [formData],
-      });
-      if (result?.success && currentUserId && internshipId) {
+      }).catch(() => null);
+      if ((result?.success || result?.timedOut) && currentUserId && internshipId) {
         void invalidateCurrentInternshipDocuments(queryClient, currentUserId, internshipId);
       }
     });

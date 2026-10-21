@@ -8,11 +8,9 @@ import { evaluationsKeys, evaluationsTabOptions } from "@/lib/cache/evaluations-
 
 const tabs = [
   { value: "evaluate-supervisor", text: "Evaluate Supervisor" },
-  { value: "pending-confirmation", text: "Pending Confirmation" },
   { value: "past-evaluations", text: "Past Evaluations" },
-  { value: "disputed", text: "Disputed" },
 ];
-const changedEvaluationTabs = ["pending-confirmation", "past-evaluations", "disputed"];
+const changedEvaluationTabs = ["past-evaluations"];
 export default function useEvaluationsManager(initialCriteria) {
   const { user } = useUser();
   const queryClient = useQueryClient();

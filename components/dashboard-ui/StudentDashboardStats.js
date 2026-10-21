@@ -1,4 +1,4 @@
-import { Briefcase, ClipboardCheck, FolderOpen, Megaphone } from "lucide-react";
+import { Briefcase, FolderOpen, Megaphone } from "lucide-react";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
 function StudentDashboardStats({ data }) {
@@ -16,14 +16,6 @@ function StudentDashboardStats({ data }) {
       label: "Unread Announcements",
       value: data?.stats?.unreadAnnouncements ?? 0,
       icon: Megaphone,
-      accent: "bg-card text-primary-emphasis border border-border",
-      valueClass: "text-foreground",
-      labelClass: "text-primary-emphasis",
-    },
-    {
-      label: "Pending Evaluations",
-      value: data?.stats?.pendingEvaluations ?? 0,
-      icon: ClipboardCheck,
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",

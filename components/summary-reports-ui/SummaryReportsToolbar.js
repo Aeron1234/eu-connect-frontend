@@ -11,7 +11,7 @@ import {
 import { secondaryButton } from "./summaryReportFields";
 import SummaryReportPrintButton from "./SummaryReportPrintButton";
 
-export default function SummaryReportsToolbar({ record, records, editing, setSelectedId, setEditing, setConfirmingDelete }) {
+export default function SummaryReportsToolbar({ record, records, editing, canEdit = true, setSelectedId, setEditing, setConfirmingDelete }) {
   return (
     <section
       className="flex flex-col gap-5 rounded-xl border border-border bg-card p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between xl:gap-8"
@@ -33,7 +33,7 @@ export default function SummaryReportsToolbar({ record, records, editing, setSel
       </div>
       {record.report_id && !editing && (
         <div className="flex flex-wrap gap-2 sm:justify-end">
-          <button type="button" onClick={() => setEditing(true)} className={`${secondaryButton} flex-1 sm:flex-none`}><Pencil className="size-4" aria-hidden="true" />Edit</button>
+          {canEdit && <button type="button" onClick={() => setEditing(true)} className={`${secondaryButton} flex-1 sm:flex-none`}><Pencil className="size-4" aria-hidden="true" />Edit</button>}
           <button
             type="button"
             onClick={() => setConfirmingDelete(true)}

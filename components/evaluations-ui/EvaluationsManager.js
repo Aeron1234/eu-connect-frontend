@@ -44,24 +44,10 @@ function EvaluationsManager({ initialCriteria }) {
                 />
               </div>
             )}
-            {activeTab === "pending-confirmation" && (
-              <EvaluationCard
-                evaluations={data?.evaluations || []}
-                type="confirmation"
-                onChanged={refreshEvaluations}
-              />
-            )}
             {activeTab === "past-evaluations" && (
               <EvaluationCard
                 evaluations={data?.evaluations || []}
                 type="all"
-                onChanged={refreshEvaluations}
-              />
-            )}
-            {activeTab === "disputed" && (
-              <EvaluationCard
-                evaluations={data?.evaluations || []}
-                type="disputed"
                 onChanged={refreshEvaluations}
               />
             )}

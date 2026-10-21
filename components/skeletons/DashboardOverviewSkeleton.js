@@ -34,7 +34,7 @@ function PanelSkeleton({ children, className = "" }) {
 function StudentDashboardSkeleton() {
   return (
     <>
-      <DashboardStatsSkeleton />
+      <DashboardStatsSkeleton count={3} />
       <PanelSkeleton>
         <Skeleton className="h-4 w-32" />
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
@@ -71,7 +71,7 @@ function EmployerDashboardSkeleton() {
         <Skeleton className="h-5 w-40" />
         <Skeleton className="mt-3 h-4 w-64 max-w-full" />
       </PanelSkeleton>
-      <DashboardStatsSkeleton />
+      <DashboardStatsSkeleton count={3} />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2"><InternsSupervisedCardSkeleton /></div>
         <div className="flex flex-col gap-5">

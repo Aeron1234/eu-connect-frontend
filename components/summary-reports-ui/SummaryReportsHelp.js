@@ -7,7 +7,8 @@ export default function SummaryReportsHelp() { return (
       <ol
         className="list-decimal space-y-3 pl-5 text-sm leading-relaxed marker:font-semibold marker:text-primary-emphasis"
       >
-        <li>Choose the internship you want to write about. You can create one report for each eligible internship.</li>
+        <li>Choose the internship you want to write about. You can create one report for each approved ongoing or finished internship once its start date arrives in Philippine time.</li>
+        <li>You can build your report throughout your internship; you do not need to wait until it is finished.</li>
         <li>Write paragraphs about the organization, your work schedule, a memorable moment, and difficulties with their solutions.</li>
         <li>Optionally add a memorabilia note and up to six JPG, PNG, or WebP images. Preview each image before saving.</li>
         <li>Keep the report within 900 words. Follow the school format: Times New Roman, 12 pt, 1.5 line spacing, 1-inch margins, and a maximum of three pages.</li>

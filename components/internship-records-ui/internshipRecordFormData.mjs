@@ -26,6 +26,8 @@ export function internshipRecordFields(record = {}) {
   return {
     company_name: record.company_name ?? "",
     company_address: record.company_address ?? "",
+    city_name: record.city_name ?? "",
+    province_name: record.province_name ?? "",
     internship_position: record.internship_position ?? "",
     company_website: record.company_website ?? "",
     description: record.description ?? "",

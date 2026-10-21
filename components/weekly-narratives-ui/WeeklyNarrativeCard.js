@@ -7,7 +7,7 @@ import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
 import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
 import NarrativePreview from "./NarrativePreview";
 
-function WeeklyNarrativeCard({ narrative, showActions = false, onUpdate, onDelete }) {
+function WeeklyNarrativeCard({ narrative, showActions = false, canEdit = showActions, onUpdate, onDelete }) {
   return (
     <li className="relative pl-10 sm:pl-14">
       <div className="absolute left-0 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white shadow-md ring-4 ring-canvas sm:left-1 sm:h-8 sm:w-8 sm:text-xs">
@@ -25,7 +25,7 @@ function WeeklyNarrativeCard({ narrative, showActions = false, onUpdate, onDelet
         </div>
         {showActions && (
           <div className="absolute right-3 top-3 flex items-center gap-1 sm:right-4 sm:top-4">
-            <Modal variant="form"
+            {canEdit && <Modal variant="form"
               title="Update your narrative"
               trigger={
                 <div aria-label="Edit" className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
@@ -34,7 +34,7 @@ function WeeklyNarrativeCard({ narrative, showActions = false, onUpdate, onDelet
               }
             >
               <WeeklyNarrativeEditForm narrative={narrative} onSuccess={onUpdate} />
-            </Modal>
+            </Modal>}
             <Modal variant="confirmation"
               title={<span className="text-red-600">Delete Narrative</span>}
               trigger={

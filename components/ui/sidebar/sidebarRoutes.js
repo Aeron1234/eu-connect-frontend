@@ -209,7 +209,7 @@ export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
           ]
         : []),
       ...roleRouteGroups(userRole, userDepartment),
-      {
+      ...(userRole !== "employer" ? [{
         label: "Planning",
         routes: [
           {
@@ -218,8 +218,8 @@ export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
             icon: <CalendarDays className="h-5 w-5 shrink-0" />,
           },
         ],
-      },
-      { label: "Public", routes: publicRoutes },
+      }] : []),
+      { label: "Public", routes: publicRoutes.filter(route => userRole !== "employer" || route.href !== "/announcements") },
     ]
   );
 }

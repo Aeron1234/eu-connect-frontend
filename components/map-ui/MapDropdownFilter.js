@@ -15,7 +15,7 @@ function MapDropdownFilter({ regions = [], regionId, onChange }) {
       onValueChange={(val) => onChange(val ? Number(val) : null)}
       options={options}
       placeholder="All Locations"
-      className="bg-card p-2"
+      className="w-full bg-card p-2 sm:w-auto"
     />
   );
 }

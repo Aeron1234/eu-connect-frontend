@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 async function AccountLayout({ children }) {
   const session = await getUserSession();
   if (!session?.user) return redirect("/login");
+  if (session.user.role === "employer") return redirect("/employer");
 
   return (
     <SocketProvider>

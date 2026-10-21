@@ -10,6 +10,8 @@ import ReportEditor from "./SummaryReportEditor";
 import SummaryReportsHelp from "./SummaryReportsHelp";
 import SummaryReportsToolbar from "./SummaryReportsToolbar";
 import useStudentSummaryReports from "./useStudentSummaryReports";
+import useInternshipStartAccess from "@/components/ui/useInternshipStartAccess";
+import InternshipStartNotice from "@/components/ui/InternshipStartNotice";
 
 export default function StudentSummaryReportsPage() {
   const {
@@ -24,6 +26,7 @@ export default function StudentSummaryReportsPage() {
     deleteMutation,
     handleDelete,
   } = useStudentSummaryReports();
+  const startAccess = useInternshipStartAccess(record?.date_started, "Summary reports");
 
   if (reports.isPending) return <SummaryReportsSkeleton />;
   if (reports.isError && !reports.data) return <ErrorUI error={reports.error} reset={() => reports.refetch()} logError={false} />;
@@ -45,11 +48,13 @@ export default function StudentSummaryReportsPage() {
           <SummaryReportsToolbar
             record={record}
             records={records}
-            editing={editing}
+            editing={editing && startAccess.allowed}
+            canEdit={startAccess.allowed}
             setSelectedId={setSelectedId}
             setEditing={setEditing}
             setConfirmingDelete={setConfirmingDelete}
           />
+          {!startAccess.allowed && <InternshipStartNotice message={startAccess.message} />}
           <ConfirmDialog
             open={confirmingDelete}
             onOpenChange={setConfirmingDelete}
@@ -59,19 +64,19 @@ export default function StudentSummaryReportsPage() {
             pending={deleteMutation.isPending}
             onConfirm={() => void handleDelete()}
           />
-          {(!record.report_id || editing) ? (
+          {startAccess.allowed && (!record.report_id || editing) ? (
             <ReportEditor
               key={record.internship_id}
               record={record}
               onCancel={() => setEditing(false)}
               onSaved={() => setEditing(false)}
             />
-          ) : (
+          ) : record.report_id ? (
             <>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-foreground-soft"><FileText className="size-4 text-primary-emphasis" aria-hidden="true" />Submitted summary report for <span className="font-semibold text-foreground">{record.company_name}</span><span className="w-full pl-6 text-xs">Prepared by {record.student_name || "Student"}</span></div>
               <ReportContent record={record} />
             </>
-          )}
+          ) : null}
         </>
       )}
     </main>

@@ -1,7 +1,8 @@
 export default [
   {
     title: "Find announcements and opportunities",
-    summary: "Use the links available to every account.",
+    summary: "Read school updates and browse internship opportunities.",
+    hideForEmployer: true,
     steps: [
       "Open Announcements for general and department updates. Announcements with event dates also appear on the school calendar where available.",
       "Open Internships to browse available postings, or Search Users to find a profile.",

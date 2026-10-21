@@ -86,6 +86,7 @@ export default function useCalendarBoard({ initialDate, initialData }) {
   const dates = useMemo(() => monthDates(month), [month]);
   const visibleKinds = useMemo(() => new Set(kinds
     .filter((kind) => role === "student" || (kind.id !== "todo" && kind.id !== "internship"))
+    .filter((kind) => role !== "employer" || kind.id !== "announcement")
     .filter((kind) => visible[kind.id])
     .map((kind) => kind.id)), [role, visible]);
   const entries = useMemo(() => entriesFor(data, selected).filter((entry) => visibleKinds.has(entry.kind)), [data, selected, visibleKinds]);
@@ -93,7 +94,9 @@ export default function useCalendarBoard({ initialDate, initialData }) {
   const canAddTodo = role === "student" && data.internship?.date_started <= selected && data.internship?.date_ended >= selected;
   const canSchedule = role === "department_head" || role === "admin";
   const showManual = canSchedule || (role === "student" && Boolean(data.internship));
-  const activeKinds = kinds.filter((kind) => kind.id !== "todo" || role === "student").filter((kind) => kind.id !== "internship" || role === "student");
+  const activeKinds = kinds.filter((kind) => kind.id !== "todo" || role === "student")
+    .filter((kind) => kind.id !== "internship" || role === "student")
+    .filter((kind) => role !== "employer" || kind.id !== "announcement");
 
   async function mutate(action, successMessage) {
     setBusy(true);

@@ -3,7 +3,7 @@
 import StudentEvaluationList from "../evaluations-ui/StudentEvaluationList";
 import StudentEvaluationCriteria from "../evaluations-ui/StudentEvaluationCriteria";
 
-export default function ProfileEvaluationsTab({ userRole, searchedUserId, data, refreshEvaluations }) {
+export default function ProfileEvaluationsTab({ userRole, searchedUserId, dateStarted, data, refreshEvaluations }) {
   return (
     <>
       {userRole === "employer" && (
@@ -13,6 +13,7 @@ export default function ProfileEvaluationsTab({ userRole, searchedUserId, data, 
               data?.studentEvaluationCriterias
             }
             searchedUserId={searchedUserId}
+            dateStarted={dateStarted}
             userRole={userRole}
             onSubmitted={refreshEvaluations}
           />

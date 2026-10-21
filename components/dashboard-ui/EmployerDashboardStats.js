@@ -1,4 +1,4 @@
-import { Briefcase, Megaphone, Users, FolderOpen } from "lucide-react";
+import { Briefcase, Users, FolderOpen } from "lucide-react";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
 function EmployerDashboardStats({ stats: dashboardStats }) {
@@ -10,14 +10,6 @@ function EmployerDashboardStats({ stats: dashboardStats }) {
       accent: "bg-primary text-white border border-primary-400",
       valueClass: "text-primary-foreground",
       labelClass: "text-primary-foreground/80",
-    },
-    {
-      label: "Unread Announcements",
-      value: dashboardStats?.unreadAnnouncements ?? 0,
-      icon: Megaphone,
-      accent: "bg-card text-primary-emphasis border border-border",
-      valueClass: "text-foreground",
-      labelClass: "text-primary-emphasis",
     },
     {
       label: "Interns Handled",

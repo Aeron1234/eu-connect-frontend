@@ -1,9 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-function DashboardStatsSkeleton() {
+function DashboardStatsSkeleton({ count = 4 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4">
-      {Array.from({ length: 4 }).map((_, i) => {
+    <div className={`grid grid-cols-2 gap-2 ${count === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>
+      {Array.from({ length: count }).map((_, i) => {
         const isPrimary = i === 0;
 
         return (

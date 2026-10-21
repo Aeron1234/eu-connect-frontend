@@ -2,8 +2,8 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import { useEffect } from "react";
+import { MapContainer, Marker, Popup, TileLayer, Polyline, CircleMarker, Circle, useMap } from "react-leaflet";
+import { useEffect, useRef } from "react";
 
 function pinIcon(count, active, showCount) {
   const label = String(count);
@@ -20,16 +20,29 @@ function pinIcon(count, active, showCount) {
   });
 }
 
-function FitBounds({ sites, maxZoom }) {
+function FitBounds({ sites, maxZoom, route }) {
   const map = useMap();
   useEffect(() => {
-    if (!sites.length) return;
-    map.fitBounds(L.latLngBounds(sites.map((s) => [s.lat, s.lng])), {
+    const routePoints = route?.geometry?.coordinates?.map(([lng, lat]) => [lat, lng]);
+    if (!sites.length && !routePoints?.length) return;
+    map.fitBounds(L.latLngBounds(routePoints?.length ? routePoints : sites.map((s) => [s.lat, s.lng])), {
       padding: [60, 60],
-      maxZoom,
+      maxZoom: routePoints?.length ? Math.max(maxZoom, 14) : maxZoom,
     });
-  }, [sites, map, maxZoom]);
+  }, [sites, map, maxZoom, route]);
   return null;
+}
+
+function ViewerLocationControl({ position, hasRoute }) {
+  const map = useMap();
+  const centered = useRef(false);
+  useEffect(() => {
+    if (!centered.current) {
+      centered.current = true;
+      if (!hasRoute) map.setView([position.latitude, position.longitude], 14);
+    }
+  }, [map, position, hasRoute]);
+  return <button type="button" onClick={() => map.setView([position.latitude, position.longitude], 14)} className="absolute bottom-6 left-3 z-1000 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow" aria-label="Center map on my location">Locate me</button>;
 }
 
 export default function Map({
@@ -39,6 +52,10 @@ export default function Map({
   className = "h-[540px] w-full rounded-xl",
   fitBoundsMaxZoom = 11,
   showPinCount = true,
+  showCompanyPopups = true,
+  route = null,
+  origin = null,
+  viewerPosition = null,
 }) {
   return (
     <MapContainer
@@ -52,7 +69,20 @@ export default function Map({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <FitBounds sites={sites} maxZoom={fitBoundsMaxZoom} />
+      <FitBounds sites={sites} maxZoom={fitBoundsMaxZoom} route={route} />
+      {viewerPosition && <>
+        <ViewerLocationControl position={viewerPosition} hasRoute={Boolean(route)} />
+        <Circle center={[viewerPosition.latitude, viewerPosition.longitude]} radius={viewerPosition.accuracy} pathOptions={{ color: "#2563eb", fillOpacity: 0.08, weight: 1 }} />
+        <CircleMarker center={[viewerPosition.latitude, viewerPosition.longitude]} radius={8} pathOptions={{ color: "white", fillColor: "#2563eb", fillOpacity: 1, weight: 3 }}><Popup>Your current location<br />Accuracy: about {Math.round(viewerPosition.accuracy)} m</Popup></CircleMarker>
+      </>}
+      {origin && !origin.live && <Marker position={[origin.lat, origin.lng]} icon={L.divIcon({
+        className: "", html: '<span style="display:grid;place-items:center;width:30px;height:30px;border:3px solid white;border-radius:50%;background:#800000;color:white;font-weight:bold;box-shadow:0 1px 5px #0008">C</span>',
+        iconSize: [30, 30], iconAnchor: [15, 15],
+      })}><Popup>{origin.label}<br />Visit starting point</Popup></Marker>}
+      {route?.geometry?.coordinates && <>
+        <Polyline positions={route.geometry.coordinates.map(([lng, lat]) => [lat, lng])} pathOptions={{ color: "#ffffff", weight: 9, opacity: 0.9 }} />
+        <Polyline positions={route.geometry.coordinates.map(([lng, lat]) => [lat, lng])} pathOptions={{ color: "#800000", weight: 5, opacity: 0.95 }} />
+      </>}
       {sites.map((s) => (
         <Marker
           key={s.id}
@@ -60,7 +90,7 @@ export default function Map({
           icon={pinIcon(s.interns.length, selectedId === s.id, showPinCount)}
           eventHandlers={{ click: () => onSelect?.(s.id) }}
         >
-          <Popup>
+          {showCompanyPopups && <Popup>
             <div className="min-w-[220px]">
               <p className="font-display text-base font-bold text-primary-emphasis">
                 {s.company}
@@ -85,7 +115,7 @@ export default function Map({
                 ))}
               </ul>
             </div>
-          </Popup>
+          </Popup>}
         </Marker>
       ))}
     </MapContainer>

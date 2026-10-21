@@ -3,9 +3,9 @@
 import { MapPin } from "lucide-react";
 import ProgressBar from "../ui/ProgressBar";
 
-export default function SelectedCompanyPanel({ selected }) {
+export default function SelectedCompanyPanel({ selected, routeControls = null, embedded = false }) {
   return (
-    <aside className="rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm">
+    <aside className={embedded ? "bg-card p-4 sm:p-5" : "rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm"}>
       {selected ? (
         <>
           <div className="flex items-center gap-3">
@@ -26,6 +26,7 @@ export default function SelectedCompanyPanel({ selected }) {
               </p>
             </div>
           </div>
+          {routeControls}
           <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {selected.interns.length} interns on-site
           </p>

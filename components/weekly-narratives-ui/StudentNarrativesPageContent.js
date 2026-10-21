@@ -18,6 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import WeeklyNarrativesPrintButton from "./WeeklyNarrativesPrintButton";
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
+import useInternshipStartAccess from "@/components/ui/useInternshipStartAccess";
+import InternshipStartNotice from "@/components/ui/InternshipStartNotice";
 
 function NarrativesPage() {
   const { user } = useUser();
@@ -36,7 +38,9 @@ function NarrativesPage() {
     ...(pastQuery.data || []).filter((record) => record.status === "finished"),
   ];
   const internship = records.find((record) => record.id === selectedId) || records[0];
-  const canEdit = Boolean(ongoingRecord && internship?.id === ongoingRecord.id);
+  const canManage = Boolean(ongoingRecord && internship?.id === ongoingRecord.id);
+  const startAccess = useInternshipStartAccess(internship?.date_started, "Weekly narratives");
+  const canEdit = canManage && startAccess.allowed;
   const narrativesQuery = useInfiniteQuery({
     ...weeklyNarrativesInfiniteOptions(user?.id, internship?.id),
     enabled: Boolean(user?.id && internship?.id),
@@ -70,13 +74,13 @@ function NarrativesPage() {
                   <p>Record what you did and learned during each week of your ongoing internship.</p>
                   <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
                     <li>Choose an internship record to view its weekly narratives. Finished records can be viewed and printed.</li>
-                    <li>For your ongoing internship, select <strong>New Narrative</strong> to open the entry form.</li>
+                    <li>Once your ongoing internship reaches its start date in Philippine time, select <strong>New Narrative</strong> to open the entry form.</li>
                     <li>Enter the <strong>week number</strong>, a short <strong>title</strong>, and your <strong>narrative</strong>. Describe your activities, what you learned, and any challenges or reflections. Then select <strong>Save</strong>.</li>
                     <li>Find your saved entry in the list below. Entries show up to three lines. Select <strong>See more</strong> when an entry is truncated to read the full narrative.</li>
                     <li>Use the <strong>pencil</strong> on your entry to edit it, or the <strong>trash</strong> icon to delete it. Confirm the deletion when prompted.</li>
                     <li>Select <strong>Export PDF</strong> to download one PDF containing every narrative for the selected internship.</li>
                   </ol>
-                  <p className="text-foreground-soft">You can add or change entries only while the internship is ongoing.</p>
+                  <p className="text-foreground-soft">You can add or change entries only while the internship is ongoing and its start date has arrived.</p>
                 </div>
               </ManualDialog>
             )}
@@ -103,6 +107,7 @@ function NarrativesPage() {
             </div>
             {Number(narrativesData?.totalRecords) > 0 && <WeeklyNarrativesPrintButton internshipId={internship.id} className="w-full sm:w-auto" />}
           </section>
+          {canManage && !startAccess.allowed && <InternshipStartNotice message={startAccess.message} />}
           {narrativesQuery.isPending ? (
             <>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><WeeklyNarrativesStatsSkeleton /></div>
@@ -116,7 +121,8 @@ function NarrativesPage() {
               <WeeklyNarrativeContent
                 key={internship.id}
                 internshipId={internship.id}
-                showActions={canEdit}
+                showActions={canManage}
+                canEdit={canEdit}
               />
             </>
           )}

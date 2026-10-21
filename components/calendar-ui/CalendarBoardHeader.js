@@ -17,7 +17,7 @@ export default function CalendarBoardHeader({ role, showManual, canSchedule, can
               )}
         </div>
         <p className="mt-1 text-sm text-foreground-soft">
-          {role === "employer" ? "View school-wide announcements and schedules." : "Internship dates, announcements, schedules, and your daily plans."}
+          {role === "employer" ? "View school-wide schedules." : "Internship dates, announcements, schedules, and your daily plans."}
         </p>
       </div>
       {(canSchedule || canAddTodo) && (

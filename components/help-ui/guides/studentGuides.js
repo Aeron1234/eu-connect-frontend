@@ -46,7 +46,7 @@ export default [
     summary: "Find the two places for internship files and feedback.",
     steps: [
       "Use Storage to upload and manage your internship documents.",
-      "Use Evaluations to view and complete evaluation tasks that are available to you.",
+      "Use Evaluations to evaluate your supervisor and review your submitted feedback. Employer performance evaluations are confidential and go directly to your department head.",
     ],
     href: "/student/storage",
     linkText: "Open Storage",

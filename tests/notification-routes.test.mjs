@@ -2,6 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getNotificationTargetPath } from "../lib/notification-routes.js";
 
+test("department-head evaluation notifications navigate to the internship record instead of the evaluation UUID", () => {
+  for (const is_read of [true, false]) {
+    assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "internship-uuid", link_uuid: "evaluation-uuid", is_read }), "/internship-records/internship-uuid");
+  }
+  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link_uuid: "evaluation-uuid" }), null);
+  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "record/unsafe?" }), "/internship-records/record%2Funsafe%3F");
+});
+
 test("finished internship notifications open their record for both unread and read items", () => {
   const internshipId = "e531092e-4d22-4e1b-b909-e89d2c6ac3ea";
   for (const is_read of [false, true]) {

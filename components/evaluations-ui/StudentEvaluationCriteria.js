@@ -4,14 +4,18 @@ import { useState } from "react";
 import StudentEvaluationForm from "./StudentEvaluationForm";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import EvaluationsCriteria from "./EvaluationsCriteria";
+import useInternshipStartAccess from "@/components/ui/useInternshipStartAccess";
+import InternshipStartNotice from "@/components/ui/InternshipStartNotice";
 
 function StudentEvaluationCriteria({
   studentEvaluationCriterias,
   searchedUserId,
+  dateStarted,
   userRole,
   onSubmitted,
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const startAccess = useInternshipStartAccess(dateStarted, "Student evaluations");
 
   if (userRole !== "employer") return null;
 
@@ -22,7 +26,7 @@ function StudentEvaluationCriteria({
       >
         <h3 className="text-base font-semibold">Student Evaluation Form</h3>
 
-        <button
+        {startAccess.allowed && <button
           className="flex gap-1 items-center transition-all hover:bg-muted/50 p-1 rounded-lg"
           onClick={() => setIsOpen((prev) => !prev)}
         >
@@ -32,10 +36,12 @@ function StudentEvaluationCriteria({
           ) : (
             <ChevronDown className="h-5 w-5" />
           )}
-        </button>
+        </button>}
       </div>
 
-      {isOpen && (
+      {!startAccess.allowed && <InternshipStartNotice message={startAccess.message} />}
+
+      {startAccess.allowed && isOpen && (
         <>
           <EvaluationsCriteria />
 

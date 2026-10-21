@@ -17,7 +17,8 @@ export default function useHelpGuides() {
     );
     return [
       { title: `${roleNames[role] ?? "Your"} guides`, guides: specific },
-      { title: "Shared tools and account", guides: sharedGuides.filter((guide) => !guide.studentOnly || role === "student") },
+      { title: "Shared tools and account", guides: sharedGuides.filter((guide) =>
+        (!guide.studentOnly || role === "student") && (!guide.hideForEmployer || role !== "employer")) },
     ];
   }, [role, isRegistrar]);
 

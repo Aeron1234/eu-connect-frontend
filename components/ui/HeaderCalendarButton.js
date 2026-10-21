@@ -7,7 +7,7 @@ import { ArrowUpRight, CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useUser } from "@/contexts/UserContext";
 
-const CALENDAR_ROLES = new Set(["student", "employer", "admin", "department_head"]);
+const CALENDAR_ROLES = new Set(["student", "admin", "department_head"]);
 
 export default function HeaderCalendarButton() {
   const { user } = useUser();

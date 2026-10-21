@@ -30,8 +30,7 @@ export default function usePostedEvaluation({
   const isStaff = userRole === "department_head" || userRole === "admin";
   const canPrint =
     ev.type === "Performance Evaluation" &&
-    userRole === "student" &&
-    type === "all";
+    (isStaff || (userRole === "employer" && userId === ev.evaluator_id));
 
   function handleResponse(res) {
     if (type !== "confirmation" || !["completed", "disputed"].includes(res))

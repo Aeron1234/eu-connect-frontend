@@ -43,6 +43,8 @@ export default function useSummaryReportEditor({ record, onSaved }) {
           ? "Summary report updated."
           : "Summary report submitted.",
         errorLabel: "Could not save your report.",
+        timeoutMs: 120000,
+        timeoutLabel: "Upload confirmation timed out. Refresh this page before trying again.",
         action: async (internshipId, data) => {
           try {
             return await saveSummaryReport(
@@ -60,6 +62,9 @@ export default function useSummaryReportEditor({ record, onSaved }) {
         args: [record.internship_id, formData],
       }),
     onSuccess: async (result) => {
+      if (result?.timedOut) {
+        void queryClient.invalidateQueries({ queryKey: summaryReportKeys.list(user.id) });
+      }
       if (!result?.success) return;
       await queryClient.invalidateQueries({
         queryKey: summaryReportKeys.list(user.id),

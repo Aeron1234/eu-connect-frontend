@@ -1,5 +1,5 @@
 export const evaluationStatusClass = (status) =>
-    status === "Completed"
+    status === "Completed" || status === "Submitted"
       ? "bg-emerald-100 text-emerald-700"
       : status === "Pending"
         ? "bg-amber-100 text-amber-700"

@@ -1,4 +1,4 @@
-import { Briefcase, FileUp, Megaphone, MoreHorizontal } from "lucide-react";
+import { Briefcase, FileUp, UserRound, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
 const actions = [
@@ -9,9 +9,9 @@ const actions = [
     href: "/users",
   },
   {
-    label: "View announcements",
-    icon: Megaphone,
-    href: "/announcements",
+    label: "Manage my account",
+    icon: UserRound,
+    href: "/employer/account",
   },
 ];
 

@@ -58,6 +58,8 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
 
     const handlers = {
       loadingLabel: "Uploading certificate...",
+      timeoutMs: 120000,
+        timeoutLabel: "Upload confirmation timed out. Refresh this page before trying again.",
       successLabel: "Certificate uploaded — awaiting student confirmation.",
       errorLabel: "Failed to upload certificate.",
       action: uploadCertificateOfCompletion,
@@ -65,7 +67,8 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
     };
 
     startTransition(async () => {
-      const result = await toastAndAction(handlers);
+      const result = await toastAndAction(handlers).catch(() => null);
+      if (result?.timedOut) onChanged?.();
       if (!result?.success) return;
 
       // 🌟 TODO: replace with a real refetch once revalidation is wired up —

@@ -9,7 +9,7 @@ export default function MapLocationsLoading() { return (
         <Skeleton className="h-11 w-full rounded-lg sm:w-44" />
       </div>
       <div className="grid gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="rounded-xl border border-border bg-card p-2"><Skeleton className="h-[540px] w-full rounded-xl" /></div>
+        <div className="rounded-xl border border-border bg-card p-2"><Skeleton className="h-[min(58dvh,420px)] min-h-[280px] w-full rounded-xl sm:h-[480px] lg:h-[540px]" /></div>
         <Skeleton className="h-[540px] w-full rounded-xl" />
       </div>
     </div>

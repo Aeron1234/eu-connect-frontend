@@ -104,7 +104,7 @@ const embeds = [
   { file: "map-ui/MapWrapper.js", marker: "Saved map", mocks: (result) => ({
     "./useMapLocationsView": () => ({ locationsQuery: result, blockingError: !result.data, tab: "Map View", sites: [{ id: 1 }] }),
     "./StudentMapHeader": empty, "./MapLocationsLoading": empty, "./MapLocationFilters": empty,
-    "./CompanyMapView": () => "Saved map", "./CompanySiteCard": empty,
+    "./CompanyMapView": () => "Saved map", "./CompanySiteCard": empty, "./CityVisitGroups": empty, "./MapViewerLocationControls": empty, "./MapVisitRecommendations": empty, "./MapPlanningTools": empty,
   }) },
   { file: "internship-records-ui/RecordsDetailsPageContent.js", marker: "Saved record tab", mocks: (result) => ({
     "./useRecordDetailsTabs": () => ({ tabQuery: result, data: result.data, loadError: !result.data, activeTab: "dtr" }),

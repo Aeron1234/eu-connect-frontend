@@ -30,6 +30,8 @@ export default function InternshipRecordFormSkeleton() {
           <div className="border-t border-border pt-7 sm:pt-8"><SectionSkeleton>
             <Skeleton className="h-3 w-full max-w-md" />
             <Skeleton className="h-[min(320px,55vh)] w-full rounded-lg" />
+            <div className="grid gap-4 sm:grid-cols-2"><FieldSkeleton /><FieldSkeleton /></div>
+            <Skeleton className="h-3 w-full max-w-md" />
             <div className="space-y-2"><Skeleton className="h-3 w-28" /><Skeleton className="h-20 w-full rounded-lg" /></div>
           </SectionSkeleton></div>
         </div>

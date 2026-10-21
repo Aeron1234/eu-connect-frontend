@@ -7,6 +7,8 @@ import StudentMapHeader from "./StudentMapHeader";
 import MapLocationsLoading from "./MapLocationsLoading";
 import MapLocationFilters from "./MapLocationFilters";
 import CompanyMapView from "./CompanyMapView";
+import MapPlanningTools from "./MapPlanningTools";
+import CityVisitGroups from "./CityVisitGroups";
 import CompanySiteCard from "./CompanySiteCard";
 
 export default function MapWrapper() {
@@ -25,10 +27,11 @@ export default function MapWrapper() {
     selected,
     blockingError,
     tabs,
+    origin, viewerLocation, route, routeQuery, routeActive, showRoute, clearRoute,
   } = useMapLocationsView();
 
   return (
-    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-4 lg:space-y-6">
       <StudentMapHeader tabs={tabs} tab={tab} setTab={setTab} />
 
       {locationsQuery.isError && locationsQuery.data && (
@@ -38,7 +41,7 @@ export default function MapWrapper() {
         <MapLocationsLoading />
       ) : blockingError ? (
         <ErrorUI error={locationsQuery.error} reset={() => void locationsQuery.refetch()} logError={false} />
-      ) : <div className="space-y-6">
+      ) : <div className="space-y-4 lg:space-y-6">
         {/* Search + location filter */}
 
         <MapLocationFilters
@@ -49,8 +52,13 @@ export default function MapWrapper() {
           setRegionId={setRegionId}
         />
 
+        <MapPlanningTools sites={sites} origin={origin} viewerLocation={viewerLocation} onShowRoute={showRoute} />
+
         {tab === "Map View" ? (
-          <CompanyMapView sites={sites} selectedId={selectedId} setSelectedId={setSelectedId} selected={selected} />
+          <CompanyMapView sites={sites} selectedId={selectedId} setSelectedId={setSelectedId} selected={selected}
+            origin={origin} viewerPosition={viewerLocation?.position} route={route} routeQuery={routeQuery} routeActive={routeActive} showRoute={showRoute} clearRoute={clearRoute} />
+        ) : tab === "Cities" ? (
+          <CityVisitGroups sites={sites} origin={origin} onShowRoute={showRoute} />
         ) : (
           <div className="space-y-4 sm:space-y-5">
             {sites.map((s) => <CompanySiteCard key={s.id} site={s} />)}

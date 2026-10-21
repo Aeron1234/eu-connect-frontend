@@ -2,7 +2,7 @@ function DashboardStats({ stats = [] }) {
   if (!stats.length) return null;
 
   return (
-    <section className="grid gap-2 grid-cols-2 lg:grid-cols-4 lg:gap-4">
+    <section className={`grid gap-2 grid-cols-2 ${stats.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>
       {stats.map((s) => (
         <div key={s.label} className={`rounded-xl p-4 ${s.accent} shadow-sm`}>
           <div className="flex lg:items-center gap-2 flex-col sm:flex-row ">

@@ -53,7 +53,7 @@ export default [
     title: "Post department announcements",
     summary: "Share updates and optional event dates with students.",
     steps: [
-      "Open Announcements and select Announce. Choose the appropriate category and add an event date when the update concerns a specific day.",
+      "Open Announcements and select Announce. Post to your department and add an event date when the update concerns a specific day. General announcements can only be posted by admins and registrar department heads.",
       "Review the announcement after posting. Its event date appears on the calendar for students who can see it.",
     ],
     href: "/announcements",

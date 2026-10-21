@@ -111,3 +111,27 @@ test("concurrent actions each resolve their own loading toast without early succ
   assert.equal(events.at(-1).id, events[0].id);
   assert.equal(events.at(-1).message, "First saved.");
 });
+
+test("an opted-in stalled upload replaces its loading toast and does not report late success", async () => {
+  const { run, events } = harness(); let resolve;
+  const result = await run({ action: () => new Promise(done => { resolve = done; }), timeoutMs: 5, timeoutLabel: "Upload was not confirmed. Refresh first." });
+  assert.equal(result.success, false); assert.equal(result.timedOut, true);
+  assert.deepEqual(events.map(event => event.type), ["loading", "error"]);
+  assert.equal(events[0].id, events[1].id); assert.match(events[1].message, /Refresh first/);
+  resolve({ success: true }); await Promise.resolve(); await Promise.resolve();
+  assert.equal(events.length, 2);
+});
+
+test("a rejection after the upload deadline does not replace the timeout with another toast", async () => {
+  const { run, events } = harness(); let reject;
+  await run({ action: () => new Promise((_, fail) => { reject = fail; }), timeoutMs: 5 });
+  reject(new Error("Late transport failure")); await Promise.resolve(); await Promise.resolve();
+  assert.deepEqual(events.map(event => event.type), ["loading", "error"]);
+});
+
+test("a returned upload error before the deadline retains its real message and has no late timeout", async () => {
+  const { run, events } = harness();
+  await run({ action: async () => ({ success: false, error: "File exceeds the upload limit." }), timeoutMs: 5 });
+  await new Promise(resolve => setTimeout(resolve, 10));
+  assert.equal(events.length, 2); assert.equal(events[1].message, "File exceeds the upload limit.");
+});

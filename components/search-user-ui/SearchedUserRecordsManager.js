@@ -75,6 +75,7 @@ function SearchedUserRecordsManager({
               <ProfileEvaluationsTab
                 userRole={userRole}
                 searchedUserId={searchedUserId}
+                dateStarted={info?.internship_date_started}
                 data={data}
                 refreshEvaluations={refreshEvaluations}
               />
