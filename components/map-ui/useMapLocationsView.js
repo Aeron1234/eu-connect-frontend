@@ -3,7 +3,10 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
-import { mapLocationsOptions, mapCompanyRouteOptions } from "@/lib/cache/map-locations-queries";
+import {
+  mapLocationsOptions,
+  mapCompanyRouteOptions,
+} from "@/lib/cache/map-locations-queries";
 import { getInitials, formatPeriod } from "./mapSiteFormatting";
 import useMapViewerLocation from "./useMapViewerLocation";
 import { DEFAULT_MAP_ORIGIN } from "./mapVisitPlanning.mjs";
@@ -75,8 +78,13 @@ export default function useMapLocationsView() {
   const selected = sites.find((s) => s.id === selectedId) ?? null;
   const routeSite = selected?.id === routeSiteId ? selected : null;
   const viewerLocation = useMapViewerLocation();
-  const origin = viewerLocation.routePosition || locationsQuery.data?.origin || DEFAULT_MAP_ORIGIN;
-  const routeQuery = useQuery(mapCompanyRouteOptions(user?.id, routeSite, origin.live ? origin : null));
+  const origin =
+    viewerLocation.routePosition ||
+    locationsQuery.data?.origin ||
+    DEFAULT_MAP_ORIGIN;
+  const routeQuery = useQuery(
+    mapCompanyRouteOptions(user?.id, routeSite, origin.live ? origin : null),
+  );
   function showRoute(site) {
     setSelectedId(site.id);
     setRouteSiteId(site.id);
