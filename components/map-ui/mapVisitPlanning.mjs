@@ -1,6 +1,6 @@
 export const DEFAULT_MAP_ORIGIN = {
-  lat: DEFAULT_LATITUDE,
-  lng: DEFAULT_LONGITUDE,
+  lat: 13.9304557,
+  lng: 121.4312752,
   label: "MSEUF–Candelaria",
 };
 
