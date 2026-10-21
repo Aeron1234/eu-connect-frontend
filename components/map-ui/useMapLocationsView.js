@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import {
   mapLocationsOptions,
@@ -11,10 +11,11 @@ import { getInitials, formatPeriod } from "./mapSiteFormatting";
 import useMapViewerLocation from "./useMapViewerLocation";
 import { DEFAULT_MAP_ORIGIN } from "./mapVisitPlanning.mjs";
 
-const tabs = ["Map View", "Cities", "Companies"];
+const tabs = ["Map View", "Companies"];
 const emptyCompanies = [];
 export default function useMapLocationsView() {
   const { user } = useUser();
+  const queryClient = useQueryClient();
   const locationsQuery = useQuery({
     ...mapLocationsOptions(user?.id),
     enabled: Boolean(user?.id),
@@ -89,7 +90,9 @@ export default function useMapLocationsView() {
     setSelectedId(site.id);
     setRouteSiteId(site.id);
     setTab("Map View");
-    if (site.id === routeSite?.id) void routeQuery.refetch();
+    const options = mapCompanyRouteOptions(user?.id, site, origin.live ? origin : null);
+    return queryClient.fetchQuery(site.id === routeSite?.id ? { ...options, staleTime: 0 } : options)
+      .then(() => ({ success: true }), () => ({ success: false }));
   }
   const blockingError = locationsQuery.isError && !locationsQuery.data;
   return {

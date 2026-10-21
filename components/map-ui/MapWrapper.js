@@ -8,7 +8,6 @@ import MapLocationsLoading from "./MapLocationsLoading";
 import MapLocationFilters from "./MapLocationFilters";
 import CompanyMapView from "./CompanyMapView";
 import MapPlanningTools from "./MapPlanningTools";
-import CityVisitGroups from "./CityVisitGroups";
 import CompanySiteCard from "./CompanySiteCard";
 
 export default function MapWrapper() {
@@ -57,8 +56,6 @@ export default function MapWrapper() {
         {tab === "Map View" ? (
           <CompanyMapView sites={sites} selectedId={selectedId} setSelectedId={setSelectedId} selected={selected}
             origin={origin} viewerPosition={viewerLocation?.position} route={route} routeQuery={routeQuery} routeActive={routeActive} showRoute={showRoute} clearRoute={clearRoute} />
-        ) : tab === "Cities" ? (
-          <CityVisitGroups sites={sites} origin={origin} onShowRoute={showRoute} />
         ) : (
           <div className="space-y-4 sm:space-y-5">
             {sites.map((s) => <CompanySiteCard key={s.id} site={s} />)}

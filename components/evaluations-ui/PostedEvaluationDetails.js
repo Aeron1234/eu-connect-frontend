@@ -31,7 +31,7 @@ export default function PostedEvaluationDetails({ ev }) { return (
         <div className="rounded-lg bg-card border border-border p-4 ">
           <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-foreground">
             <Star className="w-4 h-4 text-primary-emphasis" />
-            Supervisor Comments
+            Evaluation Comments
           </div>
           <p className="text-sm text-foreground-soft italic leading-relaxed">
             &quot;{ev.comments}&quot;
@@ -42,7 +42,7 @@ export default function PostedEvaluationDetails({ ev }) { return (
         </div>
       )}
 
-      {ev.status === "Disputed" && ev?.review_notes && (
+      {ev?.review_notes && (
         <div className="rounded-lg bg-card border border-border p-4 ">
           <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-foreground">
             <MessageSquareQuote className="w-4 h-4 text-primary-emphasis" />

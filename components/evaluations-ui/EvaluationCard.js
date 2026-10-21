@@ -8,7 +8,7 @@ import { useUser } from "@/contexts/UserContext";
 function EvaluationCard({ evaluations = [], type = "default", onChanged }) {
   const { items, removeItem, restoreItem } = useEvaluationItems(evaluations);
   const { user } = useUser();
-  const visibleItems = user?.role === "student" ? items.filter(ev => ev.type !== "Performance Evaluation") : items;
+  const visibleItems = user?.role === "student" ? items.filter(ev => ev.type !== "Performance Evaluation" && !ev.deleted_at) : user?.role === "employer" ? items.filter(ev => !ev.deleted_at) : items;
 
   if (visibleItems.length === 0) return <EvaluationEmptyState type={type} />;
 

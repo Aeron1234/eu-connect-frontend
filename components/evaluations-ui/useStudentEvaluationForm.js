@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
 import { postStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
@@ -15,19 +16,20 @@ export default function useStudentEvaluationForm({ studentEvaluationCriterias, s
 
     return initialState;
   });
+  const queryClient = useQueryClient();
   const [remarks, setRemarks] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [confirming, setConfirming] = useState(false);
+
 
   const grades = [0, 1, 2, 3, 4, 5];
 
   async function handleEvaluation(e) {
     e.preventDefault();
-    setConfirming(true);
+    submitEvaluation();
   }
 
   function submitEvaluation() {
-    setConfirming(false);
+
 
     const formData = {
       student_id: searchedUserId,
@@ -63,6 +65,7 @@ export default function useStudentEvaluationForm({ studentEvaluationCriterias, s
       });
 
       setRemarks("");
+      void queryClient.invalidateQueries({ queryKey: ["evaluation-posting"] });
       onSubmitted?.();
     });
   }
@@ -74,8 +77,6 @@ export default function useStudentEvaluationForm({ studentEvaluationCriterias, s
     setRemarks,
     isPending,
     handleEvaluation,
-    confirming,
-    setConfirming,
-    submitEvaluation,
+
   };
 }

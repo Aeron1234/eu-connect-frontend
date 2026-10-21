@@ -1,4 +1,6 @@
 "use client";
+import EvaluationPostingGuard from "./EvaluationPostingGuard";
+
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -34,10 +36,12 @@ function EmployerEvaluations({ employerEvaluationCriterias, onSubmitted }) {
 
           <h3 className="text-base font-semibold">Submit New Evaluation</h3>
 
+          <EvaluationPostingGuard direction="supervisor">
           <EmployerEvaluationForm
             employerEvaluationCriterias={employerEvaluationCriterias}
             onSubmitted={onSubmitted}
           />
+          </EvaluationPostingGuard>
         </>
       )}
     </div>

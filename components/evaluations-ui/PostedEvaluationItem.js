@@ -8,24 +8,17 @@ import PostedEvaluationActions from "./PostedEvaluationActions";
 function PostedEvaluationItem({
   ev,
   defaultOpen,
-  type = "default",
-  onOptimisticRemove,
-  onOptimisticRestore,
   onChanged,
 }) {
   const {
     open,
     setOpen,
-    isPending,
-    userId,
+    canDelete,
     isStaff,
     canPrint,
     total,
     totalMax,
-    handleResponse,
-    handleRestore,
-    handleStaffReview,
-  } = usePostedEvaluation({ ev, defaultOpen, type, onOptimisticRemove, onOptimisticRestore, onChanged });
+  } = usePostedEvaluation({ ev, defaultOpen });
   return (
     <div className="border border-border rounded-xl bg-card overflow-hidden mb-3">
       <PostedEvaluationHeader
@@ -34,19 +27,15 @@ function PostedEvaluationItem({
         setOpen={setOpen}
         total={total}
         totalMax={totalMax}
-        userId={userId}
+        canDelete={canDelete}
+        isStaff={isStaff}
         onChanged={onChanged}
       />
       {open && <PostedEvaluationDetails ev={ev} />}
       <PostedEvaluationActions
         ev={ev}
-        type={type}
-        isPending={isPending}
         canPrint={canPrint}
         isStaff={isStaff}
-        handleResponse={handleResponse}
-        handleRestore={handleRestore}
-        handleStaffReview={handleStaffReview}
       />
     </div>
   );

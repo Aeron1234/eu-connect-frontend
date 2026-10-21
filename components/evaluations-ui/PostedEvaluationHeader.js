@@ -4,9 +4,9 @@ import { Calendar, ChevronDown, ChevronUp, Trash2, User } from "lucide-react";
 import Modal from "../ui/Modal";
 import StudentEvaluationDeleteForm from "./StudentEvaluationDeleteForm";
 import CircularScore from "./EvaluationCircularScore";
-import { evaluationStatusClass as statusClass } from "./evaluationStatusClass";
 
-export default function PostedEvaluationHeader({ ev, open, setOpen, total, totalMax, userId, onChanged }) { return (
+
+export default function PostedEvaluationHeader({ ev, open, setOpen, total, totalMax, canDelete, isStaff, onChanged }) { return (
     <div className="w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
       <button
         onClick={() => setOpen((o) => !o)}
@@ -19,11 +19,7 @@ export default function PostedEvaluationHeader({ ev, open, setOpen, total, total
             <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-emphasis">
               {ev.type}
             </span>
-            <span
-              className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusClass(ev.status)}`}
-            >
-              {ev.status}
-            </span>
+            {ev.deleted_at && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">Deleted</span>}
           </div>
           <h3 className="text-sm font-semibold text-foreground">
             {ev.period}
@@ -45,24 +41,25 @@ export default function PostedEvaluationHeader({ ev, open, setOpen, total, total
           <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
         )}
       </button>
-      {ev.status === "Pending" && userId === ev.evaluator_id && (
+      {canDelete && (
         <Modal variant="confirmation"
           trigger={
             <div
               className="shrink-0 p-2 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
-              aria-label="Delete evaluation"
-              title="Delete evaluation"
+              aria-label={isStaff ? "Permanently delete evaluation" : "Delete evaluation"}
+              title={isStaff ? "Permanently delete evaluation" : "Delete evaluation"}
             >
               <Trash2 className="w-4 h-4" />
             </div>
           }
           title={
-            <span className={`text-primary-emphasis`}>Delete Evaluation</span>
+            <span className="text-primary-emphasis">{isStaff ? "Permanently Delete Evaluation" : "Delete Evaluation"}</span>
           }
         >
           <StudentEvaluationDeleteForm
             evaluationId={ev.id}
-            status={ev.status === "Pending"}
+            evaluationType={ev.type}
+            permanent={isStaff}
             onSuccess={onChanged}
           />
         </Modal>

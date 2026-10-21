@@ -1,33 +1,23 @@
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+import { escapeHtml, journalStyles, proseParagraphs } from "./templates/printDocumentShared.js";
 
 export function weeklyNarrativesHtml(record) {
   const entries = record.narratives.map((item) => `
-    <article>
-      <h2>Week ${escapeHtml(item.week_number)} — ${escapeHtml(item.title)}</h2>
-      <p>${escapeHtml(item.narrative)}</p>
+    <article aria-label="Week ${escapeHtml(item.week_number)}">
+      <h1>Practicum Journal</h1>
+      <div class="details">
+        <p><strong>Name:</strong> ${escapeHtml(record.student_name || "Student")}</p>
+        <p><strong>Company:</strong> ${escapeHtml(record.company_name)}</p>
+        <p><strong>Week:</strong> ${escapeHtml(item.week_number)}${item.title ? ` &mdash; ${escapeHtml(item.title)}` : ""}</p>
+        <p><strong>Date:</strong> ___ to ___</p>
+      </div>
+      ${proseParagraphs(item.narrative)}
     </article>`).join("");
 
+  // No date range is stored for a narrative. Keep the paper form's blank
+  // field instead of presenting its submission date as attendance dates.
   return `<!doctype html><html lang="en"><head><meta charset="utf-8" />
-    <title>Weekly Narratives</title><style>
-      @page { size: A4 portrait; margin: 1in; }
-      html, body { margin: 0; padding: 0; }
-      body { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.5; color: #000; }
-      h1 { text-align: center; font-size: 14pt; margin: 0 0 18px; }
-      .details { margin: 0 0 24px; }
-      article { margin-bottom: 24px; }
-      h2 { font-size: 12pt; margin: 0 0 8px; break-after: avoid; }
-      article p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-    </style></head><body>
-      <h1>Weekly Narratives</h1>
-      <p class="details"><strong>Name:</strong> ${escapeHtml(record.student_name || "Student")}<br />
-      <strong>Company:</strong> ${escapeHtml(record.company_name)}</p>
-      ${entries}
-    </body></html>`;
+    <title>Practicum Journal</title><style>
+      ${journalStyles}
+      article + article { break-before: page; }
+    </style></head><body>${entries}</body></html>`;
 }

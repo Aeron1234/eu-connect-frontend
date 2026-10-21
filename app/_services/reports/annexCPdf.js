@@ -32,6 +32,6 @@ export async function generateAnnexCPdf(reportId, accessToken) {
       certifiedBy: data.certified_by || "",
     });
 
-    return renderPdf(html);
+    return renderPdf(html, { landscape: true, preferCSSPageSize: true });
   });
 }

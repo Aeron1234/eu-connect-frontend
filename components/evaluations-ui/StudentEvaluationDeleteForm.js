@@ -1,30 +1,38 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
 import { toastAndAction } from "../../lib/helpers";
 import DeleteForm from "../ui/DeleteForm";
-import { deletePendingStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
+import { deleteEvaluation } from "@/lib/server-actions/evaluations-actions";
 
-function StudentEvaluationDeleteForm({ evaluationId, status, onSuccess }) {
+function StudentEvaluationDeleteForm({ evaluationId, evaluationType, permanent = false, onSuccess }) {
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   function handleAction(formData) {
+    formData.set("evaluationType", evaluationType);
     startTransition(async () => {
       const result = await toastAndAction({
-        loadingLabel: "Deleting pending evaluation...",
+        loadingLabel: permanent ? "Permanently deleting evaluation..." : "Deleting evaluation...",
         successLabel: "Evaluation deleted.",
         errorLabel: "Failed to delete.",
-        action: deletePendingStudentEvaluation,
+        action: deleteEvaluation,
         args: [formData],
       });
-      if (result?.success) onSuccess?.();
+      if (result?.success) {
+        void queryClient.invalidateQueries({ queryKey: ["evaluation-posting"] });
+        onSuccess?.();
+      }
     });
   }
 
-  if (!status) return null;
+
 
   return (
     <DeleteForm
+      description={permanent ? "Permanently remove this deleted evaluation and its scores? This cannot be undone." : "Remove this evaluation from your history? Staff will retain a copy labeled Deleted. You can post a replacement afterward."}
+      submitLabel={permanent ? "Permanently delete" : "Delete"}
       handleAction={handleAction}
       id={evaluationId}
       isPending={isPending}

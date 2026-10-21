@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
 import { postEmployerEvaluation } from "@/lib/server-actions/evaluations-actions";
@@ -15,6 +16,7 @@ export default function useEmployerEvaluationForm({ employerEvaluationCriterias,
 
     return initialState;
   });
+  const queryClient = useQueryClient();
   const [remarks, setRemarks] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -45,6 +47,7 @@ export default function useEmployerEvaluationForm({ employerEvaluationCriterias,
         return;
       }
 
+      void queryClient.invalidateQueries({ queryKey: ["evaluation-posting"] });
       onSubmitted?.();
 
       setEvaluationGrades(() => {

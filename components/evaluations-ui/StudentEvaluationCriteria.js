@@ -1,4 +1,6 @@
 "use client";
+import EvaluationPostingGuard from "./EvaluationPostingGuard";
+
 
 import { useState } from "react";
 import StudentEvaluationForm from "./StudentEvaluationForm";
@@ -47,11 +49,13 @@ function StudentEvaluationCriteria({
 
           <h3 className="text-base font-semibold">Submit New Evaluation</h3>
 
+          <EvaluationPostingGuard direction="performance" studentId={searchedUserId}>
           <StudentEvaluationForm
             studentEvaluationCriterias={studentEvaluationCriterias}
             searchedUserId={searchedUserId}
             onSubmitted={onSubmitted}
           />
+          </EvaluationPostingGuard>
         </>
       )}
     </div>

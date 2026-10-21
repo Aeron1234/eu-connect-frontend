@@ -27,7 +27,7 @@ function fixture() {
   const data = { companies, availableRegions: [{ id: 4, name: 'CALABARZON' }, { id: 15, name: 'NCR' }] };
   const useView = load('useMapLocationsView.js', {
     react: { useMemo: fn => fn(), useState(initial) { const index = cursor++; if (!(index in states)) states[index] = initial; return [states[index], value => { states[index] = value; }]; } },
-    '@tanstack/react-query': { useQuery: options => options.route ? { refetch() {} } : { data, isError: false } },
+    '@tanstack/react-query': { useQuery: options => options.route ? { refetch() {} } : { data, isError: false }, useQueryClient: () => ({ fetchQuery: async () => ({}) }) },
     '@/contexts/UserContext': { useUser: () => ({ user: { id: 'admin' } }) },
     '@/lib/cache/map-locations-queries': { mapLocationsOptions: () => ({}), mapCompanyRouteOptions: () => ({ route: true }) },
     './useMapViewerLocation': () => ({ position: null, routePosition: null }),
@@ -56,10 +56,11 @@ test('region and search combine, All Locations resets only region, and clearing 
   assert.equal(view.regions.length, 2);
 });
 
-test('Map View, Cities, Companies and route selection retain the same search and region state', () => {
+test('combined map/cities, Companies and route selection retain the same search and region state', () => {
   const render = fixture(); let view = render();
   view.setRegionId(4); view.setQuery('computer');
-  for (const tab of ['Cities', 'Companies', 'Map View']) {
+  assert.deepEqual(Array.from(view.tabs), ['Map View', 'Companies']);
+  for (const tab of ['Companies', 'Map View']) {
     view.setTab(tab); view = render(); assert.equal(view.tab, tab); assert.equal(view.query, 'computer'); assert.equal(view.regionId, 4);
     assert.deepEqual(ids(view), ['a']);
     const groups = groupSitesByCity(view.sites); assert.equal(groups.length, 1); assert.equal(groups[0].studentCount, 1);

@@ -35,6 +35,6 @@ export async function generateAnnexDPdf(companyKey, academicYear, accessToken) {
       certifiedBy: "",
     });
 
-    return renderPdf(html);
+    return renderPdf(html, { landscape: true, preferCSSPageSize: true });
   });
 }

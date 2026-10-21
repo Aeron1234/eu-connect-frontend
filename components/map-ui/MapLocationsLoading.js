@@ -43,7 +43,7 @@ export default function MapLocationsLoading() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_300px]" aria-hidden="true">
+      <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_380px]" aria-hidden="true">
         <div className="overflow-hidden rounded-xl border border-border bg-card p-2 shadow-sm">
           <Skeleton className="h-[min(58dvh,420px)] min-h-[280px] w-full rounded-xl sm:h-[480px] lg:h-[540px]" />
           <div className="space-y-2 px-2 py-2">
@@ -51,13 +51,18 @@ export default function MapLocationsLoading() {
             <Skeleton className="h-3 w-48 max-w-full sm:hidden" />
           </div>
         </div>
-        <div className="hidden lg:block">
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-5 py-16 shadow-sm">
-            <Skeleton className="size-8 rounded-full" />
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:h-[600px]">
+          <div className="space-y-3 border-b border-border p-4">
             <Skeleton className="h-4 w-36" />
             <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-40" />
+            <Skeleton className="h-3 w-48 max-w-full" />
+            <Skeleton className="h-10 w-full rounded-lg" />
           </div>
+          {[0, 1, 2, 3].map((item) => <div key={item} className="space-y-2 border-b border-border p-4 last:border-0">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-40" />
+          </div>)}
         </div>
       </div>
     </div>

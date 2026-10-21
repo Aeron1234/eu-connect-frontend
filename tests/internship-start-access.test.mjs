@@ -38,6 +38,7 @@ function load(file, mocks = {}, globals = {}) {
 
 function evaluationForm(now = before) {
   return load("evaluations-ui/StudentEvaluationCriteria.js", {
+    "./EvaluationPostingGuard": ({ children }) => children,
     "./StudentEvaluationForm": () => React.createElement("button", null, "Submit scores"),
     "./EvaluationsCriteria": () => "Scoring guide",
     "@/components/ui/useInternshipStartAccess": (date, feature) => getInternshipStartAccess(date, feature, now),

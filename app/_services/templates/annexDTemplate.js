@@ -1,5 +1,5 @@
-import { formatGender } from "@/lib/formatGender";
-import { header, escapeHtml } from "./sippTemplateShared.js";
+import { formatGender } from "../../../lib/formatGender.js";
+import { header, escapeHtml, signatures } from "./sippTemplateShared.js";
 
 function formatDuration(start, end) {
   const opts = { month: "long", day: "numeric" };
@@ -23,16 +23,17 @@ export function annexDHtml(data) {
       (s, i) => `
       <tr>
         ${i === 0 ? `<td rowspan="${c.interns.length}" style="vertical-align: middle;">${escapeHtml(c.name)}</td>` : ""}
-        <td>${i + 1}. ${escapeHtml(s.name)}</td>
+        <td>${escapeHtml(s.name)}</td>
         <td>${escapeHtml(s.course)}</td>
         <td>${escapeHtml(formatGender(s.gender))}</td>
         <td>${escapeHtml(formatDuration(s.date_started, s.date_ended))}</td>
       </tr>`,
     )
-    .join("");
+    .join("") + Array.from({ length: Math.max(0, 7 - c.interns.length) }, () =>
+      '<tr class="empty"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>').join("");
 
   return `
-    <html><body>
+    <!doctype html><html lang="en"><head><meta charset="utf-8" /><title>SIPP Annex D</title></head><body>
       ${header(
         "D",
         [
@@ -46,13 +47,13 @@ export function annexDHtml(data) {
         <div><strong>HEI:</strong> ${escapeHtml(data.hei)}</div>
         <div><strong>ADDRESS:</strong> ${escapeHtml(data.address)}</div>
       </div>
-      <table>
+      <table class="report">
         <colgroup>
-          <col style="width:20%">
-          <col style="width:24%">
-          <col style="width:26%">
-          <col style="width:10%">
-          <col style="width:20%">
+          <col style="width:22.0961%">
+          <col style="width:21.6594%">
+          <col style="width:22.3581%">
+          <col style="width:13.8865%">
+          <col style="width:19.9999%">
         </colgroup>
         <thead>
           <tr>
@@ -60,21 +61,13 @@ export function annexDHtml(data) {
             <th>NAME OF STUDENT INTERNS</th>
             <th>PROGRAM</th>
             <th>GENDER</th>
-            <th>DATES OF DURATION OF THE INTERNSHIP</th>
+            <th>DATES OF DURATION<br />OF THE INTERNSHIP</th>
           </tr>
         </thead>
         <tbody>${internRows}</tbody>
       </table>
-      <div class="sign-block">
-        <div>
-          <strong>PREPARED BY:</strong><br/><br/><br/>
-          <div class="sign-line">${escapeHtml(data.preparedBy)}<br/><span style="font-size:10px">Name &amp; Signature</span></div>
-        </div>
-        <div>
-          <strong>CERTIFIED CORRECT:</strong><br/><br/><br/>
-          <div class="sign-line">${escapeHtml(data.certifiedBy)}<br/><span style="font-size:10px">Name &amp; Signature</span></div>
-        </div>
-      </div>
+      ${signatures(data.preparedBy, data.certifiedBy)}
+      </td></tr></tbody></table>
     </body></html>
   `;
 }

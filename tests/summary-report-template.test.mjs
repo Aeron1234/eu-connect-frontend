@@ -15,8 +15,11 @@ const report = {
 
 test("print template uses the required document format and escapes report text", () => {
   const html = summaryReportHtml(report);
-  assert.match(html, /@page \{ size: A4 portrait; margin: 1in; \}/);
+  assert.match(html, /@page \{ size: A4 portrait; margin: 1cm; \}/);
   assert.match(html, /font-size: 12pt; line-height: 1\.5/);
+  assert.match(html, /text-align: left; font-size: 13pt/);
+  assert.match(html, /text-indent: 1cm/);
+  assert.match(html, /Working in the Organization\/Company/);
   assert.match(html, /Jane &lt;Student&gt;/);
   assert.match(html, /Company &amp; Co\./);
   assert.doesNotMatch(html, /<script>/);

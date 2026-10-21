@@ -8,7 +8,7 @@ export default function MapLoading() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0"><PageTitleSkeleton /></div>
         <div className="flex w-full rounded-lg bg-secondary p-1 sm:w-fit" aria-hidden="true">
-          {["Map View", "Cities", "Companies"].map((tab) => (
+          {["Map View", "Companies"].map((tab) => (
             <div key={tab} className="min-w-0 flex-1 rounded-md px-3 py-2 sm:flex-none sm:px-4">
               <Skeleton className="h-5 w-16 max-w-full" />
             </div>

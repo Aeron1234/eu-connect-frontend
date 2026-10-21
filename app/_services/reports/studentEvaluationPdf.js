@@ -31,6 +31,6 @@ export async function generateStudentEvaluationPdf(evaluationId, accessToken) {
       remarks: data.other_remarks,
     });
 
-    return renderPdf(html);
+    return renderPdf(html, { landscape: false, preferCSSPageSize: true });
   });
 }
