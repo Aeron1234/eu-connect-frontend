@@ -20,9 +20,9 @@ the reference documents.
 
 Record values replace sample names in journal/summary and registrar reports.
 Evaluation date, recipient and signature blanks follow the paper form; the
-sample department head is not hardcoded. Narrative date ranges remain blank
-because the application stores a week number and submission time, not a daily
-attendance range. Submission dates must not be presented as attendance dates.
+sample department head is not hardcoded. Narrative coverage dates use the
+saved `date_from` and `date_to` date-only values. Legacy entries without a saved
+range keep blank date lines. Submission dates never substitute for coverage.
 
 Existing authorization, confidential evaluation access, download filenames,
 PDF runtime limits and the summary report's three-page limit are unchanged.

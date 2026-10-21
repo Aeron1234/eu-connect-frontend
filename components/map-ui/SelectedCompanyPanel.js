@@ -5,7 +5,7 @@ import ProgressBar from "../ui/ProgressBar";
 
 export default function SelectedCompanyPanel({ selected, routeControls = null, embedded = false }) {
   return (
-    <aside className={embedded ? "bg-card p-4 sm:p-5" : "rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm"}>
+    <aside className={embedded ? "bg-card p-3 sm:p-4 lg:p-5" : "rounded-xl border border-border bg-card p-4 sm:p-5 shadow-sm"}>
       {selected ? (
         <>
           <div className="flex items-center gap-3">

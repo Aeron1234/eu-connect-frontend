@@ -75,7 +75,7 @@ function NarrativesPage() {
                   <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
                     <li>Choose an internship record to view its weekly narratives. Finished records can be viewed and printed.</li>
                     <li>Once your ongoing internship reaches its start date in Philippine time, select <strong>New Narrative</strong> to open the entry form.</li>
-                    <li>Enter the <strong>week number</strong>, a short <strong>title</strong>, and your <strong>narrative</strong>. Describe your activities, what you learned, and any challenges or reflections. Then select <strong>Save</strong>.</li>
+                    <li>Enter the <strong>week number</strong>, a short <strong>title</strong>, the <strong>start and end dates</strong> covered, and your <strong>narrative</strong>. Describe your activities, what you learned, and any challenges or reflections. Then select <strong>Save</strong>. The date range also appears in your printed journal.</li>
                     <li>Find your saved entry in the list below. Entries show up to three lines. Select <strong>See more</strong> when an entry is truncated to read the full narrative.</li>
                     <li>Use the <strong>pencil</strong> on your entry to edit it, or the <strong>trash</strong> icon to delete it. Confirm the deletion when prompted.</li>
                     <li>Select <strong>Export PDF</strong> to download one PDF containing every narrative for the selected internship.</li>

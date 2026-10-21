@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
 import Modal from "../ui/Modal";
+import { formatNarrativeRange } from "@/lib/weekly-narrative-dates.mjs";
 
 export default function NarrativePreview({ narrative }) {
   const previewRef = useRef(null);
@@ -40,7 +40,7 @@ export default function NarrativePreview({ narrative }) {
       {isClipped && (
         <Modal
           title={narrative.title || "Untitled"}
-          description={`${format(new Date(narrative.created_at), "MMMM d, yyyy")} · Week ${narrative.week_number}`}
+          description={`${formatNarrativeRange(narrative.date_from, narrative.date_to) || "Date range not set"} · Week ${narrative.week_number}`}
           trigger={<span>See more &rarr;</span>}
           triggerStyles="mt-2 block w-fit text-left text-xs font-semibold text-primary-emphasis hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >

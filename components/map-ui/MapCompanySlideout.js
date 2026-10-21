@@ -20,11 +20,11 @@ export default function MapCompanySlideout({ open, companyId, onClose, returnFoc
       aria-hidden={!open}
       inert={!open}
       onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}
-      className={`absolute inset-y-0 left-0 z-10 hidden w-[calc(100%-3rem)] max-w-sm flex-col border-r border-border bg-card text-foreground transition-transform duration-250 ease-out motion-reduce:transition-none lg:flex ${open ? "translate-x-0 shadow-xl" : "pointer-events-none -translate-x-full"}`}
+      className={`absolute inset-y-0 left-0 z-10 flex w-[calc(100%-3.5rem)] max-w-[17rem] flex-col overflow-hidden border-r border-border bg-card text-foreground transition-transform duration-250 ease-out motion-reduce:transition-none lg:w-[calc(100%-3rem)] lg:max-w-sm ${open ? "translate-x-0 shadow-xl" : "pointer-events-none -translate-x-full"}`}
     >
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2 lg:gap-3 lg:px-4 lg:py-3">
         <h2 className="text-sm font-semibold">Company details</h2>
-        <button ref={closeRef} type="button" onClick={close} aria-label="Close company details" className="inline-flex size-9 items-center justify-center rounded-lg border border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+        <button ref={closeRef} type="button" onClick={close} aria-label="Close company details" className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
           <X className="size-4" />
         </button>
       </div>

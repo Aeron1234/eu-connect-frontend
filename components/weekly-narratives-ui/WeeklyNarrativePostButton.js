@@ -4,13 +4,14 @@ import Modal from "../ui/Modal";
 import WeeklyNarrativeForm from "./WeeklyNarrativeForm";
 import { toastAndAction } from "../../lib/helpers";
 import { createWeeklyNarrative } from "@/lib/server-actions/weekly-narratives-actions";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { weeklyNarrativesKeys } from "@/lib/cache/weekly-narratives-queries";
 import TitleButton from "../ui/TitleButton";
 
 function WeeklyNarrativePostButton() {
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
   const { user } = useUser();
@@ -25,6 +26,7 @@ function WeeklyNarrativePostButton() {
         args: [formData],
       });
       if (result?.success) {
+        setOpen(false);
         queryClient.setQueriesData({ queryKey: weeklyNarrativesKeys.all(user.id) }, (old) =>
           old?.pages?.length
             ? { pages: [old.pages[0]], pageParams: [1] }
@@ -36,7 +38,7 @@ function WeeklyNarrativePostButton() {
   }
 
   return (
-    <Modal variant="form"
+    <Modal variant="form" open={open} onOpenChange={(next) => { if (!isPending) setOpen(next); }}
       triggerStyles="w-full sm:w-auto"
       trigger={
         <TitleButton>

@@ -1,4 +1,5 @@
 import { escapeHtml, journalStyles, proseParagraphs } from "./templates/printDocumentShared.js";
+import { formatNarrativeRange } from "../../lib/weekly-narrative-dates.mjs";
 
 export function weeklyNarrativesHtml(record) {
   const entries = record.narratives.map((item) => `
@@ -8,13 +9,13 @@ export function weeklyNarrativesHtml(record) {
         <p><strong>Name:</strong> ${escapeHtml(record.student_name || "Student")}</p>
         <p><strong>Company:</strong> ${escapeHtml(record.company_name)}</p>
         <p><strong>Week:</strong> ${escapeHtml(item.week_number)}${item.title ? ` &mdash; ${escapeHtml(item.title)}` : ""}</p>
-        <p><strong>Date:</strong> ___ to ___</p>
+        <p><strong>Date:</strong> ${escapeHtml(formatNarrativeRange(item.date_from, item.date_to) || "___ to ___")}</p>
       </div>
       ${proseParagraphs(item.narrative)}
     </article>`).join("");
 
-  // No date range is stored for a narrative. Keep the paper form's blank
-  // field instead of presenting its submission date as attendance dates.
+  // Legacy entries without coverage dates keep the paper form's blank field;
+  // submission time must never stand in for the dates actually covered.
   return `<!doctype html><html lang="en"><head><meta charset="utf-8" />
     <title>Practicum Journal</title><style>
       ${journalStyles}

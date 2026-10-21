@@ -7,8 +7,9 @@ function WeeklyNarrativeItemSkeleton() {
 
       <article className="rounded-xl bg-card border border-border shadow-sm p-4 sm:p-5">
         <div className="min-w-0 space-y-1.5">
-          <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-3 w-56" />
+          <Skeleton className="h-4 w-48 max-w-full" />
+          <Skeleton className="h-3 w-64 max-w-full" />
+          <Skeleton className="h-3 w-40 max-w-full" />
         </div>
 
         <div className="space-y-1.5 mt-3">

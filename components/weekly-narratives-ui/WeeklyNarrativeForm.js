@@ -1,6 +1,7 @@
 "use client";
 
 import ModalForm from "@/components/ui/ModalForm";
+import { useState } from "react";
 
 function WeeklyNarrativeForm({
   handleAction,
@@ -8,6 +9,8 @@ function WeeklyNarrativeForm({
   data = null,
   type = "",
 }) {
+  const [dateFrom, setDateFrom] = useState(data?.date_from || "");
+  const [dateTo, setDateTo] = useState(data?.date_to || "");
   return (
     <ModalForm.Root action={handleAction}>
       {type === "edit" && (
@@ -42,6 +45,22 @@ function WeeklyNarrativeForm({
           </ModalForm.Field>
         </ModalForm.Row>
 
+        <ModalForm.Row>
+          <ModalForm.Field label="Start date">
+            <ModalForm.Input type="date" name="date_from" value={dateFrom}
+              onChange={(event) => {
+                const next = event.target.value;
+                setDateFrom(next);
+                if (!next || (dateTo && dateTo < next)) setDateTo("");
+              }} disabled={isPending} required />
+          </ModalForm.Field>
+          <ModalForm.Field label="End date">
+            <ModalForm.Input type="date" name="date_to" value={dateTo} min={dateFrom || undefined}
+              onChange={(event) => setDateTo(event.target.value)} disabled={isPending || !dateFrom} required />
+          </ModalForm.Field>
+        </ModalForm.Row>
+        <p className="text-xs leading-relaxed text-foreground-subtle">Choose the dates covered by this narrative, including both the start and end date. This range appears on the card and printed journal.</p>
+
         <ModalForm.Field label="Narrative">
           <ModalForm.Textarea
             name="narrative"
@@ -55,7 +74,7 @@ function WeeklyNarrativeForm({
         </ModalForm.Field>
       </ModalForm.Section>
 
-      <ModalForm.Actions isPending={isPending} disableCancelWhilePending submitLabel="Save" />
+      <ModalForm.Actions isPending={isPending} closeOnSubmit={false} disableCancelWhilePending submitLabel="Save" />
     </ModalForm.Root>
   );
 }

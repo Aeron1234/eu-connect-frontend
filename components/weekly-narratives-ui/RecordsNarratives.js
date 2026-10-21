@@ -1,6 +1,5 @@
-import { format } from "date-fns";
-import { Calendar } from "lucide-react";
 import NarrativePreview from "./NarrativePreview";
+import NarrativeDateRange from "./NarrativeDateRange";
 
 function RecordsNarrative({ narrative }) {
   return (
@@ -11,11 +10,7 @@ function RecordsNarrative({ narrative }) {
             <h2 className="text-sm sm:text-base font-semibold text-foreground">
               {narrative.title}
             </h2>
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-              <Calendar className="w-3.5 h-3.5" />{" "}
-              {format(new Date(narrative.created_at), "MMMM d, yyyy")} · Week{" "}
-              {narrative.week_number}
-            </p>
+            <NarrativeDateRange narrative={narrative} />
           </div>
         </div>
         <NarrativePreview narrative={narrative} />

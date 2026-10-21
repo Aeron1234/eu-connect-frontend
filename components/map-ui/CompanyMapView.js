@@ -3,8 +3,6 @@
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { PanelLeftOpen } from "lucide-react";
-import SelectedCompanyDrawer from "./SelectedCompanyDrawer";
-import useSmallMapViewport from "./useSmallMapViewport";
 import { Skeleton } from "@/components/ui/skeleton";
 import SelectedCompanyPanel from "./SelectedCompanyPanel";
 import MapDirections from "./MapDirections";
@@ -18,12 +16,10 @@ const Map = dynamic(() => import("./Map"), {
   ),
 });
 export default function CompanyMapView({ sites, selectedId, setSelectedId, selected, origin, viewerPosition = null, route = null, routeQuery, routeActive, showRoute, clearRoute }) {
-  const smallScreen = useSmallMapViewport();
   const [dismissedId, setDismissedId] = useState(null);
   const returnFocusRef = useRef(null);
   const routeRequestRef = useRef(0);
   const detailsOpen = Boolean(selected) && dismissedId !== selected.id;
-  const drawerOpen = smallScreen && detailsOpen;
   function selectCompany(id) {
     routeRequestRef.current++;
     setDismissedId(null);
@@ -57,10 +53,10 @@ export default function CompanyMapView({ sites, selectedId, setSelectedId, selec
           viewerPosition={viewerPosition}
           route={route}
         />
-        <MapCompanySlideout open={!smallScreen && detailsOpen} companyId={selected?.id} onClose={() => { if (selected) setDismissedId(selected.id); }} returnFocusRef={returnFocusRef}>
+        <MapCompanySlideout open={detailsOpen} companyId={selected?.id} onClose={() => { if (selected) setDismissedId(selected.id); }} returnFocusRef={returnFocusRef}>
           {selected && <SelectedCompanyPanel selected={selected} routeControls={routeControls} embedded />}
         </MapCompanySlideout>
-        {selected && <button ref={returnFocusRef} type="button" onClick={() => setDismissedId(null)} tabIndex={detailsOpen ? -1 : 0} className={`absolute left-3 top-24 z-20 inline-flex size-9 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-md hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${detailsOpen ? "pointer-events-none opacity-0" : ""}`} aria-label={`Open company details: ${selected.company}`} title="Open company details" aria-haspopup={smallScreen ? "dialog" : undefined} aria-expanded={detailsOpen}>
+        {selected && <button ref={returnFocusRef} type="button" onClick={() => setDismissedId(null)} tabIndex={detailsOpen ? -1 : 0} className={`absolute left-3 top-24 z-20 inline-flex size-9 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-md hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${detailsOpen ? "pointer-events-none opacity-0" : ""}`} aria-label={`Open company details: ${selected.company}`} title="Open company details" aria-expanded={detailsOpen}>
           <PanelLeftOpen className="size-4" />
         </button>}
         </div>
@@ -73,9 +69,6 @@ export default function CompanyMapView({ sites, selectedId, setSelectedId, selec
 
       </div>
       <CityVisitGroups sites={sites} origin={origin} onShowRoute={showCityRoute} />
-      <SelectedCompanyDrawer open={drawerOpen} onOpenChange={(open) => { if (!open && selected) setDismissedId(selected.id); }} returnFocusRef={returnFocusRef}>
-        {selected && <SelectedCompanyPanel selected={selected} routeControls={routeControls} embedded />}
-      </SelectedCompanyDrawer>
     </div>
   );
 }

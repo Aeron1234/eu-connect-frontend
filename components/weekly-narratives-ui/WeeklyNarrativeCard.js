@@ -1,13 +1,15 @@
 "use client";
 
-import { format } from "date-fns";
-import { Calendar, Edit2, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Edit2, Trash2 } from "lucide-react";
 import Modal from "../ui/Modal";
 import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
 import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
 import NarrativePreview from "./NarrativePreview";
+import NarrativeDateRange from "./NarrativeDateRange";
 
 function WeeklyNarrativeCard({ narrative, showActions = false, canEdit = showActions, onUpdate, onDelete }) {
+  const [editOpen, setEditOpen] = useState(false);
   return (
     <li className="relative pl-10 sm:pl-14">
       <div className="absolute left-0 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white shadow-md ring-4 ring-canvas sm:left-1 sm:h-8 sm:w-8 sm:text-xs">
@@ -15,17 +17,14 @@ function WeeklyNarrativeCard({ narrative, showActions = false, canEdit = showAct
       </div>
       <article className="relative rounded-xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
         <div className={showActions ? "min-w-0 pr-16 sm:pr-20" : "min-w-0"}>
-          <h2 className="text-sm font-semibold text-foreground sm:text-base">
+          <h2 className="break-words text-sm font-semibold text-foreground sm:text-base">
             {narrative.title}
           </h2>
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5" />{" "}
-            {format(new Date(narrative.created_at), "MMMM d, yyyy")} · Week {narrative.week_number}
-          </p>
         </div>
+        <NarrativeDateRange narrative={narrative} />
         {showActions && (
           <div className="absolute right-3 top-3 flex items-center gap-1 sm:right-4 sm:top-4">
-            {canEdit && <Modal variant="form"
+            {canEdit && <Modal variant="form" open={editOpen} onOpenChange={setEditOpen}
               title="Update your narrative"
               trigger={
                 <div aria-label="Edit" className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
@@ -33,7 +32,7 @@ function WeeklyNarrativeCard({ narrative, showActions = false, canEdit = showAct
                 </div>
               }
             >
-              <WeeklyNarrativeEditForm narrative={narrative} onSuccess={onUpdate} />
+              <WeeklyNarrativeEditForm narrative={narrative} onSuccess={(updated) => { onUpdate?.(updated); setEditOpen(false); }} />
             </Modal>}
             <Modal variant="confirmation"
               title={<span className="text-red-600">Delete Narrative</span>}

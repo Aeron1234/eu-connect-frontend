@@ -138,7 +138,7 @@ test("a locked narrative card preserves reading and deleting but has no edit mod
   const Card = load("weekly-narratives-ui/WeeklyNarrativeCard.js", {
     "../ui/Modal": props => { modals.push(props); return props.children; },
     "./WeeklyNarrativeEditForm": empty, "./WeeklyNarrativeDelete": empty,
-    "./NarrativePreview": () => "Full saved narrative",
+    "./NarrativePreview": () => "Full saved narrative", "./NarrativeDateRange": empty,
   });
   const html = renderToStaticMarkup(React.createElement(Card, { showActions: true, canEdit: false,
     narrative: { id: 1, title: "Saved", created_at: "2026-10-20", week_number: 1 } }));
