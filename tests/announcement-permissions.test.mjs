@@ -36,20 +36,25 @@ function renderForm(user, type = "create", data = null) {
   return renderToStaticMarkup(React.createElement(Form, { categories, type, data }));
 }
 
-test("department heads can choose Department but not General when creating or editing", () => {
+test("department heads have a fixed Department category for creation and editing", () => {
   const user = { role: "department_head", department_code: "CCS" };
   for (const type of ["create", "edit"]) {
     const html = renderForm(user, type, type === "edit" ? { id: "post", category_id: 9 } : null);
     assert(html.includes("Department")); assert(!html.includes("General"));
+    assert.match(html, /name="category_id"[^>]*value="9"/);
   }
   const legacy = renderForm(user, "edit", { id: "legacy", category_id: 7 });
-  assert.match(legacy, /name="category_id"[^>]*value=""/);
-  assert(!legacy.includes("General")); // The old category cannot be silently resubmitted.
+  assert.match(legacy, /name="category_id"[^>]*value="9"/);
+  assert(!legacy.includes("General")); // The old General category cannot be resubmitted.
 });
 
-test("registrar heads retain General posting and admins retain their General-only form", () => {
+test("registrar heads and admins both have a fixed General category", () => {
   const registrar = renderForm({ role: "department_head", department_code: "REG" });
-  assert(registrar.includes("General")); assert(registrar.includes("Department"));
+  assert(registrar.includes("General")); assert(!registrar.includes("Department"));
+  assert.match(registrar, /name="category_id"[^>]*value="7"/);
+  const legacyRegistrar = renderForm({ role: "department_head", department_code: "REG" }, "edit", { id: "old-post", category_id: 9 });
+  assert.match(legacyRegistrar, /name="category_id"[^>]*value="7"/);
+  assert(!legacyRegistrar.includes("Department"));
   const admin = renderForm({ role: "admin" });
   assert(admin.includes("General")); assert(!admin.includes("Department"));
   assert.match(admin, /name="category_id"[^>]*value="7"/);

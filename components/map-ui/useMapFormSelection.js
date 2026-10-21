@@ -17,7 +17,7 @@ export default function useMapFormSelection({
   const selectedPosition = toPosition([data?.lat, data?.lon]);
   const sharedPosition = liveLocation && toPosition([liveLocation.latitude, liveLocation.longitude]);
   const initialCenter = selectedPosition ||
-    toPosition(defaultCoords) || [13.931, 121.423];
+    toPosition(defaultCoords) || [13.9304557, 121.4312752];
   const selectionVersionRef = useRef(0);
 
   const handleLocationSelect = useCallback(

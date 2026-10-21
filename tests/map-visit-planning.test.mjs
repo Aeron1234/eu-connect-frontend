@@ -43,8 +43,9 @@ test('missing classification stays explicit and never guesses a city from addres
 });
 
 test('Google Maps backup uses saved company coordinates and custom campus origin without a routing API', () => {
-  const url = new URL(directionsUrl({ lat: 13.94, lng: 121.61 }, { lat: 13.931, lng: 121.423 }));
-  assert.equal(url.searchParams.get('origin'), '13.931,121.423');
+  const url = new URL(directionsUrl({ lat: 13.94, lng: 121.61 }));
+  assert.equal(url.searchParams.get('origin'), '13.9304557,121.4312752');
+  assert.equal(new URL(directionsUrl({ lat: 13.94, lng: 121.61 }, { lat: 14, lng: 121.5 })).searchParams.get('origin'), '14,121.5');
   assert.equal(url.searchParams.get('destination'), '13.94,121.61');
   assert.equal(url.searchParams.get('travelmode'), 'driving'); assert.equal(url.searchParams.get('api'), '1');
   assert.equal(directionsUrl(null), null); assert.equal(directionsUrl({ lat: NaN, lng: 121 }), null);

@@ -1,4 +1,4 @@
-export const DEFAULT_MAP_ORIGIN = { lat: 13.931, lng: 121.423, label: "MSEUF–Candelaria" };
+export const DEFAULT_MAP_ORIGIN = { lat: 13.9304557, lng: 121.4312752, label: "MSEUF–Candelaria" };
 
 export function directionsUrl(site, origin = DEFAULT_MAP_ORIGIN) {
   if (!site || !Number.isFinite(site.lat) || !Number.isFinite(site.lng)) return null;

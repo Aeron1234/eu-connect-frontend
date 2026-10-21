@@ -1,15 +1,5 @@
 "use client";
 import ModalForm, { controlClass } from "@/components/ui/ModalForm";
-import { modalFormSelectContentClass } from "@/components/ui/modalFormStyles";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState } from "react";
 import DeleteForm from "../ui/DeleteForm";
 import { useUser } from "@/contexts/UserContext";
@@ -67,28 +57,13 @@ function CreateUpdateAnnouncementForm({
 }) {
   const isEdit = type === "edit";
   const { user } = useUser();
-  const isAdmin = user?.role === "admin";
-  const canPostGeneral = isAdmin || (user?.role === "department_head" && user?.department_code === "REG");
-  const postableCategories = (categories || []).filter(category =>
-    (canPostGeneral || category.name !== "General") && (!isAdmin || category.name === "General")
-  );
+  const categoryName = user?.role === "admin" || (user?.role === "department_head" && user?.department_code === "REG")
+    ? "General" : user?.role === "department_head" ? "Department" : null;
+  // Match by name and use the real database ID, including when categories
+  // arrive after the form mounts. The category is fixed by the account role.
+  const selectedCategory = (categories || []).find((category) => category.name === categoryName)?.id ?? "";
   const [eventDate, setEventDate] = useState(isEdit ? data.event_date?.slice(0, 10) || "" : "");
   const [eventEndDate, setEventEndDate] = useState(isEdit ? data.event_end_date?.slice(0, 10) || "" : "");
-
-  // Admin can only ever post/edit General-category announcements — find
-  // that category's real id from whatever the backend returned, rather
-  // than hardcoding "1" and hoping the seed data never changes.
-  const generalCategory = postableCategories.find((c) => c.name === "General");
-
-  const [selectedCategory, setSelectedCategory] = useState(
-    isAdmin
-      ? generalCategory
-        ? `${generalCategory.id}`
-        : ""
-      : isEdit && postableCategories.some(category => String(category.id) === String(data.category_id))
-        ? `${data.category_id}`
-        : "",
-  );
 
   return (
     <ModalForm.Root action={handleAction}>
@@ -122,36 +97,9 @@ function CreateUpdateAnnouncementForm({
               disabled={isPending}
             />
 
-            {isAdmin ? (
-              // Admin has no department, so Department-category is never a
-              // valid choice — no picker at all, just a locked display.
-              <div className={`${controlClass} flex items-center text-foreground-subtle`}>
-                General
-              </div>
-            ) : (
-              <Select
-                className="w-full h-full "
-                onValueChange={setSelectedCategory}
-                disabled={isPending}
-                value={selectedCategory}
-              >
-                <SelectTrigger className={controlClass}>
-                  <SelectValue placeholder={"Select category"} />
-                </SelectTrigger>
-                <SelectContent position="popper" align="start" className={modalFormSelectContentClass}>
-                  <SelectGroup>
-                    <SelectLabel>Categories</SelectLabel>
-                    {postableCategories.length > 0
-                      ? postableCategories.map((category) => (
-                          <SelectItem key={category.id} value={`${category.id}`} className="whitespace-normal break-words py-2">
-                            {category.name}
-                          </SelectItem>
-                        ))
-                      : null}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            )}
+            <div className={`${controlClass} flex items-center text-foreground-subtle`}>
+              {categoryName || "Unavailable"}
+            </div>
           </label>
         </ModalForm.Row>
 

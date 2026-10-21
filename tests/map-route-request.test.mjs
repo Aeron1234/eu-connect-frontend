@@ -42,3 +42,44 @@ test('a stalled public fetch is aborted rather than leaving routing in a loading
   }, 0), error => error.status === 504);
   assert.equal(signal.aborted, true);
 });
+
+
+test('browser provider failures use the authenticated server fallback, with no fallback for authorization or disconnected routes', async () => {
+  const fallbackCalls = [];
+  const saved = { geometry: route.geometry, distance_meters: route.distance, duration_seconds: route.duration };
+  const fallback = async (...args) => { fallbackCalls.push(args); return saved; };
+  assert.equal(await requestMapRoute(async () => descriptor, 'record', null, 100,
+    async () => { throw Error('browser connection blocked'); }, 0, fallback), saved);
+  assert.equal(fallbackCalls.length, 1); assert.equal(fallbackCalls[0][0], 'record'); assert(fallbackCalls[0][2].signal);
+  await assert.rejects(requestMapRoute(async () => ({ error: 'Access denied.', status: 403 }), 'record', null, 100,
+    async () => response({ code: 'Ok', routes: [route] }), 0, fallback), error => error.status === 403);
+  await assert.rejects(requestMapRoute(async () => descriptor, 'record', null, 100,
+    async () => response({ code: 'NoRoute' }), 0, fallback), error => error.status === 422);
+  assert.equal(fallbackCalls.length, 1);
+});
+
+test('a timed-out browser route is aborted before the server fallback returns real geometry', async () => {
+  let signal;
+  const saved = { geometry: route.geometry, distance_meters: route.distance, duration_seconds: route.duration };
+  const result = await requestMapRoute(async () => descriptor, 'record', null, 10,
+    async (url, options) => { signal = options.signal; return new Promise(() => {}); }, 0,
+    async () => { assert.equal(signal.aborted, true); return saved; });
+  assert.equal(result, saved);
+});
+
+test('lookup and provider latency receive independent deadlines instead of sharing one expiring budget', async () => {
+  const delay = value => new Promise(resolve => setTimeout(() => resolve(value), 300));
+  const result = await requestMapRoute(() => delay(descriptor), 'record', null, 500,
+    () => delay(response({ code: 'Ok', routes: [route] })), 0);
+  assert.equal(result.distance_meters, route.distance);
+});
+
+
+test('a stalled server fallback also terminates with its own explicit timeout', async () => {
+  let signal;
+  await assert.rejects(requestMapRoute(async () => descriptor, 'record', null, 10,
+    async () => { throw Error('browser offline'); }, 0,
+    async (id, origin, options) => { signal = options.signal; return new Promise(() => {}); }),
+    error => error.status === 504 && /fallback routing request timed out/.test(error.message));
+  assert.equal(signal.aborted, true);
+});
