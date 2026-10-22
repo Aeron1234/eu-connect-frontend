@@ -1,40 +1,7 @@
 "use client";
-
-import { useState } from "react";
-import { downloadPdf } from "../ui/downloadPdf";
+import useExportPdf from "../ui/useExportPdf";
 
 export default function useSummaryReportPdf(internshipId) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState(null);
-  if (error) throw error;
-
-  async function printReport() {
-    setPending(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        `/api/reports/summary-report?internshipId=${encodeURIComponent(internshipId)}`,
-        { cache: "no-store" },
-      );
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const failure = new Error(
-          data.error || "Could not generate the report PDF.",
-        );
-        failure.status = response.status;
-        failure.code = data.code;
-        throw failure;
-      }
-      await downloadPdf(response, `summary-report-${internshipId}.pdf`);
-    } catch (failure) {
-      setError(
-        failure instanceof Error
-          ? failure
-          : new Error("Could not generate the report PDF."),
-      );
-    } finally {
-      setPending(false);
-    }
-  }
-  return { pending, printReport };
+  const { isPending, handleExport } = useExportPdf({ endpoint: "/api/reports/summary-report", params: { internshipId }, filename: `summary-report-${internshipId}.pdf` });
+  return { pending: isPending, printReport: handleExport };
 }

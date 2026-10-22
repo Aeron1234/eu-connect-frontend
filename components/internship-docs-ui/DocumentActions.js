@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Download } from "lucide-react";
+import { Check, Download, Eye } from "lucide-react";
 import { useState } from "react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import StorageDeleteFile from "./StorageDeleteFile";
@@ -19,6 +19,7 @@ export default function DocumentActions({
   className = "flex items-center gap-1",
 }) {
   const [confirmingApproval, setConfirmingApproval] = useState(false);
+  const isPdf = String(item.file_type || "").split(";")[0].trim().toLowerCase() === "application/pdf" || /\.pdf$/i.test(item.file_name || "");
   const showApprove = canActuallyApprove({ item, canApprove, userRole, currentUserId });
   const pendingReview = isStudentDocumentOwner({ item, userRole, currentUserId }) &&
     item.uploaded_by_role === "employer" && item.verification_status === "pending";
@@ -58,11 +59,12 @@ export default function DocumentActions({
       <button
         type="button"
         className="p-1.5 rounded-md text-muted-foreground hover:text-primary-emphasis hover:bg-primary/10 transition-colors"
-        aria-label="Download"
+        aria-label={isPdf ? "Preview PDF" : "Download"}
+        title={isPdf ? "Preview, print or download PDF" : "Download"}
         onClick={() => handleDownload(item.id, item)}
         disabled={isPending}
       >
-        <Download className="w-4 h-4" />
+        {isPdf ? <Eye className="w-4 h-4" /> : <Download className="w-4 h-4" />}
       </button>
       {showDelete && (
         <StorageDeleteFile

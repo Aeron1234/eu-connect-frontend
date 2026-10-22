@@ -78,7 +78,7 @@ function NarrativesPage() {
                     <li>Enter the <strong>week number</strong>, a short <strong>title</strong>, the <strong>start and end dates</strong> covered, and your <strong>narrative</strong>. Describe your activities, what you learned, and any challenges or reflections. Then select <strong>Save</strong>. The date range also appears in your printed journal.</li>
                     <li>Find your saved entry in the list below. Entries show up to three lines. Select <strong>See more</strong> when an entry is truncated to read the full narrative.</li>
                     <li>Use the <strong>pencil</strong> on your entry to edit it, or the <strong>trash</strong> icon to delete it. Confirm the deletion when prompted.</li>
-                    <li>Select <strong>Export PDF</strong> to download one PDF containing every narrative for the selected internship.</li>
+                    <li>Select <strong>Export PDF</strong> to preview every narrative for the selected internship, then choose <strong>Print</strong> or <strong>Download</strong>.</li>
                   </ol>
                   <p className="text-foreground-soft">You can add or change entries only while the internship is ongoing and its start date has arrived.</p>
                 </div>

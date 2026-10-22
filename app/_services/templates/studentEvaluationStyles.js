@@ -11,9 +11,12 @@ export const studentEvaluationStyles = `<style>
   table.doc > thead { display: table-header-group; }
   .header-cell { padding: 0 0 24pt; }
   .content-cell { padding: 0; vertical-align: top; }
-  .header { position: relative; min-height: 53.5pt; padding-left: 48pt; }
-  .header img.logo { position: absolute; left: -22.5pt; top: 0; width: 55.125pt; height: 53.504pt; }
-  .uni-name { font-size: 12pt; font-weight: normal; color: #710000; border-bottom: .75pt solid #cc0000; padding-bottom: 2pt; }
+  /* The seal must occupy normal layout space inside the repeating header,
+     rather than extending left of its printable table cell. */
+  .header { display: flex; align-items: center; gap: 12pt; width: 100%; break-inside: avoid; }
+  .header img.logo { display: block; flex: 0 0 56pt; width: 56pt; height: 56pt; object-fit: contain; }
+  .header-text { flex: 1; min-width: 0; }
+  .uni-name { font-size: 12pt; line-height: 1.15; font-weight: normal; color: #710000; border-bottom: .75pt solid #cc0000; padding-bottom: 2pt; overflow-wrap: break-word; }
   .dept-name { font-size: 11pt; text-align: right; margin-top: 16pt; }
   .cover-row { break-after: page; }
   .date-block { width: 2.2in; margin: 12pt 0 0 auto; text-align: center; }

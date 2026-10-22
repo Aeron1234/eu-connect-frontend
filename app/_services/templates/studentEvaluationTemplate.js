@@ -1,4 +1,4 @@
-import { evaluationSeal } from "./printTemplateAssets.js";
+import { LOGO_BASE64 } from "../pdfAssets.js";
 import { escapeHtml } from "./printDocumentShared.js";
 import { studentEvaluationStyles } from "./studentEvaluationStyles.js";
 
@@ -48,8 +48,10 @@ export function studentEvaluationHtml({
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8" /><title>Student Evaluation</title>${studentEvaluationStyles}</head><body>
     <table class="doc"><thead><tr><td class="header-cell"><div class="header">
-      <img class="logo" src="${evaluationSeal}" alt="School seal" />
-      <p class="uni-name">${escapeHtml(hei)}</p><p class="dept-name">${escapeHtml(departmentName)}</p>
+      <img class="logo" src="${LOGO_BASE64}" alt="School seal" />
+      <div class="header-text">
+        <p class="uni-name">${escapeHtml(hei)}</p><p class="dept-name">${escapeHtml(departmentName)}</p>
+      </div>
     </div></td></tr></thead><tbody>${contentRows}</tbody></table>
   </body></html>`;
 }

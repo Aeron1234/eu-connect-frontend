@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import vm from "node:vm";
+import { createPdfPreviewController } from "../components/ui/pdfPreviewController.mjs";
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("next/dist/compiled/babel/core");
@@ -112,51 +113,40 @@ test("PDF endpoints still reject missing parameters and authentication before ge
 });
 
 function exporter(kind, response) {
-  const states = [], downloads = [], requests = [];
-  let index = 0;
-  const file = kind === "generic" ? "components/ui/useExportPdf.js"
-    : kind === "summary" ? "components/summary-reports-ui/useSummaryReportPdf.js"
-      : "components/weekly-narratives-ui/WeeklyNarrativesPrintButton.js";
-  const result = load(file, {
-    react: { useState(initial) {
-      const slot = index++;
-      if (!(slot in states)) states[slot] = initial;
-      return [states[slot], (value) => { states[slot] = value; }];
-    } },
-    "./downloadPdf": { downloadPdf: async (...args) => downloads.push(args) },
-    "../ui/downloadPdf": { downloadPdf: async (...args) => downloads.push(args) },
-  }, { fetch: async (...args) => { requests.push(args); if (response instanceof Error) throw response; return response; } });
-  function render() {
-    index = 0;
-    if (kind === "generic") return result.default({ endpoint: "/api/reports/annex-c", params: { reportId: "report 1", ignored: null } });
-    if (kind === "summary") return result.default(internshipId);
-    return result.default({ internshipId });
-  }
-  return { states, downloads, requests, render, async run() {
-    const output = render();
-    await (kind === "generic" ? output.handleExport() : kind === "summary" ? output.printReport() : output.props.children.props.onClick());
-  } };
+  const states = [], previews = [], requests = [], refs = [];
+  let index = 0, refIndex = 0;
+  const controller = createPdfPreviewController({ createUrl: () => "blob:preview", revokeUrl() {} });
+  const Hook = load("components/ui/useExportPdf.js", {
+    react: { useState(initial) { const slot = index++; if (!(slot in states)) states[slot] = initial; return [states[slot], value => { states[slot] = value; }]; }, useRef(initial) { return refs[refIndex++] ||= { current: initial }; } },
+    "./PdfPreviewProvider": { usePdfPreview: () => ({ previewPdf: (request) => { previews.push(request); return controller.open(request); } }) },
+  }, { fetch: async (...args) => { requests.push(args); if (response instanceof Error) throw response; return response; } }).default;
+  const file = kind === "summary" ? "components/summary-reports-ui/useSummaryReportPdf.js" : "components/weekly-narratives-ui/WeeklyNarrativesPrintButton.js";
+  const Wrapper = kind === "generic" ? Hook : load(file, { "../ui/useExportPdf": Hook }).default;
+  function render() { index = 0; refIndex = 0; return kind === "generic" ? Wrapper({ endpoint: "/api/reports/annex-c", params: { reportId: "report 1", ignored: null } }) : kind === "summary" ? Wrapper(internshipId) : Wrapper({ internshipId }); }
+  return { states, previews, requests, controller, render, async run() { const output = render(); await (kind === "generic" ? output.handleExport() : kind === "summary" ? output.printReport() : output.props.children.props.onClick()); } };
 }
 
-test("every PDF export caller downloads the successful response without opening a tab", async () => {
+test("every PDF export caller opens a preview once without starting a download or opening a tab", async () => {
   for (const kind of ["generic", "summary", "narratives"]) {
-    const response = new Response("%PDF", { headers: { "Content-Disposition": 'attachment; filename="report.pdf"' } });
+    const response = new Response("%PDF-demo", { headers: { "Content-Disposition": 'attachment; filename="report.pdf"' } });
     const h = exporter(kind, response); await h.run();
-    assert.equal(h.downloads.length, 1); assert.equal(h.downloads[0][0], response);
-    assert.equal(h.states[0], false); assert.equal(h.states[1], null);
+    assert.equal(h.previews.length, 1); assert.equal(h.requests.length, 1); assert.equal(h.states[0], false);
+    const state = h.controller.getSnapshot(); assert.equal(state.status, "ready"); assert.equal(state.document.filename, "report.pdf");
+    assert.equal(await state.document.blob.text(), "%PDF-demo");
     assert.ok(h.requests[0][0].includes(kind === "generic" ? "reportId=report+1" : internshipId));
+    h.controller.close();
   }
 });
 
-test("failed exports preserve status and busy/timeout codes for ErrorUI and never start a download", async () => {
+test("failed exports preserve status and busy/timeout codes inside the preview modal", async () => {
   for (const kind of ["generic", "summary", "narratives"]) {
     for (const [status, code] of [[403, "FORBIDDEN"], [503, "PDF_BUSY"], [504, "PDF_TIMEOUT"]]) {
-      const h = exporter(kind, Response.json({ error: "Please try again.", code }, { status }));
-      await h.run(); assert.equal(h.downloads.length, 0); assert.equal(h.states[0], false);
-      assert.equal(h.states[1].status, status); assert.equal(h.states[1].code, code);
-      assert.throws(h.render, (error) => error === h.states[1]);
+      const h = exporter(kind, Response.json({ error: "Please try again.", code }, { status })); await h.run();
+      const state = h.controller.getSnapshot(); assert.equal(state.open, true); assert.equal(state.status, "error");
+      assert.equal(state.document, null); assert.equal(state.error.status, status); assert.equal(state.error.code, code);
+      assert.equal(h.states[0], false); assert.doesNotThrow(h.render); h.controller.close();
     }
     const h = exporter(kind, new Error("fetch failed")); await h.run();
-    assert.equal(h.downloads.length, 0); assert.equal(h.states[0], false); assert.throws(h.render);
+    assert.equal(h.controller.getSnapshot().status, "error"); assert.equal(h.states[0], false); h.controller.close();
   }
 });

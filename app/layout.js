@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import SmoothScroll from "@/components/ui/SmoothScroll";
 import QueryProvider from "@/lib/cache/QueryProvider";
+import { PdfPreviewProvider } from "@/components/ui/PdfPreviewProvider";
 
 const DmSans = DM_Sans({
   subsets: ["latin"],
@@ -32,7 +33,7 @@ export default function RootLayout({ children }) {
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SmoothScroll />
-            <SidebarProvider>{children}</SidebarProvider>
+            <SidebarProvider><PdfPreviewProvider>{children}</PdfPreviewProvider></SidebarProvider>
             <Toaster position="top-center" className="shadow-lg" />
           </ThemeProvider>
         </QueryProvider>

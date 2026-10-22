@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import vm from "node:vm";
+import { createPdfPreviewController } from "../components/ui/pdfPreviewController.mjs";
 import { createToastAndAction } from "../lib/toast-and-action.mjs";
 
 const require = createRequire(import.meta.url);
@@ -17,7 +18,7 @@ function load(file, mocks, globals = {}) {
   });
   const compiledModule = { exports: {} };
   vm.runInNewContext(code, {
-    module: compiledModule, exports: compiledModule.exports, FormData,
+    module: compiledModule, exports: compiledModule.exports, FormData, Headers, Response,
     require(id) { return Object.hasOwn(mocks, id) ? mocks[id] : require(id); }, ...globals,
   }, { filename: url.pathname });
   return compiledModule.exports.default;
@@ -25,39 +26,45 @@ function load(file, mocks, globals = {}) {
 
 function harness({ userRole = "student", internshipId = "current-record", actionResult,
   fetchResponse, fetchError, downloadWait, useDefault = false, isDownloading = false } = {}) {
-  const tasks = [], actions = [], requests = [], downloads = [], tabs = [], events = [], approved = [], changes = [];
+  const tasks = [], actions = [], requests = [], previews = [], tabs = [], events = [], approved = [], changes = [];
   const getFile = async (payload) => {
     actions.push(payload);
     return actionResult || { success: true, url: "https://storage.example.test/signed-file", fileName: "My Certificate", message: "Old opening message" };
   };
+  const controller = createPdfPreviewController({ createUrl: () => "blob:storage-preview", revokeUrl() {} });
+  controller.subscribe(() => { const state = controller.getSnapshot(); events.push([state.status, state.status === "ready" ? "PDF preview ready." : state.error?.message || "Preparing PDF preview..."]); });
   const hook = load("useDocumentActions.js", {
     react: { useTransition: () => [isDownloading, (callback) => tasks.push(callback())] },
     "@/lib/helpers": { toastAndAction: createToastAndAction({
       loading: (message) => { events.push(["loading", message]); return 1; },
       success: (message) => events.push(["success", message]), error: (message) => events.push(["error", message]),
     }) },
-    "@/components/ui/downloadPdf": { downloadPdf: async (...args) => { downloads.push(args); if (downloadWait) await downloadWait; } },
+    "@/components/ui/PdfPreviewProvider": { usePdfPreview: () => ({ previewPdf: async request => {
+      const result = await controller.open(request);
+      if (result) { const file = controller.getSnapshot().document; previews.push([file.blob, file.filename]); }
+      return result;
+    } }) },
     "@/lib/server-actions/internship-docs-actions": {
       downloadInternshipRecordDocuments: getFile,
       approveInternshipDocument: async (payload) => { approved.push(payload); return { success: true }; },
     },
   }, {
     window: { open: (...args) => tabs.push(args) },
-    fetch: async (...args) => { requests.push(args); if (fetchError) throw fetchError; return fetchResponse || new Response("%PDF-test"); },
+    fetch: async (...args) => { requests.push(args); if (fetchError) throw fetchError; if (downloadWait) await downloadWait; return fetchResponse || new Response("%PDF-test"); },
   });
   const form = hook({ internshipId, userRole, downloadAction: useDefault ? null : getFile, onChanged: (value) => changes.push(value) });
-  return { form, hook, getFile, actions, requests, downloads, tabs, events, approved, changes, async settle() { await Promise.all(tasks.splice(0)); } };
+  return { form, hook, getFile, actions, requests, previews, tabs, events, approved, changes, async settle() { await Promise.all(tasks.splice(0)); } };
 }
 
-test("current and past student PDFs download directly using the authorized file URL", async () => {
+test("current and past student PDFs open a preview using the authorized file URL", async () => {
   for (const internshipId of ["current-record", "past-record"]) {
     const h = harness({ internshipId }); h.form.handleDownload(pdf.id, pdf); await h.settle();
     assert.equal(h.actions[0].fileId, pdf.id); assert.equal(h.actions[0].internshipId, internshipId);
     assert.equal(h.requests.length, 1); assert.equal(h.requests[0][0], "https://storage.example.test/signed-file");
     assert.equal(h.requests[0][1].credentials, "omit"); assert.equal(h.requests[0][1].cache, "no-store");
-    assert.equal(h.downloads.length, 1); assert.equal(h.downloads[0][1], "My Certificate.pdf");
-    assert.equal(h.tabs.length, 0); assert.deepEqual(h.events.map(([type]) => type), ["loading", "success"]);
-    assert.equal(h.events[1][1], "PDF downloaded.");
+    assert.equal(h.previews.length, 1); assert.equal(h.previews[0][1], "My Certificate.pdf");
+    assert.equal(h.tabs.length, 0); assert.deepEqual(h.events.map(([type]) => type), ["loading", "ready"]);
+    assert.equal(h.events[1][1], "PDF preview ready.");
   }
 });
 
@@ -65,17 +72,17 @@ test("PDF detection accepts MIME types and filename extensions, with a named PDF
   for (const file of [pdf, { ...pdf, file_type: "APPLICATION/PDF; charset=binary" }, { ...pdf, file_type: "", file_name: "COC.PDF" }]) {
     const h = harness({ actionResult: { success: true, url: "https://storage.example.test/file" } });
     h.form.handleDownload(file.id, file); await h.settle();
-    assert.equal(h.downloads[0][1], file.file_name === "COC.PDF" ? "COC.PDF" : "Certificate.pdf");
+    assert.equal(h.previews[0][1], file.file_name === "COC.PDF" ? "COC.PDF" : "Certificate.pdf");
     assert.equal(h.tabs.length, 0);
   }
 });
 
-test("internship-record PDF downloads use the authorized record ID for every document viewer", async () => {
+test("internship-record PDF previews use the authorized record ID for every document viewer", async () => {
   for (const userRole of ["admin", "department_head", ""]) {
     const h = harness({ userRole, useDefault: true, internshipId: "viewed-record" });
     h.form.handleDownload(pdf.id, pdf); await h.settle();
     assert.equal(h.actions[0].fileId, pdf.id); assert.equal(h.actions[0].internshipId, "viewed-record");
-    assert.equal(h.requests.length, 1); assert.equal(h.downloads.length, 1); assert.equal(h.tabs.length, 0);
+    assert.equal(h.requests.length, 1); assert.equal(h.previews.length, 1); assert.equal(h.tabs.length, 0);
   }
 });
 
@@ -83,7 +90,7 @@ test("non-PDF documents retain their existing behavior for all viewers", async (
   const file = { ...pdf, file_type: "text/plain" };
   for (const userRole of ["admin", "department_head", "", "student"]) {
     const h = harness({ userRole, useDefault: true }); h.form.handleDownload(file.id, file); await h.settle();
-    assert.equal(h.requests.length, 0); assert.equal(h.downloads.length, 0); assert.equal(h.tabs.length, 1);
+    assert.equal(h.requests.length, 0); assert.equal(h.previews.length, 0); assert.equal(h.tabs.length, 1);
     assert.equal(h.tabs[0][0], "https://storage.example.test/signed-file");
   }
 });
@@ -91,11 +98,11 @@ test("non-PDF documents retain their existing behavior for all viewers", async (
 test("denied authorization never fetches a storage file or reports a successful download", async () => {
   const h = harness({ actionResult: { success: false, error: "You don't have access to this file." } });
   h.form.handleDownload(pdf.id, pdf); await h.settle();
-  assert.equal(h.requests.length, 0); assert.equal(h.downloads.length, 0); assert.equal(h.tabs.length, 0);
+  assert.equal(h.requests.length, 0); assert.equal(h.previews.length, 0); assert.equal(h.tabs.length, 0);
   assert.deepEqual(h.events.map(([type]) => type), ["loading", "error"]);
 });
 
-test("expired URLs and network failures produce an error toast without a false success or new tab", async () => {
+test("expired URLs and network failures show a preview error without a false success or new tab", async () => {
   for (const options of [
     { fetchResponse: new Response("Expired", { status: 403 }) },
     { fetchResponse: new Response("Missing", { status: 404 }) },
@@ -103,19 +110,19 @@ test("expired URLs and network failures produce an error toast without a false s
     { actionResult: { success: true } },
   ]) {
     const h = harness(options); h.form.handleDownload(pdf.id, pdf); await h.settle();
-    assert.equal(h.downloads.length, 0); assert.equal(h.tabs.length, 0);
+    assert.equal(h.previews.length, 0); assert.equal(h.tabs.length, 0);
     assert.deepEqual(h.events.map(([type]) => type), ["loading", "error"]);
   }
 });
 
-test("the loading toast is replaced with success only after the PDF download is ready", async () => {
+test("the preview stays loading until the PDF response is ready", async () => {
   let finish, started;
   const downloading = new Promise((resolve) => { finish = resolve; });
   const h = harness({ downloadWait: downloading });
   h.form.handleDownload(pdf.id, pdf);
-  for (let i = 0; i < 10; i += 1) { await Promise.resolve(); if (h.downloads.length) { started = true; break; } }
+  for (let i = 0; i < 10; i += 1) { await Promise.resolve(); if (h.requests.length) { started = true; break; } }
   assert.equal(started, true); assert.deepEqual(h.events.map(([type]) => type), ["loading"]);
-  finish(); await h.settle(); assert.deepEqual(h.events.map(([type]) => type), ["loading", "success"]);
+  finish(); await h.settle(); assert.deepEqual(h.events.map(([type]) => type), ["loading", "ready"]);
 });
 
 test("document approval still accepts the file and refreshes the original callbacks", async () => {
@@ -123,7 +130,7 @@ test("document approval still accepts the file and refreshes the original callba
   const h = harness(); h.form.handleApprove(pdf.id, () => { accepted = true; }); await h.settle();
   assert.equal(h.approved[0].get("fileId"), String(pdf.id)); assert.equal(accepted, true);
   assert.equal(h.changes[0].type, "approved"); assert.equal(h.changes[0].fileId, pdf.id);
-  assert.equal(h.requests.length, 0); assert.equal(h.downloads.length, 0);
+  assert.equal(h.requests.length, 0); assert.equal(h.previews.length, 0);
 });
 
 test("the shared download button forwards file metadata and grid/list views retain their download action", () => {
@@ -134,7 +141,7 @@ test("the shared download button forwards file metadata and grid/list views reta
     "./documentPermissions": { canActuallyApprove: () => false, canActuallyDelete: () => false, isStudentDocumentOwner: () => true },
   });
   const tree = Actions({ item: pdf, handleDownload: (...args) => calls.push(args) });
-  const button = tree.props.children.find((element) => element?.props?.["aria-label"] === "Download");
+  const button = tree.props.children.find((element) => element?.props?.["aria-label"] === "Preview PDF");
   button.props.onClick(); assert.equal(calls[0][0], pdf.id); assert.equal(calls[0][1], pdf);
 
   for (const view of ["grid", "list"]) {
@@ -160,15 +167,15 @@ function profileHarness(options) {
   return { ...h, profile: hook({ searchedUserId: "viewed-student", uploadedFiles: [pdf] }) };
 }
 
-test("profile certificate PDFs download through the shared handler with the viewed student ID", async () => {
+test("profile certificate PDFs preview through the shared handler with the viewed student ID", async () => {
   for (const isDownloading of [false, true]) {
     const h = profileHarness({ isDownloading });
     assert.equal(h.profile.isUploading, isDownloading);
     h.profile.handleDownload(pdf.id, pdf); await h.settle();
     assert.equal(h.actions[0].searchedUserId, "viewed-student"); assert.equal(h.actions[0].fileId, pdf.id);
     assert.equal(h.actions[0].internshipId, undefined);
-    assert.equal(h.downloads.length, 1); assert.equal(h.tabs.length, 0);
-    assert.deepEqual(h.events.map(([type]) => type), ["loading", "success"]);
+    assert.equal(h.previews.length, 1); assert.equal(h.tabs.length, 0);
+    assert.deepEqual(h.events.map(([type]) => type), ["loading", "ready"]);
   }
 });
 
@@ -179,7 +186,7 @@ test("profile certificate authorization and storage failures never open a tab or
     { fetchError: new Error("Network unavailable") },
   ]) {
     const h = profileHarness(options); h.profile.handleDownload(pdf.id, pdf); await h.settle();
-    assert.equal(h.downloads.length, 0); assert.equal(h.tabs.length, 0);
+    assert.equal(h.previews.length, 0); assert.equal(h.tabs.length, 0);
     assert.deepEqual(h.events.map(([type]) => type), ["loading", "error"]);
   }
 });
@@ -192,7 +199,7 @@ test("the profile certificate list forwards PDF metadata to its download handler
   function findDownload(element) {
     if (Array.isArray(element)) return element.map(findDownload).find(Boolean);
     if (!element?.props) return null;
-    if (element.props["aria-label"] === "Download") return element;
+    if (element.props["aria-label"] === "Preview PDF") return element;
     return findDownload(element.props.children);
   }
   findDownload(tree).props.onClick();

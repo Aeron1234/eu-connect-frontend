@@ -1,33 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { FileDown } from "lucide-react";
-import { downloadPdf } from "../ui/downloadPdf";
+import useExportPdf from "../ui/useExportPdf";
 
 export default function WeeklyNarrativesPrintButton({ internshipId, className = "" }) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState(null);
-  if (error) throw error;
-
-  async function printNarratives() {
-    setPending(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/reports/weekly-narratives?internshipId=${encodeURIComponent(internshipId)}`, { cache: "no-store" });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const failure = new Error(data.error || "Could not generate the narratives PDF.");
-        failure.status = response.status;
-        failure.code = data.code;
-        throw failure;
-      }
-      await downloadPdf(response, `weekly-narratives-${internshipId}.pdf`);
-    } catch (failure) {
-      setError(failure instanceof Error ? failure : new Error("Could not generate the narratives PDF."));
-    } finally {
-      setPending(false);
-    }
-  }
+  const { isPending: pending, handleExport: printNarratives } = useExportPdf({ endpoint: "/api/reports/weekly-narratives", params: { internshipId }, filename: `weekly-narratives-${internshipId}.pdf` });
 
   return <div className={className}>
     <button type="button" onClick={printNarratives} disabled={pending} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60 sm:w-auto">

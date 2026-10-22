@@ -15,8 +15,9 @@ paragraph properties, run sizes, table grids, header drawings and colors.
 Chromium does not silently substitute a different serif font. The font files'
 embedding flags permit editable document embedding. No external font service,
 runtime Windows font dependency, environment variable or database change is
-needed. `printTemplateAssets.js` contains the two school seals extracted from
-the reference documents.
+needed. Evaluation and Annex C/D letterheads all use the existing `LOGO_BASE64`
+from `pdfAssets.js`. The Word-extracted seals in `printTemplateAssets.js` are
+unused reference assets; their baked-in backgrounds are not printed.
 
 Record values replace sample names in journal/summary and registrar reports.
 Evaluation date, recipient and signature blanks follow the paper form; the

@@ -1,4 +1,4 @@
-import { registrarSeal } from "./printTemplateAssets.js";
+import { LOGO_BASE64 } from "../pdfAssets.js";
 import { printFontCss, escapeHtml } from "./printDocumentShared.js";
 
 export { escapeHtml };
@@ -14,11 +14,15 @@ const baseStyles = `<style>
   table.document { width: 100%; border-collapse: collapse; table-layout: fixed; }
   table.document > thead { display: table-header-group; }
   table.document > thead > tr > td, table.document > tbody > tr > td { padding: 0; border: 0; vertical-align: top; }
-  .header { position: relative; text-align: center; height: 58pt; padding-top: 0; }
-  .header img { position: absolute; left: 2in; top: -7pt; width: 55.125pt; height: 55.924pt; }
+  /* Keep the entire seal in normal flow so repeated print headers reserve
+     its full height. Negative offsets can clip images at page boundaries. */
+  .header { padding: 0 0 12pt; break-inside: avoid; }
+  .letterhead { display: flex; align-items: center; gap: 10pt; width: fit-content; max-width: 100%; margin: 0 auto; }
+  .header img { display: block; flex: 0 0 56pt; width: 56pt; height: 56pt; object-fit: contain; }
+  .header-text { min-width: 0; text-align: center; }
   .org-name { color: #710000; font-weight: bold; font-size: 13pt; }
   .org-sub { color: #710000; font-size: 12pt; line-height: 1; }
-  .hr { border-top: 1.5pt solid #710000; width: 6.51in; margin: 12pt auto 0; }
+  .hr { border-top: 1.5pt solid #710000; width: 100%; margin: 8pt 0 0; }
   .annex-tag { text-align: left; font-size: 11pt; line-height: 1.15; }
   .title { text-align: center; font-weight: bold; font-size: 12pt; line-height: 1.15; }
   .meta { margin: 12.65pt 0; font-size: 12pt; line-height: 1.15; }
@@ -37,10 +41,13 @@ const baseStyles = `<style>
 export function header(annexLabel, titleLines, ay) {
   return `${baseStyles}
     <table class="document"><thead><tr><td>
-      <div class="header"><img src="${registrarSeal}" alt="School seal" />
-        <p class="org-name">MANUEL S. ENVERGA UNIVERSITY FOUNDATION - CANDELARIA, INC.</p>
-        <p class="org-sub">Quezon, Philippines</p><div class="hr"></div>
-      </div>
+      <div class="header"><div class="letterhead">
+        <img src="${LOGO_BASE64}" alt="School seal" />
+        <div class="header-text">
+          <p class="org-name">MANUEL S. ENVERGA UNIVERSITY FOUNDATION - CANDELARIA, INC.</p>
+          <p class="org-sub">Quezon, Philippines</p><div class="hr"></div>
+        </div>
+      </div></div>
     </td></tr></thead><tbody><tr><td>
     <div class="annex-tag">Annex &ldquo;${escapeHtml(annexLabel)}&rdquo;</div>
     <div class="title">${titleLines.map(escapeHtml).join("<br />")}<br />AY ${escapeHtml(ay)}</div>`;

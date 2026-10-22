@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
-import { downloadPdf } from "@/components/ui/downloadPdf";
+import { usePdfPreview } from "@/components/ui/PdfPreviewProvider";
 import {
   downloadInternshipRecordDocuments,
   approveInternshipDocument,
@@ -10,6 +10,7 @@ import {
 
 export default function useDocumentActions({ internshipId, downloadAction, onChanged }) {
   const [isPending, startTransition] = useTransition();
+  const { previewPdf } = usePdfPreview();
 
   function handleDownload(id, file) {
     // dept-head download action needs internshipId alongside fileId;
@@ -24,32 +25,25 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
     );
     const getDownload = downloadAction ?? downloadInternshipRecordDocuments;
 
-    const handlers = {
-      loadingLabel: directPdf ? "Downloading PDF..." : "Opening / downloading file...",
-      successLabel: directPdf ? "PDF downloaded." : "File was opened / downloaded.",
-      errorLabel: directPdf ? "Could not download the PDF. Please try again." : "Failed to open / download file.",
-      action: async (payload) => {
-        const result = await getDownload(payload);
-        if (!result?.success || !directPdf) return result;
-
-        try {
-          if (!result.url) throw new Error("Missing download URL");
-          const response = await fetch(result.url, { cache: "no-store", credentials: "omit" });
-          if (!response.ok) throw new Error("PDF download failed");
-          const name = result.fileName || file?.file_name || "document";
-          await downloadPdf(response, /\.pdf$/i.test(name) ? name : `${name}.pdf`);
-          return { ...result, message: "PDF downloaded." };
-        } catch {
-          return { success: false, error: "Could not download the PDF. Please try again." };
-        }
-      },
-      args: [formData],
-    };
-
+    if (directPdf) {
+      startTransition(async () => {
+        const name = file?.file_name || "document.pdf";
+        await previewPdf({ filename: /\.pdf$/i.test(name) ? name : name + ".pdf", load: async (signal) => {
+          const result = await getDownload(formData);
+          signal.throwIfAborted();
+          if (!result?.success || !result.url) throw Object.assign(new Error(result?.error || "Could not load the PDF."), { status: result?.status, code: result?.code });
+          const response = await fetch(result.url, { cache: "no-store", credentials: "omit", signal });
+          const fileName = result.fileName || name;
+          const headers = new Headers(response.headers);
+          headers.set("Content-Disposition", `attachment; filename*=UTF-8''${encodeURIComponent(/\.pdf$/i.test(fileName) ? fileName : fileName + ".pdf")}`);
+          return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+        } });
+      });
+      return;
+    }
     startTransition(async () => {
-      const result = await toastAndAction(handlers);
-      if (!result?.success) return;
-      if (!directPdf) window.open(result.url, "_blank", "noopener,noreferrer");
+      const result = await toastAndAction({ loadingLabel: "Opening / downloading file...", successLabel: "File was opened / downloaded.", errorLabel: "Failed to open / download file.", action: getDownload, args: [formData] });
+      if (result?.success) window.open(result.url, "_blank", "noopener,noreferrer");
     });
   }
 
