@@ -29,8 +29,7 @@ export function annexDHtml(data) {
         <td>${escapeHtml(formatDuration(s.date_started, s.date_ended))}</td>
       </tr>`,
     )
-    .join("") + Array.from({ length: Math.max(0, 7 - c.interns.length) }, () =>
-      '<tr class="empty"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>').join("");
+    .join("");
 
   return `
     <!doctype html><html lang="en"><head><meta charset="utf-8" /><title>SIPP Annex D</title></head><body>
