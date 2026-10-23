@@ -156,7 +156,7 @@ function InternshipPostForm({
           <span className="text-xs font-medium leading-5 text-foreground-soft">
             Eligible Courses
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5" data-required-group="course_ids" data-validation-message="Select at least one eligible course.">
             {courses.map((course) => {
               const isChecked =
                 type === "edit" && data.courses?.some((c) => c.id === course.id);

@@ -24,6 +24,7 @@ export default function StorageRequirementPicker({
       <label htmlFor={id} className="text-xs font-medium leading-5 text-foreground-soft">Category</label>
       <Select
         name="requirement_type_id"
+        required
         value={selectedRequirementId}
         onValueChange={onValueChange}
         disabled={isPending || requirementTypes.length === 0}

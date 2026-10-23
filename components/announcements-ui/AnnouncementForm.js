@@ -92,6 +92,8 @@ function CreateUpdateAnnouncementForm({
             <input
               type="hidden"
               name="category_id"
+              required
+              data-validation-label="Category"
               className="pointer-events-none cursor-not-allowed"
               value={selectedCategory}
               disabled={isPending}

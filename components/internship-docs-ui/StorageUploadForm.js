@@ -18,6 +18,7 @@ function StorageUploadForm({ fileRequirementTypes = [], currentUserId = "", inte
           <ModalForm.Input
             type="text"
             name="company_name"
+            required
             disabled={isPending}
           />
         </ModalForm.Field>
@@ -26,6 +27,7 @@ function StorageUploadForm({ fileRequirementTypes = [], currentUserId = "", inte
           <ModalForm.Input
             type="text"
             name="file_name"
+            required
             disabled={isPending}
           />
         </ModalForm.Field>
@@ -34,6 +36,7 @@ function StorageUploadForm({ fileRequirementTypes = [], currentUserId = "", inte
           <ModalForm.Input
             type="file"
             name="file"
+            required
             accept=".pdf,.txt,.doc,.docx,.xls,.xlsx"
             disabled={isPending}
           />

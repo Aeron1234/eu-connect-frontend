@@ -1,6 +1,7 @@
 "use client";
 
 import { formatGender } from "@/lib/formatGender";
+import { formatAnnexDDuration } from "@/lib/annex-d-dates.mjs";
 
 export default function AnnexDInternTable({ company: c }) {
   return (
@@ -38,8 +39,7 @@ export default function AnnexDInternTable({ company: c }) {
                 {formatGender(intern.gender)}
               </td>
               <td className="px-4 sm:px-5 py-3 text-foreground-soft">
-                {intern.date_started?.slice(0, 10)} –{" "}
-                {intern.date_ended?.slice(0, 10) || "Present"}
+                {formatAnnexDDuration(intern.date_started, intern.date_ended)}
               </td>
             </tr>
           ))}

@@ -37,6 +37,8 @@ export default function DepartmentCourseEditDialog({
               <ModalForm.Field label="Name">
                 <ModalForm.Input
                   value={editing.name}
+                  name="name"
+                  required
                   onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                   disabled={isSavingEdit}
                 />
@@ -44,6 +46,8 @@ export default function DepartmentCourseEditDialog({
               <ModalForm.Field label="Code">
                 <ModalForm.Input
                   value={editing.code}
+                  name="code"
+                  required
                   onChange={(e) => setEditing({ ...editing, code: e.target.value })}
                   disabled={isSavingEdit}
                 />
@@ -52,6 +56,8 @@ export default function DepartmentCourseEditDialog({
                 <div className="min-w-0">
                   <span id="edit-course-department" className={modalFormLabelClass}>Department</span>
                   <Select
+                    name="department_id"
+                    required
                     value={editing.departmentId}
                     onValueChange={(value) => setEditing({ ...editing, departmentId: value })}
                     disabled={isSavingEdit}

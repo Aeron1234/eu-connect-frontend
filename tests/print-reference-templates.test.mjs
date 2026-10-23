@@ -56,7 +56,7 @@ test("both registrar reports use legal landscape, reference font sizes and escap
   }
   assert.match(readable(forms[0]), /Annex &ldquo;C&rdquo;/);
   assert.match(readable(forms[1]), /Jane &lt;Doe&gt;/);
-  assert.match(readable(forms[1]), /January 25-March 24, 2027/);
+  assert.match(readable(forms[1]), /January 25, 2027 - March 24, 2027/);
 });
 
 test("report generators honor template paper size and evaluation portrait orientation", () => {

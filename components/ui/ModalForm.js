@@ -6,6 +6,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Children, isValidElement } from "react";
 import { Info, LayoutList } from "lucide-react";
+import { toast } from "sonner";
+import { showActionError } from "@/lib/toast-and-action.mjs";
+import { validateModalForm } from "@/lib/modal-form-validation.mjs";
 import {
   controlClass,
   modalFormLabelClass,
@@ -20,11 +23,32 @@ import {
   confirmationPrimaryClass,
 } from "./ConfirmationContent";
 
-function Root({ children, className, ...props }) {
+function Root({ children, className, onSubmit, onClickCapture, ...props }) {
   const confirmation = useConfirmationLayout();
+  const validate = (form) => validateModalForm(form, (message) => showActionError(toast, message));
+  const validationProps = {
+    // Validate before an action or DialogClose runs, using the action toast
+    // instead of a browser tooltip that disappears with the dialog.
+    noValidate: true,
+    onClickCapture(event) {
+      onClickCapture?.(event);
+      if (event.defaultPrevented) return;
+      const submitter = event.target.closest?.("button, input");
+      if (submitter?.type === "submit" && submitter.form === event.currentTarget &&
+          !submitter.formNoValidate && !validate(event.currentTarget)) event.preventDefault();
+    },
+    onSubmit(event) {
+      if (event.defaultPrevented) return;
+      if (!event.nativeEvent?.submitter?.formNoValidate && !validate(event.currentTarget)) {
+        event.preventDefault();
+        return;
+      }
+      onSubmit?.(event);
+    },
+  };
   if (confirmation) {
     return (
-      <form className={cn("flex min-w-0 flex-1 flex-col gap-4 sm:gap-5", className)} {...props}>
+      <form className={cn("flex min-w-0 flex-1 flex-col gap-4 sm:gap-5", className)} {...props} {...validationProps}>
         {children}
       </form>
     );
@@ -33,7 +57,7 @@ function Root({ children, className, ...props }) {
   const content = Children.toArray(children);
   const isFooter = (child) => isValidElement(child) && (child.type === Actions || child.type === Footer);
   return (
-    <form className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", className)} {...props}>
+    <form className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", className)} {...props} {...validationProps}>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-4 py-5 sm:gap-6 sm:px-6 sm:py-6">
         {content.filter((child) => !isFooter(child))}
       </div>

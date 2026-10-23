@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import ModalForm, { controlClass } from "@/components/ui/ModalForm";
 import { modalFormSelectContentClass } from "@/components/ui/modalFormStyles";
 import {
@@ -20,6 +20,7 @@ function PastInternshipPostEditForm({
   data = {},
   courses = [],
 }) {
+  const courseTriggerId = useId();
   const [selectedCourseId, setSelectedCourseId] = useState(
     type === "edit" && data.course_id ? String(data.course_id) : "",
   );
@@ -85,6 +86,9 @@ function PastInternshipPostEditForm({
               type="hidden"
               name="course_id"
               value={selectedCourseId}
+              required
+              data-validation-label="Course"
+              data-validation-focus={courseTriggerId}
               disabled={isPending}
             />
             <Select
@@ -96,7 +100,7 @@ function PastInternshipPostEditForm({
               }
               disabled={isPending}
             >
-              <SelectTrigger className={controlClass}>
+              <SelectTrigger id={courseTriggerId} aria-label="Course" aria-required="true" className={controlClass}>
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
               <SelectContent position="popper" align="start" className={modalFormSelectContentClass}>
