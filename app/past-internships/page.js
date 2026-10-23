@@ -27,9 +27,12 @@ async function PastInternshipsPage({ searchParams }) {
 
       <Suspense fallback={
         <div className="space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Skeleton className="h-10 w-full rounded-md sm:w-64" />
-            <Skeleton className="h-10 w-full rounded-md sm:w-40" />
+            <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-[10rem_10rem]">
+              <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
+            </div>
           </div>
           {Array.from({ length: 5 }, (_, index) => <AlumniCompaniesSkeleton key={index} />)}
         </div>

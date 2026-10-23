@@ -9,9 +9,12 @@ function PastInternshipsLoading() {
         <PageTitleSkeleton />
       </div>
 
-      <div className="flex gap-2 flex-col sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <Skeleton className="h-10 w-full sm:w-64 rounded-md" />
-        <Skeleton className="h-10 w-full sm:w-40 rounded-md" />
+        <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-[10rem_10rem]">
+          <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
       </div>
 
       <div className="space-y-3">

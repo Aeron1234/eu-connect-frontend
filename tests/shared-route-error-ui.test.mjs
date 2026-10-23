@@ -87,7 +87,7 @@ test("past-internship errors preserve loaded companies and retry the failed read
       "@tanstack/react-query": { useQuery: () => healthy, useInfiniteQuery: () => result, useQueryClient: () => ({}) },
       "@/lib/cache/reference-queries": { coursesOptions: () => ({}) }, "@/lib/see-more-pagination.mjs": {},
       "@/lib/cache/past-internships-queries": { pastInternshipsInfiniteOptions: () => ({}) }, "@/lib/client-read-error": {},
-      "../ui/SearchBar": empty, "./AlumniCompanies": () => "Saved company", "../ui/AcademicYearFilter": empty,
+      "../ui/SearchBar": empty, "./AlumniCompanies": () => "Saved company", "../ui/AcademicYearFilter": empty, "../ui/DropdownFilter": empty,
       "../skeletons/AlumniCompaniesSkeleton": empty,
     });
     const html = view.render(); assert.equal(view.errors.length, 1);

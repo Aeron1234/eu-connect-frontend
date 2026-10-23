@@ -3,7 +3,7 @@
 
 import DropdownFilter from "./DropdownFilter";
 
-function AcademicYearFilter({ academicYears = [], value, onChange }) {
+function AcademicYearFilter({ academicYears = [], value, onChange, className = "bg-card p-2 flex-1 sm:flex-0 rounded-md" }) {
   const options = [
     { value: "all", label: "Academic Year" },
     ...academicYears.map((year) => ({
@@ -18,7 +18,7 @@ function AcademicYearFilter({ academicYears = [], value, onChange }) {
       onValueChange={onChange}
       options={options}
       placeholder="Academic Year"
-      className="bg-card p-2 flex-1 sm:flex-0 rounded-md"
+      className={className}
     />
   );
 }

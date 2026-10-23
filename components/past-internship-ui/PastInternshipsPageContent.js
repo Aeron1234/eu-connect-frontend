@@ -15,6 +15,7 @@ import {
 import SearchBar from "../ui/SearchBar";
 import AlumniCompanies from "./AlumniCompanies";
 import AcademicYearFilter from "../ui/AcademicYearFilter";
+import DropdownFilter from "../ui/DropdownFilter";
 import AlumniCompaniesSkeleton from "../skeletons/AlumniCompaniesSkeleton";
 
 function keyOf(company) {
@@ -25,6 +26,7 @@ function PastInternshipsPageContent({
   initialData,
   academicYears: initialAcademicYears,
   courses: initialCourses,
+  departments: initialDepartments,
   yearFilter: initialYearFilter = "all",
   pagination: {
     page: initialPage = 1,
@@ -38,10 +40,12 @@ function PastInternshipsPageContent({
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [yearFilter, setYearFilter] = useState(initialYearFilter);
-  const [filters, setFilters] = useState({ academicYear: initialYearFilter, search: "" });
+  const [departmentFilter, setDepartmentFilter] = useState("all");
+  const [filters, setFilters] = useState({ academicYear: initialYearFilter, search: "", departmentId: "all" });
   const serverSnapshotRef = useRef({
     initialData,
     initialAcademicYears,
+    initialDepartments,
     initialPage,
     initialTotal,
     initialTotalPages,
@@ -50,19 +54,20 @@ function PastInternshipsPageContent({
 
   useEffect(() => {
     const search = query.trim();
-    if (filters.academicYear === yearFilter && filters.search === search) return;
-    const timeout = setTimeout(() => setFilters({ academicYear: yearFilter, search }), 500);
+    if (filters.academicYear === yearFilter && filters.search === search && filters.departmentId === departmentFilter) return;
+    const timeout = setTimeout(() => setFilters({ academicYear: yearFilter, search, departmentId: departmentFilter }), 500);
     return () => clearTimeout(timeout);
-  }, [yearFilter, query, filters.academicYear, filters.search]);
+  }, [yearFilter, departmentFilter, query, filters.academicYear, filters.search, filters.departmentId]);
 
   const pastInternshipsQuery = useInfiniteQuery({
     ...pastInternshipsInfiniteOptions(user.id, filters),
     initialData:
-      Array.isArray(initialData) && filters.academicYear === initialYearFilter && filters.search === ""
+      Array.isArray(initialData) && filters.academicYear === initialYearFilter && filters.search === "" && filters.departmentId === "all"
         ? {
             pages: [{
               data: initialData,
               academicYears: initialAcademicYears,
+              departments: initialDepartments,
               pagination: {
                 page: initialPage,
                 total: initialTotal,
@@ -86,9 +91,11 @@ function PastInternshipsPageContent({
     );
   }, [pastInternshipsQuery.data]);
   const academicYears = pastInternshipsQuery.data?.pages[0]?.academicYears ?? initialAcademicYears ?? [];
+  const departments = pastInternshipsQuery.data?.pages[0]?.departments ?? initialDepartments ?? [];
   const isLoadingMore = pastInternshipsQuery.isFetchingNextPage;
   const isSearching =
     filters.academicYear !== yearFilter ||
+    filters.departmentId !== departmentFilter ||
     filters.search !== query.trim() ||
     pastInternshipsQuery.isPending ||
     pastInternshipsQuery.isPlaceholderData;
@@ -102,12 +109,17 @@ function PastInternshipsPageContent({
   function handleSearchChange(event) {
     const search = event.target.value;
     setQuery(search);
-    showCachedFilters({ academicYear: yearFilter, search: search.trim() });
+    showCachedFilters({ academicYear: yearFilter, search: search.trim(), departmentId: departmentFilter });
   }
 
   function handleYearChange(academicYear) {
     setYearFilter(academicYear);
-    showCachedFilters({ academicYear, search: query.trim() });
+    showCachedFilters({ academicYear, search: query.trim(), departmentId: departmentFilter });
+  }
+
+  function handleDepartmentChange(departmentId) {
+    setDepartmentFilter(departmentId);
+    showCachedFilters({ academicYear: yearFilter, search: query.trim(), departmentId });
   }
 
   useEffect(() => {
@@ -122,6 +134,7 @@ function PastInternshipsPageContent({
     if (
       previous.initialData === initialData &&
       previous.initialAcademicYears === initialAcademicYears &&
+      previous.initialDepartments === initialDepartments &&
       previous.initialPage === initialPage &&
       previous.initialTotal === initialTotal &&
       previous.initialTotalPages === initialTotalPages &&
@@ -130,17 +143,19 @@ function PastInternshipsPageContent({
     serverSnapshotRef.current = {
       initialData,
       initialAcademicYears,
+      initialDepartments,
       initialPage,
       initialTotal,
       initialTotalPages,
       initialYearFilter,
     };
-    const seedFilters = { academicYear: initialYearFilter, search: "" };
+    const seedFilters = { academicYear: initialYearFilter, search: "", departmentId: "all" };
     queryClient.setQueryData(pastInternshipsKeys.list(user.id, seedFilters), (old) => {
       if (!old?.pages?.length) return {
         pages: [{
           data: initialData,
           academicYears: initialAcademicYears,
+          departments: initialDepartments,
           pagination: { page: initialPage, total: initialTotal, totalPages: initialTotalPages },
         }],
         pageParams: [1],
@@ -156,6 +171,7 @@ function PastInternshipsPageContent({
       const firstPage = {
         data: initialData,
         academicYears: initialAcademicYears,
+        departments: initialDepartments,
         pagination: {
           page: initialPage,
           total: initialTotal,
@@ -167,7 +183,7 @@ function PastInternshipsPageContent({
         pageParams: keepLoaded ? old.pageParams : [1],
       };
     });
-  }, [initialData, initialAcademicYears, initialPage, initialTotal, initialTotalPages, initialYearFilter, queryClient, user.id]);
+  }, [initialData, initialAcademicYears, initialDepartments, initialPage, initialTotal, initialTotalPages, initialYearFilter, queryClient, user.id]);
 
   function refreshAfterRecordChange() {
     // A mutation can move or remove companies, which changes every later offset page.
@@ -179,7 +195,7 @@ function PastInternshipsPageContent({
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 flex-col sm:flex-row">
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
         <div className="items-start">
           <SearchBar
             value={query}
@@ -187,11 +203,28 @@ function PastInternshipsPageContent({
             placeholder="Search company or alumni..."
           />
         </div>
+        <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-[10rem_10rem]">
         <AcademicYearFilter
           academicYears={academicYears}
           value={yearFilter}
           onChange={handleYearChange}
+          className="h-10 w-full min-w-0 rounded-md bg-card px-3 text-sm"
         />
+        <DropdownFilter
+          value={departmentFilter}
+          onValueChange={handleDepartmentChange}
+          placeholder="Department"
+          options={[
+            { value: "all", label: "Departments" },
+            ...departments.map((department) => ({
+              value: String(department.id),
+              label: department.code || department.name,
+            })),
+          ]}
+          className="h-10 w-full min-w-0 rounded-md bg-card px-3 text-sm"
+          itemClassName="whitespace-normal break-words text-sm"
+        />
+        </div>
       </div>
 
       {coursesQuery.isError && (
@@ -217,7 +250,7 @@ function PastInternshipsPageContent({
           <Building2 className="size-8 text-foreground-faint" />
           <p className="text-sm text-muted-foreground">No companies found</p>
           <p className="max-w-sm text-xs text-foreground-subtle">
-            Try a different batch filter or clear the search.
+            Try a different department or academic year, or clear the search.
           </p>
         </div>
       ) : (
