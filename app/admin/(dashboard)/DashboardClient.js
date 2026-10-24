@@ -5,6 +5,7 @@ import { useUser } from "@/contexts/UserContext";
 import { dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries";
 import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewState";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import DashboardStatsSection from "@/components/dashboard-ui/AdminDashboardStats";
 import UserGrowthChart from "@/components/dashboard-ui/UserGrowthChart";
 import UsersByRoleChart from "@/components/dashboard-ui/UsersByRoleChart";
@@ -85,6 +86,7 @@ function AdminDashboardPage() {
     <div className="space-y-6">
       <PageTitle
         title="Dashboard"
+        titleAction={<PageManual page="dashboard" />}
         description="System-wide overview of users, internships, and activity."
       />
 

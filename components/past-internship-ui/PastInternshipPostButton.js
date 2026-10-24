@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import Modal from "../ui/Modal";
-import ManualDialog from "../ui/ManualDialog";
+import HelpManual from "@/components/help-ui/HelpManual";
 import { useUser } from "@/contexts/UserContext";
 import PastInternshipPostEditForm from "./PastInternshipPostEditForm";
 import { useTransition } from "react";
@@ -16,23 +16,7 @@ import ModalFormSkeleton from "@/components/skeletons/ModalFormSkeleton";
 import ErrorUI from "@/components/ui/ErrorUI";
 
 export function PastInternshipsManual() {
-  const { user } = useUser();
-  if (user?.role !== "department_head" || user?.department_code === "REG") return null;
-
-  return (
-    <ManualDialog title="How to post a past internship">
-      <div className="space-y-4 text-sm leading-relaxed text-foreground">
-        <p>Add alumni internship records for your department so their placements appear in the Past Internships list.</p>
-        <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
-          <li>Select <strong>Post Record</strong> to open the form.</li>
-          <li>Enter the alumnus&apos;s name, company, industry, course, company address, batch year, and academic year. Add the position, hours, supervisor name, or notes if you have them.</li>
-          <li>Review the details, then select <strong>Post Record</strong> in the form to save it.</li>
-          <li>Use the search box or academic-year filter to find the company. Open its card to see the alumni records.</li>
-          <li>For records in your department, use the <strong>pencil</strong> to correct details or the <strong>trash</strong> icon to delete an entry. Confirm the deletion when prompted.</li>
-        </ol>
-      </div>
-    </ManualDialog>
-  );
+  return <HelpManual guideId="past-internships" title="How to use past internships" />;
 }
 
 function PastInternshipPostButton() {

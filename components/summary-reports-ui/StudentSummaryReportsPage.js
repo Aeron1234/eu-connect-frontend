@@ -33,9 +33,7 @@ export default function StudentSummaryReportsPage() {
 
   return (
     <main className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <PageTitle Icon={BookOpenText} title="Summary Reports" description="Reflect on your complete internship experience in one report per internship." titleAction={Boolean(record) && (
-        <SummaryReportsHelp />
-      )} />
+      <PageTitle Icon={BookOpenText} title="Summary Reports" description="Reflect on your complete internship experience in one report per internship." titleAction={<SummaryReportsHelp />} />
     
       {!record ? (
         <section className="rounded-xl border border-dashed border-border bg-card p-8 text-center sm:p-12">

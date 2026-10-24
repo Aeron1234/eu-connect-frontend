@@ -7,6 +7,7 @@ import { dashboardOverviewKeys, dashboardOverviewOptions } from "@/lib/cache/das
 import { socket } from "@/components/ui/SocketProvider";
 import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewState";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import DashboardStatsSection from "@/components/dashboard-ui/EmployerDashboardStats";
 import EmployerProfileCard from "@/components/dashboard-ui/EmployerProfileCard";
 import InternsSupervisedCard from "@/components/dashboard-ui/InternsSupervisedCard";
@@ -86,6 +87,7 @@ function EmployerDashboardPage() {
     <div className="space-y-6">
       <PageTitle
         title="Dashboard"
+        titleAction={<PageManual page="dashboard" />}
         description="Overview of your internship program and posted opportunities."
       />
 

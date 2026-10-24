@@ -5,6 +5,9 @@ import { openAnnouncementNotification } from "@/lib/server-actions/notifications
 import { userProfileKeys } from "@/lib/cache/user-profile-queries";
 
 export function invalidateNotificationTarget(queryClient, userId, notification) {
+  if (["feedback_mentioned", "feedback_reply", "feedback_status"].includes(notification?.type)) {
+    void queryClient.invalidateQueries({ queryKey: ["feedback", String(userId)] });
+  }
   if (["evaluation_submitted", "evaluation_deleted"].includes(notification?.type) && notification.link) {
     void queryClient.invalidateQueries({ queryKey: ["internship-records", String(userId), "detail", String(notification.link), "evaluations"] });
   }

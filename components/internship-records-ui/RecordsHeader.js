@@ -1,5 +1,7 @@
 "use client";
 
+import PageManual from "@/components/ui/PageManual";
+
 import {
   Building2,
   CheckCircle2,
@@ -101,9 +103,9 @@ function RecordsHeader({ record, internshipId }) {
       />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold">
+          <div className="flex items-start gap-1"><h1 className="min-w-0 font-display text-2xl font-bold">
             {record.student_name}
-          </h1>
+          </h1><PageManual page="records" onBrand /></div>
           <p className="mt-1 text-sm text-primary-foreground/80">
             {record.student_number ? `${record.student_number} ·` : ""}{" "}
             {record.course_name}

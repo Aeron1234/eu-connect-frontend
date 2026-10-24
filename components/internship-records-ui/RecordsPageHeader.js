@@ -1,6 +1,6 @@
 import { ClipboardList, Loader2, Search } from "lucide-react";
 import PageTitle from "../ui/PageTitle";
-import ManualDialog from "../ui/ManualDialog";
+import HelpManual from "@/components/help-ui/HelpManual";
 
 function RecordsPageHeader({ query, setQuery, isPending }) {
   return (
@@ -13,17 +13,7 @@ function RecordsPageHeader({ query, setQuery, isPending }) {
             "Review, approve and monitor every internship record in your department."
           }
           titleAction={
-            <ManualDialog title="How to manage internship records">
-              <div className="space-y-4 text-sm leading-relaxed text-foreground">
-                <p>Use this page to review student placements and manage their approval status.</p>
-                <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary-emphasis">
-                  <li>Search by student, company, or course, or choose a status tab to narrow the records. Select <strong>See more</strong> to load additional results.</li>
-                  <li>Review a <strong>Pending Approval</strong> record before selecting <strong>Approve</strong> or <strong>Reject</strong>. Confirm the action in the dialog. Approved records become ongoing.</li>
-                  <li>Use <strong>Restore</strong> to return a rejected record to pending review. For an ongoing record, select <strong>Mark Finished</strong> when the internship is complete.</li>
-                  <li>Select a student&apos;s name or <strong>View Record</strong> to inspect the overview, DTR, narratives, evaluations, and documents. For an ongoing record, the DTR tab also lets authorized staff set the allowed attendance location.</li>
-                </ol>
-              </div>
-            </ManualDialog>
+            <HelpManual guideId="records" title="How to manage internship records" />
           }
         />
       </div>

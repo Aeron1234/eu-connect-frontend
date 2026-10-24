@@ -1,86 +1,103 @@
-export default [
-  {
-    title: "Manage accounts, departments, and courses",
-    summary: "Maintain the people and academic structure used by the system.",
-    steps: [
-      "Use Accounts to create and manage user accounts.",
-      "Use Departments & Courses to maintain the choices used across student records and reports.",
-    ],
-    href: "/admin/create-account",
-    linkText: "Open Accounts",
-  },
-  {
-    title: "Review activity logs",
-    summary: "Find recent actions and narrow them with the page filters.",
-    steps: ["Open Activity Logs, then use its search and filters to locate the action you need."],
-    href: "/admin/activity-logs",
-    linkText: "Open Activity Logs",
-  },
-  {
-    title: "Inspect cache monitoring",
-    summary: "Understand request counts, hits, misses, and cache performance.",
-    steps: [
-      "Open Cache Monitoring to view metrics by endpoint.",
-      "A hit means a request was served from cached data; a miss means it was not.",
-    ],
-    href: "/admin/cache-monitoring",
-    linkText: "Open Cache Monitoring",
-  },
-  {
-    title: "Set evaluation criteria",
-    summary: "Maintain the criteria used in evaluations.",
-    steps: ["Open Evaluation Criteria to review and update the available criteria."],
-    href: "/admin/evaluation-criteria",
-    linkText: "Open Evaluation Criteria",
-  },
-  {
-    title: "Review placement locations and records",
-    summary: "Inspect internships across the system.",
-    steps: [
-      "Use Map to explore internship locations and companies.",
-      "Use Records to open an internship and review its work and documents.",
-    ],
-    href: "/internship-records",
-    linkText: "Open Records",
-  },
-  {
-    title: "Investigate backend errors",
-    summary: "Read grouped server failures and background-job errors.",
-    steps: [
-      "Open Error Tracking and adjust the date, method, source, status, or search filters.",
-      "Select a group to see recent occurrences, request IDs, and available code locations. Only unexpected errors and server failures are recorded; an empty list can be normal.",
-    ],
-    href: "/admin/error-tracking",
-    linkText: "Open Error Tracking",
-  },
-  {
-    title: "Publish school-wide schedules",
-    summary: "Place internship deadlines on the calendar for students.",
-    steps: [
-      "Open Calendar and choose Add schedule. Set the dates and optional details, then publish it.",
-      "School-wide schedules notify students. Select a scheduled day to review or manage its entry.",
-    ],
-    href: "/calendar",
-    linkText: "Open Calendar",
-  },
-  {
-    title: "Post general announcements",
-    summary: "Share school-wide updates and event dates.",
-    steps: [
-      "Open Announcements and select Announce. Add the title and content, plus an event date when applicable.",
-      "Review the post on the announcement page. Its event date also appears on the calendar.",
-    ],
-    href: "/announcements",
-    linkText: "Open Announcements",
-  },
-  {
-    title: "Set a student's DTR location",
-    summary: "Use the student's shared position when choosing an attendance area.",
-    steps: [
-      "Open the student's internship record and find Set DTR Location.",
-      "If the student shares a live position, review its accuracy and set the workplace pin and permitted radius before saving.",
-    ],
-    href: "/internship-records",
-    linkText: "Open Records",
-  },
+import { feedbackStaff, recordsGuide, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
+
+const adminGuides = [
+{
+  "id": "dashboard",
+  "title": "Review the system dashboard",
+  "summary": "Monitor accounts, placements, and recent activity.",
+  "steps": [
+    "Review the overview cards and charts for account growth, user roles, and internship distribution.",
+    "Read recent activity, then open the relevant management page for records, accounts, or detailed audit entries."
+  ],
+  "href": "/admin",
+  "linkText": "Open dashboard"
+},
+feedbackStaff,
+{
+  "id": "accounts",
+  "title": "Manage accounts",
+  "summary": "Create accounts and control sign-in access.",
+  "steps": [
+    "In Form, enter the person's details and temporary password and choose a role. Complete course or department fields for the roles that require them.",
+    "Select Create Account. Required fields must be completed before submission.",
+    "Use Accounts to search names or email addresses and filter by role.",
+    "Use the account's available activate or deactivate control and confirm the change when prompted. Deactivation prevents sign-in."
+  ],
+  "href": "/admin/create-account",
+  "linkText": "Open Accounts"
+},
+{
+  "id": "departments",
+  "title": "Manage departments and courses",
+  "summary": "Maintain academic choices and their availability.",
+  "steps": [
+    "Use the department and course forms to add entries. Choose the course's department before saving.",
+    "Switch between Departments and Courses. Search by name or code and filter active or inactive entries.",
+    "Use Edit to correct details or the course's department. Activate or deactivate entries with the available controls; confirm department deactivation."
+  ],
+  "href": "/admin/departments-and-courses",
+  "linkText": "Open Departments & Courses"
+},
+{
+  "id": "activity-logs",
+  "title": "Review and manage activity logs",
+  "summary": "Trace recorded actions and review deletions before confirming.",
+  "steps": [
+    "Review the summary cards, search descriptions, and filter by Role or Module.",
+    "Read an entry's action, actor, time, and related details. Select View submitted details when available.",
+    "Use a log's trash control and confirm to remove an individual entry.",
+    "To delete a range, choose its From and Through dates and review the matching count before confirming. The date-range deletion is separate from the current search and role/module filters; check the preview carefully."
+  ],
+  "href": "/admin/activity-logs",
+  "linkText": "Open Activity Logs"
+},
+{
+  "id": "cache-monitoring",
+  "title": "Inspect cache monitoring",
+  "summary": "Understand server response reuse and refresh its metrics.",
+  "steps": [
+    "This page measures the backend response cache for one running server process, not browser data or database query time.",
+    "A hit reuses a saved response; a miss needs a fresh response. Hit rate is hits divided by hits plus misses.",
+    "Use Refresh or Auto-refresh for snapshots every 30 seconds. The first snapshot is since server startup; later activity compares snapshots. A server restart resets the counts.",
+    "Search or sort Routes using the cache to examine misses, bypasses, stores, and invalidations. A bypass skips lookup; a skipped store means the response was not saved.",
+    "Stored entries indicate capacity. Memory figures are estimates and process heap covers the entire server."
+  ],
+  "href": "/admin/cache-monitoring",
+  "linkText": "Open Cache Monitoring"
+},
+{
+  "id": "evaluation-criteria",
+  "title": "Manage evaluation criteria",
+  "summary": "Maintain the sections and questions available for new evaluations.",
+  "steps": [
+    "Switch between Student and Employer evaluation forms and use the active or inactive filters.",
+    "Enter a section title and Add Section. The section is saved after its first criterion is added.",
+    "Use Add criterion for further questions in that section. Use the available controls to deactivate or reactivate a criterion or section.",
+    "Confirm deactivation. Inactive questions are unavailable to new evaluations."
+  ],
+  "href": "/admin/evaluation-criteria",
+  "linkText": "Open Evaluation Criteria"
+},
+recordsGuide,
+mapGuide,
+{
+  "id": "error-tracking",
+  "title": "Investigate server errors",
+  "summary": "Trace grouped unexpected failures and their occurrences.",
+  "steps": [
+    "Similar server or reported background-job failures are grouped. Groups count distinct problems; occurrences count how often they happened.",
+    "Search a route, error code, or message and filter by date, method, source, or status. Use the page controls for older groups.",
+    "Expand a group for up to 25 recent occurrences. Review the time, route and method, message, available code location, and request ID. Background jobs show their source.",
+    "Deleting a group permanently removes all its recorded occurrences, including those outside current filters. Future occurrences can be recorded again.",
+    "Refresh for newer entries. Errors are normally kept for 30 days. Some fatal process failures can appear only in hosting logs."
+  ],
+  "href": "/admin/error-tracking",
+  "linkText": "Open Error Tracking"
+},
+calendarStaff,
+generalAnnouncements,
+dtrLocationGuide,
+pastGuide
 ];
+
+export default adminGuides;

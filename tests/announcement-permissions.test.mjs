@@ -79,11 +79,17 @@ test("employer navigation, quick actions, dashboard and help have no announcemen
   renderToStaticMarkup(React.createElement(Stats, { stats: { unreadAnnouncements: 5 } }));
   assert.equal(stats.length, 3); assert(!stats.some(stat => stat.label.includes("Announcements")));
 
-  const sharedGuides = load("components/help-ui/guides/sharedGuides.js").default;
+  const common = load("components/help-ui/guides/commonGuides.js");
+  const sharedGuides = load("components/help-ui/guides/sharedGuides.js", { "./commonGuides": common }).default;
+  const employerGuides = load("components/help-ui/guides/employerGuides.js", { "./commonGuides": common }).default;
+  const helpContent = load("components/help-ui/helpContent.js", {
+    "./guides/studentGuides": [], "./guides/employerGuides": employerGuides,
+    "./guides/departmentHeadGuides": [], "./guides/adminGuides": [], "./guides/sharedGuides": sharedGuides,
+  });
   const useGuides = load("components/help-ui/useHelpGuides.js", {
     react: { useMemo: callback => callback(), useState: initial => [initial, () => {}] },
     "@/contexts/UserContext": { useUser: () => ({ user: { role: "employer" } }) },
-    "./helpContent": { roleNames: {}, roleGuides: {}, sharedGuides },
+    "./helpContent": helpContent,
   }).default;
   assert(!useGuides().visibleSections.flatMap(section => section.guides).some(guide => guide.href === "/announcements"));
 });

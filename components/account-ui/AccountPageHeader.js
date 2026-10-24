@@ -2,6 +2,7 @@
 
 import { Pencil, X, Check, User } from "lucide-react";
 import PageTitle from "../ui/PageTitle";
+import PageManual from "../ui/PageManual";
 
 export default function AccountPageHeader({
   isEditing,
@@ -17,8 +18,9 @@ export default function AccountPageHeader({
         <PageTitle
           Icon={User}
           title={"My Account"}
+          titleAction={<PageManual page="account" />}
           description={
-            "View and manage your profile details, records, and securitysettings."
+            "View and manage your profile details, records, and security settings."
           }
         />
 

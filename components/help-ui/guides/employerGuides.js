@@ -1,50 +1,73 @@
-export default [
-  {
-    title: "Manage internship postings",
-    summary: "Create and maintain the opportunities students can find.",
-    steps: [
-      "Open Internships or select Manage Jobs on your dashboard.",
-      "Review your postings there and use the available controls to create or update them.",
-    ],
-    href: "/internships",
-    linkText: "Open Internships",
-  },
-  {
-    title: "Find an intern and review their work",
-    summary: "Open a student profile to see the records available to you.",
-    steps: [
-      "Search Users for the student's name and open their profile.",
-      "Use the profile tabs to review internship details, time records, narratives, and evaluations where your role permits.",
-    ],
-    href: "/users",
-    linkText: "Search Users",
-  },
-  {
-    title: "Complete a student evaluation",
-    summary: "Find evaluation tasks for an intern you supervise.",
-    steps: [
-      "Open the student's profile from Search Users.",
-      "Select Evaluations and complete any evaluation available for your supervisor relationship.",
-    ],
-    href: "/users",
-    linkText: "Search Users",
-  },
-  {
-    title: "Set an intern's DTR location",
-    summary: "Use a map pin or the student's temporarily shared position.",
-    steps: [
-      "Open the supervised student's internship record and find Set DTR Location.",
-      "If the student is sharing a live location, compare its pin and accuracy circle with the workplace before choosing the permitted location and radius.",
-      "Save the location. Ask the student to stop sharing after setup.",
-    ],
-    href: "/users",
-    linkText: "Search Users",
-  },
-  {
-    title: "Use the header calendar",
-    summary: "Check dates without leaving your current page.",
-    steps: ["Select the calendar icon beside notifications to view a simple month calendar. The full internship planning page is available to school roles only."],
-    href: "/employer",
-    linkText: "Open dashboard",
-  },
+import { feedbackEmployer, dtrLocationGuide } from "./commonGuides";
+
+const employerGuides = [
+{
+  "id": "dashboard",
+  "title": "Review your intern overview",
+  "summary": "Monitor supervised interns and posted opportunities.",
+  "steps": [
+    "Use the dashboard's overview cards for your internships, interns, and documents.",
+    "In the supervised interns list, switch between ongoing and finished placements and use its filters and page controls. Check hours and internship dates, then open a student's profile for details.",
+    "Review your posted jobs and recent activity, or use the quick actions to manage opportunities and find students.",
+    "Accept or decline supervision requests from notifications before managing a student's internship tools."
+  ],
+  "href": "/employer",
+  "linkText": "Open dashboard"
+},
+feedbackEmployer,
+{
+  "id": "internships",
+  "title": "Manage internship postings",
+  "summary": "Publish and maintain opportunities students can find.",
+  "steps": [
+    "Open Internships or Manage Jobs on the dashboard and select Post Job.",
+    "Complete the company, position, location, work type, vacancies, duration, description, requirements, and eligible courses, then post.",
+    "Use search, Work Type, Courses, and My Posts to find opportunities.",
+    "Use the pencil or trash controls on your own post to edit or delete it. Confirm deletion. Required missing fields keep the form open and show an error toast."
+  ],
+  "href": "/internships",
+  "linkText": "Open Internships"
+},
+{
+  "id": "intern-profile",
+  "title": "Review a supervised student's work",
+  "summary": "Use the student profile tabs available to your role.",
+  "steps": [
+    "Open the intern from your dashboard or Search Users. Accept the supervision request before managing an intern.",
+    "An accepted supervision relationship and ongoing internship expose the permitted DTR, weekly narratives, evaluations, certificates, and profile information.",
+    "In DTR, review attendance or use Set DTR Location. Narratives let you read the student's saved weekly work.",
+    "In Certificates, upload the permitted certificate or supporting file. Wait for the upload result; use the file control to preview PDFs or open other formats.",
+    "You can delete your own pending uploads. Accepted documents are managed under the student's document permissions."
+  ],
+  "href": "/users",
+  "linkText": "Search Users"
+},
+{
+  "id": "evaluations",
+  "title": "Complete a student performance evaluation",
+  "summary": "Submit confidential feedback and print the evaluation.",
+  "steps": [
+    "Open an accepted supervised intern's profile and select Evaluations. Submission becomes available when the internship start date arrives in Philippine time.",
+    "Score every criterion and add optional remarks, then Submit Evaluation. It posts immediately without a status selector or extra posting confirmation.",
+    "Only one active performance evaluation is allowed per internship. Your evaluation is visible to you and authorized school staff; students cannot view it.",
+    "The student's department head is notified and opens the internship record from the notification. Use the PDF control to preview, print, or download the evaluation.",
+    "Delete your own evaluation to hide it from your summary and allow a replacement. Staff retain the Deleted copy for review and can permanently remove it."
+  ],
+  "href": "/users",
+  "linkText": "Search Users"
+},
+{ ...dtrLocationGuide, ...{"href":"/users","linkText":"Search Users"} },
+{
+  "id": "header-calendar",
+  "title": "Use the header calendar",
+  "summary": "Check dates without opening the planning page.",
+  "steps": [
+    "Select the calendar icon beside notifications for a simple month calendar.",
+    "Employers do not have access to the full Calendar page or Announcements. The header calendar has no link to the full planning page."
+  ],
+  "href": "/employer",
+  "linkText": "Open dashboard"
+}
 ];
+
+export default employerGuides;

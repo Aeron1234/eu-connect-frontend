@@ -1,6 +1,7 @@
 import { Bell } from "lucide-react";
 import NotificationList from "../../components/notifications-ui/NotificationList";
 import PageTitle from "../../components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 
 export const metadata = {
   title: "Notifications",
@@ -13,6 +14,7 @@ function NotificationsPage() {
         <PageTitle
           Icon={Bell}
           title={"Notifications"}
+          titleAction={<PageManual page="notifications" />}
           description={"Approvals, announcements, and system updates."}
         />
       </div>

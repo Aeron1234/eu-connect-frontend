@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import StudentDtrHistory from "@/components/dtr-ui/StudentDtrHistory";
 import { Suspense } from "react";
+import PageManual from "@/components/ui/PageManual";
 import DtrRecordsSkeleton from "@/components/skeletons/DtrRecordsSkeleton";
 
 
@@ -78,9 +79,9 @@ function StudentDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+        <div className="flex items-start gap-1"><h1 className="text-2xl sm:text-3xl font-bold text-foreground">
           Dashboard
-        </h1>
+        </h1><PageManual page="dashboard" /></div>
         <p className="text-sm text-foreground-soft mt-1">
           Here&apos;s your OJT overview for today
         </p>

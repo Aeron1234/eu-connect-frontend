@@ -1,6 +1,8 @@
 import { withReadErrorPage } from "@/lib/page-read-error";
 import { getUserSession } from "../../../lib/server-actions/auth";
 import { FileText } from "lucide-react";
+import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import SIPPReportsManager from "../../../components/sipp-reports-ui/SIPPReportsManager";
 import { notFound } from "next/navigation";
 
@@ -17,15 +19,7 @@ async function SIPPReportsPage() {
 
   return (
     <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
-          <FileText className="w-7 h-7 text-primary-emphasis" />
-          SIPP Reports
-        </h1>
-        <p className="text-sm text-foreground-soft mt-1">
-          Review SIPP internship placement data and export official CHED annexes as PDFs.
-        </p>
-      </div>
+      <PageTitle Icon={FileText} title="SIPP Reports" description="Review internship placements and export official CHED annexes." titleAction={<PageManual page="sipp" />} />
 
       <SIPPReportsManager
         hei="Manuel S. Enverga University Foundation-Candelaria, Inc."

@@ -25,6 +25,7 @@ function load(file, mocks = {}, globals = {}) {
   const defaults = {
     "@/contexts/UserContext": { useUser: () => ({ user: { id: "student" } }) },
     "@/components/ui/PageTitle": empty, "@/components/ui/ManualDialog": empty,
+    "@/components/help-ui/HelpManual": empty,
     "@/components/ui/ErrorUI": empty, "@/components/ui/ConfirmDialog": empty,
     "@/components/ui/select": controls,
     "@/components/ui/useInternshipStartAccess": (date, feature) => getInternshipStartAccess(date, feature, before),

@@ -1,80 +1,42 @@
-export default [
-  {
-    title: "Review internship records",
-    summary: "Check a student's placement and supporting work.",
-    steps: [
-      "Open Records to find internship records for your department.",
-      "Open a record to review its overview, time records, narratives, evaluations, and documents.",
-    ],
-    href: "/internship-records",
-    linkText: "Open Records",
-    hideForRegistrar: true,
-  },
-  {
-    title: "Track student hours",
-    summary: "Use the dashboard's course filter and student search.",
-    steps: [
-      "On your dashboard, find Student Hours Tracker.",
-      "Filter by course or search a student's name, then open their profile for more detail.",
-    ],
-    href: "/department_head",
-    linkText: "Open dashboard",
-    hideForRegistrar: true,
-  },
-  {
-    title: "Explore internship locations",
-    summary: "See companies and interns on the map.",
-    steps: [
-      "Open Map to view placement pins or switch to the companies view.",
-      "Select a pin or company to inspect its interns and location details.",
-    ],
-    href: "/map",
-    linkText: "Open Map",
-  },
-  {
-    title: "View SIPP reports",
-    summary: "Find the reports available to the registrar department.",
-    steps: ["Open SIPP Reports from the sidebar to review the available report views."],
-    href: "/department_head/sipp-reports",
-    linkText: "Open SIPP Reports",
-    onlyRegistrar: true,
-  },
-  {
-    title: "Publish department schedules",
-    summary: "Add internship deadlines and notify students in your department.",
-    steps: [
-      "Open Calendar and select Add schedule. Enter its title, dates, and optional details.",
-      "Publish it to notify students in your department. Select a scheduled day to review it or edit a schedule you created.",
-    ],
-    href: "/calendar",
-    linkText: "Open Calendar",
-  },
-  {
-    title: "Post department announcements",
-    summary: "Share updates and optional event dates with students.",
-    steps: [
-      "Open Announcements and select Announce. Post to your department and add an event date when the update concerns a specific day. General announcements can only be posted by admins and registrar department heads.",
-      "Review the announcement after posting. Its event date appears on the calendar for students who can see it.",
-    ],
-    href: "/announcements",
-    linkText: "Open Announcements",
-  },
-  {
-    title: "Set a student's DTR location",
-    summary: "Use a shared position to help place the attendance pin.",
-    steps: [
-      "Open the student's internship record and find Set DTR Location.",
-      "Ask the student to share their location from their dashboard, then check the live pin and its accuracy before setting the workplace location and radius.",
-    ],
-    href: "/internship-records",
-    linkText: "Open Records",
-    hideForRegistrar: true,
-  },
-  {
-    title: "Browse past internships",
-    summary: "Review completed placements and available documents.",
-    steps: ["Open Past Internships, find a placement, and inspect its saved record and documents."],
-    href: "/past-internships",
-    linkText: "Open Past Internships",
-  },
+import { feedbackStaff, recordsGuide, mapGuide, calendarStaff, deptAnnouncements, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
+
+const departmentHeadGuides = [
+{
+  "id": "dashboard",
+  "hideForRegistrar": true,
+  "title": "Track your department overview",
+  "summary": "Review student hours, placement activity, and evaluation summaries.",
+  "steps": [
+    "Review the dashboard cards, charts, and recent activity for your department.",
+    "In Student Hours Tracker, use the course filter and student search, then open a student profile for more detail.",
+    "Use Records for placement approvals and saved work. Registrar accounts use the tools available to their office, including SIPP Reports."
+  ],
+  "href": "/department_head",
+  "linkText": "Open dashboard"
+},
+feedbackStaff,
+{ ...recordsGuide, ...{"hideForRegistrar":true} },
+mapGuide,
+{
+  "id": "sipp",
+  "title": "Prepare SIPP Annex C and Annex D",
+  "summary": "Review registrar reports and preview official PDFs.",
+  "steps": [
+    "In Annex C, use Form to enter the academic year, degree program, issues and concerns, solutions, recommendations, and signatories. Add or remove rows to match the actual content, then choose Save Draft or Submit Annex C.",
+    "In Reports, use the filters to find saved Annex C reports. Use the available edit or delete controls to manage a report; confirm deletion.",
+    "In Annex D, choose an academic year, find a host training establishment, and review its interns, programs, gender, and internship dates.",
+    "Select Export PDF for the selected report or establishment. Preview at 75%, review every page, then Print or Download.",
+    "Annex tables grow with the actual records and do not add fixed blank rows. Annex D dates use Month day, year for both ends, or Present for an ongoing placement."
+  ],
+  "href": "/department_head/sipp-reports",
+  "linkText": "Open SIPP Reports",
+  "onlyRegistrar": true
+},
+calendarStaff,
+deptAnnouncements,
+{ ...generalAnnouncements, ...{"onlyRegistrar":true} },
+{ ...dtrLocationGuide, ...{"hideForRegistrar":true} },
+pastGuide
 ];
+
+export default departmentHeadGuides;

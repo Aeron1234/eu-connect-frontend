@@ -5,6 +5,7 @@ import { useUser } from "@/contexts/UserContext";
 import { dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries";
 import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewState";
 import PageTitle from "@/components/ui/PageTitle";
+import PageManual from "@/components/ui/PageManual";
 import DashboardStatsSection from "@/components/dashboard-ui/DepartmentHeadDashboardStats";
 import ShiftHoursChart from "@/components/dashboard-ui/ShiftHoursChart";
 import InternshipsPerCourseChart from "@/components/dashboard-ui/InternshipsPerCourseChart";
@@ -92,6 +93,7 @@ function DepartmentHeadDashboardPage() {
     <div className="space-y-6">
       <PageTitle
         title="Dashboard"
+        titleAction={<PageManual page="dashboard" />}
         description="Overview of internships and student activity in your department."
       />
 

@@ -209,6 +209,10 @@ export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
           ]
         : []),
       ...roleRouteGroups(userRole, userDepartment),
+      ...(["employer", "department_head", "admin"].includes(userRole) ? [{
+        label: "Communication",
+        routes: [{ name: "Feedback & Concerns", href: "/feedback", icon: <FileText className="h-5 w-5 shrink-0" /> }],
+      }] : []),
       ...(userRole !== "employer" ? [{
         label: "Planning",
         routes: [

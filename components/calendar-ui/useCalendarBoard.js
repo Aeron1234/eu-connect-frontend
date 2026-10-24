@@ -93,7 +93,7 @@ export default function useCalendarBoard({ initialDate, initialData }) {
   const marked = useMemo(() => dates.filter((day) => entriesFor(data, day).some((entry) => visibleKinds.has(entry.kind))).map(parseDay), [dates, data, visibleKinds]);
   const canAddTodo = role === "student" && data.internship?.date_started <= selected && data.internship?.date_ended >= selected;
   const canSchedule = role === "department_head" || role === "admin";
-  const showManual = canSchedule || (role === "student" && Boolean(data.internship));
+  const showManual = ["student", "department_head", "admin"].includes(role);
   const activeKinds = kinds.filter((kind) => kind.id !== "todo" || role === "student")
     .filter((kind) => kind.id !== "internship" || role === "student")
     .filter((kind) => role !== "employer" || kind.id !== "announcement");
