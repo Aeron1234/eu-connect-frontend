@@ -16,9 +16,10 @@ function InternshipRequirementsType({ requirementTypes, docs }) {
             {requirementTypes
               .filter((r) => r.category === key)
               .map((r) => {
-                const done = docs.files
-                  ? docs.files.some((file) => file.requirement_type_id === r.id)
-                  : docs.some((file) => file.requirement_type_id === r.id);
+                const done = (docs.files || docs).some((file) =>
+                  String(file.requirement_type_id) === String(r.id) &&
+                  (file.verification_status == null || file.verification_status === "accepted"),
+                );
                 return (
                   <li key={r.id} className="flex items-start gap-2.5">
                     {done ? (

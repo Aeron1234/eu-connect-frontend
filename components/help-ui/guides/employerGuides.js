@@ -36,7 +36,7 @@ feedbackEmployer,
     "Open the intern from your dashboard or Search Users. Accept the supervision request before managing an intern.",
     "An accepted supervision relationship and ongoing internship expose the permitted DTR, weekly narratives, evaluations, certificates, and profile information.",
     "In DTR, review attendance or use Set DTR Location. Narratives let you read the student's saved weekly work.",
-    "In Certificates, upload the permitted certificate or supporting file. Wait for the upload result; use the file control to preview PDFs or open other formats.",
+    "In Certificates, upload the permitted certificate or supporting file. Wait for the upload result; use the file control to preview PDFs, DOCX, spreadsheets, text, or supported images. Download original file remains available.",
     "You can delete your own pending uploads. Accepted documents are managed under the student's document permissions."
   ],
   "href": "/users",

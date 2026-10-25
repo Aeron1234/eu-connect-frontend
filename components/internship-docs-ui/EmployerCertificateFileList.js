@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { FileText, Trash2, Download, Eye, Paperclip } from "lucide-react";
+import { FileText, Trash2, Eye, Paperclip } from "lucide-react";
 import StatusBadge from "./EmployerCertificateStatusBadge";
 
 function getFileTypeLabel(mimeType = "") {
@@ -54,13 +54,13 @@ export default function EmployerCertificateFileList({ files, isUploading, handle
             </div>
             <button
               type="button"
-              aria-label={getFileTypeLabel(f.file_type) === "PDF" || /\.pdf$/i.test(f.file_name || "") ? "Preview PDF" : "Download"}
+              aria-label={getFileTypeLabel(f.file_type) === "PDF" || /\.pdf$/i.test(f.file_name || "") ? "Preview PDF" : "Preview document"}
               title="Open file"
               onClick={() => handleDownload(f.id, f)}
               disabled={isUploading}
               className="p-1.5 rounded-md text-foreground-subtle hover:bg-muted hover:text-foreground transition-colors disabled:opacity-40"
             >
-              {getFileTypeLabel(f.file_type) === "PDF" || /\.pdf$/i.test(f.file_name || "") ? <Eye className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+              <Eye className="w-4 h-4" />
             </button>
             {f.verification_status === "pending" && (
               <button

@@ -1,21 +1,25 @@
+import Link from "next/link";
+
 function DashboardStats({ stats = [] }) {
   if (!stats.length) return null;
 
   return (
-    <section className={`grid gap-2 grid-cols-2 ${stats.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>
-      {stats.map((s) => (
-        <div key={s.label} className={`rounded-xl p-4 ${s.accent} shadow-sm`}>
-          <div className="flex lg:items-center gap-2 flex-col sm:flex-row ">
-            <s.icon className="w-4 h-4 opacity-90" />
-            <p className={`text-sm font-medium ${s.labelClass}`}>{s.label}</p>
-          </div>
-          <p
-            className={`${s.small ? "text-xl" : "text-3xl"} font-bold mt-3 ${s.valueClass}`}
-          >
-            {s.value}
-          </p>
-        </div>
-      ))}
+    <section className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${stats.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>
+      {stats.map((s) => {
+        const Card = s.href ? Link : "div";
+        return (
+          <Card key={s.label} href={s.href} className={`min-w-0 rounded-xl p-4 ${s.accent} shadow-sm ${s.href ? "transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" : ""}`}>
+            <div className="flex items-center gap-2">
+              <s.icon className="size-4 shrink-0 opacity-90" aria-hidden="true" />
+              <p className={`text-sm font-medium ${s.labelClass}`}>{s.label}</p>
+            </div>
+            <p className={`${s.small ? "text-xl" : "text-3xl"} mt-3 break-words font-bold ${s.valueClass}`}>
+              {s.value}
+            </p>
+            {s.detail && <p className="mt-1 text-xs text-muted-foreground">{s.detail}</p>}
+          </Card>
+        );
+      })}
     </section>
   );
 }

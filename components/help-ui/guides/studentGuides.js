@@ -7,6 +7,7 @@ const studentGuides = [
   "summary": "Track attendance, hours, and recent internship activity.",
   "steps": [
     "Check your ongoing internship, required hours, and completed hours on the dashboard.",
+    "Missing Requirements counts before- and after-deployment categories without a qualifying file for your ongoing internship. Open the card to go to Storage. Duplicate uploads and files from other internships do not satisfy extra categories; employer files count after you accept them.",
     "Use the Today card for attendance and Recent Time Records to review saved shifts. Breaks pause counted duty time.",
     "Use the map's Share location only when authorized staff need your temporary position to set a DTR location. Allow browser access and keep the page open; Stop sharing or leave the page when finished.",
     "Sharing a position and clocking attendance are separate actions. Each clock action checks your current position."
@@ -66,7 +67,7 @@ const studentGuides = [
     "Optionally add a memorabilia note and up to six JPG, PNG, or WebP images, each 5 MB or smaller. Review the images before saving.",
     "Select Submit report. Only one report can exist for an internship; use the available controls to edit it or delete it after confirmation.",
     "Select Export PDF to preview the school template and saved images, then Print or Download.",
-    "Older reports may include document attachments. Their open control uses a separate browser tab; Word or Excel attachments may download rather than preview."
+    "Older reports may include document attachments. Open them in the shared preview, then Print or Download original file. Older .doc files need to be downloaded."
   ],
   "href": "/student/summary-reports",
   "linkText": "Open Summary Reports"
@@ -79,7 +80,7 @@ const studentGuides = [
     "Review the Before Deployment and After Deployment lists for your ongoing internship's requirements.",
     "Select Upload File. Enter the company and file names, choose its requirement category and a PDF, text, Word, or Excel file, then Save.",
     "Wait for the loading toast to finish. An upload failure shows an error; if a request times out, refresh the list before retrying to check whether the file was saved.",
-    "Use category filters, search, and grid or list view to find documents. The file control previews PDFs with Print and Download. Other file types open in a new browser tab and may download.",
+    "Use category filters, search, and grid or list view to find documents. The file control opens a preview. PDFs use the PDF viewer; DOCX, spreadsheets, text, and supported images offer Print and Download original file. Older .doc files offer an original download.",
     "Use the trash control where available to delete a document. You can also approve eligible pending documents uploaded by your supervisor using the check control.",
     "Find files from earlier internships in the past-internship section of Storage. Past Internships in the sidebar is the separate alumni placement directory."
   ],

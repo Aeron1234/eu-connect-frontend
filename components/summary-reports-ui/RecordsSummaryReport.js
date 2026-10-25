@@ -9,7 +9,7 @@ import SummaryReportImages from "./SummaryReportImages";
 import useSummaryAttachment from "./useSummaryAttachment";
 
 export default function RecordsSummaryReport({ report }) {
-  const { attachmentError, openAttachment } = useSummaryAttachment(report?.internship_id, getInternshipRecordSummaryAttachmentUrl, true);
+  const { attachmentError, openAttachment } = useSummaryAttachment(report?.internship_id, getInternshipRecordSummaryAttachmentUrl, true, { filename: report?.attachment_name, mimeType: report?.attachment_type });
 
   if (!report) {
     return (

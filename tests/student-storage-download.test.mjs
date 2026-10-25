@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import vm from "node:vm";
 import { createPdfPreviewController } from "../components/ui/pdfPreviewController.mjs";
+import { createDocumentPreviewController } from "../components/ui/documentPreviewController.mjs";
+import * as documentHelpers from "../lib/document-preview.mjs";
 import { createToastAndAction } from "../lib/toast-and-action.mjs";
 
 const require = createRequire(import.meta.url);
@@ -26,14 +28,17 @@ function load(file, mocks, globals = {}) {
 
 function harness({ userRole = "student", internshipId = "current-record", actionResult,
   fetchResponse, fetchError, downloadWait, useDefault = false, isDownloading = false } = {}) {
-  const tasks = [], actions = [], requests = [], previews = [], tabs = [], events = [], approved = [], changes = [];
+  const tasks = [], actions = [], requests = [], previews = [], officePreviews = [], tabs = [], events = [], approved = [], changes = [];
   const getFile = async (payload) => {
     actions.push(payload);
     return actionResult || { success: true, url: "https://storage.example.test/signed-file", fileName: "My Certificate", message: "Old opening message" };
   };
+  const office = createDocumentPreviewController();
   const controller = createPdfPreviewController({ createUrl: () => "blob:storage-preview", revokeUrl() {} });
   controller.subscribe(() => { const state = controller.getSnapshot(); events.push([state.status, state.status === "ready" ? "PDF preview ready." : state.error?.message || "Preparing PDF preview..."]); });
+  const fetchFile = async (...args) => { requests.push(args); if (fetchError) throw fetchError; if (downloadWait) await downloadWait; return fetchResponse || new Response("%PDF-test"); };
   const hook = load("useDocumentActions.js", {
+    "@/lib/document-preview.mjs": { ...documentHelpers, authorizedDocumentResponse: (...args) => documentHelpers.authorizedDocumentResponse(...args, fetchFile) },
     react: { useTransition: () => [isDownloading, (callback) => tasks.push(callback())] },
     "@/lib/helpers": { toastAndAction: createToastAndAction({
       loading: (message) => { events.push(["loading", message]); return 1; },
@@ -43,6 +48,10 @@ function harness({ userRole = "student", internshipId = "current-record", action
       const result = await controller.open(request);
       if (result) { const file = controller.getSnapshot().document; previews.push([file.blob, file.filename]); }
       return result;
+    }, previewDocument: async request => {
+      const result = await office.open(request);
+      if (result) officePreviews.push(office.getSnapshot().document);
+      return result;
     } }) },
     "@/lib/server-actions/internship-docs-actions": {
       downloadInternshipRecordDocuments: getFile,
@@ -50,10 +59,10 @@ function harness({ userRole = "student", internshipId = "current-record", action
     },
   }, {
     window: { open: (...args) => tabs.push(args) },
-    fetch: async (...args) => { requests.push(args); if (fetchError) throw fetchError; if (downloadWait) await downloadWait; return fetchResponse || new Response("%PDF-test"); },
+    fetch: fetchFile,
   });
   const form = hook({ internshipId, userRole, downloadAction: useDefault ? null : getFile, onChanged: (value) => changes.push(value) });
-  return { form, hook, getFile, actions, requests, previews, tabs, events, approved, changes, async settle() { await Promise.all(tasks.splice(0)); } };
+  return { form, hook, getFile, actions, requests, previews, officePreviews, tabs, events, approved, changes, async settle() { await Promise.all(tasks.splice(0)); } };
 }
 
 test("current and past student PDFs open a preview using the authorized file URL", async () => {
@@ -86,12 +95,13 @@ test("internship-record PDF previews use the authorized record ID for every docu
   }
 });
 
-test("non-PDF documents retain their existing behavior for all viewers", async () => {
+test("non-PDF documents use the shared preview and retain scoped file authorization for all viewers", async () => {
   const file = { ...pdf, file_type: "text/plain" };
   for (const userRole of ["admin", "department_head", "", "student"]) {
     const h = harness({ userRole, useDefault: true }); h.form.handleDownload(file.id, file); await h.settle();
-    assert.equal(h.requests.length, 0); assert.equal(h.previews.length, 0); assert.equal(h.tabs.length, 1);
-    assert.equal(h.tabs[0][0], "https://storage.example.test/signed-file");
+    assert.equal(h.requests.length, 1); assert.equal(h.previews.length, 0); assert.equal(h.tabs.length, 0);
+    assert.equal(h.officePreviews.length, 1); assert.equal(h.officePreviews[0].kind, "text");
+    assert.equal(h.actions[0].fileId, file.id); assert.equal(h.actions[0].internshipId, "current-record");
   }
 });
 

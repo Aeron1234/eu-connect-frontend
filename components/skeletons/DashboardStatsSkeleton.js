@@ -2,20 +2,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function DashboardStatsSkeleton({ count = 4 }) {
   return (
-    <div className={`grid grid-cols-2 gap-2 ${count === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>
+    <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${count === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>
       {Array.from({ length: count }).map((_, i) => {
         const isPrimary = i === 0;
 
         return (
           <div
             key={i}
-            className={`flex h-30 flex-col justify-between rounded-xl border p-4 shadow-sm sm:h-22 ${
+            className={`flex min-h-28 flex-col justify-between rounded-xl border p-4 shadow-sm ${
               isPrimary
                 ? "border-primary bg-primary"
                 : "border-border bg-card"
             }`}
           >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
               <Skeleton
                 className={`h-4 w-4 rounded ${isPrimary ? "bg-white/30" : ""}`}
               />

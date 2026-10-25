@@ -7,7 +7,7 @@ import SummaryReportImages from "./SummaryReportImages";
 import useSummaryAttachment from "./useSummaryAttachment";
 
 export default function SummaryReportContent({ record }) {
-  const { attachmentError, openAttachment } = useSummaryAttachment(record.internship_id, getSummaryAttachmentUrl);
+  const { attachmentError, openAttachment } = useSummaryAttachment(record.internship_id, getSummaryAttachmentUrl, false, { filename: record.attachment_name, mimeType: record.attachment_type });
 
   return (
     <article className="space-y-5">

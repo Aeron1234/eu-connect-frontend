@@ -8,7 +8,7 @@ function StudentDashboardLoading() {
   return (
     <div className="space-y-6">
       <PageTitleSkeleton />
-      <DashboardStatsSkeleton count={3} />
+      <DashboardStatsSkeleton />
 
       {/* Today card */}
       <section className="rounded-xl bg-primary p-5 sm:p-6 shadow-sm overflow-hidden">

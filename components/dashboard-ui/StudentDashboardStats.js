@@ -1,7 +1,10 @@
-import { Briefcase, FolderOpen, Megaphone } from "lucide-react";
+import { Briefcase, FolderOpen, Megaphone, ClipboardList } from "lucide-react";
 import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 
 function StudentDashboardStats({ data }) {
+  const hasInternship = data?.stats?.hasOngoingInternship;
+  const missing = data?.stats?.missingRequirements;
+  const hasCount = hasInternship === true && Number.isFinite(missing);
 
   const stats = [
     {
@@ -27,6 +30,17 @@ function StudentDashboardStats({ data }) {
       accent: "bg-card text-primary-emphasis border border-border",
       valueClass: "text-foreground",
       labelClass: "text-primary-emphasis",
+    },
+    {
+      label: "Missing Requirements",
+      value: hasCount ? missing : hasInternship === false ? "No ongoing internship" : "Unavailable",
+      detail: hasCount ? "Current internship requirements still to complete" : hasInternship === false ? "Requirements are tracked per ongoing internship" : "Requirement count could not be loaded",
+      href: "/student/storage",
+      icon: ClipboardList,
+      accent: "bg-card text-primary-emphasis border border-border",
+      valueClass: "text-foreground",
+      labelClass: "text-primary-emphasis",
+      small: !hasCount,
     },
   ];
 

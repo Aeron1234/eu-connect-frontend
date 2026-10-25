@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
+import { authorizedDocumentResponse, documentFilename, downloadAuthorizedOriginal } from "@/lib/document-preview.mjs";
 import { usePdfPreview } from "@/components/ui/PdfPreviewProvider";
 import {
   downloadInternshipRecordDocuments,
@@ -10,7 +11,7 @@ import {
 
 export default function useDocumentActions({ internshipId, downloadAction, onChanged }) {
   const [isPending, startTransition] = useTransition();
-  const { previewPdf } = usePdfPreview();
+  const { previewPdf, previewDocument } = usePdfPreview();
 
   function handleDownload(id, file) {
     // dept-head download action needs internshipId alongside fileId;
@@ -42,8 +43,12 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
       return;
     }
     startTransition(async () => {
-      const result = await toastAndAction({ loadingLabel: "Opening / downloading file...", successLabel: "File was opened / downloaded.", errorLabel: "Failed to open / download file.", action: getDownload, args: [formData] });
-      if (result?.success) window.open(result.url, "_blank", "noopener,noreferrer");
+      const metadata = { filename: file?.file_name || "document", mimeType: file?.file_type || "" };
+      await previewDocument({
+        filename: documentFilename(metadata.filename, metadata.mimeType), mimeType: metadata.mimeType,
+        load: signal => authorizedDocumentResponse(getDownload, formData, metadata, signal),
+        downloadOriginal: signal => downloadAuthorizedOriginal(getDownload, formData, metadata, signal),
+      });
     });
   }
 

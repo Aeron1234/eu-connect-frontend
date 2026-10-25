@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Download, Eye } from "lucide-react";
+import { Check, Eye } from "lucide-react";
 import { useState } from "react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import StorageDeleteFile from "./StorageDeleteFile";
@@ -59,12 +59,12 @@ export default function DocumentActions({
       <button
         type="button"
         className="p-1.5 rounded-md text-muted-foreground hover:text-primary-emphasis hover:bg-primary/10 transition-colors"
-        aria-label={isPdf ? "Preview PDF" : "Download"}
-        title={isPdf ? "Preview, print or download PDF" : "Download"}
+        aria-label={isPdf ? "Preview PDF" : "Preview document"}
+        title={isPdf ? "Preview, print or download PDF" : "Preview, print or download original file"}
         onClick={() => handleDownload(item.id, item)}
         disabled={isPending}
       >
-        {isPdf ? <Eye className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+        <Eye className="w-4 h-4" />
       </button>
       {showDelete && (
         <StorageDeleteFile

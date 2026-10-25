@@ -1,26 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { usePdfPreview } from "@/components/ui/PdfPreviewProvider";
+import { authorizedDocumentResponse, downloadAuthorizedOriginal, documentFilename, documentKind } from "@/lib/document-preview.mjs";
 
-export default function useSummaryAttachment(
-  internshipId,
-  getAttachmentUrl,
-  clearBeforeOpen = false,
-) {
+export default function useSummaryAttachment(internshipId, getAttachmentUrl, clearBeforeOpen = false, metadata = {}) {
   const [attachmentError, setAttachmentError] = useState("");
-
+  const { previewPdf, previewDocument } = usePdfPreview();
   async function openAttachment() {
-    const tab = window.open("", "_blank");
     if (clearBeforeOpen) setAttachmentError("");
-    const result = await getAttachmentUrl(internshipId);
-    if (result?.success && result.url) {
-      if (tab) tab.location.href = result.url;
-      else window.location.href = result.url;
-    } else {
-      tab?.close();
-      setAttachmentError(result?.error || "Could not open the attachment.");
-    }
+    const filename = documentFilename(metadata.filename || "summary-attachment", metadata.mimeType);
+    const preview = documentKind({ ...metadata, filename }) === "pdf" ? previewPdf : previewDocument;
+    try {
+      await preview({
+        filename, mimeType: metadata.mimeType,
+        load: signal => authorizedDocumentResponse(getAttachmentUrl, internshipId, { ...metadata, filename }, signal),
+        downloadOriginal: signal => downloadAuthorizedOriginal(getAttachmentUrl, internshipId, { ...metadata, filename }, signal),
+      });
+    } catch { setAttachmentError("Could not open the attachment. Please try again."); }
   }
-
   return { attachmentError, openAttachment };
 }

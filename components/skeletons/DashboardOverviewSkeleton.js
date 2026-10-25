@@ -34,7 +34,7 @@ function PanelSkeleton({ children, className = "" }) {
 function StudentDashboardSkeleton() {
   return (
     <>
-      <DashboardStatsSkeleton count={3} />
+      <DashboardStatsSkeleton />
       <PanelSkeleton>
         <Skeleton className="h-4 w-32" />
         <div className="mt-5 grid gap-4 sm:grid-cols-3">

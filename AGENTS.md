@@ -185,7 +185,7 @@ Primary helper: `lib/weekly-narrative-dates.mjs`; forms/cards: `components/weekl
 - Upload requests have a bounded request timeout and an outer confirmation guard. A timeout means the final commit may be unknown; advise refresh and reconcile storage instead of reporting success or creating duplicate retries.
 - Keep native FormData boundaries; do not manually set multipart Content-Type.
 - Preserve the fixes across student storage, employer certificates, and summary attachment flows.
-- Authorized stored PDFs use the shared preview rather than automatic download. Non-PDF files retain their existing behavior.
+- Authorized stored PDFs use the shared preview rather than automatic download. Office/text/image documents now use the shared document preview described below.
 - Pass the correct file ID and any required internship/target student identifiers when requesting signed document access.
 - `components/internship-docs-ui/documentPermissions.js` centralizes document action permissions.
 - Students may delete their own documents under the existing ownership rules, including accepted employer uploads associated with them. Approval is restricted to eligible pending employer documents.
@@ -219,7 +219,7 @@ Implementation notes: `components/ui/PDF_PREVIEW.md`.
 - `scripts/prepare-pdf-preview.mjs` generates ignored files under public/pdfjs. Keep install/dev/build hooks; do not add a third-party viewer service or API key.
 - Validate PDF bytes before rendering and preserve safe error messages, bounded preparation, cancellation, and latest-request guards.
 - Load/generate once per successful preview. Download and print reuse the loaded bytes rather than generating another report.
-- Downloads preserve the original PDF. Non-PDF documents continue using their established behavior.
+- Downloads preserve the original PDF. Office/text/image files use the shared document viewer; generated reports stay PDFs.
 - Print every page, preserving individual dimensions and portrait/landscape orientation, rather than only the currently previewed page.
 - Critical font fix: PDF.js registers embedded fonts in the viewer document. Render page canvases there, then send completed page images to the print iframe.
 - Do not render text canvases under the print iframe's ownerDocument: this caused square/box glyphs when printing.
@@ -298,3 +298,20 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 - Preserve role and registrar filtering: students have no Feedback guide, employers have no full Calendar or Announcements links, and registrar accounts use SIPP Reports instead of the department dashboard/Records guides.
 - Manuals remain useful in empty or locked states. They explain eligibility without exposing unavailable actions. Use ManualDialog for scrollable mobile dialogs and its existing accessible info trigger.
 - Feedback manuals distinguish employer authors from staff: category audiences, tagged-student notifications, internal notes, status/reopening, author-only post/reply changes, attachment previews, and actual file deletion must match the implementation.
+
+## Dashboard summary cards
+
+- All role dashboards use a single stat-card column below sm, two columns from sm, and the existing three/four columns from lg. Keep DashboardStatsSkeleton and student loading states synchronized.
+- The student fourth card is Missing Requirements, linked to Storage. The backend counts distinct before/after requirement categories lacking a student/accepted document on the current ongoing non-deleted internship. Pending employer uploads do not satisfy requirements. No ongoing internship is a separate state from zero missing requirements.
+- Document mutations invalidate the student's dashboard overview as well as document queries. No new database columns are needed for this count.
+
+## Office and non-PDF document previews
+
+- PdfPreviewProvider exposes previewDocument alongside the unchanged previewPdf API. Only one modal is open at a time, and route changes/close cancel reads and release private file state.
+- Shared authorized actions cover student Storage/current and past files, profile certificates, staff record documents, and legacy summary attachments. Preserve file/record/student authorization before requesting a signed URL; never send app credentials to storage.
+- DOCX uses docx-preview in a sandboxed, offline iframe. Disable alt chunks/comments, use embedded data URLs, sanitize links/active content/remote CSS before printing, and preserve document styles within the content root. Legacy .doc files retain an explicit original download.
+- XLS/XLSX/CSV use the maintained SheetJS CE distribution pinned to its official CDN in package.json/lock. .npmrc permits only root URL dependencies for reproducible npm 12 installs. Do not replace this with the outdated public-registry xlsx package.
+- Parse spreadsheets and validate Office archives in a cancellable worker. Render cells as text, never HTML, links or executable formulas. Select a sheet to preview/print its saved values. Preview limits (25 MB, 1000 rows/100 columns, 150 Word pages) must be explicit, and printing partial data is disabled.
+- Use react-to-print for non-PDF content only; print Word documents in full, spreadsheets one selected sheet. Default zoom is 75%; preview zoom is outside the printed content. Wait for fonts/images and clean up on close/failure. PDFs retain the existing canvas/font printing fix.
+- Always keep Download original file available after a parsing failure/unsupported type. Successful previews reuse the original bytes. Read failures offer an explicit reauthorized original download; do not start downloads automatically.
+- No new backend, database, environment variable or third-party document-viewing service is required. Tests include office-preview.test.mjs and student-storage-download.test.mjs.

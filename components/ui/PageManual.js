@@ -43,7 +43,7 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
       "In DTR, review attendance and use Set DTR Location to save the workplace pin and permitted radius.",
       "In Evaluations, complete the student's performance evaluation after the internship start date in Philippine time. Submit posts it immediately. Only one active evaluation is allowed per internship, and students cannot view it.",
       "Preview, print, or download a performance evaluation with the PDF control. Deleting your evaluation hides it from you and allows a replacement, while authorized staff retain a Deleted copy.",
-      "In Certificates, upload the permitted supporting files. PDFs open in the preview; other formats open in a browser tab and may download. You can delete your own pending uploads.",
+      "In Certificates, upload the permitted supporting files. PDFs, DOCX, spreadsheets, text, and supported images open in a preview with an original download option. You can delete your own pending uploads.",
     ];
   } else if (page === "user-profile" && searchedRole === "student" && hasOngoingInternship && role === "admin") {
     title = "How to review this student";

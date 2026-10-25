@@ -54,8 +54,8 @@ export const pdfGuide = {
   "steps": [
     "Select Export PDF or an available PDF preview control. Wait for the preview to load; reports do not download automatically.",
     "The preview starts at 75%. Use page navigation, zoom, or Fit width to inspect the document.",
-    "Select Print to print all pages, or Download to save the original PDF. If loading fails, use Retry.",
-    "Uploaded PDF attachments use the same viewer where offered. Images in Feedback appear inline and can be enlarged. Word, Excel, and text files currently open in a separate browser tab and may download instead; they do not use the PDF viewer."
+    "Select Print to print all PDF pages, or Download to save the original PDF. If loading fails, use Retry. Large non-PDF previews can be limited; partial previews show a notice and require the original file for full printing.",
+    "DOCX, XLS, XLSX, CSV, text, and supported images open in the same preview-style dialog with Download original file. Select a worksheet to preview and print it. Word prints all document pages. Legacy .doc files cannot be previewed and keep the original download option."
   ],
   "href": "/help",
   "linkText": "Open Help"
