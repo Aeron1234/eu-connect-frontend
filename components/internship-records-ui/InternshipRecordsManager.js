@@ -56,6 +56,8 @@ function InternshipRecordsManager() {
     void queryClient.invalidateQueries({ queryKey: studentStorageKeys.active(userId) });
   }
 
+  // Shared by successful creation and pending edits: update the active snapshot,
+  // then refetch to obtain canonical fields/IDs and refresh dependent student views.
   function handleCreated(submittedRecord) {
     queryClient.setQueryData(studentRecordsKeys.records(userId), (previous) =>
       previous ? {
@@ -70,6 +72,8 @@ function InternshipRecordsManager() {
     void queryClient.invalidateQueries({ queryKey: calendarKeys.all(userId) });
   }
 
+  // A save conflict can mean staff already processed the pending record.
+  // Reload current status so the form's eligibility is recalculated.
   function handleConflict() {
     void queryClient.invalidateQueries({ queryKey: studentRecordsKeys.records(userId) });
   }

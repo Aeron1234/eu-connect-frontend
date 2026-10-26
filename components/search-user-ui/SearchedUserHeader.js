@@ -6,11 +6,9 @@ import SupervisorRequestButton from "./SupervisorRequestButton";
 import ProgressBar from "../ui/ProgressBar";
 import PageManual from "../ui/PageManual";
 
-// Keyed by direction first, then status — the same "accepted" reads
-// differently depending on which side of the relationship is looking.
-// Only used for the direction the viewer can't act on (employer viewing
-// a student who requested them) — the other direction gets its own
-// interactive button below.
+// The employer sees a passive relationship label on this profile.
+// Accept/decline actions live in Notifications; students use the interactive
+// control below when viewing an employer.
 const supervisionTagConfig = {
   viewer_is_supervisor: {
     accepted: { label: "Your intern", icon: UserCheck },
@@ -47,11 +45,9 @@ function SearchedUserHeader({
   const percentComplete =
     totalHours > 0 ? Math.min(100, (hoursRendered / totalHours) * 100) : 0;
 
-  // The student-facing "am I this employer's intern / did I request them"
-  // flow needs live, interactive status — fetched client-side, same as
-  // SearchedUserItem. The reverse (employer viewing a student who
-  // requested them) stays a passive tag from the server-computed
-  // `supervision` prop, since only the student side can act on this.
+  // Student controls fetch current status on the client, as in search results.
+  // Employer-to-student profile labels use the server's supervision prop;
+  // employers respond to requests from Notifications.
   const showSupervisorButton =
     userRole === "student" && userProfile?.role === "employer";
 

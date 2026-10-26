@@ -9,6 +9,8 @@ export default function NotificationResponseActions({ handleRespond, isPending }
 
   function confirmResponse() {
     if (!decision || isPending) return;
+    // Capture the confirmed choice before closing the dialog.
+    // The shared response hook keeps the controls pending until the write settles.
     const response = decision;
     setDecision(null);
     handleRespond(response);

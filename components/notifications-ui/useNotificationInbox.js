@@ -14,6 +14,8 @@ export default function useNotificationInbox(initialData) {
   const queryClient = useQueryClient();
   const isEmployer = user?.role === "employer";
   const [scope, setScope] = useState("all");
+  // Requests filters by notification type, including answered requests.
+  // The server's actionable flag separately controls response and deletion actions.
   const selectedScope = isEmployer ? scope : "all";
   const serverSnapshotRef = useRef(null);
 
@@ -51,6 +53,8 @@ export default function useNotificationInbox(initialData) {
         return { pages: [initialData], pageParams: [1] };
       }
       const previous = old.pages[0];
+      // Keep later pages only when the refreshed first page still agrees with
+      // their ordering and total; otherwise discard obsolete pagination offsets.
       const keepLoaded = canKeepLoadedPages(
         previous.data.map((item) => item.ui_key || item.id),
         previous.totalRecords,
@@ -83,12 +87,14 @@ export default function useNotificationInbox(initialData) {
     };
     socket.on("new_notification", scheduleRefresh);
     socket.on("connect", scheduleRefresh);
+    socket.on("supervisor_status_changed", scheduleRefresh);
     window.addEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
     document.addEventListener("visibilitychange", refreshWhenVisible);
     return () => {
       clearTimeout(timer);
       socket.off("new_notification", scheduleRefresh);
       socket.off("connect", scheduleRefresh);
+      socket.off("supervisor_status_changed", scheduleRefresh);
       window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };

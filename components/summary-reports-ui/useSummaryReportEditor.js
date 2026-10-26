@@ -61,6 +61,8 @@ export default function useSummaryReportEditor({ record, onSaved }) {
         },
         args: [record.internship_id, formData],
       }),
+    // A resolved action may still contain failure/timeout. Refresh uncertain outcomes,
+    // but close the editor only after confirmed success so draft text/images survive errors.
     onSuccess: async (result) => {
       if (result?.timedOut) {
         void queryClient.invalidateQueries({ queryKey: summaryReportKeys.list(user.id) });

@@ -7,6 +7,8 @@ import { socket } from "@/components/ui/SocketProvider";
 
 const UPDATE_INTERVAL_MS = 20_000;
 
+// Opt-in DTR setup sharing uses repeated one-shot GPS reads, not watchPosition.
+// It is separate from clock-in/out coordinates and from the private /map origin.
 function LiveDtrLocationShare({ onLocation }) {
   const { refreshLocation } = useGetLocation(false);
   const [sharing, setSharing] = useState(false);
@@ -50,6 +52,8 @@ function LiveDtrLocationShare({ onLocation }) {
       } finally {
         waitingForPosition = false;
       }
+      // Schedule the next read after this attempt finishes: 20 seconds while connected,
+      // or 3 seconds while waiting for a connection. Do not overlap location reads.
       if (active) timer = setTimeout(update, socket.connected ? UPDATE_INTERVAL_MS : 3_000);
     }
 
@@ -64,6 +68,8 @@ function LiveDtrLocationShare({ onLocation }) {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     update();
+    // Stop publishing on toggle-off or unmount and ignore late GPS/ack responses.
+    // Disconnect/expiry cleanup on the backend also removes the temporary shared pin.
     return () => {
       active = false;
       clearTimeout(timer);

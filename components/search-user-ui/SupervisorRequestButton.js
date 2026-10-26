@@ -7,13 +7,12 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import useSupervisorRequestStatus from "../../lib/hooks/useSupervisorRequestStatus";
 
 /**
- * The student -> employer "supervisor" relationship for one employer:
- * fetches the current status and renders the matching control (loading,
- * "Your Supervisor", "Request Sent" / cancel, or "Set as Supervisor").
- *
- * Callers are responsible for deciding *when* to show this (viewer is a
- * student, target is an employer) — mount it only in that case, since it
- * fetches unconditionally as soon as it's rendered.
+ * Student-to-employer controls for requesting, cancelling a pending request,
+ * or removing an accepted supervisor after confirmation.
+ * Hide controls on failed status reads, without an ongoing internship,
+ * or when a different supervisor is already assigned.
+ * Callers must mount this only for a student viewing an employer; status
+ * is fetched on mount. Employers respond from Notifications.
  */
 function SupervisorRequestControl({ employerId, rounded, onBrand }) {
   const [confirmingRemoval, setConfirmingRemoval] = useState(false);

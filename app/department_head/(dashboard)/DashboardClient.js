@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { activityDescription } from "@/lib/activity-log-display.mjs";
 import { useUser } from "@/contexts/UserContext";
 import { dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries";
 import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewState";
@@ -80,7 +81,7 @@ function DepartmentHeadDashboardPage() {
     return {
       icon,
       color,
-      title: log.description,
+      title: activityDescription(log),
       time: formatDistanceToNow(new Date(log.created_at), { addSuffix: true }),
     };
   });

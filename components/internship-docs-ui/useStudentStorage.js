@@ -22,6 +22,8 @@ export default function useStudentStorage() {
   const pastQuery = useQuery({ ...pastStorageRecordsOptions(currentUserId), enabled: Boolean(currentUserId) });
   const ongoing = activeQuery.data;
   const fileRequirementTypes = typesQuery.data || [];
+  // Separate failed initial reads from background refresh failures so loaded
+  // documents remain visible instead of being replaced by an empty/error page.
   const currentError = (activeQuery.isError && activeQuery.data === undefined) ||
     (typesQuery.isError && typesQuery.data === undefined);
   const pastError = pastQuery.isError && pastQuery.data === undefined;

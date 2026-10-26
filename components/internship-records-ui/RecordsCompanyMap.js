@@ -62,6 +62,7 @@ export default function RecordsCompanyMap({ record, internshipId }) {
             selectedId={internshipId}
             fitBoundsMaxZoom={16}
             showPinCount={false}
+            showGoogleMapsLink
             className="h-[280px] w-full rounded-xl sm:h-[360px]"
           />
         ) : (

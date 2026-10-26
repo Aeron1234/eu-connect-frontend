@@ -8,9 +8,13 @@ import { internshipRecordFields } from "./internshipRecordFormData.mjs";
 export default function useInternshipRecordForm({ recordStatus, onCreated, onUpdated, onConflict, activeRecord = null }) {
   const currentStatus = recordStatus || activeRecord?.status || "";
   const isCurrentRecord = currentStatus === "pending" || currentStatus === "ongoing";
+  // Editing requires a saved pending record ID. Ongoing records stay read-only;
+  // the backend rechecks the record's current status when saving.
   const canEdit = currentStatus === "pending" && Boolean(activeRecord?.id);
   const [editingRecordId, setEditingRecordId] = useState(null);
   const isEditing = canEdit && editingRecordId === activeRecord.id;
+  // Here status is the form's read-only flag, not the internship's status string.
+  // Show saved values while locked and a separate draft during explicit editing.
   const status = isCurrentRecord && !isEditing;
   const [draft, setInternshipForm] = useState(() => internshipRecordFields(activeRecord || {}));
   const [draftRegion, setSelectedRegion] = useState(() => String(activeRecord?.region_id ?? ""));
@@ -37,6 +41,8 @@ export default function useInternshipRecordForm({ recordStatus, onCreated, onUpd
     formData.set("company_address", internshipForm.company_address);
     formData.set("lat", internshipForm.lat);
     formData.set("lon", internshipForm.lon);
+    // Use a pending snapshot only after a successful write. The edit response supplies
+    // the saved record when available; creation is reconciled by the parent's refetch.
     const submittedRecord = {
       ...internshipForm,
       ...(isEditing ? { id: activeRecord.id } : {}),
@@ -64,6 +70,8 @@ export default function useInternshipRecordForm({ recordStatus, onCreated, onUpd
           setInternshipForm(internshipRecordFields());
           setSelectedRegion("");
         }
+      // A missing or changed record triggers reconciliation instead of reporting a saved edit.
+      // Other failures preserve the draft for correction or retry.
       } else if (result?.refreshRecord) {
         onConflict?.();
       }

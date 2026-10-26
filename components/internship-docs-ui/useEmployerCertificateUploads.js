@@ -12,6 +12,8 @@ import useDocumentActions from "./useDocumentActions";
 
 export default function useEmployerCertificateUploads({ searchedUserId, company, uploadedFiles, onChanged }) {
   const [filesOverride, setFilesOverride] = useState(null);
+  // Keep a confirmed local change only while the parent still supplies the same list.
+  // A new server list replaces the override instead of being merged with stale rows.
   const files = filesOverride?.source === uploadedFiles
     ? filesOverride.files
     : uploadedFiles || [];
@@ -68,11 +70,12 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
 
     startTransition(async () => {
       const result = await toastAndAction(handlers).catch(() => null);
+      // A timeout may still have committed. Refresh without adding a guessed certificate row.
       if (result?.timedOut) onChanged?.();
       if (!result?.success) return;
 
-      // 🌟 TODO: replace with a real refetch once revalidation is wired up —
-      // this optimistically adds it, matching the real API's field shape
+      // Show the confirmed upload immediately using the API row shape, then request
+      // the profile's certificate refresh through onChanged. Fresh props replace this override.
       setFilesOverride({ source: uploadedFiles, files: [
         {
           id: result.id,
@@ -107,6 +110,7 @@ export default function useEmployerCertificateUploads({ searchedUserId, company,
       const result = await toastAndAction(handlers);
       if (!result?.success) return;
 
+      // Remove the local certificate row only after the delete succeeds, then refresh.
       setFilesOverride({
         source: uploadedFiles,
         files: files.filter((f) => f.id !== fileId),

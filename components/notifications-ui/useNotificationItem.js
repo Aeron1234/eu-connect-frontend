@@ -7,21 +7,27 @@ import { useUser } from "@/contexts/UserContext";
 import { toastAndAction } from "@/lib/helpers";
 import { getNotificationTargetPath } from "@/lib/notification-routes";
 import { markAsRead, deleteNotification } from "@/lib/server-actions/notifications-actions";
-import { respondToSupervisorRequest } from "@/lib/server-actions/supervisor-actions";
+import useSupervisorRequestResponse from "@/lib/hooks/useSupervisorRequestResponse";
+import { canDeleteNotification } from "@/lib/notification-permissions.mjs";
 import { invalidateNotificationTarget, openAnnouncementFromNotification } from "./notificationActions";
 
 export default function useNotificationItem(item, onChanged) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useUser();
-  const [isPending, startTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isOpeningAnnouncement, setIsOpeningAnnouncement] = useState(false);
 
-  // Hide response actions immediately after submitting, before the refresh.
-  // The parent remounts this item when the server's actionable state changes.
+  // Hide response actions only after a successful response; failures remain retryable.
+  // The parent keys this item by actionable state, resetting the override on a server change.
   const [respondedOverride, setRespondedOverride] = useState(null);
   const isActionable = respondedOverride === false ? false : item.actionable;
+
+  const { isPending, handleRespond } = useSupervisorRequestResponse({
+    requestId: item.link_uuid || item.link, studentId: item.sender?.id,
+    onSuccess: () => { setRespondedOverride(false); onChanged?.(); },
+  });
+  const canDelete = respondedOverride === false || canDeleteNotification(item);
 
   const targetPath = getNotificationTargetPath(item);
   const isClickable = !isActionable && (!item.is_read || Boolean(targetPath));
@@ -36,13 +42,8 @@ export default function useNotificationItem(item, onChanged) {
 
     if (targetPath) {
       invalidateNotificationTarget(queryClient, user.id, item);
-      // Skip the optimistic local re-render here — this page is about to
-      // be unmounted by the navigation anyway, so there's nothing to
-      // visually update. Mutating this card's DOM node (via updateItem)
-      // in the same tick as router.push is what causes Next's "Cannot
-      // read properties of undefined (reading 'startTime')" crash — a
-      // known web-vitals/INP timing bug when the clicked element gets
-      // removed before its interaction entry finishes being read.
+      // Navigate without optimistically replacing the clicked card.
+      // After a successful mark-read, refresh the inbox through onChanged.
       if (!item.is_read) {
         void markAsRead(item.id).then((result) => {
           if (result?.success) onChanged?.();
@@ -75,33 +76,9 @@ export default function useNotificationItem(item, onChanged) {
     }
   }
 
-  function handleRespond(decision) {
-    const formData = new FormData();
-    formData.append("requestId", item.link_uuid || item.link);
-    formData.append("decision", decision);
-
-    startTransition(async () => {
-      const result = await toastAndAction({
-        loadingLabel:
-          decision === "accept"
-            ? "Accepting request..."
-            : "Declining request...",
-        successLabel:
-          decision === "accept" ? "Request accepted." : "Request declined.",
-        errorLabel: "Failed to respond to request.",
-        action: respondToSupervisorRequest,
-        args: [formData],
-      });
-
-      if (result?.success) {
-        setRespondedOverride(false);
-        onChanged?.();
-      }
-    });
-  }
-
   function handleDelete(e) {
     e.stopPropagation();
+    if (!canDelete || isDeleting) return;
 
     const formData = new FormData();
     formData.append("notificationId", item.id);
@@ -119,7 +96,7 @@ export default function useNotificationItem(item, onChanged) {
   }
 
   return {
-    isPending, isDeleting, isOpeningAnnouncement, isActionable, isClickable,
+    isPending, isDeleting, isOpeningAnnouncement, isActionable, isClickable, canDelete,
     handleOpen, handleRespond, handleDelete,
   };
 }

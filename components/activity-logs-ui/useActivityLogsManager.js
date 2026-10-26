@@ -9,7 +9,7 @@ import { deleteActivityLog, deleteActivityLogsByDateRange } from "@/lib/server-a
 import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { toastAndAction } from "../../lib/helpers";
 import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
-import { ROLE_LABELS, toTitleCase } from "./activityLogFormatting";
+import { ROLE_LABELS, toTitleCase, activityModuleLabel } from "./activityLogFormatting";
 
 const defaultFilters = { actorRole: "", targetType: "", search: "" };
 const emptyFilterOptions = { actions: [], actorRoles: [], targetTypes: [] };
@@ -109,7 +109,7 @@ export default function useActivityLogsManager(initialPage) {
     { value: "", label: "All Modules" },
     ...filterOptions.targetTypes.map((type) => ({
       value: type,
-      label: toTitleCase(type),
+      label: activityModuleLabel(type),
     })),
   ];
 

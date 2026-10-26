@@ -10,6 +10,8 @@ function StudentEvaluationDeleteForm({ evaluationId, evaluationType, permanent =
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
+  // The permanent prop changes wording only. The backend derives soft deletion versus purge
+  // from the authenticated role and the stored evaluation, not a client-supplied flag.
   function handleAction(formData) {
     formData.set("evaluationType", evaluationType);
     startTransition(async () => {
@@ -20,6 +22,7 @@ function StudentEvaluationDeleteForm({ evaluationId, evaluationType, permanent =
         action: deleteEvaluation,
         args: [formData],
       });
+      // Only a confirmed deletion refreshes eligibility so an author may post a replacement.
       if (result?.success) {
         void queryClient.invalidateQueries({ queryKey: ["evaluation-posting"] });
         onSuccess?.();

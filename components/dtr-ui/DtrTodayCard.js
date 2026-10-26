@@ -24,8 +24,11 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
     ? startDate
     : startDate ? manilaDay(startDate) : null;
   const todayDay = manilaDay(new Date());
+  // Gate clock controls using the Philippine start day; backend checks remain authoritative.
   const dtrAvailable = Boolean(startDay && todayDay >= startDay);
 
+  // Offer internship completion only outside an open shift/break and after
+  // credited accumulated hours reach the required total.
   const canFinish =
     status !== "CLOCKED_IN" && status !== "ON_BREAK" &&
     internshipData?.accumulated_hours >= internshipData?.total_hours;

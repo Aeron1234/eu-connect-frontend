@@ -13,8 +13,8 @@ function SearchedStudentFiles({
   userRole = "",
   internshipId = "",
   currentUserId = "",
-  // New, additive-only props — both default to behavior that preserves
-  // what existing call sites already relied on.
+  // Defaults expose delete for admin and acceptance for students. Row-level
+  // ownership and document state are checked again by documentPermissions.
   canDelete = userRole === "admin",
   canApprove = userRole === "student",
   downloadAction = null,

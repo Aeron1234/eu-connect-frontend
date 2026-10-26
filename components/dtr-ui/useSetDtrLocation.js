@@ -23,6 +23,8 @@ export default function useSetDtrLocation({ studentId, dataLocation = {}, onSave
   const [isCustom, setIsCustom] = useState(Boolean(dataLocation.is_custom_location));
   const { liveLocation, liveStatus } = useLiveDtrLocationWatch(studentId, loc.internshipId);
 
+  // Copy a temporary shared pin into the editable draft. This does not save or
+  // continuously move the configured geofence; saving is a separate confirmed action.
   function handleUseSharedLocation() {
     if (!liveLocation) return;
     setLoc((current) => ({
@@ -86,6 +88,8 @@ export default function useSetDtrLocation({ studentId, dataLocation = {}, onSave
     setRadius(0);
   }
 
+  // Clear an unsaved draft locally. Remove a saved override through the API and
+  // use its company-coordinate fallback only after confirmed success.
   function handleRemove() {
     if (!isCustom) {
       handleClear();

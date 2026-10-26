@@ -48,6 +48,8 @@ export default function useRecordsList({
     return () => clearTimeout(timeout);
   }, [query, statusParam, limit]);
 
+  // Keep actions disabled while the visible filter/search is ahead of the debounced
+  // query, including when the query temporarily shows results from previous criteria.
   const isChangingCriteria =
     criteria.status !== statusParam ||
     criteria.search !== query ||
@@ -159,6 +161,8 @@ export default function useRecordsList({
         args: [formData],
       });
 
+      // Only confirmed transitions update the cached status. Drop later pages and
+      // refetch all list variants because membership, ordering and totals may have changed.
       if (result?.success) {
         queryClient.setQueryData(
           internshipRecordsKeys.list(user.id, criteria),

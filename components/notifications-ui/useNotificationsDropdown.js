@@ -1,5 +1,6 @@
 "use client";
 
+import { canDeleteNotification } from "@/lib/notification-permissions.mjs";
 import { useState, useEffect, useRef, useTransition } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -56,7 +57,8 @@ export default function useNotificationsDropdown() {
     }
   }, [page, pages.length, totalPages]);
 
-  // The badge fetches independently; the full inbox remains lazy until opened.
+  // Keep the badge independent of the lazy inbox. Socket, visibility and local
+  // mutation events refresh both; local writes do not rely on socket delivery.
   useEffect(() => {
     let timer;
     const scheduleRefresh = () => {
@@ -72,6 +74,7 @@ export default function useNotificationsDropdown() {
     };
     socket.on("new_notification", handleNewNotification);
     socket.on("connect", scheduleRefresh);
+    socket.on("supervisor_status_changed", scheduleRefresh);
     window.addEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
     document.addEventListener("visibilitychange", refreshWhenVisible);
 
@@ -79,6 +82,7 @@ export default function useNotificationsDropdown() {
       clearTimeout(timer);
       socket.off("new_notification", handleNewNotification);
       socket.off("connect", scheduleRefresh);
+      socket.off("supervisor_status_changed", scheduleRefresh);
       window.removeEventListener(NOTIFICATIONS_CHANGED, scheduleRefresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
@@ -224,6 +228,8 @@ export default function useNotificationsDropdown() {
   }
 
   function handleDismiss(id) {
+    const notification = notifications.find(item => String(item.id) === String(id));
+    if (!canDeleteNotification(notification)) return;
     const formData = new FormData();
     formData.append("notificationId", id);
 
@@ -239,6 +245,8 @@ export default function useNotificationsDropdown() {
           args: [formData],
         });
         if (!result?.success) return;
+        // Remove cached rows and adjust counts only after deletion succeeds.
+        // Then refresh to reconcile pagination and totals with the server.
         const target = notifications.find((item) => String(item.id) === String(id));
         if (target) {
           const nextCount = Math.max(0, unreadCount - (target.is_read ? 0 : 1));

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { activityDescription } from "@/lib/activity-log-display.mjs";
 import { useUser } from "@/contexts/UserContext";
 import { dashboardOverviewKeys, dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries";
 import { socket } from "@/components/ui/SocketProvider";
@@ -78,7 +79,7 @@ function EmployerDashboardPage() {
     return {
       icon,
       color,
-      title: log.description,
+      title: activityDescription(log),
       time: formatDistanceToNow(new Date(log.created_at), { addSuffix: true }),
     };
   });

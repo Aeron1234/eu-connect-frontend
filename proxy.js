@@ -1,4 +1,4 @@
-// proxy.js
+// Page-session boundary; layouts and backend routes apply their own role/record checks.
 import { NextResponse } from "next/server";
 import {
   ACCESS_COOKIE,
@@ -25,8 +25,8 @@ function redirectToLogin(request) {
   return response;
 }
 
-// Named export "proxy" — required by Next.js 16+. This replaces the old
-// `export default function middleware(request)` convention.
+// Authenticate matched page requests. Public path prefixes bypass this gate;
+// missing credentials or a failed refresh redirect to login and clear cookies.
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
@@ -55,6 +55,7 @@ export async function proxy(request) {
     return redirectToLogin(request);
   }
 
+  // Attach the rotated pair to the outgoing response for the browser to keep.
   const response = NextResponse.next();
   response.cookies.set(
     ACCESS_COOKIE,
@@ -70,6 +71,7 @@ export async function proxy(request) {
   return response;
 }
 
+// API handlers are outside this matcher and must authenticate their own requests.
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
 };

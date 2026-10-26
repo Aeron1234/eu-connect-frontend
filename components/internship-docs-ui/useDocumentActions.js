@@ -14,9 +14,8 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
   const { previewPdf, previewDocument } = usePdfPreview();
 
   function handleDownload(id, file) {
-    // dept-head download action needs internshipId alongside fileId;
-    // the student's own download action only needs fileId. Build the
-    // payload based on what's actually available rather than assuming.
+    // Record-document authorization needs internshipId plus fileId; personal storage
+    // uses fileId. A profile-specific downloadAction supplies its target student ID.
     const formData = internshipId
       ? { fileId: id, internshipId }
       : { fileId: id };
@@ -33,6 +32,8 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
           const result = await getDownload(formData);
           signal.throwIfAborted();
           if (!result?.success || !result.url) throw Object.assign(new Error(result?.error || "Could not load the PDF."), { status: result?.status, code: result?.code });
+          // Use the authorized short-lived storage URL without sending application cookies.
+          // Cancellation prevents a closed preview from continuing to load private bytes.
           const response = await fetch(result.url, { cache: "no-store", credentials: "omit", signal });
           const fileName = result.fileName || name;
           const headers = new Headers(response.headers);
@@ -43,6 +44,8 @@ export default function useDocumentActions({ internshipId, downloadAction, onCha
       return;
     }
     startTransition(async () => {
+      // Open the shared non-PDF preview; downloading the original remains an explicit
+      // action and obtains authorized access again when needed.
       const metadata = { filename: file?.file_name || "document", mimeType: file?.file_type || "" };
       await previewDocument({
         filename: documentFilename(metadata.filename, metadata.mimeType), mimeType: metadata.mimeType,

@@ -4,6 +4,8 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, Polyline, CircleMarker, Circle, useMap } from "react-leaflet";
 import { useEffect, useRef } from "react";
+import { ExternalLink } from "lucide-react";
+import { directionsUrl } from "./mapVisitPlanning.mjs";
 
 function pinIcon(count, active, showCount) {
   const label = String(count);
@@ -18,6 +20,21 @@ function pinIcon(count, active, showCount) {
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
   });
+}
+
+function CompanyGoogleMapsLink({ site, origin }) {
+  const href = directionsUrl(site, origin || undefined);
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-3 inline-flex min-h-10 items-center gap-1.5 text-xs font-semibold text-primary-emphasis hover:underline"
+    >
+      See on Google Maps <ExternalLink className="size-3.5 shrink-0" aria-hidden="true" />
+    </a>
+  );
 }
 
 function FitBounds({ sites, maxZoom, route }) {
@@ -53,6 +70,7 @@ export default function Map({
   fitBoundsMaxZoom = 11,
   showPinCount = true,
   showCompanyPopups = true,
+  showGoogleMapsLink = false,
   route = null,
   origin = null,
   viewerPosition = null,
@@ -99,6 +117,7 @@ export default function Map({
                 {s.address}
                 {s.region_name ? `, ${s.region_name}` : ""}
               </p>
+              {showGoogleMapsLink && <CompanyGoogleMapsLink site={s} origin={origin} />}
               <p className="mt-2 text-xs font-semibold text-foreground/70">
                 {s.interns.length} intern{s.interns.length > 1 ? "s" : ""}{" "}
                 on-site

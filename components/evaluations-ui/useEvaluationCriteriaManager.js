@@ -29,13 +29,13 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
   const [draftSections, setDraftSections] = useState([]);
 
   const [isPending, startTransition] = useTransition();
-  // Which specific button triggered the in-flight transition, so only that
-  // one shows a spinner/disabled state instead of the whole page.
+  // Identify the triggering control for its spinner. Other mutation controls
+  // remain disabled through the shared isPending state.
   const [activeKey, setActiveKey] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
   const isKeyPending = (key) => isPending && activeKey === key;
 
-  // Student and Employer have separate cache entries.
+  // Cache criteria separately per viewer and evaluation target type.
   const criteriaQuery = useQuery({
     ...evaluationCriteriaOptions(userId, activeType),
     enabled: Boolean(userId),
@@ -46,7 +46,8 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
   const sections = useMemo(() => toSections(criteriaQuery.data), [criteriaQuery.data]);
   const isSwitchingType = formType !== activeType || criteriaQuery.isPending;
 
-  // Delay only uncached type switches; status filters are applied locally.
+  // Cached types switch immediately in handleTypeChange; uncached types wait 300 ms.
+  // Active/inactive filters use the loaded data without another request.
   useEffect(() => {
     if (formType === activeType) return;
     const timeout = setTimeout(() => setActiveType(formType), 300);
@@ -73,7 +74,8 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
     }
   }
 
-  // Mutations update the active cache optimistically and restore it on failure.
+  // Snapshot and optimistically update only this viewer/type cache. Restore it on
+  // returned or thrown failure, and refetch the canonical groups after success.
   const runAction = (key, action, fields, update, { onError, onSuccess } = {}) => {
     const queryKey = evaluationCriteriaKeys.type(userId, activeType);
     void queryClient.cancelQueries({ queryKey, exact: true });
@@ -125,6 +127,8 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
         },
         onSuccess: (result, queryKey) => {
           if (result.id == null) return;
+          // Replace the temporary criterion ID with the saved ID before the refetch.
+          // Temporary rows cannot receive further activation/deactivation actions.
           queryClient.setQueryData(queryKey, (groups = []) => groups.map((group) => ({
             ...group,
             items: group.items.map((item) => item.id === tempId
@@ -172,7 +176,8 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
     );
   };
 
-  // Overall stats — always computed from the full (unfiltered) data.
+  // Counts ignore the active/inactive filter: sections include local drafts,
+  // while the criteria count includes active items only.
   const totals = useMemo(() => {
     const all = [...sections, ...draftSections];
     const activeCriteria = all.reduce(
@@ -182,8 +187,8 @@ export default function useEvaluationCriteriaManager(initialCriteria) {
     return { sections: all.length, criteria: activeCriteria };
   }, [sections, draftSections]);
 
-  // What's actually rendered, filtered by `filter` — purely client-side,
-  // no fetch involved since we already have the full dataset for this type.
+  // Filter persisted items locally. Keep unsaved draft sections visible under
+  // every filter so a new section can receive its first criterion.
   const visibleSections = useMemo(() => {
     const applyFilter = (items) => {
       if (filter === "active") return items.filter((i) => i.is_active);

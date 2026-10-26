@@ -13,8 +13,9 @@ const emptyUser = {
 };
 
 /**
- * Wrap your app with this once (root layout), seeding it with the session
- * you already fetch via getUserSession() on the server.
+ * Authenticated role/shared-page layouts seed this client state from the
+ * server session. It supports UI decisions; backend guards authorize requests.
+ * resetUser clears this context only, not the session cookies.
  */
 export function UserProvider({ initialUser, children }) {
   const [user, setUser] = useState(initialUser ?? emptyUser);
@@ -31,8 +32,8 @@ export function UserProvider({ initialUser, children }) {
 }
 
 /**
- * const { user, setUser, resetUser } = useUser();
- * user.id / user.role / user.department_code / user.course_name / user.email
+ * Read the current layout's client user state and its setters.
+ * Role and academic fields originate from the session claims.
  */
 export function useUser() {
   const ctx = useContext(UserContext);

@@ -9,7 +9,7 @@ import useNotificationItem from "./useNotificationItem";
 
 function NotificationItem({ item, onChanged }) {
   const {
-    isPending, isDeleting, isOpeningAnnouncement, isActionable, isClickable,
+    isPending, isDeleting, isOpeningAnnouncement, isActionable, isClickable, canDelete,
     handleOpen, handleRespond, handleDelete,
   } = useNotificationItem(item, onChanged);
   const meta = getNotificationItemMeta(item.type);
@@ -60,7 +60,7 @@ function NotificationItem({ item, onChanged }) {
         )}
       </div>
 
-      <button
+      {canDelete && <button
         type="button"
         onClick={handleDelete}
         disabled={isDeleting}
@@ -69,7 +69,7 @@ function NotificationItem({ item, onChanged }) {
         className="absolute right-3 top-3 text-muted-foreground/60 transition hover:text-destructive disabled:opacity-50"
       >
         <X className="size-3.5" />
-      </button>
+      </button>}
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { getApiBaseUrl } from "@/lib/api-base-url.mjs";
 import { NextResponse } from "next/server";
 import { getAccessToken } from "@/lib/server-actions/auth";
 
+// This API handler is outside proxy.js. Resolve its own session, relay the
+// access token server-side, and expose only the backend's socket ticket.
 export async function POST() {
   const accessToken = await getAccessToken();
   if (!accessToken) {

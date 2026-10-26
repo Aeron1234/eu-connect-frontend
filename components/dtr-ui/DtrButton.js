@@ -13,6 +13,8 @@ function DtrButton({ internshipData, status, disabled = false }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useUser();
+  // Close the confirmation only after a successful attendance write, then refresh
+  // this student's DTR queries and dashboard. Failed writes leave the modal available.
   function handleSuccess() {
     setOpen(false);
     void queryClient.invalidateQueries({

@@ -9,9 +9,10 @@ import { buildTabs } from "./profileTabs";
 
 export default function useSearchedUserTabs({
   searchedUserId, userId, userRole, searchedUserRole, hasOngoingInternship,
-  defaultFilter, initialDtrData, initialDtrLocation, supervision,
+  defaultFilter, initialDtrData, initialDtrLocation, supervision, canViewStudentRecords,
 }) {
-  const tabs = buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship });
+  const tabs = buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship, canViewStudentRecords });
+  const restricted = userRole === "department_head" && searchedUserRole === "student" && canViewStudentRecords !== true;
   const hideTabs = searchedUserRole === "student" && !hasOngoingInternship;
 
   const safeDefaultFilter = tabs.some((tab) => tab.value === defaultFilter)
@@ -19,9 +20,11 @@ export default function useSearchedUserTabs({
     : "info";
 
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState(safeDefaultFilter);
-  const [activeTab, setActiveTab] = useState(safeDefaultFilter);
+  const [requestedTab, setSelectedTab] = useState(safeDefaultFilter);
+  const [loadedTab, setActiveTab] = useState(safeDefaultFilter);
   const [dtrPage, setDtrPage] = useState(1);
+  const selectedTab = tabs.some(tab => tab.value === requestedTab) ? requestedTab : "info";
+  const activeTab = tabs.some(tab => tab.value === loadedTab) ? loadedTab : "info";
   const tabQuery = useQuery({
     ...userProfileTabOptions(
       userId,
@@ -38,6 +41,16 @@ export default function useSearchedUserTabs({
   });
 
   useEffect(() => {
+    if (!restricted || !userId || !searchedUserId) return;
+    const filters = {
+      queryKey: userProfileKeys.all(userId, searchedUserId),
+      predicate: query => query.queryKey[3] !== "info",
+    };
+    void queryClient.cancelQueries(filters);
+    queryClient.removeQueries(filters);
+  }, [restricted, queryClient, userId, searchedUserId]);
+
+  useEffect(() => {
     if (selectedTab === activeTab) return;
     const timeout = setTimeout(() => setActiveTab(selectedTab), 300);
     return () => clearTimeout(timeout);
@@ -50,7 +63,7 @@ export default function useSearchedUserTabs({
   }, [tabQuery.error, tabQuery.data]);
 
   useEffect(() => {
-    if (!userId || !initialDtrData) return;
+    if (restricted || !userId || !initialDtrData) return;
     queryClient.setQueryData(
       userProfileKeys.tab(userId, searchedUserId, "dtr", 1),
       { dtrData: initialDtrData, dtrLocation: initialDtrLocation },
@@ -61,9 +74,11 @@ export default function useSearchedUserTabs({
     queryClient,
     searchedUserId,
     userId,
+    restricted,
   ]);
 
   function handleTabClick(value) {
+    if (!tabs.some(tab => tab.value === value)) return;
     setSelectedTab(value);
     const page = value === "dtr" ? 1 : dtrPage;
     if (value === "dtr") {

@@ -16,6 +16,7 @@ function SearchedUserRecordsManager({
   userRole,
   searchedUserRole,
   hasOngoingInternship,
+  canViewStudentRecords,
   info,
   defaultFilter,
   initialDtrData,
@@ -28,7 +29,7 @@ function SearchedUserRecordsManager({
     handleDtrLocationSaved, refreshEvaluations, refreshCertificates,
   } = useSearchedUserTabs({
     searchedUserId, userId, userRole, searchedUserRole, hasOngoingInternship,
-    defaultFilter, initialDtrData, initialDtrLocation, supervision,
+    defaultFilter, initialDtrData, initialDtrLocation, supervision, canViewStudentRecords,
   });
 
   return (

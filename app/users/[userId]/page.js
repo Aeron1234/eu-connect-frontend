@@ -54,6 +54,9 @@ async function UserProfilePage({ params, searchParams }) {
   const searchedUserRole = header.role || "student";
   const hasOngoingInternship = profileData.user.hasOngoingInternship !== false;
 
+  const canViewStudentRecords = userRole !== "department_head" || searchedUserRole !== "student" ||
+    profileData.user.permissions?.canViewStudentRecords === true;
+
   const isEmployerNonSupervisor =
     userRole === "employer" &&
     searchedUserRole === "student" &&
@@ -63,7 +66,8 @@ async function UserProfilePage({ params, searchParams }) {
     userRole === "student" ||
     searchedUserRole !== "student" ||
     !hasOngoingInternship ||
-    isEmployerNonSupervisor
+    isEmployerNonSupervisor ||
+    !canViewStudentRecords
       ? "info"
       : "dtr";
   const requestedTab = (await searchParams)?.tab;
@@ -100,12 +104,13 @@ async function UserProfilePage({ params, searchParams }) {
       />
 
       <SearchedUserRecordsManager
-        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}:${hasOngoingInternship}:${defaultFilter}`}
+        key={`${searchedUserId}:${userRole}:${searchedUserRole}:${supervision?.status || ""}:${hasOngoingInternship}:${defaultFilter}:${canViewStudentRecords}`}
         searchedUserId={searchedUserId}
         userId={session?.user?.id || ""}
         userRole={userRole}
         searchedUserRole={searchedUserRole}
         hasOngoingInternship={hasOngoingInternship}
+        canViewStudentRecords={canViewStudentRecords}
         info={info}
         supervision={supervision || null}
         defaultFilter={defaultFilter}

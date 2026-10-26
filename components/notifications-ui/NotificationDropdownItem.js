@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowUpRight, CheckCircle2, X } from "lucide-react";
+import { canDeleteNotification } from "@/lib/notification-permissions.mjs";
 import { cx } from "@/lib/utils";
 import { getNotificationTargetPath } from "@/lib/notification-routes";
 import { getDropdownNotificationMeta } from "./notificationMetadata";
@@ -66,7 +67,7 @@ export default function NotificationDropdownItem({
             <CheckCircle2 className="size-4" />
           </button>
         )}
-        <button
+        {canDeleteNotification(notif) && <button
           type="button"
           onClick={() => handleDismiss(notif.id)}
           disabled={deletingId === notif.id}
@@ -75,7 +76,7 @@ export default function NotificationDropdownItem({
           className="grid size-7 place-items-center rounded-md text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
         >
           <X className="size-4" />
-        </button>
+        </button>}
       </div>
     </li>
   );

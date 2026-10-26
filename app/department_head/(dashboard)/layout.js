@@ -5,10 +5,11 @@ async function DepartmentHeadDashboardLayout({ children }) {
   const session = await getUserSession();
   const role = session?.user?.role;
 
-  if (!session?.user || role !== "department_head") return null; // TODO: confirm actual role string
+  if (!session?.user || role !== "department_head") return null; // The active role code is department_head; REG identifies the registrar office.
 
   const department = session?.user?.department_code;
 
+  // Registrar accounts enter SIPP Reports through the department-head role.
   if (department === "REG") return redirect("/department_head/sipp-reports");
 
   return (

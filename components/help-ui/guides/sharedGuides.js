@@ -36,7 +36,7 @@ const sharedGuides = [
     "Select the header bell for recent notifications and use its page controls for older items.",
     "Select a notification to open the related page. Feedback notifications open the discussion; department-head notifications about employer evaluations open the internship record.",
     "Open Notifications for the full list. Mark items as read, use Mark all as read, or delete a notification.",
-    "Employers can accept or decline eligible supervisor requests from the request's notification controls."
+    "Employers can accept or decline eligible supervisor requests in Notifications. Unanswered active requests cannot be deleted, even when marked read. Answered or cancelled requests can be dismissed."
   ],
   "href": "/notifications",
   "linkText": "Open Notifications"
@@ -49,7 +49,7 @@ const sharedGuides = [
     "Enter at least three characters of a person's name in Search Users, then select a result.",
     "When the search is empty, revisit a recently viewed profile. Remove one history entry with X or use clear all.",
     "Students can use Set as Supervisor on an eligible employer's profile and manage the request status there. Employers respond to requests from notifications.",
-    "Student internship tabs require the appropriate role and supervision or department access; finding a profile does not grant access to confidential evaluations."
+    "Department heads can view DTR, Narratives and Evaluations only for students in their own department. Other departments' students show Info only. Existing administrator and accepted-supervisor access still applies; finding a profile does not grant access to confidential evaluations."
   ],
   "href": "/users",
   "linkText": "Search Users"

@@ -8,6 +8,8 @@ import { useUser } from "@/contexts/UserContext";
 function EvaluationCard({ evaluations = [], type = "default", onChanged }) {
   const { items, removeItem, restoreItem } = useEvaluationItems(evaluations);
   const { user } = useUser();
+  // Filter confidential/deleted entries defensively in the UI as well as on the API.
+  // Staff keep the history returned by their authorized endpoint.
   const visibleItems = user?.role === "student" ? items.filter(ev => ev.type !== "Performance Evaluation" && !ev.deleted_at) : user?.role === "employer" ? items.filter(ev => !ev.deleted_at) : items;
 
   if (visibleItems.length === 0) return <EvaluationEmptyState type={type} />;

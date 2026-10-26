@@ -10,8 +10,8 @@ function EvaluationsTabContentSkeleton({ tab }) {
     );
   }
 
-  // pending-confirmation, past-evaluations, disputed — all the same
-  // EvaluationCard shape, just different data underneath.
+  // The supervisor form uses criteria placeholders; other tab values use the
+  // history-list placeholder. Confirmation/dispute tabs are no longer offered.
   return <EvaluationListSkeleton />;
 }
 

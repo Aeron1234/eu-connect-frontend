@@ -1,5 +1,8 @@
-export function buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship }) {
+export function buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship, canViewStudentRecords }) {
   if (searchedUserRole !== "student") {
+    return [{ value: "info", text: "Info" }];
+  }
+  if (userRole === "department_head" && canViewStudentRecords !== true) {
     return [{ value: "info", text: "Info" }];
   }
   if (!hasOngoingInternship) {

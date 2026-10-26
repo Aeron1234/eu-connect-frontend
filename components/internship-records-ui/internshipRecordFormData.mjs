@@ -1,5 +1,7 @@
 const isCurrent = (record) => record?.status === "pending" || record?.status === "ongoing";
 
+// Prefer the current-record response, merging any matching list fields beneath it.
+// Without a current response, prefer an ongoing list entry over a pending one.
 export function getCurrentInternshipRecord(records = [], active = null) {
   if (isCurrent(active)) {
     const listed = active.id == null ? null : records.find((record) => String(record.id) === String(active.id));
@@ -10,6 +12,8 @@ export function getCurrentInternshipRecord(records = [], active = null) {
     || null;
 }
 
+// Preserve saved date-only strings for date inputs; format timestamp values
+// as Philippine calendar dates when prefilling the form.
 function inputDate(value) {
   if (!value) return "";
   if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
@@ -22,6 +26,8 @@ function inputDate(value) {
   return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
+// Prefill only placement fields. Do not copy ownership, approval status,
+// supervisor assignments or accumulated hours into the editable draft.
 export function internshipRecordFields(record = {}) {
   return {
     company_name: record.company_name ?? "",

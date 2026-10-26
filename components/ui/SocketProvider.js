@@ -31,10 +31,8 @@ export const socket = io(SOCKET_URL, {
   autoConnect: false,
   auth: getSocketAuth,
   transports: ["websocket", "polling"],
-  // Caps reconnection so a sleeping/unreachable backend (e.g. Render free
-  // tier spin-down) doesn't retry indefinitely for hours while the tab
-  // sits idle — without this, socket.io-client defaults to unlimited
-  // retries every few seconds.
+  // Limit Socket.IO's automatic reconnect attempts. The provider also keeps
+  // a separately counted manual-retry loop for connection/server-disconnect errors.
   reconnectionAttempts: 10,
   reconnectionDelay: 2000,
   reconnectionDelayMax: 10000,
@@ -45,6 +43,8 @@ export default function SocketProvider({ children }) {
     let retryTimer;
     let retryCount = 0;
 
+    // Manual retries share one timer and stop after ten scheduled attempts;
+    // only a successful connection resets this provider's retry counter.
     function scheduleReconnect() {
       if (retryCount >= 10 || retryTimer) return;
       retryCount += 1;
@@ -64,13 +64,13 @@ export default function SocketProvider({ children }) {
     }
 
     function onConnectError() {
-      // A missing session needs a fresh login, not a retry loop.
+      // A 401 from the ticket endpoint suppresses this manual retry path.
       if (ticketStatus !== 401) scheduleReconnect();
     }
 
     function onDisconnect(reason) {
-      // The server disconnects at access-token expiry. Fetch a fresh ticket
-      // (and refresh the HttpOnly session if needed) before rejoining.
+      // A server-initiated disconnect needs an explicit reconnect. Its new
+      // handshake requests another ticket through the session-aware Next.js endpoint.
       if (reason === "io server disconnect") scheduleReconnect();
     }
 

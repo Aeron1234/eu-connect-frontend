@@ -315,3 +315,25 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 - Use react-to-print for non-PDF content only; print Word documents in full, spreadsheets one selected sheet. Default zoom is 75%; preview zoom is outside the printed content. Wait for fonts/images and clean up on close/failure. PDFs retain the existing canvas/font printing fix.
 - Always keep Download original file available after a parsing failure/unsupported type. Successful previews reuse the original bytes. Read failures offer an explicit reauthorized original download; do not start downloads automatically.
 - No new backend, database, environment variable or third-party document-viewing service is required. Tests include office-preview.test.mjs and student-storage-download.test.mjs.
+
+## Readable activity logs
+
+- lib/activity-log-display.mjs supplies shared action/module labels and read-only legacy description formatting for the admin log, filters/summary cards, and all four dashboards. Preserve stored action/target codes and metadata identifiers for filtering and audit history.
+- Backend insert descriptions should identify the affected person, company, post, or report in plain language. Keep field names/IDs in structured metadata, rather than appending raw changed_fields lists to descriptions.
+- Expand update details with readable field labels. The list describes fields included in the update, not a claimed before/after diff. Do not expose unfiltered metadata or raw course IDs as submitted details.
+- Legacy formatting is scoped to known templates and suffixes; do not rewrite arbitrary user content or modify historical database rows. Preserve role permissions, transaction behavior, and cache invalidation.
+
+## Supervisor-request notifications
+
+- The employer dashboard retains the original Interns You Supervised card with All/Ongoing/Completed filters and accepted assignments only. Pending requests are handled in Notifications, not in the dashboard.
+- Use the response confirmation, loading/error action toast and useSupervisorRequestResponse hook in Notifications. Failed writes retain retry controls. Confirmed responses refresh this employer's overview, intern pages, notifications and relevant profile queries without depending on WebSocket delivery.
+- Unanswered active supervisor-request notifications have no delete button in either the inbox or header dropdown. The backend enforces this even for direct calls. Responded, cancelled/superseded and no-longer-actionable alerts can be dismissed; marking read does not count as responding.
+- Backend deployment is required; no new database columns or environment variables. Tests: employer-supervisor-requests.test.mjs (frontend) and employer-supervisor-requests.test.js (backend).
+
+## Search Users department scope
+
+- Department heads viewing a student from another department receive Info only. DTR, narratives, evaluations and file/location tools require a positive current-department permission; missing permission fails closed.
+- The profile API supplies user.permissions.canViewStudentRecords from current database membership using the student's latest academic row and the head's assigned department. Do not compare display names or trust stale JWT department claims.
+- Server-rendered profiles must skip private-data preloading when permission is absent. The tab hook clamps stale/private tab selections to Info, refuses unavailable selections, and cancels/removes this viewer/target's private cached profile data when restricted.
+- Backend guards run before private searched-user cache hits and mutations. Basic profile reads for department heads bypass the profile response cache so the permission is recomputed. Keep existing administrator and accepted-supervisor behavior.
+- Both repositories need deployment. No SQL migration or environment variable is required. Tests: student-profile-department-access.test.mjs (frontend) and student-profile-department-access.test.js (backend).

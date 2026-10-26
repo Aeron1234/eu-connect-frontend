@@ -1,3 +1,4 @@
+import { activityActionLabel, activityModuleLabel, activityDescription, activityUpdateFields } from "@/lib/activity-log-display.mjs";
 const ROLE_LABELS = {
   student: "Student",
   employer: "Employer",
@@ -54,11 +55,16 @@ const POSTING_DETAIL_FIELDS = [
 
 function postingDetails(metadata) {
   if (!metadata) return [];
-  const fields = POSTING_DETAIL_FIELDS.filter(([key]) => metadata[key] != null && metadata[key] !== "");
-  if (!metadata.eligible_courses && Array.isArray(metadata.course_ids)) {
-    fields.push(["course_ids", "Eligible course IDs"]);
-  }
-  return fields.map(([key, label]) => [label, Array.isArray(metadata[key]) ? metadata[key].join(", ") : String(metadata[key])]);
+  const readable = value => {
+    if (Array.isArray(value)) return value.filter(item => ["string", "number"].includes(typeof item)).join(", ");
+    if (typeof value === "string") return value;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    return "";
+  };
+  const details = POSTING_DETAIL_FIELDS.map(([key, label]) => [label, readable(metadata[key])]).filter(([, value]) => value !== "");
+  if (!metadata.eligible_courses && Array.isArray(metadata.course_ids)) details.push(["Eligible courses", metadata.course_ids.length + " selected"]);
+  return details;
 }
 
-export { ROLE_LABELS, toSentenceCase, toTitleCase, formatTimestamp, parseMetadata, postingDetails };
+export { ROLE_LABELS, toSentenceCase, toTitleCase, formatTimestamp, parseMetadata, postingDetails, activityActionLabel, activityModuleLabel, activityDescription, activityUpdateFields };

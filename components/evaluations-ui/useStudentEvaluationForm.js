@@ -5,6 +5,8 @@ import { useState, useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
 import { postStudentEvaluation } from "@/lib/server-actions/evaluations-actions";
 
+// The accepted employer submits a confidential Performance Evaluation of the target student.
+// Posting is direct; reset scores and refresh availability only after confirmed success.
 export default function useStudentEvaluationForm({ studentEvaluationCriterias, searchedUserId, onSubmitted }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {
     const initialState = {};

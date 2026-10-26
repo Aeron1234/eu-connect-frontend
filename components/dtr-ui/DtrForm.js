@@ -7,6 +7,7 @@ import { toastAndAction, useGetLocation } from "../../lib/helpers";
 import { toast } from "sonner";
 
 function DtrForm({ isOut, onSuccess }) {
+  // isOut means currently CLOCKED_OUT, so this form will clock in.
   const action = isOut ? clockIn : clockOut;
 
   const [isPending, setIsPending] = useState(false);
@@ -33,6 +34,8 @@ function DtrForm({ isOut, onSuccess }) {
       if (result?.success) onSuccess?.();
     } catch (error) {
       toast.error(error.message || "Could not get your current location. Please try again.");
+    // Keep submission disabled through GPS acquisition and the server action.
+    // Always release pending state after failure so the student can retry.
     } finally {
       setIsPending(false);
     }

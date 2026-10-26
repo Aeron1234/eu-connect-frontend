@@ -12,6 +12,8 @@ export default function useLiveDtrLocationWatch(studentId, internshipId) {
     const targetStudentId = String(studentId);
     const targetInternshipId = String(internshipId);
     let active = true;
+    // Ignore acknowledgements from older subscriptions after reconnect, renewal
+    // or a target change; the backend rechecks access on each subscription.
     let subscriptionVersion = 0;
 
     function subscribe() {
@@ -41,6 +43,7 @@ export default function useLiveDtrLocationWatch(studentId, internshipId) {
     socket.on("connect", subscribe);
     socket.on("disconnect", onDisconnect);
     if (socket.connected) subscribe();
+    // Renew every 30 seconds because the server grants a 60-second watch lease.
     const accessTimer = setInterval(() => {
       if (socket.connected) subscribe();
     }, 30_000);
@@ -55,6 +58,7 @@ export default function useLiveDtrLocationWatch(studentId, internshipId) {
     };
   }, [studentId, internshipId]);
 
+  // Expire the displayed pin after 60 seconds without a newer server-stamped position.
   useEffect(() => {
     if (!liveLocation) return;
     const timer = setTimeout(() => {

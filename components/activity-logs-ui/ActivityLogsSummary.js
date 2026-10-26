@@ -1,5 +1,5 @@
 import { Activity, Layers3, ScrollText, Users } from "lucide-react";
-import { toSentenceCase, toTitleCase } from "./activityLogFormatting";
+import { activityActionLabel, activityModuleLabel } from "./activityLogFormatting";
 
 export default function ActivityLogsSummary({ total, stats }) {
   return (
@@ -16,12 +16,12 @@ export default function ActivityLogsSummary({ total, stats }) {
         Icon: Users
       }, {
         label: "Most common action",
-        value: toSentenceCase(stats?.mostCommonAction?.name) || "None",
+        value: activityActionLabel(stats?.mostCommonAction?.name) || "None",
         detail: stats?.mostCommonAction ? `${Number(stats.mostCommonAction.count).toLocaleString()} events` : "No matching activity",
         Icon: ScrollText
       }, {
         label: "Most active module",
-        value: toTitleCase(stats?.mostActiveModule?.name) || "None",
+        value: activityModuleLabel(stats?.mostActiveModule?.name) || "None",
         detail: stats?.mostActiveModule ? `${Number(stats.mostActiveModule.count).toLocaleString()} events` : "No matching activity",
         Icon: Layers3
       }].map(({ label, value, detail, Icon }) => (

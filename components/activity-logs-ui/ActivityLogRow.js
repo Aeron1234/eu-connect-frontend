@@ -3,8 +3,11 @@ import Modal from "../ui/Modal";
 import DeleteForm from "../ui/DeleteForm";
 import {
   ROLE_LABELS,
-  toSentenceCase,
   toTitleCase,
+  activityActionLabel,
+  activityModuleLabel,
+  activityDescription,
+  activityUpdateFields,
   formatTimestamp,
   parseMetadata,
   postingDetails,
@@ -15,6 +18,8 @@ export default function ActivityLogRow({ log, handleDelete, isDeleting }) {
   const ip = metadata?.ip_address || metadata?.ip;
   const createdPosting = log.action === "internship_posting_created" && metadata?.position;
   const details = createdPosting ? postingDetails(metadata) : [];
+  const description = activityDescription(log);
+  const updatedFields = activityUpdateFields(log);
   return (
     <tr
       key={log.id}
@@ -32,13 +37,24 @@ export default function ActivityLogRow({ log, handleDelete, isDeleting }) {
       </td>
       <td className="px-4 sm:px-5 py-3 max-w-[280px]">
         <p className="font-medium text-foreground">
-          {createdPosting ? `Created internship post: ${metadata.position}` : toSentenceCase(log.action)}
+          {createdPosting ? `Created internship post: ${metadata.position}` : activityActionLabel(log.action)}
         </p>
-        {log.description && !createdPosting && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {log.description}
+        {description && !createdPosting && (
+          <p className="break-words text-xs text-muted-foreground line-clamp-2">
+            {description}
           </p>
         )}
+        {updatedFields.length > 0 && (
+          <details className="mt-1.5 text-xs">
+            <summary className="w-fit cursor-pointer font-semibold text-primary-emphasis">View update details</summary>
+            <div className="mt-2 space-y-2 rounded-lg border border-border bg-muted/40 p-2.5">
+              <p className="break-words whitespace-pre-wrap text-foreground">{description}</p>
+              <p className="font-semibold text-foreground-soft">Fields included in the update</p>
+              <ul className="list-disc space-y-1 pl-4 text-foreground">{updatedFields.map(label => <li key={label}>{label}</li>)}</ul>
+            </div>
+          </details>
+        )}
+        {!createdPosting && !updatedFields.length && description.length > 180 && <details className="mt-1.5 text-xs"><summary className="w-fit cursor-pointer font-semibold text-primary-emphasis">View full description</summary><p className="mt-2 break-words whitespace-pre-wrap rounded-lg border border-border bg-muted/40 p-2.5 text-foreground">{description}</p></details>}
         {createdPosting && (
           <>
             <p className="text-xs text-muted-foreground line-clamp-2">
@@ -61,7 +77,7 @@ export default function ActivityLogRow({ log, handleDelete, isDeleting }) {
         )}
       </td>
       <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
-        {toTitleCase(log.target_type)}
+        {activityModuleLabel(log.target_type)}
       </td>
       <td className="px-4 sm:px-5 py-3 text-muted-foreground whitespace-nowrap">
         {formatTimestamp(log.created_at)}

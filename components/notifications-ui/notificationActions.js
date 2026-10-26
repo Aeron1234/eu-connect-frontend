@@ -18,6 +18,8 @@ export function invalidateNotificationTarget(queryClient, userId, notification) 
   }
 }
 
+// Resolve the announcement and access at click time instead of trusting a cached link.
+// A 410 refreshes the inbox without navigating; other failures leave the item available.
 export async function openAnnouncementFromNotification(notificationId, { onUnavailable, onOpen }) {
   try {
     const result = await openAnnouncementNotification(notificationId);
