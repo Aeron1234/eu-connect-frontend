@@ -4,6 +4,8 @@ import DashboardStats from "@/components/dashboard-ui/DashboardStats";
 function StudentDashboardStats({ data }) {
   const hasInternship = data?.stats?.hasOngoingInternship;
   const missing = data?.stats?.missingRequirements;
+  // A finite zero is a completed requirement set. No ongoing internship and unavailable
+  // data are separate display states rather than zero missing requirements.
   const hasCount = hasInternship === true && Number.isFinite(missing);
 
   const stats = [

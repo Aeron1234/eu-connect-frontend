@@ -19,6 +19,8 @@ export function buildFormData(fields) {
   return fd;
 }
 
+// Append within an existing category; sort only when creating a new category unless
+// preserveOrder is requested. Always return new changed containers for optimistic caches.
 export function addToGroups(groups, category, item, preserveOrder = false) {
   if (groups.some((group) => group.category === category)) {
     return groups.map((group) => group.category === category

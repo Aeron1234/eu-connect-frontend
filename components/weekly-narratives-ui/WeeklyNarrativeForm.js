@@ -9,6 +9,7 @@ function WeeklyNarrativeForm({
   data = null,
   type = "",
 }) {
+  // Prefill saved coverage when editing; legacy blanks must be completed by the user.
   const [dateFrom, setDateFrom] = useState(data?.date_from || "");
   const [dateTo, setDateTo] = useState(data?.date_to || "");
   return (
@@ -51,6 +52,8 @@ function WeeklyNarrativeForm({
               onChange={(event) => {
                 const next = event.target.value;
                 setDateFrom(next);
+                // Clear an end date that becomes invalid after changing/clearing the start.
+                // The backend validates both dates again before saving.
                 if (!next || (dateTo && dateTo < next)) setDateTo("");
               }} disabled={isPending} required />
           </ModalForm.Field>

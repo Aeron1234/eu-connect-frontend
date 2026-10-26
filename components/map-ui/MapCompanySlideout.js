@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
+// One nonmodal panel lives inside the map at every viewport size. Hidden content
+// is inert; Escape returns focus to its reopen control without blocking the whole page.
 export default function MapCompanySlideout({ open, companyId, onClose, returnFocusRef, children }) {
   const closeRef = useRef(null);
   useEffect(() => {

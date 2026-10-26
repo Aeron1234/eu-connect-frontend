@@ -58,6 +58,7 @@ function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true,
     });
   }, [initialPage, queryClient, queryKey]);
 
+  // Patch the matching row on every loaded page after a confirmed edit.
   function handleItemUpdate(updatedItem) {
     queryClient.setQueryData(queryKey, (old) => old?.pages?.length
       ? {
@@ -72,6 +73,8 @@ function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true,
       : old);
   }
 
+  // Deletion shifts offsets, so keep only page one and refetch counts/rows from the
+  // server rather than continuing with the old later-page boundaries.
   function handleItemDelete(deletedId) {
     queryClient.setQueryData(queryKey, (old) => old?.pages?.length
       ? {

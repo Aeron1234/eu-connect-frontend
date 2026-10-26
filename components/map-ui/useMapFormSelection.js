@@ -3,6 +3,8 @@
 import { useCallback, useRef } from "react";
 import { toPosition } from "./mapPositions";
 
+// Keep editable coordinates and their reverse-geocoded label/address in sync.
+// User selection and saving remain separate operations; this hook prepares the form draft.
 export default function useMapFormSelection({
   setData,
   data,
@@ -12,8 +14,8 @@ export default function useMapFormSelection({
   setRadius = null,
   liveLocation = null,
 }) {
-// Both callers store coordinates in their form data. The pin follows that
-  // source of truth, including when a form resets or clears the location.
+// Form data is the pin's source of truth, including reset/clear. Both internship
+// placement and DTR-location forms keep latitude/longitude in those fields.
   const selectedPosition = toPosition([data?.lat, data?.lon]);
   const sharedPosition = liveLocation && toPosition([liveLocation.latitude, liveLocation.longitude]);
   const initialCenter = selectedPosition ||
@@ -50,6 +52,8 @@ export default function useMapFormSelection({
 
   const handleResolvedAddress = useCallback(
     ({ version, label, lat, lon }) => {
+      // Apply reverse lookup text only to the latest selected coordinates and only
+      // while the coordinate placeholder remains; preserve a manually edited address.
       if (version !== selectionVersionRef.current) return;
       setData((prev) => {
         if (Number(prev.lat) !== lat || Number(prev.lon) !== lon) return prev;

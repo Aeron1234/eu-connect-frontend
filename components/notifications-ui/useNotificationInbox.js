@@ -9,6 +9,8 @@ import { NOTIFICATIONS_CHANGED } from "@/lib/notification-events";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
 import { notificationInboxOptions, notificationsKeys, refreshNotificationQueries } from "@/lib/cache/notifications-queries";
 
+// Coordinate scoped inbox pages, unread totals and refreshes from socket/browser events.
+// Return loaded notification rows while retaining query state for loading/error/retry UI.
 export default function useNotificationInbox(initialData) {
   const { user } = useUser();
   const queryClient = useQueryClient();

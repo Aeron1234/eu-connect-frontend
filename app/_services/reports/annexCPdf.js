@@ -18,6 +18,8 @@ export async function generateAnnexCPdf(reportId, accessToken) {
 
     const data = await res.json();
 
+    // Export the saved report returned by the authorized read, not unsaved editor state.
+    // Map every saved entry in order; Prepared By prefers the backend's export label.
     const html = annexCHtml({
       ay: data.academic_year,
       hei: HEI_NAME,

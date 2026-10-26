@@ -1,3 +1,5 @@
+// Give DTR location consumers a stable nested object when a read is missing fields.
+// Preserve absent coordinates/radius as undefined; this is shape normalization, not GPS validation.
 export default function normalizeDtrLocation(raw) {
   const r = raw || {};
   return {

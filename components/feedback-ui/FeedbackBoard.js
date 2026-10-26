@@ -32,6 +32,8 @@ export default function FeedbackBoard() {
   useEffect(() => {
     if (!user?.id) return;
     const refresh = () => void queryClient.invalidateQueries({ queryKey: feedbackKeys.all(user.id) });
+    // Socket events invalidate only this viewer's feedback queries. Local mutations
+    // also reconcile explicitly, so new posts do not depend on socket delivery.
     socket.on("feedback_updated", refresh);
     socket.on("connect", refresh);
     return () => { socket.off("feedback_updated", refresh); socket.off("connect", refresh); };
@@ -58,6 +60,8 @@ export default function FeedbackBoard() {
     await queryClient.fetchQuery({ ...feedbackListOptions(user.id, freshFilters, user.role), staleTime: 0 }).catch(() => {});
   }
   if (!user) return null;
+  // Hide cached private rows after an authorization failure; transport refresh
+  // errors may keep previously loaded content alongside retry feedback.
   const posts = [401, 403].includes(query.error?.status) ? [] : query.data?.posts || [];
   const page = query.data?.page || filters.page;
   const pages = query.data?.totalPages || 1;

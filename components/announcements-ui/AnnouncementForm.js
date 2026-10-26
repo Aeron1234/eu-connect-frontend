@@ -57,6 +57,8 @@ function CreateUpdateAnnouncementForm({
 }) {
   const isEdit = type === "edit";
   const { user } = useUser();
+  // Posting choices differ from reading: ordinary heads post Department, registrar
+  // heads/admin post General. The backend enforces the same rule on create and edit.
   const categoryName = user?.role === "admin" || (user?.role === "department_head" && user?.department_code === "REG")
     ? "General" : user?.role === "department_head" ? "Department" : null;
   // Match by name and use the real database ID, including when categories

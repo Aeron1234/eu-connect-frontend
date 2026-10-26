@@ -16,6 +16,8 @@ import {
 } from "@/lib/cache/notifications-queries";
 import { invalidateNotificationTarget, openAnnouncementFromNotification } from "./notificationActions";
 
+// Coordinate the header notification list, its refresh sources and per-item actions.
+// Keep its query family aligned with the full inbox so reads/responses update both views.
 export default function useNotificationsDropdown() {
   const { user } = useUser();
   const router = useRouter();

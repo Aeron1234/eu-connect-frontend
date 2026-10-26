@@ -1,5 +1,5 @@
 import { getApiBaseUrl } from "@/lib/api-base-url.mjs";
-// app/api/users/route.js
+// Same-origin proxy keeps the backend bearer token out of the browser request.
 import { getAccessToken } from "@/lib/server-actions/auth";
 import { NextResponse } from "next/server";
 
@@ -16,12 +16,13 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() || "";
 
-  // Guard clause: empty or 3 characters or less -> return empty results immediately
+  // Queries shorter than three trimmed characters return an empty successful list
+  // without contacting the backend.
   if (!q || q.length <= 2) {
     return NextResponse.json({ success: true, users: [] });
   }
 
-  // 3. Server-secret environment variables
+  // Resolve the server-only backend base and encode the user's query value.
   const backendUrl = getApiBaseUrl();
   const queryPath = `/search-users?q=${encodeURIComponent(q)}`;
 

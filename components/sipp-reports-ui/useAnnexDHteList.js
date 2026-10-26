@@ -7,6 +7,8 @@ import { notifyReadError } from "@/lib/client-read-error";
 import { annexDHteInfiniteOptions, sippReportsKeys } from "@/lib/cache/sipp-reports-queries";
 import { canKeepLoadedPages, hasValidPage } from "@/lib/see-more-pagination.mjs";
 
+// Build the filtered Annex D company list from cached pages and server snapshots.
+// Return company rows, paging controls and totals for the currently loaded groups.
 export default function useAnnexDHteList(initialPage) {
   const { user } = useUser();
   const userId = user?.id;
@@ -31,6 +33,8 @@ export default function useAnnexDHteList(initialPage) {
         ? { pages: [initialPage], pageParams: [1] }
         : undefined,
   });
+  // Deduplicate loaded groups by the backend's coordinate/name company_key while
+  // retaining page order. This key differs from the alumni archive's name-only key.
   const companies = useMemo(() => {
     const seen = new Set();
     return (companiesQuery.data?.pages || []).flatMap((page) =>
@@ -81,6 +85,8 @@ export default function useAnnexDHteList(initialPage) {
     }
   }
 
+  // Company total comes from server pagination, but this intern total covers only
+  // company cards loaded so far. It grows as See more adds groups.
   const totalInterns = companies.reduce((n, c) => n + (c.intern_count || 0), 0);
 
   return {

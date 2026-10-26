@@ -1,3 +1,5 @@
+// Keep exports private and uncached. Expose validation/access errors and controlled
+// busy/timeout messages, but use the caller's fallback for other server failures.
 export function pdfErrorResponse(error, fallback) {
   const status = Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599
     ? error.status : 500;

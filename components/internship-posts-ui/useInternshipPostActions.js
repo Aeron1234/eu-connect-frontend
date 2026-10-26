@@ -8,6 +8,8 @@ import {
   updateInternshipPosting,
 } from "@/lib/server-actions/internship-posts-actions";
 
+// Provide one posting card's edit/delete transitions, favorite control and UI permissions.
+// Parent callbacks reconcile list membership after confirmed mutations.
 export default function useInternshipPostActions({
   item,
   userRole,
@@ -52,11 +54,15 @@ export default function useInternshipPostActions({
       });
 
       if (result?.success) {
+        // Prefer persisted scalar fields and course links from the backend response.
+        // The form-data merge is only a fallback for older success responses.
         onUpdate?.(result.data ?? { ...item, ...Object.fromEntries(formData) });
       }
     });
   }
 
+  // Mirror the distinct UI permissions: owner edits; owner or admin deletes.
+  // These flags supplement the backend checks and do not grant API access.
   const canDelete = item.isOwner || userRole === "admin";
   const canEdit = item.isOwner;
 

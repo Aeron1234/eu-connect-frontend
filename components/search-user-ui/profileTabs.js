@@ -1,3 +1,6 @@
+// Only student targets with an ongoing internship can expose record tabs. Heads
+// need explicit department permission; employers need accepted supervision.
+// These display rules supplement the APIs' authorization checks.
 export function buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship, canViewStudentRecords }) {
   if (searchedUserRole !== "student") {
     return [{ value: "info", text: "Info" }];

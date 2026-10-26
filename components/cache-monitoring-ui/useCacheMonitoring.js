@@ -5,6 +5,8 @@ import { getCacheMetrics } from "@/lib/server-actions/cache-metrics-actions";
 import { CACHE_EVENTS, deriveCacheView } from "@/lib/cache-metrics.mjs";
 import { bypasses, duration } from "./cacheMetricsFormatting";
 
+// Own the monitoring screen's snapshots, filtering and optional 30-second refresh.
+// Keep the last valid snapshot after errors; inFlight prevents overlapping refreshes.
 export default function useCacheMonitoring(initialSnapshot) {
   const initialData = initialSnapshot?.error ? null : initialSnapshot;
   const [snapshot, setSnapshot] = useState(initialData);

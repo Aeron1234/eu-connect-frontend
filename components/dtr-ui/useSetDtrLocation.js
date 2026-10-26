@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { setStudentDtrLocation, removeStudentDtrLocation } from "@/lib/server-actions/dtr-actions";
 import useLiveDtrLocationWatch from "../map-ui/useLiveDtrLocationWatch";
 
+// Own the student's editable attendance-location override and save/remove confirmation.
+// Shared live coordinates are draft inputs; they do not automatically move the saved geofence.
 export default function useSetDtrLocation({ studentId, dataLocation = {}, onSaved }) {
   const [loc, setLoc] = useState({
     lat: dataLocation.location.lat || "",

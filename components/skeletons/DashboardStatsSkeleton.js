@@ -1,5 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Match DashboardStats breakpoints and three-versus-four desktop columns so
+// loading does not introduce a different small-screen stat-card layout.
 function DashboardStatsSkeleton({ count = 4 }) {
   return (
     <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${count === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"} lg:gap-4`}>

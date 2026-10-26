@@ -4,6 +4,8 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 function ThemeToggle({ className = "" }) {
+  // Toggle from the resolved root dark class, including a system-selected theme.
+  // Icon visibility follows that same CSS class rather than server theme state.
   const { setTheme } = useTheme();
 
   return (

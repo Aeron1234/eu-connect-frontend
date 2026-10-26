@@ -101,6 +101,8 @@ function AlumniRow({
   const userRole = user.role;
   const userDepartment = user.department_code;
 
+  // These controls mirror admin/same-department staff visibility. The backend repeats
+  // its authorization checks; client department labels are not access credentials.
   const isAuthorizedStaff =
     (userRole === "department_head" &&
       alumni.department_code === userDepartment) ||

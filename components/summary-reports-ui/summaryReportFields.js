@@ -1,3 +1,5 @@
+// Shared editor section keys/hints. These keys match saved report text fields; EMPTY
+// also includes memorabilia_note for new drafts without changing the section order.
 export const SECTIONS = [
   { key: "organization_experience", title: "Working in the organization / company", hint: "Describe the company, your role, the people you worked with, and what you learned about the workplace." },
   { key: "work_schedule", title: "Work schedule", hint: "Explain your usual workdays, hours, and responsibilities." },

@@ -18,6 +18,8 @@ const Map = dynamic(() => import("./Map"), {
 export default function CompanyMapView({ sites, selectedId, setSelectedId, selected, origin, viewerPosition = null, route = null, routeQuery, routeActive, showRoute, clearRoute }) {
   const [dismissedId, setDismissedId] = useState(null);
   const returnFocusRef = useRef(null);
+  // Keep panel dismissal separate from selection so the same company can reopen.
+  // Selection and route attempts advance this counter to reject older completions.
   const routeRequestRef = useRef(0);
   const detailsOpen = Boolean(selected) && dismissedId !== selected.id;
   function selectCompany(id) {
@@ -29,6 +31,8 @@ export default function CompanyMapView({ sites, selectedId, setSelectedId, selec
     const request = ++routeRequestRef.current;
     setDismissedId(null);
     const result = await showRoute(site);
+    // Leave details open during loading or failure. Close only for this request's
+    // success, never when a previous company's slower route finishes.
     if (result?.success && request === routeRequestRef.current) setDismissedId(site.id);
   }
   function showSelectedRoute() { return requestRoute(selected); }

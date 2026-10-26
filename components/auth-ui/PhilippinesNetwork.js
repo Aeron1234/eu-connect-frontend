@@ -53,6 +53,8 @@ function position(point) {
   return { left: `${point.x / 520 * 100}%`, top: `${point.y / 640 * 100}%` };
 }
 
+// Start the next random group 100 ms before the previous group's timer expires.
+// These illustrative SVG connections are unrelated to Leaflet road routing.
 const ROUTE_DURATION_MS = 1800;
 const ROUTE_OVERLAP_MS = 100;
 const MAX_ACTIVE_ROUTES = 11; // Two groups of up to five, plus a selected pin's pulse.
@@ -70,6 +72,8 @@ export default function PhilippinesNetwork() {
     let nextTimer;
     let previousIds = new Set();
 
+    // Choose 2-5 unique locations, excluding the immediately previous batch. Sequence
+    // IDs distinguish repeated locations so one batch's expiry cannot remove another.
     function animate() {
       const choices = locations.filter(location => !previousIds.has(location.id));
       const count = 2 + Math.floor(Math.random() * 4);
@@ -95,6 +99,8 @@ export default function PhilippinesNetwork() {
       expiryTimers.clear();
     }
 
+    // Stop all automatic timers and clear active flights when the motion preference
+    // changes. Restart recurring groups only when reduced motion is disabled.
     function updateMotion() {
       clearTimers();
       setFlights([]);
@@ -110,6 +116,8 @@ export default function PhilippinesNetwork() {
     };
   }, []);
 
+  // Retain at most one manual pulse alongside bounded automatic groups. The SVG's
+  // animation-end handler removes completed pulse instances by sequence ID.
   function selectLocation(location) {
     setSelectedId(location.id);
     const pulse = { id: location.id, path: location.path, sequence: ++sequence.current, manual: true };

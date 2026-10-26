@@ -67,6 +67,8 @@ export default function FeedbackThread({ id, user, onBack, onDeleted = onBack })
     await onDeleted();
     await refresh();
   }
+  // Cancel in-flight reads and apply the confirmed edit/deletion with its new
+  // visible revision before refresh. Older loaded pages are gated by that revision.
   async function replyChanged(result) {
     await queryClient.cancelQueries({ queryKey: feedbackKeys.all(user.id) });
     queryClient.setQueryData(feedbackKeys.detail(user.id, id, user.role), previous => {
@@ -90,6 +92,8 @@ export default function FeedbackThread({ id, user, onBack, onDeleted = onBack })
     if (olderBusy) return;
     setOlderBusy(true);
     try {
+      // An older-reply page belongs to one visible revision. If the server revision
+      // changed while paging, refresh instead of attaching stale history.
       const version = query.data?.post?.reply_version;
       const current = older.version === version ? older.replies : [];
       const before = current[0]?.id || query.data?.replies?.[0]?.id;
@@ -100,6 +104,8 @@ export default function FeedbackThread({ id, user, onBack, onDeleted = onBack })
     } finally { setOlderBusy(false); }
   }
   const data = query.data;
+  // Hide cached discussion content on expired/denied/missing access or local deletion.
+  // Keep loaded content on ordinary background transport failures so retry stays useful.
   const accessDenied = [401, 403, 404].includes(query.error?.status);
   const post = accessDenied || deleted ? null : data?.post;
   const existing = new Set((data?.replies || []).map(r => r.id));

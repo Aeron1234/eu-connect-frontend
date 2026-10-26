@@ -7,6 +7,8 @@ import {
   pastInternshipFilesOptions,
 } from "@/lib/cache/past-internship-documents-queries";
 
+// Load files only when this past-record card is expanded. Confirmed changes patch
+// its cached rows/count before invalidation reconciles them with the server.
 export default function usePastInternshipFiles(record, currentUserId) {
   const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();

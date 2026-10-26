@@ -13,6 +13,8 @@ import { DEFAULT_MAP_ORIGIN } from "./mapVisitPlanning.mjs";
 
 const tabs = ["Map View", "Companies"];
 const emptyCompanies = [];
+// Join company queries, local search/region controls, selected sites and route state.
+// Use the session's location origin when available, otherwise the configured campus origin.
 export default function useMapLocationsView() {
   const { user } = useUser();
   const queryClient = useQueryClient();
@@ -28,8 +30,8 @@ export default function useMapLocationsView() {
   const [selectedId, setSelectedId] = useState(null);
   const [routeSiteId, setRouteSiteId] = useState(null);
 
-  // Normalize the API's company shape into what the map/list UI expects,
-  // once — stable composite id since the API doesn't provide one
+  // Memoize the UI shape for each API response. The company/coordinate composite
+  // identifies a grouped site; intern IDs remain actual internship record IDs.
   const companySites = useMemo(
     () =>
       initialData.map((c) => ({
@@ -57,6 +59,8 @@ export default function useMapLocationsView() {
     [initialData],
   );
 
+  // Apply region and text filters to one shared set of sites/interns for pins,
+  // company lists, city groups and recommendations. Drop sites with no matching interns.
   const sites = useMemo(() => {
     const q = query.trim().toLowerCase();
     return companySites
@@ -77,6 +81,7 @@ export default function useMapLocationsView() {
   }, [companySites, regionId, query]);
 
   const selected = sites.find((s) => s.id === selectedId) ?? null;
+  // Show route data only for the currently selected site still present in the filters.
   const routeSite = selected?.id === routeSiteId ? selected : null;
   const viewerLocation = useMapViewerLocation();
   const origin =
@@ -86,6 +91,8 @@ export default function useMapLocationsView() {
   const routeQuery = useQuery(
     mapCompanyRouteOptions(user?.id, routeSite, origin.live ? origin : null),
   );
+  // Resolve a success/failure result for panel handling. Retrying the active site
+  // forces a fresh query; changing the site or live origin uses a distinct key.
   function showRoute(site) {
     setSelectedId(site.id);
     setRouteSiteId(site.id);

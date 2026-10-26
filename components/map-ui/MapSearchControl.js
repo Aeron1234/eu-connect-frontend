@@ -51,6 +51,8 @@ export default function MapSearchControl({ onLocationSelect }) {
 
     let active = true;
     let version = 0;
+    // Track requests by input version. An older response must not hide the spinner
+    // for a newer query; multiple searches for one version settle together.
     const pending = new Map();
     const setLoading = (busy) => {
       if (!active) return;
@@ -63,6 +65,8 @@ export default function MapSearchControl({ onLocationSelect }) {
       // Include the existing one-second debounce in the visible waiting state.
       setLoading(input.value.length > 0);
     };
+    // Reset, Escape and selection invalidate older loading completions. Requests
+    // already in flight are not cancelled by this UI reset.
     const clearLoading = () => {
       version++;
       setLoading(false);

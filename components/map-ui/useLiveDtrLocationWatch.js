@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { socket } from "@/components/ui/SocketProvider";
 
+// Subscribe staff map tools to a student's temporary DTR location session.
+// Expose the latest location/status and release subscriptions when the target changes.
 export default function useLiveDtrLocationWatch(studentId, internshipId) {
   const [liveLocation, setLiveLocation] = useState(null);
   const [liveStatus, setLiveStatus] = useState("Waiting for the student to share a location.");

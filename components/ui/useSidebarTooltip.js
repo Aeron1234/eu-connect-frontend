@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+// Return event bindings plus a portal tooltip for collapsed desktop navigation.
+// Coordinates are viewport-relative; scrolling or resizing dismisses a stale position.
 export default function useSidebarTooltip(label, isCollapsed) {
   const [position, setPosition] = useState(null);
 

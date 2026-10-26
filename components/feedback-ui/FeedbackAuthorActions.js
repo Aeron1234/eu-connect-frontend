@@ -18,6 +18,8 @@ export function FeedbackActionButtons({ label, onEdit, onDelete }) {
     <Button type="button" variant="ghost" size="icon" className="size-8 hover:text-destructive" aria-label={"Delete " + label} onClick={onDelete}><Trash2 className="size-4" /></Button>
   </div>;
 }
+// Post deletion also removes discussion metadata and queues attachment cleanup.
+// Reply deletion affects only that reply. Both close only after confirmed success.
 export function FeedbackDeleteDialog({ postId, reply = null, onClose, onDone }) {
   const [busy, setBusy] = useState(false);
   async function submit(event) {

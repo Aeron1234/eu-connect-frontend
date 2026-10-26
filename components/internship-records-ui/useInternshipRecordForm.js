@@ -5,6 +5,8 @@ import { createInternshipRecord, updateOwnPendingInternshipRecord } from "@/lib/
 import { toastAndAction } from "@/lib/helpers";
 import { internshipRecordFields } from "./internshipRecordFormData.mjs";
 
+// Manage the placement/schedule draft and create/update action for an internship record.
+// Return field props and submission state; server validation remains authoritative.
 export default function useInternshipRecordForm({ recordStatus, onCreated, onUpdated, onConflict, activeRecord = null }) {
   const currentStatus = recordStatus || activeRecord?.status || "";
   const isCurrentRecord = currentStatus === "pending" || currentStatus === "ongoing";

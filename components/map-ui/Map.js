@@ -22,6 +22,8 @@ function pinIcon(count, active, showCount) {
   });
 }
 
+// Opt-in record-overview popups reuse the directions helper; other shared-map
+// callers keep their existing popup contents unless explicitly enabled.
 function CompanyGoogleMapsLink({ site, origin }) {
   const href = directionsUrl(site, origin || undefined);
   if (!href) return null;
@@ -40,6 +42,7 @@ function CompanyGoogleMapsLink({ site, origin }) {
 function FitBounds({ sites, maxZoom, route }) {
   const map = useMap();
   useEffect(() => {
+    // OSRM/GeoJSON stores longitude first; Leaflet bounds use latitude first.
     const routePoints = route?.geometry?.coordinates?.map(([lng, lat]) => [lat, lng]);
     if (!sites.length && !routePoints?.length) return;
     map.fitBounds(L.latLngBounds(routePoints?.length ? routePoints : sites.map((s) => [s.lat, s.lng])), {

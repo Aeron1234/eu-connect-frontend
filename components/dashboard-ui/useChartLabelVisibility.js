@@ -18,6 +18,8 @@ function getServerSnapshot() {
   return false;
 }
 
+// Labels need both a non-phone viewport and enough measured chart width.
+// Start hidden until measurement, and disconnect the observer when disabled/unmounted.
 export default function useChartLabelVisibility(requiredWidth, enabled = true) {
   const chartRef = useRef(null);
   const [chartWidth, setChartWidth] = useState(0);

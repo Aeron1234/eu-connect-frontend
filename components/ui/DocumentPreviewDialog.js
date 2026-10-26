@@ -16,6 +16,8 @@ export default function DocumentPreviewDialog({ state, onClose, onRetry }) {
     setDownloading(false); setDownloadError("");
     return () => { downloadRequest.current?.abort(); downloadRequest.current = null; };
   }, [state.open, state.filename]);
+  // On read failure, original download is a separate explicit action with its own
+  // abort/deadline state; a preview error never starts a download automatically.
   async function downloadOriginal() {
     if (downloadRequest.current || !state.downloadOriginal) return;
     const abort = new AbortController(); downloadRequest.current = abort;

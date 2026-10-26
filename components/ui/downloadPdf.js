@@ -12,6 +12,8 @@ export async function downloadPdf(response, fallbackFilename = "report.pdf") {
   return downloadPdfBlob(await response.blob(), filename);
 }
 
+// Despite the PDF helper name, this downloads the supplied blob unchanged; Office
+// previews use it for original bytes too. No format conversion happens here.
 export function downloadPdfBlob(blob, filename = "report.pdf") {
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);

@@ -8,6 +8,8 @@ import { summaryReportKeys } from "@/lib/cache/summary-reports-queries";
 import { saveSummaryReport } from "@/lib/server-actions/summary-reports-actions";
 import { EMPTY } from "./summaryReportFields";
 
+// Own summary text, retained/new images and the save mutation for one internship.
+// Return editor state/actions; preserve the draft on failure and release local preview URLs.
 export default function useSummaryReportEditor({ record, onSaved }) {
   const queryClient = useQueryClient();
   const { user } = useUser();
@@ -25,6 +27,8 @@ export default function useSummaryReportEditor({ record, onSaved }) {
     () => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)),
     [],
   );
+  // Track saved removals separately from new local files. The combined image cap
+  // counts retained saved images plus newly selected files.
   const retainedImages = (record.images || []).filter(
     (image) => !removeImageIds.includes(image.id),
   );
@@ -79,6 +83,8 @@ export default function useSummaryReportEditor({ record, onSaved }) {
   function submit(event) {
     event.preventDefault();
     setError("");
+    // This client word cap is shared with backend text validation; actual rendered
+    // page count is checked separately during PDF generation.
     if (words > 900) {
       setError(
         "Keep the report within 900 words so it can fit the three-page format.",
@@ -87,12 +93,16 @@ export default function useSummaryReportEditor({ record, onSaved }) {
     }
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) formData.set(key, value);
+    // Preserve selection order for new images. The server appends them after saved
+    // images and validates removal IDs against the report being edited.
     images.forEach(({ file }) => formData.append("images", file));
     formData.set("remove_image_ids", JSON.stringify(removeImageIds));
     if (removeAttachment) formData.set("remove_attachment", "true");
     mutation.mutate(formData);
   }
 
+  // Reject the whole selection on type/size/count failure. Local preview URLs belong
+  // to this editor and are released on removal or editor unmount.
   function selectImages(event) {
     const selected = Array.from(event.target.files || []);
     event.target.value = "";

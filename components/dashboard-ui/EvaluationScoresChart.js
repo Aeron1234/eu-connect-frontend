@@ -1,4 +1,4 @@
-// app/_components/EvaluationScoresChart.js
+// Display backend category averages; this chart does not recompute evaluation scores.
 "use client";
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -15,6 +15,7 @@ const chartConfig = {
   },
 };
 
+// Number category positions on the compact axis; tooltip data retains category names.
 function IndexAxisTick({ x, y, index }) {
   return (
     <g transform={`translate(${x},${y})`}>

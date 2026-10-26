@@ -38,6 +38,8 @@ function NarrativesPage() {
     ...(pastQuery.data || []).filter((record) => record.status === "finished"),
   ];
   const internship = records.find((record) => record.id === selectedId) || records[0];
+  // Finished internships remain readable/printable. Only the current ongoing record
+  // offers management, and create/edit additionally require the start-date gate.
   const canManage = Boolean(ongoingRecord && internship?.id === ongoingRecord.id);
   const startAccess = useInternshipStartAccess(internship?.date_started, "Weekly narratives");
   const canEdit = canManage && startAccess.allowed;

@@ -6,11 +6,14 @@ const SidebarContext = createContext(null);
 export function SidebarProvider({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  // Keep the sidebar's scroll position for this provider lifetime without rerendering
+  // on every scroll. It is separate from the page content's scroll position.
   const navigationScrollRef = useRef(0);
 
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
   const toggleMobile = () => setIsMobileOpen((prev) => !prev);
   const closeMobile = () => setIsMobileOpen(false);
+  // Reset both desktop/mobile state and the remembered navigation offset together.
   const resetSidebar = () => {
     setIsCollapsed(false);
     setIsMobileOpen(false);

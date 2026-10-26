@@ -14,6 +14,8 @@ import { ROLE_LABELS, toTitleCase, activityModuleLabel } from "./activityLogForm
 const defaultFilters = { actorRole: "", targetType: "", search: "" };
 const emptyFilterOptions = { actions: [], actorRoles: [], targetTypes: [] };
 
+// Coordinate filtered log pages, summary/filter choices and deletion controls.
+// Return view props and handlers; deletion must reconcile offset pages across variants.
 export default function useActivityLogsManager(initialPage) {
   const { user } = useUser();
   const userId = user?.id;

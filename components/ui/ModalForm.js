@@ -37,6 +37,8 @@ function Root({ children, className, onSubmit, onClickCapture, ...props }) {
       if (submitter?.type === "submit" && submitter.form === event.currentTarget &&
           !submitter.formNoValidate && !validate(event.currentTarget)) event.preventDefault();
     },
+    // Keyboard/programmatic submit events also validate; click capture alone is
+    // insufficient. formNoValidate remains an explicit per-submitter bypass.
     onSubmit(event) {
       if (event.defaultPrevented) return;
       if (!event.nativeEvent?.submitter?.formNoValidate && !validate(event.currentTarget)) {
@@ -54,6 +56,8 @@ function Root({ children, className, onSubmit, onClickCapture, ...props }) {
     );
   }
 
+  // Only direct Actions/Footer children stay outside the scrolling form body.
+  // Nested footers are not detected by this layout split.
   const content = Children.toArray(children);
   const isFooter = (child) => isValidElement(child) && (child.type === Actions || child.type === Footer);
   return (
@@ -150,6 +154,9 @@ function Confirmation({ children, title = "Confirm Action" }) {
   );
 }
 
+// closeOnSubmit wraps the submit control in DialogClose immediately; it does not
+// wait for a successful server response. Forms that must retain drafts on save
+// failure opt out and close from their confirmed-success handler.
 function Actions({
   children,
   isPending = false,

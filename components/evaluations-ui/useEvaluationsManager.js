@@ -11,6 +11,8 @@ const tabs = [
   { value: "past-evaluations", text: "Past Evaluations" },
 ];
 const changedEvaluationTabs = ["past-evaluations"];
+// Coordinate criteria/history tabs and their viewer-scoped queries.
+// selectedTab updates immediately; activeTab waits 300 ms unless its data is cached.
 export default function useEvaluationsManager(initialCriteria) {
   const { user } = useUser();
   const queryClient = useQueryClient();

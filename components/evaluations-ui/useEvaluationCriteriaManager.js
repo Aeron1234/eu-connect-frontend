@@ -13,6 +13,8 @@ import {
   toSections, buildFormData, addToGroups, setCriterionActive, setSectionActive,
 } from "./evaluationCriteriaState";
 
+// Manage criteria queries, unsaved sections, filtering and optimistic activation edits.
+// Keep draft-only section identities separate from persisted criterion IDs.
 export default function useEvaluationCriteriaManager(initialCriteria) {
   const { user } = useUser();
   const userId = user?.id;

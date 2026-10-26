@@ -18,6 +18,8 @@ function keyOf(post) {
   return post.id;
 }
 
+// Coordinate posting filters, loaded pages and list reconciliation after card mutations.
+// Keep favorite changes and refreshed page boundaries consistent with the active filters.
 export default function useInternshipPosts({
   internshipPosts: initialData,
   pagination: {
@@ -78,6 +80,8 @@ export default function useInternshipPosts({
     debouncedFilters.search !== query ||
     debouncedFilters.mine !== (scope === "myposts" ? "true" : "") ||
     debouncedFilters.favorite !== favorite;
+  // Seed server rows only under the filters that produced them; other filter sets
+  // use their own query cache and page stack.
   const matchesInitialFilters = Object.keys(initialFilters).every(
     (key) => debouncedFilters[key] === initialFilters[key],
   );
@@ -151,6 +155,8 @@ export default function useInternshipPosts({
     );
   }, [initialData, initialFilters, initialPage, initialTotal, initialTotalPages, queryClient, userId]);
 
+  // Patch this viewer's cached rows across filter/page variants. Membership and totals
+  // still need a server refresh when content or favorite filters change.
   function updateCachedPosts(transform) {
     queryClient.setQueriesData(
       { queryKey: internshipPostsKeys.all(userId) },
@@ -190,6 +196,8 @@ export default function useInternshipPosts({
     });
   }
 
+  // Apply the confirmed saved row immediately, then invalidate lists because course,
+  // work type, search matches and owner/dashboard views may be affected.
   function handleItemUpdate(updatedItem) {
     updateCachedPosts((posts) =>
       posts.map((post) =>
@@ -199,6 +207,8 @@ export default function useInternshipPosts({
     refreshPosts();
   }
 
+  // Remove the confirmed deleted ID from loaded variants, then refetch authoritative
+  // membership and totals instead of calculating them from visible rows alone.
   function handleItemDelete(deletedId) {
     updateCachedPosts((posts) => posts.filter((post) => post.id !== deletedId));
     refreshPosts();

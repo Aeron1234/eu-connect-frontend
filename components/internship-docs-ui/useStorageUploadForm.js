@@ -8,6 +8,8 @@ import {
 import { uploadInternshipFile } from "@/lib/server-actions/internship-docs-actions";
 import { toastAndAction } from "@/lib/helpers";
 
+// Own the requirement picker and upload transition. The caller supplies the file FormData;
+// this hook reports progress and reconciles document caches after success or timeout.
 export default function useStorageUploadForm({ fileRequirementTypes, currentUserId, internshipId }) {
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();

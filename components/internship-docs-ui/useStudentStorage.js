@@ -8,6 +8,8 @@ import {
   pastStorageRecordsOptions,
 } from "@/lib/cache/student-storage-queries";
 
+// Coordinate current/past internship and requirement reads for the signed-in student.
+// Return queries plus separate initial/refresh error flags so cached content can remain visible.
 export default function useStudentStorage() {
   const { user } = useUser();
   const currentUserId = user?.id || "";

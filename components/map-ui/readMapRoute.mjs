@@ -1,3 +1,5 @@
+// Use an authenticated same-origin GET, outside the browser Server Action queue.
+// server_route=1 requests the bounded server fallback; retain status/stage errors.
 export async function readMapRoute(internshipId, origin, { signal, serverRoute = false } = {}, fetcher = fetch) {
   const params = new URLSearchParams();
   if (origin) {

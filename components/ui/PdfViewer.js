@@ -9,6 +9,7 @@ import ErrorUI from "./ErrorUI";
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 
+// Use locally prepared assets matching this PDF.js version, including fallback fonts.
 const assetRoot = `/pdfjs/${pdfjs.version}/`;
 pdfjs.GlobalWorkerOptions.workerSrc = `${assetRoot}pdf.worker.min.mjs`;
 const options = { cMapUrl: `${assetRoot}cmaps/`, cMapPacked: true, standardFontDataUrl: `${assetRoot}standard_fonts/`, wasmUrl: `${assetRoot}wasm/`, iccUrl: `${assetRoot}iccs/`, isEvalSupported: false };
@@ -18,6 +19,7 @@ const busy = <p role="status" className="flex items-center gap-2 p-6 text-sm tex
 export default function PdfViewer({ file }) {
   const [pdf, setPdf] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  // Start at 75% of the available preview width; print uses the PDF's own page sizes.
   const [zoom, setZoom] = useState(.75);
   const [width, setWidth] = useState(280);
   const [error, setError] = useState(null);
@@ -41,6 +43,7 @@ export default function PdfViewer({ file }) {
     printingCleanup.current?.();
     const request = printingRequest.current = new AbortController();
     setPrinting(true); setActionError(null);
+    // Serialize print preparation and reuse the loaded PDF rather than exporting again.
     try { printingCleanup.current = await printPdfDocument(pdf, { signal: request.signal, title: file.filename, onProgress: (page, total) => setPrintProgress(`Preparing page ${page} of ${total}…`) }); }
     catch (failure) { if (!request.signal.aborted) setActionError(failure); }
     finally { if (!request.signal.aborted) { printingRequest.current = null; setPrinting(false); setPrintProgress(""); } }

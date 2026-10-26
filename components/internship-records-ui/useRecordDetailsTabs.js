@@ -6,6 +6,8 @@ import { useUser } from "@/contexts/UserContext";
 import { notifyReadError } from "@/lib/client-read-error";
 import { internshipRecordDetailsKeys, internshipRecordDetailsTabOptions } from "@/lib/cache/internship-record-details-queries";
 
+// Load record-detail sections on demand while Overview uses its existing record prop.
+// Expose tab/loading state, DTR paging and targeted cache updates after child mutations.
 export default function useRecordDetailsTabs(record, internshipId) {
   const { user } = useUser();
   const queryClient = useQueryClient();

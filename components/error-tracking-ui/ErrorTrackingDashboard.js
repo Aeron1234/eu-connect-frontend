@@ -60,6 +60,7 @@ export default function ErrorTrackingDashboard() {
     setIsDeleting(true);
     const queryKey = errorTrackingKeys.all(user?.id);
     try {
+      // Cancel older diagnostic reads before deletion so they cannot restore stale groups.
       await queryClient.cancelQueries({ queryKey });
       const result = await toastAndAction({
         loadingLabel: "Deleting error group...",
@@ -69,6 +70,8 @@ export default function ErrorTrackingDashboard() {
         args: [fingerprint],
       });
       if (!result?.success) return;
+      // After confirmed deletion, reconcile each filtered view using its own counts.
+      // Then discard the detail cache and refresh authoritative groups/pagination.
       queryClient.setQueriesData({ queryKey: [...queryKey, "list"] }, old =>
         removeErrorGroupFromResult(old, fingerprint));
       const updated = queryClient.getQueryData(errorTrackingKeys.list(user?.id, filters));

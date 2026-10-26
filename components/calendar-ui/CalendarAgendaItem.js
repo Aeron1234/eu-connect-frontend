@@ -9,6 +9,8 @@ import TodoPreview from "./TodoPreview";
 export default function CalendarAgendaItem({ entry, canSchedule, role, user, busy, mutate, setEditor, setDeletingEntry }) {
   const meta = kinds.find((kind) => kind.id === entry.kind);
   const Icon = meta.icon;
+  // Admins can manage visible schedules; heads manage their authored schedules.
+  // The API repeats those checks. Private to-do controls follow a separate branch.
   const editable = canSchedule && entry.kind === "schedule" && (role === "admin" || String(entry.source.created_by) === String(user.id));
   return (
     <div

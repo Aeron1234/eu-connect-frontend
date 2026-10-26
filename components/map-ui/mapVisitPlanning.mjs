@@ -4,6 +4,8 @@ export const DEFAULT_MAP_ORIGIN = {
   label: "MSEUF–Candelaria",
 };
 
+// Build Google Maps driving directions from saved numeric destination coordinates.
+// The campus is the default origin; this link needs no road-route request.
 export function directionsUrl(site, origin = DEFAULT_MAP_ORIGIN) {
   if (!site || !Number.isFinite(site.lat) || !Number.isFinite(site.lng))
     return null;
@@ -27,8 +29,8 @@ export function routeDuration(seconds) {
     : `${Math.floor(minutes / 60)} hr${minutes % 60 ? ` ${minutes % 60} min` : ""}`;
 }
 
-// Counts use student identity, so duplicate records cannot inflate the
-// number of people reachable by visiting a city.
+// Normalize locality spelling/casing for grouping, including common city prefixes
+// and accents. Province stays part of the key to distinguish same-named cities.
 function localityKey(value = "") {
   return value
     .normalize("NFD")
@@ -40,6 +42,9 @@ function localityKey(value = "") {
     .replace(/\s+/g, " ");
 }
 
+// Count distinct student identities across the supplied filtered sites, regardless
+// of department. Fall back to internship ID for legacy rows without studentId.
+// Missing city/province stays explicitly unclassified rather than guessed from address.
 export function groupSitesByCity(sites) {
   const groups = new Map();
   for (const site of sites) {
@@ -83,6 +88,9 @@ export function straightLineMeters(a, b) {
   return 6371000 * 2 * Math.asin(Math.sqrt(Math.min(1, angle)));
 }
 
+// Recommend up to three classified cities by distinct students, then nearest-company
+// straight-line proximity, company count and city name. This is visit prioritization,
+// not driving-time ranking or a multi-stop route optimizer.
 export function recommendVisitCities(sites, origin) {
   return groupSitesByCity(sites)
     .filter((group) => group.id !== "unclassified")

@@ -23,6 +23,8 @@ function InternshipPostButton({ courses, onSuccess = null }) {
         action: createInternshipPosting,
         args: [formData],
       });
+      // Only confirmed posting success refreshes the employer's jobs and opportunity
+      // lists, then notifies the parent that it may close the form.
       if (result?.success) {
         void queryClient.invalidateQueries({
           queryKey: dashboardListsKeys.employerJobsAll(user.id),

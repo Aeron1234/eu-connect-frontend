@@ -30,6 +30,8 @@ export function createPdfRuntime({
   const queue = [];
   let browserPromise = null;
 
+  // Allow one active job per runtime; queue at most maxQueued additional callers.
+  // Queue overflow and expiry return PDF_BUSY before report data is fetched.
   function acquire() {
     if (!active) { active = true; return Promise.resolve(); }
     if (queue.length >= maxQueued) return Promise.reject(busy());
@@ -57,6 +59,8 @@ export function createPdfRuntime({
     }).catch(() => {});
   }
 
+  // Detach the saved browser promise before cleanup so a failed browser is not reused.
+  // A close timeout falls back to killing its process.
   async function discardBrowser() {
     const pending = browserPromise;
     browserPromise = null;
@@ -99,6 +103,8 @@ export function createPdfRuntime({
       signal.throwIfAborted();
       page = await (context || browser).newPage();
       page.setDefaultTimeout(operationTimeoutMs);
+      // Wait for page loading to become idle before export. The optional check below
+      // rejects incomplete/broken images; it is separate from PDF font handling.
       await page.setContent(html, { waitUntil: "networkidle0", timeout: operationTimeoutMs });
       signal.throwIfAborted();
       if (verifyImages) {
@@ -123,6 +129,8 @@ export function createPdfRuntime({
     // Acquire before fetching report data or images, not only before Chromium.
     await acquire();
     const controller = new AbortController();
+    // The job deadline aborts cooperative fetches/checkpoints and kills Chromium.
+    // It does not forcibly settle arbitrary work that ignores the supplied signal.
     const timer = setTimeout(() => controller.abort(timedOut()), jobTimeoutMs);
     controller.signal.addEventListener("abort", killBrowser, { once: true });
     try {
@@ -142,7 +150,8 @@ export function createPdfRuntime({
       clearTimeout(timer);
       controller.signal.removeEventListener("abort", killBrowser);
       if (controller.signal.aborted || !reuseBrowser) await discardBrowser();
-      // Never start another job while an aborted operation is still unwinding.
+      // Release the slot only after work and cleanup finish unwinding; a deadline alone
+      // does not make it safe for another job to reuse Chromium.
       release();
     }
   }
@@ -158,6 +167,8 @@ export async function readPdfImage(response, signal, maxBytes = 5 * 1024 * 1024)
     throw tooLarge();
   }
   if (!response.body) throw new Error("Could not load a report image.");
+  // Enforce the byte limit while streaming as well as through Content-Length.
+  // The caller's fetch signal must interrupt pending network reads on cancellation.
   const reader = response.body.getReader();
   const chunks = [];
   let total = 0;

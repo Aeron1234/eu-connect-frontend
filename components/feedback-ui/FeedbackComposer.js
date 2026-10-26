@@ -28,6 +28,8 @@ export default function FeedbackComposer({ userId, onClose, onPosted, initialDat
   const internship = category === "internship_feedback";
   const query = useQuery({ ...feedbackInternOptions(userId), enabled: internship });
   const available = new Map((query.data?.interns || []).map(intern => [intern.id, intern]));
+  // Keep existing mention snapshots available during edits even when they no longer
+  // appear in the current supervised-intern list. New tags remain backend-validated.
   for (const mention of initialData?.mentions || []) {
     if (!available.has(mention.internship_id)) available.set(mention.internship_id, { ...mention, id: mention.internship_id });
   }
@@ -45,6 +47,8 @@ export default function FeedbackComposer({ userId, onClose, onPosted, initialDat
     if (existingAttachments.length - removed.length + files.length > 3) return showActionError(toast, "Keep up to three attachments in total.");
     form.set("removedAttachmentIds", JSON.stringify(removed));
     form.set("category", category);
+    // Only internship feedback submits tags. Category changes cannot carry a hidden
+    // department audience into platform, technical or general feedback.
     form.set("internshipIds", JSON.stringify(internship ? selected : []));
     files.forEach(file => form.append("attachments", file));
     setBusy(true);
@@ -53,6 +57,8 @@ export default function FeedbackComposer({ userId, onClose, onPosted, initialDat
         action: editing ? updateFeedback : createFeedback, args: editing ? [initialData.post.id, form] : [form], loadingLabel: editing ? "Updating feedback..." : "Posting feedback...",
         successLabel: editing ? "Feedback updated." : "Feedback posted.", errorLabel: "Could not save feedback.", timeoutMs: 120000,
       });
+      // Keep the draft/files available on returned failure or timeout. Only confirmed
+      // success hands the saved ID/detail to the parent for cache reconciliation.
       if (result?.success) await onPosted(result.id, result.detail);
     } finally { setBusy(false); }
   }

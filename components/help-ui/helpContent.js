@@ -24,6 +24,8 @@ export function getHelpSections(user) {
   ];
 }
 
+// Page manuals search the same filtered sections as Help, so a known guide ID
+// cannot bypass role/registrar visibility.
 export function getPageGuide(user, id) {
   return getHelpSections(user).flatMap(section => section.guides).find(guide => guide.id === id);
 }

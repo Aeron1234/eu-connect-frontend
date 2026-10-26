@@ -1,4 +1,4 @@
-// app/_components/MapDropdownFilter.js
+// Convert Select string values back to the numeric region ID used by map filtering.
 "use client";
 
 import DropdownFilter from "../ui/DropdownFilter";

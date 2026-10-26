@@ -4,6 +4,9 @@ function json(body, status = 200) {
 const validStatus = status => Number.isInteger(status) && status >= 400 && status <= 599;
 const providerCodes = new Set(['ROUTING_TIMEOUT', 'ROUTING_UNAVAILABLE', 'ROUTING_BUSY', 'ROUTING_NO_ROUTE', 'ROUTING_CONFIGURATION']);
 
+// Bound lookup, optional provider work and the overall response separately.
+// Cancellation/deadlines settle the handler even if an underlying helper ignores
+// abort; they do not guarantee that already-started I/O has stopped.
 export function createMapRouteHandler({ read, route, lookupMs = 22000, providerMs = 16000, totalMs = 38000 }) {
   return async function GET(request, context) {
     let stage = 'lookup';
@@ -55,6 +58,8 @@ export function createMapRouteHandler({ read, route, lookupMs = 22000, providerM
       if (!result || typeof result !== 'object') {
         return json({ error: 'The application server returned an invalid route response. Refresh and try again.', stage, code: 'MAP_ROUTE_RESPONSE_INVALID' }, 503);
       }
+      // Run the public provider server-side only when explicitly requested and after
+      // a fresh authorized descriptor lookup. Custom-provider results pass through.
       if (search.get('server_route') === '1' && result.client_route === true) {
         stage = 'provider';
         return json(await step(() => route(result, { cache: !origin }), providerMs));

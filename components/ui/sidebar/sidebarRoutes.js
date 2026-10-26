@@ -19,6 +19,8 @@ import {
   Users,
 } from "lucide-react";
 
+// Registrar heads receive SIPP Reports in place of the Records link. These route
+// choices organize navigation; pages and APIs still enforce their own access.
 function roleRouteGroups(userRole, userDepartment) {
   if (userRole === "student") {
     return [
@@ -190,6 +192,8 @@ function getFormattedRole(role) {
   }
 }
 
+// Combine role tools with shared links. Employers have Feedback but no full
+// Calendar/Announcements links; students have no Feedback link.
 export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
   return (
     [

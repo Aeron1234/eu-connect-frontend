@@ -7,11 +7,15 @@ import { evaluationsKeys } from "@/lib/cache/evaluations-queries";
 import { userProfileKeys, userProfileTabOptions } from "@/lib/cache/user-profile-queries";
 import { buildTabs } from "./profileTabs";
 
+// Coordinate permitted profile tabs, delayed reads and child mutation refresh handlers.
+// Server-provided department/supervision access constrains which private caches can be used.
 export default function useSearchedUserTabs({
   searchedUserId, userId, userRole, searchedUserRole, hasOngoingInternship,
   defaultFilter, initialDtrData, initialDtrLocation, supervision, canViewStudentRecords,
 }) {
   const tabs = buildTabs({ userRole, searchedUserRole, supervision, hasOngoingInternship, canViewStudentRecords });
+  // Heads require a positive server permission for student records. Missing permission
+  // fails closed, and stale requested/loaded tabs are clamped to the available list.
   const restricted = userRole === "department_head" && searchedUserRole === "student" && canViewStudentRecords !== true;
   const hideTabs = searchedUserRole === "student" && !hasOngoingInternship;
 
@@ -42,6 +46,8 @@ export default function useSearchedUserTabs({
 
   useEffect(() => {
     if (!restricted || !userId || !searchedUserId) return;
+    // Remove this viewer/target's private query entries when access is restricted.
+    // Cancellation/removal complements server authorization; it does not replace it.
     const filters = {
       queryKey: userProfileKeys.all(userId, searchedUserId),
       predicate: query => query.queryKey[3] !== "info",
@@ -77,6 +83,8 @@ export default function useSearchedUserTabs({
     restricted,
   ]);
 
+  // Reject unavailable tabs. Cached allowed tabs switch immediately; uncached ones
+  // use the delayed active-tab effect, with DTR returning to page one.
   function handleTabClick(value) {
     if (!tabs.some(tab => tab.value === value)) return;
     setSelectedTab(value);

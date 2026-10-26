@@ -266,6 +266,7 @@ function ComboboxChipsInput({
   );
 }
 
+// Return a stable DOM ref for the combobox anchor used to position its popup.
 function useComboboxAnchor() {
   return React.useRef(null);
 }

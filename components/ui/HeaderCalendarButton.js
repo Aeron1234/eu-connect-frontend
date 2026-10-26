@@ -7,6 +7,8 @@ import { ArrowUpRight, CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useUser } from "@/contexts/UserContext";
 
+// All roles retain the simple date picker. Only these roles get the full calendar
+// link; this popup does not fetch announcements, schedules or private to-dos.
 const CALENDAR_ROLES = new Set(["student", "admin", "department_head"]);
 
 export default function HeaderCalendarButton() {

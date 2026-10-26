@@ -10,6 +10,8 @@ import {
 import { toastAndAction } from "@/lib/helpers";
 import useDocumentActions from "./useDocumentActions";
 
+// Coordinate certificate selection, upload/delete transitions and document previews.
+// Local confirmed rows bridge the interval until the parent supplies a fresh server list.
 export default function useEmployerCertificateUploads({ searchedUserId, company, uploadedFiles, onChanged }) {
   const [filesOverride, setFilesOverride] = useState(null);
   // Keep a confirmed local change only while the parent still supplies the same list.

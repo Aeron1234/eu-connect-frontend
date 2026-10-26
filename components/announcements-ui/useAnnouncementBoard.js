@@ -16,6 +16,8 @@ import {
 
 const defaultFilters = { category: "all", search: "" };
 
+// Coordinate the filtered/pinned feed, linked-announcement navigation and refreshes.
+// Return card lists and navigation refs; leave posting permissions to the form/API.
 export default function useAnnouncementBoard({
   targetId = null,
   categories: initialCategories,
@@ -136,6 +138,8 @@ export default function useAnnouncementBoard({
     }
   }
 
+  // User filtering ends automatic navigation to the linked announcement so fetching
+  // later target pages cannot override the user's new search/category choice.
   function handleSearchChange(event) {
     setNavigationTargetId(null);
     setHighlightedId(null);
@@ -193,6 +197,8 @@ export default function useAnnouncementBoard({
     });
   }, [initialPinned, initialRegular, initialTotalPages, initialTotalRecords, queryClient, user.id]);
 
+  // Writes and pin changes can shift page boundaries. Drop later pages, then refresh
+  // this viewer's announcement queries and calendar projections.
   function refreshList() {
     queryClient.setQueriesData({ queryKey: announcementsKeys.all(user.id) }, (old) =>
       old?.pages?.length

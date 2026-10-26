@@ -26,6 +26,8 @@ export default function StudentSummaryReportsPage() {
     deleteMutation,
     handleDelete,
   } = useStudentSummaryReports();
+  // Gate the selected record's editor by start date without hiding a saved report.
+  // The backend rechecks ownership, eligible status and start date on every save.
   const startAccess = useInternshipStartAccess(record?.date_started, "Summary reports");
 
   if (reports.isPending) return <SummaryReportsSkeleton />;

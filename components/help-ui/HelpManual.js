@@ -6,6 +6,8 @@ import { getPageGuide } from "./helpContent";
 
 export default function HelpManual({ guideId, title, onBrand = false, triggerStyles }) {
   const { user } = useUser();
+  // Reuse the shared guide source rather than maintaining separate page instructions.
+  // Unavailable guides render no manual trigger for this user.
   const guide = getPageGuide(user, guideId);
   if (!guide) return null;
   return (

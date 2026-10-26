@@ -1,3 +1,5 @@
+// Space browser provider requests within this module instance; this is not a
+// shared/distributed rate limiter across browsers or server instances.
 let nextPublicRequestAt = 0;
 const routeError = (message, status = 503) => Object.assign(new Error(message), { status });
 function validPoint(point) {
@@ -56,9 +58,11 @@ export async function requestMapRoute(read, internshipId, origin, timeoutMs = 25
         const route = data.code === 'Ok' ? data.routes?.[0] : null;
         return { ...result, geometry: route?.geometry, distance_meters: route?.distance, duration_seconds: route?.duration, attribution: 'Routing: OSRM / FOSSGIS · OpenStreetMap contributors' };
       }, Math.min(timeoutMs, 10000), 'The road routing service timed out. Try again or use Google Maps.');
+      // Reject malformed road geometry instead of drawing a straight-line substitute.
       if (!validRoute(result)) throw routeError('The routing service returned an invalid road route. Try again or use Google Maps.');
     } catch (error) {
-      // Retry network/provider failures through Vercel, never authorization or NoRoute errors.
+      // Use one same-origin server fallback for 5xx provider/network failures.
+      // A 422 NoRoute/NoSegment result must not trigger another provider attempt.
       if (!fallback || error.status < 500) throw error;
       result = await withDeadline(signal => fallback(internshipId, origin, { signal }), timeoutMs + Math.min(timeoutMs, 15000),
         'The fallback routing request timed out. Try again or use Google Maps.');

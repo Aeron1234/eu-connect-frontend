@@ -11,6 +11,8 @@ import { createOfficeRoot, renderSheet, safeDocxElement, sanitizeOfficeContent, 
 
 const buttonClass = "inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40";
 const frameHtml = '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="' + OFFICE_CSP.replaceAll('"', "&quot;") + '"></head><body></body></html>';
+// Bound UI waits without claiming to cancel the underlying task. Rendering effects
+// also check their abort signal before publishing content.
 const delayLimit = (task, ms, message) => {
   let timer;
   return Promise.race([task, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(message)), ms); })]).finally(() => clearTimeout(timer));
@@ -26,6 +28,8 @@ export default function OfficeViewer({ file }) {
   const [truncated, setTruncated] = useState(false);
   const contentRef = useRef(null), frame = useRef(null), printTimer = useRef(null);
   const printAbort = useRef(null), printFrame = useRef(null);
+  // Print only the sanitized content root in a separate frame, without app styles.
+  // Preview zoom lives on the viewer body and is reset by print-specific CSS.
   const print = useReactToPrint({
     contentRef, documentTitle: file.filename, ignoreGlobalStyles: true,
     printIframeProps: { sandbox: "allow-same-origin allow-modals", referrerPolicy: "no-referrer" },
@@ -33,6 +37,8 @@ export default function OfficeViewer({ file }) {
     print: async target => {
       printFrame.current = target;
       await delayLimit(Promise.all([
+        // Wait for print-frame fonts/images before invoking print; failed image decodes
+        // are tolerated, while a readiness timeout prevents starting this print.
         target.contentDocument?.fonts?.ready,
         ...Array.from(target.contentDocument?.images || []).map(image => image.decode?.().catch(() => {})),
       ]), 10_000, "Preparing print resources timed out.");
@@ -41,6 +47,8 @@ export default function OfficeViewer({ file }) {
       target.contentWindow.focus(); target.contentWindow.print();
     },
     onBeforePrint: async () => {
+      // Partial/error previews cannot print. Word includes all rendered pages; a
+      // spreadsheet root contains only the selected sheet.
       if (!contentRef.current || error || loading || truncated) throw new Error("Wait for the complete document preview before printing.");
       printAbort.current = new AbortController();
       setPrinting(true); setActionError("");
@@ -64,6 +72,8 @@ export default function OfficeViewer({ file }) {
     setLoading(true); setError(null); setPages(0); setPage(1); setSheetData(null); setTruncated(false);
     (async () => {
       if (file.kind === "docx") {
+        // Validate the DOCX archive in a cancellable worker before rendering in this frame.
+        // Disable alt chunks/comments and sanitize the rendered DOM and CSS before use.
         await parseOfficeFile(file, 0, abort.signal);
         const { renderAsync } = await import("docx-preview");
         const body = frameDoc.createElement("div"), styles = frameDoc.createElement("div");
@@ -102,6 +112,8 @@ export default function OfficeViewer({ file }) {
       contentRef.current = null; root.replaceChildren();
       setError(failure); setLoading(false);
     });
+    // A sheet/file change or unmount invalidates this render and releases image URLs.
+    // Late rendering work must pass the abort checkpoint before publishing its root.
     return () => { abort.abort(); contentRef.current = null; if (imageUrl) URL.revokeObjectURL(imageUrl); root.remove(); };
   }, [file, frameDoc, sheet, retry]);
 

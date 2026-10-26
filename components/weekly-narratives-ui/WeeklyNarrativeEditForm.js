@@ -19,6 +19,8 @@ function WeeklyNarrativeEditForm({ narrative, onSuccess }) {
     startTransition(async () => {
       const result = await toastAndAction(handlers);
       if (result?.success) {
+        // Prefer the server's saved row; otherwise merge submitted fields into the existing
+        // row so the card updates immediately without discarding unrelated metadata.
         onSuccess?.(
           result.narrative ?? {
             ...narrative,

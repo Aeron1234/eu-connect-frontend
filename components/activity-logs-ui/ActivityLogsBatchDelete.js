@@ -27,12 +27,15 @@ export default function ActivityLogsBatchDelete({ disabled, onDelete, pending })
   const busy = pending || checking;
   const reversed = Boolean(fromDate && throughDate && fromDate > throughDate);
 
+  // Changing either date invalidates the earlier preview so confirmation cannot reuse
+  // a count associated with another range.
   function updateDate(setDate, value) {
     setDate(value);
     setPreview(null);
     setError(null);
   }
 
+  // Retry here performs another count only. Deletion is a separate confirmed action.
   async function checkRange(event) {
     event?.preventDefault();
     if (checkingRef.current || !fromDate || !throughDate || reversed) return;
@@ -55,6 +58,8 @@ export default function ActivityLogsBatchDelete({ disabled, onDelete, pending })
     }
   }
 
+  // Use the range snapshotted into confirmation, not a mutable preview or page filter.
+  // The preview count is informational; the server returns the actual deleted count.
   async function confirmDeletion() {
     if (deletingRef.current || !confirmation || pending) return;
     deletingRef.current = true;

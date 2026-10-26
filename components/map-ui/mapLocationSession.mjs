@@ -1,3 +1,5 @@
+// Poll fresh one-shot GPS reads, waiting 10 seconds after each attempt finishes.
+// No watchPosition subscription or navigation history is created.
 export function startMapLocationSession({
   socket,
   geolocation,
@@ -39,6 +41,8 @@ export function startMapLocationSession({
     // The device pin and directions remain usable if the WebSocket is reconnecting.
     onPosition(location);
     cancel(expiry);
+    // Expire a published fix after 45 seconds without replacement; device location
+    // continues to work when the socket is unavailable.
     expiry = schedule(() => {
       if (active) {
         onPosition(null);
@@ -94,6 +98,8 @@ export function startMapLocationSession({
       { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
     );
   }
+  // Accept echoes only for this map-session ID and a recent timestamp, so another
+  // tab/session cannot replace the displayed fix through this listener.
   function received(message) {
     if (
       active &&
@@ -111,6 +117,8 @@ export function startMapLocationSession({
   socket.on("disconnect", disconnected);
   if (!socket.connected) socket.connect();
   update();
+  // Ignore late callbacks and remove timers/listeners on stop or unmount.
+  // The socket stop event invalidates backend authorization work still in flight.
   return () => {
     active = false;
     cancel(timer);

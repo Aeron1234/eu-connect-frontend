@@ -18,6 +18,8 @@ import AcademicYearFilter from "../ui/AcademicYearFilter";
 import DropdownFilter from "../ui/DropdownFilter";
 import AlumniCompaniesSkeleton from "../skeletons/AlumniCompaniesSkeleton";
 
+// Match the backend's name-only grouping so overlapping pages cannot duplicate
+// the same normalized company card.
 function keyOf(company) {
   return company.company_name.trim().toLowerCase();
 }
@@ -117,6 +119,8 @@ function PastInternshipsPageContent({
     showCachedFilters({ academicYear, search: query.trim(), departmentId: departmentFilter });
   }
 
+  // Change only department; retain the selected academic year and trimmed search.
+  // The query key separates every combined filter set.
   function handleDepartmentChange(departmentId) {
     setDepartmentFilter(departmentId);
     showCachedFilters({ academicYear: yearFilter, search: query.trim(), departmentId });

@@ -17,6 +17,8 @@ export async function printPdfDocument(pdf, { signal, onProgress = () => {}, tit
     const style = doc.createElement("style");
     style.textContent = "html,body{margin:0;padding:0;background:white}section{margin:0;padding:0;break-after:page;overflow:hidden}section:last-child{break-after:auto}img{display:block;width:100%;height:100%;object-fit:contain}";
     doc.head.appendChild(style);
+    // Print every page independently of the viewer's selected page, width or zoom.
+    // Page-sized images preserve the PDF layout without copying viewer controls.
     for (let number = 1; number <= pdf.numPages; number++) {
       signal?.throwIfAborted();
       onProgress(number, pdf.numPages);
@@ -42,6 +44,7 @@ export async function printPdfDocument(pdf, { signal, onProgress = () => {}, tit
         image.alt = `Page ${number}`;
         image.src = canvas.toDataURL("image/png");
         sheet.appendChild(image); doc.body.appendChild(sheet);
+        // Decode each print image before releasing the source canvas and opening print.
         await image.decode();
       } finally { canvas.width = 0; canvas.height = 0; renderTask = null; }
     }

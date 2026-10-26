@@ -5,6 +5,8 @@ import { header, escapeHtml, signatures } from "./sippTemplateShared.js";
 export function annexDHtml(data) {
   const c = data.company;
 
+  // Render one row per returned intern, with the company cell spanning that count.
+  // The row count follows data rather than a fixed paper-form minimum.
   const internRows = c.interns
     .map(
       (s, i) => `

@@ -35,6 +35,8 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
       : undefined,
   });
   const isLoading = pageQuery.isPending;
+  // Show pending UI during debounce as well as the first query load, so older rows
+  // are not presented as matches for the newly typed search.
   const isSearchPending = searchInput.trim() !== query.search;
   const isPending = isSearchPending || isLoading;
   const loadingMessage = isSearchPending
@@ -64,6 +66,8 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
     return () => clearTimeout(timer);
   }, [searchInput, query.search]);
 
+  // Changing course resets pagination but retains the current trimmed name search.
+  // The distribution chart is separate and keeps its department-wide aggregate.
   function changeCourse(value) {
     setCourseFilter(value);
     setQuery({ page: 1, courseId: value, search: searchInput.trim() });

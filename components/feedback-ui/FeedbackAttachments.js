@@ -16,6 +16,8 @@ export default function FeedbackAttachments({ postId, attachments = [] }) {
   const { previewPdf } = usePdfPreview();
   if (!attachments.length) return null;
   return <div className="mt-4 grid min-w-0 gap-3" aria-label="Attachments">{attachments.map(attachment => {
+    // Use the same-origin authorized endpoint for inline images and PDF preview.
+    // Original download is explicit; neither view exposes a permanent storage URL.
     const url = "/api/feedback/" + encodeURIComponent(postId) + "/attachments/" + encodeURIComponent(attachment.id);
     return attachmentKind(attachment) === "image" ? <FeedbackImage key={attachment.id} attachment={attachment} url={url} /> :
       <div key={attachment.id} className="flex min-w-0 items-center gap-2 rounded-lg border border-border p-3">

@@ -9,6 +9,8 @@ import {
   approveInternshipDocument,
 } from "@/lib/server-actions/internship-docs-actions";
 
+// Share authorized preview/download and acceptance actions across document cards.
+// A custom downloadAction supplies profile/storage context; onChanged reports confirmed acceptance.
 export default function useDocumentActions({ internshipId, downloadAction, onChanged }) {
   const [isPending, startTransition] = useTransition();
   const { previewPdf, previewDocument } = usePdfPreview();

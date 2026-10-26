@@ -10,7 +10,7 @@ import { accountProfileOptions, accountProfileKeys } from "@/lib/cache/account-p
 import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { ArrowLeft } from "lucide-react";
 
-// Adjust this import path to wherever this server action actually lives.
+// Self-profile saves use the shared authenticated account action.
 import { updateUserInfo } from "@/lib/server-actions/account-actions";
 
 import {
@@ -47,6 +47,8 @@ function AccountProfileContent({ roleLabel, userData = {} }) {
   const [saveError, setSaveError] = useState("");
   const [isSaving, startSaveTransition] = useTransition();
 
+  // Student names stay read-only here and in the backend. Academic assignments are
+  // also omitted from the editable self-profile payload.
   const isNameEditable = role !== "student";
 
   const resetToOriginal = () => {
@@ -103,6 +105,8 @@ function AccountProfileContent({ roleLabel, userData = {} }) {
 
       const result = await updateUserInfo(formData);
 
+      // Keep editing and entered values on failure. Confirmed saves refresh profile and
+      // dashboard reads, then refresh server-rendered account data.
       if (!result?.success) {
         setSaveError(result?.error || "Failed to update profile.");
         return;

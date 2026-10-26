@@ -7,6 +7,8 @@ import {
 import { cn } from "@/lib/utils";
 import { modalFormContentClass } from "./modalFormStyles";
 
+// Form shell keeps the header outside its children's scrolling body/footer layout.
+// ModalForm supplies that body split; this shell alone does not validate inputs.
 export default function FormDialogContent({
   title,
   description,

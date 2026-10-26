@@ -5,6 +5,8 @@ export function createDocumentPreviewController({ timeoutMs = 45_000 } = {}) {
   let state = closed, version = 0, abort, lastRequest, disposed = false;
   const listeners = new Set();
   const emit = next => { state = next; for (const listener of listeners) listener(); };
+  // Advance the request version before aborting; superseded loaders cannot publish
+  // private bytes or errors into a newer preview.
   function cancel() { version++; abort?.abort(); }
   async function open(request) {
     if (disposed) return false;
@@ -14,11 +16,14 @@ export function createDocumentPreviewController({ timeoutMs = 45_000 } = {}) {
     const timer = setTimeout(() => controller.abort(new Error("Preparing the document timed out. Please try again.")), timeoutMs);
     let aborted;
     try {
+      // The timeout bounds the controller's wait, not arbitrary work inside the loader.
+      // A cancelled or superseded result is discarded before becoming ready.
       const file = await Promise.race([
         Promise.resolve().then(async () => readDocumentResponse(await request.load(controller.signal), request, controller.signal)),
         new Promise((_, reject) => { aborted = () => reject(controller.signal.reason); controller.signal.addEventListener("abort", aborted, { once: true }); }),
       ]);
       if (controller.signal.aborted || current !== version || disposed) return false;
+      // Keep the original blob for explicit download; format parsing happens in the viewer.
       emit({ open: true, status: "ready", document: file, error: null, filename: file.filename });
       return true;
     } catch (error) {

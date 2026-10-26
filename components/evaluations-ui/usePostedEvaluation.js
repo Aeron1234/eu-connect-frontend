@@ -1,6 +1,8 @@
 "use client";
 import { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
+// Derive one evaluation card's expansion, printing and deletion controls from the viewer.
+// These flags describe UI affordances; the backend authorizes each action independently.
 export default function usePostedEvaluation({ ev, defaultOpen }) {
   const [open, setOpen] = useState(!!defaultOpen);
   const { user } = useUser();

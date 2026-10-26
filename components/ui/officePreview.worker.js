@@ -3,6 +3,8 @@ import { validateOfficeArchive } from "../../lib/document-preview.mjs";
 
 self.onmessage = async ({ data }) => {
   try {
+    // DOCX work here checks archive structure only; DOM rendering stays in OfficeViewer.
+    // Spreadsheet parsing returns bounded saved values for the selected sheet.
     if (data.kind === "docx") {
       validateOfficeArchive(data.buffer, "word/document.xml");
       self.postMessage({ ok: true, result: null });

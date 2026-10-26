@@ -19,6 +19,8 @@ const statusBadgeStyles = {
   rejected: "text-red-700 bg-red-50",
 };
 
+// Completed is the display label for the backend's finished status. These filters
+// browse employer assignments; request acceptance remains in Notifications.
 const filters = [
   { label: "All", status: "all" },
   { label: "Ongoing", status: "ongoing" },
@@ -57,6 +59,8 @@ function InternsSupervisedCard({ initialPage }) {
   const pageQuery = useQuery({
     ...employerInternsPageOptions(user?.id, query),
     enabled: Boolean(user?.id),
+    // The overview seeds only the unfiltered first page. Other statuses/pages must
+    // load under their own keys rather than reusing that initial result.
     initialData: query.page === 1 && query.status === "all"
       ? initialPage
       : undefined,

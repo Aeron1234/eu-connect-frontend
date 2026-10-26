@@ -35,6 +35,8 @@ export const confirmationPrimaryClass =
 export const confirmationCancelClass =
   confirmationButtonClass + " border-border bg-card text-foreground-soft hover:bg-muted hover:text-foreground";
 
+// Read the surrounding confirmation's description ID for nested form accessibility.
+// Returns null outside ConfirmationContent; consumers should allow that standalone case.
 export function useConfirmationLayout() {
   return useContext(ConfirmationContext);
 }

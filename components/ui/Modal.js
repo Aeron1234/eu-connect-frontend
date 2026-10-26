@@ -26,6 +26,8 @@ function Modal({
   if (disabled) return null;
 
   return (
+    // Provide open/onOpenChange together for controlled dialogs. Omitting open leaves
+    // Radix in charge of trigger/close state; onOpenChange alone is not forwarded.
     <Dialog {...(open === undefined ? {} : { open, onOpenChange })}>
       <DialogTrigger
         disabled={disabled}

@@ -27,6 +27,8 @@ function WeeklyNarrativePostButton() {
       });
       if (result?.success) {
         setOpen(false);
+        // A new entry shifts page boundaries: discard loaded later pages before refetching.
+        // Only confirmed saves close the dialog and trigger this reset.
         queryClient.setQueriesData({ queryKey: weeklyNarrativesKeys.all(user.id) }, (old) =>
           old?.pages?.length
             ? { pages: [old.pages[0]], pageParams: [1] }

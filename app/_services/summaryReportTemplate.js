@@ -12,6 +12,8 @@ export function summaryReportHtml(report, imageDataUrls = []) {
     <section><h2>${label}</h2>${proseParagraphs(report[key])}</section>`).join("");
   const images = (Array.isArray(imageDataUrls) ? imageDataUrls : [imageDataUrls]).filter(Boolean)
     .map((url) => `<figure><img src="${escapeHtml(url)}" alt="Internship memorabilia" /></figure>`).join("");
+  // The legacy supplemental file is referenced, not embedded into the PDF. Memorabilia
+  // images are supplied separately as data URLs in their saved order.
   const attachmentText = report.attachment_name
     ? `<p class="attachment">A supplemental file is available with the digital report.</p>` : "";
 

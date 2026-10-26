@@ -11,6 +11,8 @@ import { saveAnnexCReport, deleteAnnexCReport } from "@/lib/server-actions/sipp-
 
 const emptyRow = () => ({ issue: "", solution: "", recommendation: "" });
 
+// Coordinate the Annex C editor, saved report pages and submission/deletion controls.
+// Return grouped props while keeping local draft rows separate from cached saved reports.
 export default function useAnnexCReports(initialPage) {
   const { user } = useUser();
   const userId = user?.id;
@@ -18,7 +20,8 @@ export default function useAnnexCReports(initialPage) {
   const serverSnapshotRef = useRef(initialPage);
   const [tab, setTab] = useState("form");
 
-  // --- Form tab state ---
+  // Form values are local draft state; four starter rows are editable scaffolding,
+  // not a requirement for four stored or printed entries.
   const [academicYear, setAcademicYear] = useState("");
   const [degreeProgram, setDegreeProgram] = useState("");
   const [rows, setRows] = useState([
@@ -149,6 +152,8 @@ export default function useAnnexCReports(initialPage) {
     setRows((prev) => prev.filter((_, i) => i !== index));
   }
 
+  // Clearing the editor also clears its saved-report identity, preventing a new form
+  // from accidentally updating the previously selected draft.
   function resetForm() {
     setAcademicYear("");
     setDegreeProgram("");
@@ -159,6 +164,8 @@ export default function useAnnexCReports(initialPage) {
     setEditingReportId(null);
   }
 
+  // Copy saved entries so local edits do not mutate cached report objects.
+  // The backend verifies that the requested report is still a draft at save time.
   function editDraft(report) {
     setAcademicYear(report.academic_year);
     setDegreeProgram(report.degree_program);
@@ -184,6 +191,8 @@ export default function useAnnexCReports(initialPage) {
       setFormError("Prepared By is required to submit.");
       return;
     }
+    // Draft saves skip confirmation. Submission requires Prepared By and an explicit
+    // confirmation before sending the final status.
     if (status === "submitted" && !confirmed) {
       setConfirmation({ kind: "submit" });
       return;
@@ -206,6 +215,8 @@ export default function useAnnexCReports(initialPage) {
         return;
       }
 
+      // Only a returned saved report resets the draft and switches tabs. Refresh all
+      // report variants because a save can change year/status membership and offsets.
       refreshReportsCache();
       setTab("reports");
       resetForm();

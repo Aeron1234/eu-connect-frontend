@@ -1,3 +1,4 @@
+// Map-card presentation only: two initials from name words, with no change to site identity.
 export function getInitials(name = "") {
   return name
     .split(" ")
@@ -7,6 +8,7 @@ export function getInitials(name = "") {
     .toUpperCase();
 }
 
+// Use abbreviated month/year labels for compact internship cards; no end date means Present.
 export function formatPeriod(dateStarted, dateEnded) {
   const start = dateStarted
     ? new Date(dateStarted).toLocaleDateString("en-US", {

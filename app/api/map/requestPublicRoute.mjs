@@ -1,5 +1,8 @@
 import { createRouteProviderRequester } from './routeProviderRequest.mjs';
 
+// Reuse validated campus geometry for one hour with at most 200 entries and
+// coalesce identical pending work within this instance. Authorization happens
+// before this router is called, including for geometry-cache hits.
 export function createPublicMapRouter({ requester = createRouteProviderRequester({ timeoutMs: 15000 }), fetcher = fetch } = {}) {
   const routes = new Map();
   const pending = new Map();

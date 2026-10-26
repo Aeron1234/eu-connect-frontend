@@ -2,7 +2,7 @@ import { createPdfRuntime } from "./pdfRuntime.mjs";
 
 async function launchBrowser() {
   if (process.env.VERCEL) {
-    // Production / serverless
+    // Vercel uses the packaged Sparticuz executable with puppeteer-core.
     const chromium = (await import("@sparticuz/chromium")).default;
     const puppeteer = await import("puppeteer-core");
     return puppeteer.launch({
@@ -13,7 +13,8 @@ async function launchBrowser() {
       protocolTimeout: 10_000,
     });
   } else {
-    // Local dev
+    // Other Node hosts, including local development and a VPS, use Puppeteer's browser.
+    // This branch is selected by VERCEL, not NODE_ENV.
     const puppeteer = await import("puppeteer");
     return puppeteer.launch({ headless: true, timeout: 10_000, protocolTimeout: 10_000 });
   }

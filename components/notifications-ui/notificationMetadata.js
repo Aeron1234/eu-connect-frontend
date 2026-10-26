@@ -3,6 +3,8 @@ import {
   Star, ClipboardX, Award, UserPlus, UserCheck, UserX, MapPin,
 } from "lucide-react";
 
+// Shared display metadata for inbox cards and the header dropdown. An optional dropdownIcon
+// changes only that compact surface; unknown types use a generic Update/muted presentation.
 const NOTIFICATION_TYPES = {
   announcement: { icon: Megaphone, label: "Announcement", tone: "primary" },
   calendar_schedule: { icon: CalendarDays, label: "Calendar schedule", tone: "success" },

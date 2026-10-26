@@ -1,3 +1,5 @@
+// Format monitoring counters for display. Ratios are fractions (0 to 1); timestamps use
+// the viewer's locale/timezone, while duration takes elapsed seconds.
 const number = new Intl.NumberFormat();
 
 const count = (value) => number.format(Number(value) || 0);

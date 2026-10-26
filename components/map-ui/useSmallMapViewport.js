@@ -8,6 +8,8 @@ function subscribe(callback) {
 }
 const snapshot = () => window.matchMedia(query).matches;
 const serverSnapshot = () => false;
+// Subscribe to the map's below-lg breakpoint (up to 1023 px). The server snapshot
+// is false; matchMedia supplies the browser value after hydration and on changes.
 export default function useSmallMapViewport() {
   return useSyncExternalStore(subscribe, snapshot, serverSnapshot);
 }

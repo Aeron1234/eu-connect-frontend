@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+// Shared responsive layout: one column below sm, two from sm, then three/four
+// from lg according to card count. Keep DashboardStatsSkeleton aligned.
 function DashboardStats({ stats = [] }) {
   if (!stats.length) return null;
 

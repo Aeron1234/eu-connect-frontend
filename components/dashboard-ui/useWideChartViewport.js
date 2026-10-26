@@ -18,6 +18,8 @@ function getServerSnapshot() {
   return false;
 }
 
+// Choose hover interactions only above 1024 px; smaller screens use click/tap.
+// The server snapshot starts false and matchMedia updates after hydration.
 export default function useWideChartViewport() {
   return useSyncExternalStore(
     subscribeToViewport,

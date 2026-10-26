@@ -18,6 +18,8 @@ import { kinds, blank } from "./calendarKinds";
 import { monthDates, shiftMonth, parseDay } from "./calendarDateUtils";
 import { entriesFor } from "./calendarEntries";
 
+// Own month/day selection, entry filters, editor state and save/delete handlers.
+// Return grouped view/editor/confirmation props; APIs enforce entry ownership and roles.
 export default function useCalendarBoard({ initialDate, initialData }) {
   const { user } = useUser();
   const queryClient = useQueryClient();
@@ -56,6 +58,8 @@ export default function useCalendarBoard({ initialDate, initialData }) {
   }, [monthQuery.error, monthQuery.data]);
 
   useEffect(() => {
+    // Only announcement/schedule alerts refresh calendar projections; private to-dos
+    // are refreshed by their own confirmed mutation path.
     const refreshForCalendarNotification = (notification) => {
       if (notification?.type === "calendar_schedule" || notification?.type === "announcement") {
         void queryClient.invalidateQueries({ queryKey: calendarKeys.all(user.id) });
@@ -84,6 +88,8 @@ export default function useCalendarBoard({ initialDate, initialData }) {
   }
 
   const dates = useMemo(() => monthDates(month), [month]);
+  // Kind filters only control display. Student-only to-dos/internship entries and
+  // staff schedule tools supplement the backend's role and ownership checks.
   const visibleKinds = useMemo(() => new Set(kinds
     .filter((kind) => role === "student" || (kind.id !== "todo" && kind.id !== "internship"))
     .filter((kind) => role !== "employer" || kind.id !== "announcement")
@@ -98,6 +104,8 @@ export default function useCalendarBoard({ initialDate, initialData }) {
     .filter((kind) => kind.id !== "internship" || role === "student")
     .filter((kind) => role !== "employer" || kind.id !== "announcement");
 
+  // A returned failure keeps the editor open. Confirmed success closes it and
+  // invalidates this user's month caches without relying on socket delivery.
   async function mutate(action, successMessage) {
     setBusy(true);
     try {

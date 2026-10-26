@@ -27,6 +27,8 @@ function formatTimestamp(dateStr) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+// Accept metadata already decoded or as JSON text. Ignore malformed/non-object values
+// rather than letting an old log entry break the entire activity list.
 function parseMetadata(metadata) {
   if (!metadata) return null;
   try {
@@ -53,6 +55,8 @@ const POSTING_DETAIL_FIELDS = [
   ["eligible_courses", "Eligible courses"],
 ];
 
+// Expose only labeled posting fields and primitive values in expanded details.
+// Raw IDs/unknown metadata stay out of the display; course IDs fall back to a count.
 function postingDetails(metadata) {
   if (!metadata) return [];
   const readable = value => {

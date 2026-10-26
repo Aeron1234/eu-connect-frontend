@@ -1,3 +1,5 @@
+// Presence check only: allow zero coordinates and reject null/empty members.
+// Use toPosition below for numeric conversion and geographic range validation.
 export function hasValidCoords(coords) {
   const [lat, lon] = coords || [];
   return (
@@ -10,6 +12,8 @@ export function hasValidCoords(coords) {
   );
 }
 
+// Normalize [latitude, longitude] for Leaflet, returning null for invalid/missing coordinates.
+// OSRM request coordinates use the opposite order and must be converted separately.
 export function toPosition(coords) {
   if (!hasValidCoords(coords)) return null;
   const lat = Number(coords[0]);

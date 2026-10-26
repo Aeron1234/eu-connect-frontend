@@ -9,6 +9,8 @@ import {
 } from "@/lib/cache/current-internship-documents-queries";
 
 const EMPTY_DOCS = [];
+// Combine document search/category/view controls with current-student storage reads.
+// Other viewers use the supplied fileData; current storage mutations refresh its cache.
 export default function useRecordsDocuments({ fileData, internshipId, userRole, currentUserId }) {
   const queryClient = useQueryClient();
   const isCurrentStorage = userRole === "student" && Boolean(currentUserId && internshipId);

@@ -1,4 +1,4 @@
-// app/_components/RecentActivityCard.js
+// Display caller-prepared activity labels/icons/times; stored log codes stay upstream.
 import { Sparkles } from "lucide-react";
 
 function RecentActivityCard({ activities = [], title = "Recent Activity" }) {

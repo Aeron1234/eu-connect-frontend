@@ -11,8 +11,8 @@ import useChartLabelVisibility from "./useChartLabelVisibility";
 import useWideChartViewport from "./useWideChartViewport";
 import chartPalette from "./chartPalette";
 
-// Fixed palette, assigned to courses in sorted order so the same course
-// always gets the same color across renders/filters.
+// Assign colors by sorted course names so reordering the same set is stable.
+// Adding/removing courses can shift palette positions; colors are not permanent IDs.
 function buildCourseColorMap(courses) {
   const sorted = [...courses].sort();
   const map = new Map();
@@ -48,6 +48,8 @@ function CustomTooltip({ active, payload }) {
 function HoursDistributionDonut({ summary = [] }) {
   const useHoverTooltip = useWideChartViewport();
   const { chartData, chartConfig } = useMemo(() => {
+    // Use the whole supplied summary, not the tracker page/course filter, for colors.
+    // Segment values below are course average-completion percentages, not student counts.
     const courses = summary.map((row) => row.course);
     const colorMap = buildCourseColorMap(courses);
     const data = summary.map((row) => ({

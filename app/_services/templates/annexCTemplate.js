@@ -1,6 +1,8 @@
 import { header, escapeHtml, signatures } from "./sippTemplateShared.js";
 
 export function annexCHtml(data) {
+  // Render exactly the supplied saved rows. Do not add blank template rows or impose
+  // a fixed row count; table pagination follows actual content.
   const entries = data.rows.map((r) => `<tr><td>${escapeHtml(r.issues)}</td><td>${escapeHtml(r.solutions)}</td><td>${escapeHtml(r.recommendations)}</td></tr>`);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8" /><title>SIPP Annex C</title></head><body>
     ${header("C", ["ANNUAL REPORT IN THE", "IMPLEMENTATION OF STUDENT INTERNSHIP PROGRAM IN THE PHILIPPINES (SIPP)"], data.ay)}

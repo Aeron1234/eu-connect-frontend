@@ -13,6 +13,8 @@ const EMPTY_ACCOUNT_FORM = {
   email: "",
 };
 
+// Own account draft fields, role-dependent assignments and the create transition.
+// Return grouped props for the form sections; reset them only on confirmed creation.
 export default function useCreateAccountForm({ roles, courses, departments, onCreated }) {
   const [isPending, startTransition] = useTransition();
 
@@ -33,6 +35,8 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
         args: [formData],
       });
 
+      // Reset fields and notify the parent only after confirmed creation; failed actions
+      // leave the entered values available for correction.
       if (result?.success) {
         setAccountForm(EMPTY_ACCOUNT_FORM);
         setSelectedCourseId("");
@@ -67,6 +71,8 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
   // from the fetched roles list instead of hardcoding ids here.
   const selectedRoleName = roles.find((r) => `${r.id}` === selectedRole)?.role;
 
+  // Students select a course and gender; their department is derived from that course.
+  // Department heads select a department directly.
   const showCourse = selectedRoleName === "student";
   const showDepartment = selectedRoleName === "department_head";
   const showGender = selectedRoleName === "student";

@@ -16,6 +16,8 @@ const INITIAL_DIMENSION = {
 
 const ChartContext = React.createContext(null);
 
+// Read series/theme configuration shared by ChartContainer, legends and tooltips.
+// Throw outside the provider so an incorrectly nested chart fails with a useful message.
 function useChart() {
   const context = React.useContext(ChartContext);
 

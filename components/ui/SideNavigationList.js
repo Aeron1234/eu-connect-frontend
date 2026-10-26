@@ -20,6 +20,8 @@ export default function SideNavigationList({ fullName = "", avatar = null }) {
 
   const navRef = useRef(null);
 
+  // Restore the navigation container before paint, temporarily disabling smooth
+  // scrolling. This does not reset the main content or browser scroll.
   useLayoutEffect(() => {
     const nav = navRef.current;
     if (!nav) return;

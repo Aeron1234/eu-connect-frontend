@@ -1,4 +1,4 @@
-// app/_components/InternshipsPerCourseChart.js
+// Render department course totals supplied by the overview; padding is visual only.
 "use client";
 
 import { Briefcase } from "lucide-react";
@@ -36,6 +36,7 @@ function buildChartData(data) {
   return [...data, ...placeholders];
 }
 
+// Blank slots affect spacing but never appear as data in the tooltip.
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length || payload[0]?.payload?.isPlaceholder) {
     return null;

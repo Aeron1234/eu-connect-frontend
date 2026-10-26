@@ -2,6 +2,8 @@
 
 import { CalendarDays, ClipboardList, Megaphone, BriefcaseBusiness } from "lucide-react";
 
+// Calendar entry display metadata and the empty month shape. Kind IDs match query result
+// collections; role/ownership rules are applied by the board and backend, not these labels.
 export const kinds = [
   { id: "announcement", label: "Announcements", dot: "bg-primary", chip: "border-primary/25 bg-primary/10 text-primary-emphasis", icon: Megaphone },
   { id: "schedule", label: "Schedules", dot: "bg-emerald-500", chip: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300", icon: CalendarDays },

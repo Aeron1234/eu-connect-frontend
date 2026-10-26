@@ -13,6 +13,8 @@ function todayManila() {
 export default async function CalendarPage({ searchParams }) {
   const params = await searchParams;
   let selected = todayManila();
+  // Resolve a schedule link through an authorized read before selecting its start.
+  // Otherwise accept a real date-only query value, falling back to today in Manila.
   if (params?.schedule && /^\d+$/.test(String(params.schedule))) {
     const schedule = await getCalendarSchedule(params.schedule);
     if (schedule.starts_on) selected = schedule.starts_on;

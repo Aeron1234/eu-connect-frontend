@@ -7,6 +7,9 @@ function dateRange(start, end, day) {
   };
 }
 
+// Project the authorized month response onto one calendar day using date-only keys.
+// Announcement and schedule endpoints are inclusive; missing announcement end
+// means one day. Visibility is enforced by the API, not by this projection.
 export function entriesFor(data, day) {
   const result = [];
   for (const item of data.announcements ?? []) {

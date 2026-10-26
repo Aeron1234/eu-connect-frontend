@@ -1,5 +1,7 @@
 import { pdfFilename } from "./downloadPdf.js";
 
+// Reject non-PDF success responses before handing bytes to PDF.js. This header
+// signature check identifies likely PDFs; PDF.js still parses the document.
 export async function readPreviewPdf(response, fallbackFilename, signal) {
   signal?.throwIfAborted();
   if (!response.ok) {
@@ -21,6 +23,8 @@ export function createPdfPreviewController({ createUrl = (blob) => URL.createObj
   const listeners = new Set();
   function emit(next) { state = next; for (const listener of listeners) listener(); }
   function cancel() {
+    // Invalidate earlier completions even when their loaders do not honor abort.
+    // Release the previous preview URL as soon as it is replaced or closed.
     version++;
     abortController?.abort();
     if (objectUrl) { revokeUrl(objectUrl); objectUrl = null; }
@@ -34,6 +38,8 @@ export function createPdfPreviewController({ createUrl = (blob) => URL.createObj
     const timeout = setTimeout(() => abort.abort(Object.assign(new Error("Preparing the PDF timed out. Please try again."), { status: 504, code: "PDF_TIMEOUT" })), timeoutMs);
     let onAbort;
     try {
+      // Race cancellation against loading so close/timeout can settle the UI even if
+      // a loader is still running. Version checks keep its late result out of state.
       const file = await Promise.race([
         Promise.resolve().then(async () => readPreviewPdf(await request.load(abort.signal), request.filename || "report.pdf", abort.signal)),
         new Promise((_, reject) => { onAbort = () => reject(abort.signal.reason); abort.signal.addEventListener("abort", onAbort, { once: true }); }),

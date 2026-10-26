@@ -7,6 +7,8 @@ import {
   pastInternshipRecordsOptions,
 } from "@/lib/cache/past-internship-documents-queries";
 
+// Expose this viewer's cached past records, seeded and reconciled from server props.
+// Returns the record array; callers do not receive the underlying query state.
 export default function usePastInternshipDocuments(records, currentUserId) {
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(records);

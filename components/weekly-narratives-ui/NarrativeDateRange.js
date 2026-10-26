@@ -4,6 +4,8 @@ import { formatNarrativeRange } from "@/lib/weekly-narrative-dates.mjs";
 
 export default function NarrativeDateRange({ narrative }) {
   const range = formatNarrativeRange(narrative.date_from, narrative.date_to);
+  // Display coverage separately from submission. An older entry without a valid
+  // saved range still shows its week and any valid submission date.
   const submitted = narrative.created_at ? new Date(narrative.created_at) : null;
   return <div className="mt-2 space-y-1.5">
     <p className="flex items-start gap-1.5 text-xs font-medium leading-relaxed text-foreground-soft">

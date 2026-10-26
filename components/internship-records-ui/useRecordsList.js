@@ -11,6 +11,8 @@ import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { toastAndAction } from "@/lib/helpers";
 import { updateInternshipRecordStatus } from "@/lib/server-actions/internship-records-actions";
 
+// Coordinate the staff records list, debounced criteria and status-change confirmation.
+// Return filter/card/dialog props and reconcile affected list, map and dashboard caches.
 export default function useRecordsList({
   initialData,
   filter: initialFilter = "all",

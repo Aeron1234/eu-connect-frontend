@@ -17,6 +17,8 @@ import {
 
 const EMPTY_LIST = [];
 
+// Coordinate department/course reads, editor drafts and activation mutations.
+// Return section/dialog props; reference and account-form caches also depend on these writes.
 export default function useDepartmentCoursesManager(currentUserId) {
   const queryClient = useQueryClient();
   const departmentsQuery = useQuery({

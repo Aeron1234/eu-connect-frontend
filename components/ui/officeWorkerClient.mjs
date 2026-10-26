@@ -2,9 +2,12 @@ export async function parseOfficeFile(file, sheet, signal) {
   signal.throwIfAborted();
   const buffer = await file.blob.arrayBuffer();
   signal.throwIfAborted();
+  // Create a worker per parse so cancellation/timeout can stop synchronous parsing.
+  // Transfer this buffer to it; the original file blob remains available for download.
   const worker = new Worker(new URL("./officePreview.worker.js", import.meta.url), { type: "module" });
   return new Promise((resolve, reject) => {
     let done = false;
+    // Settle once and terminate the worker on success, failure, timeout or abort.
     const finish = (error, result) => {
       if (done) return; done = true;
       clearTimeout(timer); signal.removeEventListener("abort", onAbort); worker.terminate();

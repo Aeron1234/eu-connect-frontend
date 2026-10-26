@@ -1,3 +1,5 @@
+// Legacy status badge colors for display labels; this helper does not define posting state
+// or restore the retired confirmation/dispute workflow. Unknown labels use the blue fallback.
 export const evaluationStatusClass = (status) =>
     status === "Completed" || status === "Submitted"
       ? "bg-emerald-100 text-emerald-700"

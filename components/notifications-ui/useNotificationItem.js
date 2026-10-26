@@ -11,6 +11,8 @@ import useSupervisorRequestResponse from "@/lib/hooks/useSupervisorRequestRespon
 import { canDeleteNotification } from "@/lib/notification-permissions.mjs";
 import { invalidateNotificationTarget, openAnnouncementFromNotification } from "./notificationActions";
 
+// Provide opening, responding and deletion handlers for one inbox notification.
+// Combine server actionability with confirmed local response state while parent data refreshes.
 export default function useNotificationItem(item, onChanged) {
   const router = useRouter();
   const queryClient = useQueryClient();

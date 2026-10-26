@@ -26,7 +26,10 @@ function DocumentPreviewHost({ ref }) {
 
 export function PdfPreviewProvider({ children }) {
   const host = useRef(null), documentHost = useRef(null);
+  // Hosts are keyed by pathname below. Navigation remounts them and their cleanup
+  // closes pending reads and releases preview state.
   const pathname = usePathname();
+  // Only one preview host is open at a time; switching type closes the previous read.
   const previewPdf = useCallback(request => {
     documentHost.current?.close();
     return host.current?.open(request) ?? Promise.resolve(false);
@@ -43,6 +46,8 @@ export function PdfPreviewProvider({ children }) {
   </PreviewContext.Provider>;
 }
 
+// Access previewPdf/previewDocument from a surrounding PdfPreviewProvider.
+// Loaders read authorized bytes on demand; the provider owns modal state and cancellation.
 export function usePdfPreview() {
   const context = useContext(PreviewContext);
   if (!context) throw new Error("Document preview must be used within PdfPreviewProvider.");

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+// Maintain a local card list for immediate removal/rollback; restoreItem prepends a card.
+// A changed parent evaluations array replaces this local list with the new snapshot.
 export default function useEvaluationItems(evaluations) {
   const [items, setItems] = useState(evaluations);
 

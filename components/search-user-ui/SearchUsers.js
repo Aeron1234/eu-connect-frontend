@@ -23,6 +23,8 @@ function SearchUsers() {
   const [inputValue, setInputValue] = useState("");
   const [activeTerm, setActiveTerm] = useState("");
   const term = inputValue.trim();
+  // Use history below three trimmed characters. New uncached terms wait 500 ms;
+  // exact cached terms can become active immediately.
   const isSearching = term.length > 2;
 
   const historyQuery = useQuery({
@@ -40,6 +42,8 @@ function SearchUsers() {
     return () => clearTimeout(timer);
   }, [activeTerm, isSearching, term]);
 
+  // Clear the old active term while waiting for a new uncached query so stale results
+  // do not look like matches for the text currently in the search box.
   function handleInputChange(value) {
     setInputValue(value);
     const nextTerm = value.trim();
@@ -48,6 +52,8 @@ function SearchUsers() {
     setActiveTerm(cached ? nextTerm : "");
   }
 
+  // Cancel older history reads before applying a confirmed delete/clear locally,
+  // then refetch this viewer's authoritative history.
   function refreshHistory(update) {
     if (!userId) return;
     const queryKey = searchUsersKeys.history(userId);
