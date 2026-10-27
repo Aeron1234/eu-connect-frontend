@@ -91,6 +91,7 @@ test("timeline is read-only for employers/staff and exposes opt-in only to autho
     "@tanstack/react-query": { useQueryClient: () => ({}) }, "@/contexts/UserContext": { useUser: () => ({ user: { id: "viewer" } }) },
     "@/lib/server-actions/rotations-actions": {}, "@/lib/helpers": {},
     "@/lib/cache/student-records-queries": {}, "@/lib/cache/weekly-narratives-queries": {}, "@/lib/cache/student-storage-queries": {},
+    "@/components/skeletons/CompanyRotationsSkeleton": empty,
     "../ui/Modal": empty, "../ui/ModalForm": {}, "../ui/ErrorUI": empty,
     "../ui/button": { Button: ({ children, ...props }) => { delete props.variant; delete props.size; return React.createElement("button", props, children); } },
   }).default;

@@ -1,6 +1,7 @@
 "use client";
 
 import useInternshipRotations from "@/lib/hooks/useInternshipRotations";
+import CompanyRotationsSkeleton from "@/components/skeletons/CompanyRotationsSkeleton";
 import CompanyRotations from "./CompanyRotations";
 import { useState } from "react";
 import ErrorUI from "@/components/ui/ErrorUI";
@@ -130,6 +131,7 @@ function InternshipRecordsManager() {
       {(recordsQuery.isPending || regionsQuery.isPending) ? (
         tab === "form" ? (
           <div className="min-w-0" role="status" aria-label="Loading internship records">
+            {(!recordsQuery.data || activeRecord?.id) && <CompanyRotationsSkeleton compact className="mb-4" />}
             <InternshipRecordFormSkeleton />
           </div>
         ) : (

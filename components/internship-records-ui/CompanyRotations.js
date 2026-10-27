@@ -1,5 +1,6 @@
 "use client";
 
+import CompanyRotationsSkeleton from "@/components/skeletons/CompanyRotationsSkeleton";
 import { useRef, useState } from "react";
 import { Pencil, Plus, Repeat2, Trash2 } from "lucide-react";
 import useInternshipRotations from "@/lib/hooks/useInternshipRotations";
@@ -28,7 +29,7 @@ export default function CompanyRotations({ internshipId, readOnly = false, compa
   const [expanded, setExpanded] = useState(!compact);
   const busy = useRef(false);
   if (!internshipId) return null;
-  if (query.isPending) return <div role="status" className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Loading company rotations…</div>;
+  if (query.isPending) return <CompanyRotationsSkeleton compact={compact} readOnly={readOnly} className={className} />;
   if (query.isError) return <ErrorUI compact error={query.error} reset={() => void query.refetch()} logError={false} />;
   const data = query.data;
   const canManage = !readOnly && data.canManage;
