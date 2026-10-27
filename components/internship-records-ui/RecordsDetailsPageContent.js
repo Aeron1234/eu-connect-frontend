@@ -1,5 +1,7 @@
 "use client";
 
+import CompanyRotations from "./CompanyRotations";
+import useInternshipRotations from "@/lib/hooks/useInternshipRotations";
 import ErrorUI from "@/components/ui/ErrorUI";
 import EvaluationCard from "../evaluations-ui/EvaluationCard";
 import RecordsDocuments from "../internship-docs-ui/RecordsDocuments";
@@ -27,9 +29,11 @@ function RecordsDetailsPageContent({ record, internshipId }) {
     handleDtrLocationSaved, refreshEvaluations,
   } = useRecordDetailsTabs(record, internshipId);
 
+  const rotations = useInternshipRotations(internshipId);
+  const visibleTabs = rotations.data?.enabled || rotations.data?.rotations?.length ? [...tabs, { value: "rotations", text: "Rotations" }] : tabs;
   return (
     <>
-      <TabBar tabs={tabs} selectedTab={selectedTab} onSelect={handleTabClick} />
+      <TabBar tabs={visibleTabs} selectedTab={selectedTab} onSelect={handleTabClick} />
 
       {!isPending && tabQuery.isError && tabQuery.data && (
         <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} compact logError={false} />
@@ -45,6 +49,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
             <RecordOverviewTab record={record} internshipId={internshipId} />
           )}
 
+          {activeTab === "rotations" && <CompanyRotations internshipId={internshipId} readOnly />}
           {activeTab === "dtr" && (
             <RecordDtrTab
               record={record}

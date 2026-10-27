@@ -337,3 +337,12 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 - Server-rendered profiles must skip private-data preloading when permission is absent. The tab hook clamps stale/private tab selections to Info, refuses unavailable selections, and cancels/removes this viewer/target's private cached profile data when restricted.
 - Backend guards run before private searched-user cache hits and mutations. Basic profile reads for department heads bypass the profile response cache so the permission is recomputed. Keep existing administrator and accepted-supervisor behavior.
 - Both repositories need deployment. No SQL migration or environment variable is required. Tests: student-profile-department-access.test.mjs (frontend) and student-profile-department-access.test.js (backend).
+
+## Optional company rotations
+
+- Optional per internship across every academic department; default off. Only owning students write, school staff and assigned employers read only.
+- Backend features/internship-rotations/ locks the parent for writes, checks current department/supervisor access, validates date bounds and rejects inclusive overlaps. Pending/ongoing records can toggle; assignment mutations require ongoing status. Finished records are read-only.
+- Rotations never change academic department, employer assignments, DTR totals/geofence, map grouping or evaluation uniqueness. Disabling retains history; deleting an assignment soft-deletes it.
+- Narrative rotation_ids are validated against the locked internship; rotation_assignments stores saved display snapshots. Never recompute old printed assignments from the current timeline. Omitted selections preserve snapshots on edit; explicit [] clears them.
+- Shared UI: CompanyRotations; viewer/record queries: lib/hooks/useInternshipRotations.js. Keep pending feedback, retained drafts on failure, retry states and targeted invalidation.
+- Apply backend scripts/2026-10-27-internship-rotations.sql before deploying both repositories. No live migration or environment changes were made.

@@ -60,6 +60,7 @@ function WeeklyNarrativeContent({ initialPage, internshipId, showActions = true,
 
   // Patch the matching row on every loaded page after a confirmed edit.
   function handleItemUpdate(updatedItem) {
+    void queryClient.invalidateQueries({ queryKey });
     queryClient.setQueryData(queryKey, (old) => old?.pages?.length
       ? {
           ...old,

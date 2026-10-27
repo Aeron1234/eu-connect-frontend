@@ -23,6 +23,8 @@ const studentGuides = [
     "Open the Form tab in My Records. Enter the required company, region, position, dates, semester, hours, description, and location details; the company website is optional.",
     "Search the map for the company or select its pin location. Review the address, city or municipality, and province. Wait for the location search suggestions while it loads.",
     "Select Create Internship Record. Your record appears as Pending while your department head reviews it.",
+    "Company rotations are optional for any academic department. Select the checkbox in the internship form, or use Enable rotations below your current record later. Once the internship is ongoing, add a company department/unit, dates, optional supervisor and notes in Rotations. Dates must fit the internship and cannot overlap.",
+    "Turning rotations off keeps their history. Editing or deleting an assignment does not change names already saved with old narratives. Rotation supervisors do not replace your accepted internship supervisor or reset your hours.",
     "While pending, select Edit at the bottom of Form, change the details, then Save changes or Cancel. Pending and rejected records can be deleted from Records.",
     "Once approved, the record becomes ongoing and its form is locked. Narratives and summary reports also wait until the start date arrives in Philippine time. Ask your department to correct a missing start date."
   ],
@@ -51,6 +53,7 @@ const studentGuides = [
     "Choose an ongoing or finished internship to view its entries. Finished records can be reviewed and printed.",
     "Once your ongoing internship reaches its start date in Philippine time, select New Narrative.",
     "Enter the week number, title, start and end dates covered, and narrative. End date cannot precede start date. Save the entry; its date range appears on the card and in the printed journal.",
+    "If rotations are enabled, check the suggested company departments for your coverage dates. Select both when a week spans two units. Selected departments appear on cards and printed journals; assignment selection is optional.",
     "Select See more to read a long entry. Use the pencil to edit an entry while its internship is ongoing and has started, or the trash icon to delete an entry when available; confirm deletion.",
     "Select Export PDF to preview all entries for the selected internship, then Print or Download. Older entries without a saved range do not receive invented coverage dates."
   ],

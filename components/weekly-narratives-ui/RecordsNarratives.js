@@ -1,3 +1,4 @@
+import NarrativeRotations from "./NarrativeRotations";
 import NarrativePreview from "./NarrativePreview";
 import NarrativeDateRange from "./NarrativeDateRange";
 
@@ -11,6 +12,7 @@ function RecordsNarrative({ narrative }) {
               {narrative.title}
             </h2>
             <NarrativeDateRange narrative={narrative} />
+            <NarrativeRotations narrative={narrative} />
           </div>
         </div>
         <NarrativePreview narrative={narrative} />

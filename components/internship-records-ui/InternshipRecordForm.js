@@ -33,6 +33,10 @@ function InternshipRecordForm({ regions = [], recordStatus = "", activeRecord = 
               <InternshipScheduleFields {...fieldProps} />
               <div className="border-t border-border" />
               <InternshipActivitiesFields {...fieldProps} />
+              <label className="flex items-start gap-3 rounded-xl border border-border bg-muted/20 p-4">
+                <input type="checkbox" className="mt-1 accent-primary" checked={fieldProps.internshipForm.rotations_enabled} onChange={event => fieldProps.setInternshipForm(previous => ({ ...previous, rotations_enabled: event.target.checked }))} />
+                <span className="min-w-0"><span className="block text-sm font-semibold">This internship includes company rotations</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">Optional for any department. Track assignments across units within the same company. You can enable this later.</span></span>
+              </label>
               <div className="border-t border-border" />
               <InternshipLocationFields {...fieldProps} />
             </fieldset>

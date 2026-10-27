@@ -1,6 +1,7 @@
 "use client";
 
 import { format, isValid } from "date-fns";
+import CompanyRotations from "./CompanyRotations";
 import ProgressBar from "../ui/ProgressBar";
 import RecordsCompanyMap from "./RecordsCompanyMap";
 
@@ -69,6 +70,7 @@ export default function RecordOverviewTab({ record, internshipId }) {
           <Stat label="Documents" value={record.document_count} />
         </div>
       </div>
+      <CompanyRotations internshipId={internshipId} readOnly compact className="sm:col-span-2" />
       <RecordsCompanyMap record={record} internshipId={internshipId} />
     </div>
   );

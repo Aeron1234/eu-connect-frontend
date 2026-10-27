@@ -40,6 +40,7 @@ export default function useInternshipRecordForm({ recordStatus, onCreated, onUpd
 
   function handleAction(formData) {
     if (status || isPending) return;
+    formData.set("rotations_enabled", internshipForm.rotations_enabled ? "1" : "0");
     formData.set("company_address", internshipForm.company_address);
     formData.set("lat", internshipForm.lat);
     formData.set("lon", internshipForm.lon);

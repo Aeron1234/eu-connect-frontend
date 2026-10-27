@@ -16,6 +16,7 @@ function load(file, mocks = {}) {
     presets: [[require("next/babel"), { "preset-env": { modules: "commonjs" }, "preset-react": { runtime: "automatic" } }]] });
   const mod = { exports: {} };
   vm.runInNewContext(code, { module: mod, exports: mod.exports, require(id) {
+    if (id === "./NarrativeRotations" || id === "./NarrativeRotationPicker") return () => null;
     if (id === "@/lib/weekly-narrative-dates.mjs") return dates;
     return Object.hasOwn(mocks, id) ? mocks[id] : require(id);
   } });

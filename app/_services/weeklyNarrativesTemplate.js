@@ -1,3 +1,4 @@
+import { rotationSnapshots } from "../../lib/internship-rotations.mjs";
 import { escapeHtml, journalStyles, proseParagraphs } from "./templates/printDocumentShared.js";
 import { formatNarrativeRange } from "../../lib/weekly-narrative-dates.mjs";
 
@@ -10,6 +11,7 @@ export function weeklyNarrativesHtml(record) {
         <p><strong>Company:</strong> ${escapeHtml(record.company_name)}</p>
         <p><strong>Week:</strong> ${escapeHtml(item.week_number)}${item.title ? ` &mdash; ${escapeHtml(item.title)}` : ""}</p>
         <p><strong>Date:</strong> ${escapeHtml(formatNarrativeRange(item.date_from, item.date_to) || "___ to ___")}</p>
+        ${rotationSnapshots(item.rotation_assignments).length ? `<p><strong>Company department(s):</strong> ${rotationSnapshots(item.rotation_assignments).map(row => escapeHtml(row.department_name) + (row.supervisor_name ? " (Supervisor: " + escapeHtml(row.supervisor_name) + ")" : "")).join("; ")}</p>` : ""}
       </div>
       ${proseParagraphs(item.narrative)}
     </article>`).join("");

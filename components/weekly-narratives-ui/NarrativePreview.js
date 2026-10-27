@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import NarrativeRotations from "./NarrativeRotations";
 import Modal from "../ui/Modal";
 import { formatNarrativeRange } from "@/lib/weekly-narrative-dates.mjs";
 
@@ -44,6 +45,7 @@ export default function NarrativePreview({ narrative }) {
           trigger={<span>See more &rarr;</span>}
           triggerStyles="mt-2 block w-fit text-left text-xs font-semibold text-primary-emphasis hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
+          <NarrativeRotations narrative={narrative} />
           <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
             {narrative.narrative}
           </p>

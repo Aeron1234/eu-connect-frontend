@@ -426,3 +426,11 @@ Changing the hosting arrangement does not move the database or storage automatic
 - [Printable school templates](app/_services/templates/PRINT_TEMPLATES.md)
 - [Authenticated map routing](app/api/map/README.md)
 - [Role and page help content](components/help-ui/guides/)
+
+## Optional company rotations
+
+Available per internship across all academic departments; default off. Students opt in on the internship form or later in My Records. Dated assignments are managed on an ongoing internship; finished timelines are read-only. School record Overview/Rotations and accepted-employer profile Info provide authorized read-only views. Disabling retains history.
+
+Narrative forms suggest every rotation overlapping the coverage dates. The backend validates selections and stores snapshots for cards, preview and printing, preserving old assignment labels after timeline changes. Attendance, map grouping, overall supervision and evaluation uniqueness remain on the original internship.
+
+Apply backend `scripts/2026-10-27-internship-rotations.sql` before deploying both apps. Existing internships default to off; legacy narrative snapshots stay null. No new environment variables. Tests: `internship-rotations.test.mjs` (frontend) and `internship-rotations.test.js` (backend).

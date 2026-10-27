@@ -1,5 +1,6 @@
 "use client";
 
+import CompanyRotations from "../internship-records-ui/CompanyRotations";
 import ErrorUI from "@/components/ui/ErrorUI";
 import SearchedUserFilter from "./SearchedUserFilter";
 import StudentNarratives from "../weekly-narratives-ui/StudentNarratives";
@@ -95,6 +96,7 @@ function SearchedUserRecordsManager({
             {activeTab === "info" && (
               <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <ProfileInfoGrid info={info} />
+                {info?.internship_id && <div className="mt-4"><CompanyRotations internshipId={info.internship_id} readOnly compact /></div>}
               </div>
             )}
           </>

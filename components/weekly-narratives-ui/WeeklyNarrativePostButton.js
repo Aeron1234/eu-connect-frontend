@@ -10,7 +10,7 @@ import { useUser } from "@/contexts/UserContext";
 import { weeklyNarrativesKeys } from "@/lib/cache/weekly-narratives-queries";
 import TitleButton from "../ui/TitleButton";
 
-function WeeklyNarrativePostButton() {
+function WeeklyNarrativePostButton({ internshipId }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
@@ -53,6 +53,7 @@ function WeeklyNarrativePostButton() {
         handleAction={handleAction}
         isPending={isPending}
         type="post"
+        internshipId={internshipId}
       />
     </Modal>
   );

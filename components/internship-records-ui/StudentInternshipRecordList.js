@@ -1,5 +1,6 @@
 "use client";
 
+import CompanyRotations from "./CompanyRotations";
 import { format } from "date-fns";
 import { useTransition } from "react";
 import { deleteOwnInternshipRecord } from "@/lib/server-actions/internship-records-actions";
@@ -189,6 +190,7 @@ function Record({ record, onDeleted }) {
         </div>
       )}
 
+      {status === "finished" && (Number(record.rotations_enabled) === 1 || Number(record.rotation_count) > 0) && <div className="mt-4"><CompanyRotations internshipId={record.id} readOnly compact /></div>}
       <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground line-clamp-2">
         {description}
       </p>

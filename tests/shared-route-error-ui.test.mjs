@@ -38,7 +38,7 @@ function fixture(file, mocks) {
   const compiledModule = { exports: {} };
   vm.runInNewContext(code, {
     module: compiledModule, exports: compiledModule.exports,
-    require(id) { if (id === "@/components/help-ui/HelpManual") return empty; return Object.hasOwn(replacements, id) ? replacements[id] : require(id); },
+    require(id) { if (id.endsWith("/CompanyRotations")) return empty; if (id === "@/lib/hooks/useInternshipRotations") return () => ({ data: { enabled: false, rotations: [] } }); if (id === "@/components/help-ui/HelpManual") return empty; return Object.hasOwn(replacements, id) ? replacements[id] : require(id); },
   }, { filename: url.pathname });
   return { errors, render(props = {}) { errors.length = 0; return renderToStaticMarkup(React.createElement(compiledModule.exports.default, props)); } };
 }

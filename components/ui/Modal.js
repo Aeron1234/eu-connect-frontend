@@ -29,13 +29,13 @@ function Modal({
     // Provide open/onOpenChange together for controlled dialogs. Omitting open leaves
     // Radix in charge of trigger/close state; onOpenChange alone is not forwarded.
     <Dialog {...(open === undefined ? {} : { open, onOpenChange })}>
-      <DialogTrigger
+      {trigger != null && <DialogTrigger
         disabled={disabled}
         className={triggerStyles}
         onClick={onClick}
       >
         {trigger}
-      </DialogTrigger>
+      </DialogTrigger>}
       {variant === "confirmation" ? (
         <ConfirmationContent title={title} description={description} intent={intent} formDescription>
           {children}

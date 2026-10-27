@@ -22,7 +22,7 @@ export default function useRecordDetailsTabs(record, internshipId) {
       record,
       dtrPage,
     ),
-    enabled: activeTab !== "overview" && Boolean(user?.id && internshipId),
+    enabled: activeTab !== "overview" && activeTab !== "rotations" && Boolean(user?.id && internshipId),
   });
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function useRecordDetailsTabs(record, internshipId) {
 
   const isSwitching = selectedTab !== activeTab;
   const isPending =
-    isSwitching || (activeTab !== "overview" && tabQuery.isPending);
+    isSwitching || (activeTab !== "overview" && activeTab !== "rotations" && tabQuery.isPending);
   const loadError = !isSwitching && tabQuery.isError && !tabQuery.data;
   const data = tabQuery.data;
 

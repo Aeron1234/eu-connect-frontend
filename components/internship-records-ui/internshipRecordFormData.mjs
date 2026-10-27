@@ -30,6 +30,7 @@ function inputDate(value) {
 // supervisor assignments or accumulated hours into the editable draft.
 export function internshipRecordFields(record = {}) {
   return {
+    rotations_enabled: Boolean(Number(record.rotations_enabled || 0)),
     company_name: record.company_name ?? "",
     company_address: record.company_address ?? "",
     city_name: record.city_name ?? "",

@@ -6,6 +6,7 @@ import Modal from "../ui/Modal";
 import WeeklyNarrativeEditForm from "./WeeklyNarrativeEditForm";
 import WeeklyNarrativeDelete from "./WeeklyNarrativeDelete";
 import NarrativePreview from "./NarrativePreview";
+import NarrativeRotations from "./NarrativeRotations";
 import NarrativeDateRange from "./NarrativeDateRange";
 
 function WeeklyNarrativeCard({ narrative, showActions = false, canEdit = showActions, onUpdate, onDelete }) {
@@ -22,6 +23,7 @@ function WeeklyNarrativeCard({ narrative, showActions = false, canEdit = showAct
           </h2>
         </div>
         <NarrativeDateRange narrative={narrative} />
+        <NarrativeRotations narrative={narrative} />
         {showActions && (
           <div className="absolute right-3 top-3 flex items-center gap-1 sm:right-4 sm:top-4">
             {canEdit && <Modal variant="form" open={editOpen} onOpenChange={setEditOpen}

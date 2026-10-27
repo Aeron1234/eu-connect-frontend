@@ -1,5 +1,7 @@
 "use client";
 
+import useInternshipRotations from "@/lib/hooks/useInternshipRotations";
+import CompanyRotations from "./CompanyRotations";
 import { useState } from "react";
 import ErrorUI from "@/components/ui/ErrorUI";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +39,7 @@ function InternshipRecordsManager() {
   const records = recordsQuery.data?.records || [];
   const regions = regionsQuery.data || [];
   const activeRecord = getCurrentInternshipRecord(records, recordsQuery.data?.active);
+  const rotations = useInternshipRotations(activeRecord?.id);
   const currentRecordStatus = activeRecord?.status || "";
 
   function handleDeleted(recordId) {
@@ -87,11 +90,11 @@ function InternshipRecordsManager() {
         titleAction={<HelpManual guideId="student-record" title="How to manage your internship record" />}
       />
 
-      <div className="flex gap-1 rounded-lg p-1 bg-secondary w-fit">
+      <div className="flex w-full gap-1 rounded-lg p-1 bg-secondary sm:w-fit">
         <button
           type="button"
           onClick={() => setTab("form")}
-          className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
+          className={`flex-1 sm:flex-none rounded-md px-3 sm:px-4 py-2 text-sm font-semibold transition-colors ${
             tab === "form"
               ? "bg-primary text-primary-foreground shadow-sm"
               : "text-muted-foreground hover:text-primary-emphasis"
@@ -102,7 +105,7 @@ function InternshipRecordsManager() {
         <button
           type="button"
           onClick={() => setTab("records")}
-          className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors flex gap-1 ${
+          className={`flex-1 sm:flex-none rounded-md px-3 sm:px-4 py-2 text-sm font-semibold transition-colors flex gap-1 ${
             tab === "records"
               ? "bg-primary text-primary-foreground shadow-sm"
               : "text-muted-foreground hover:text-primary-emphasis"
@@ -121,6 +124,7 @@ function InternshipRecordsManager() {
             </span>
           )}
         </button>
+        {(rotations.data?.enabled || rotations.data?.rotations?.length > 0) && <button type="button" onClick={() => setTab("rotations")} className={`flex-1 sm:flex-none rounded-md px-3 sm:px-4 py-2 text-sm font-semibold ${tab === "rotations" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Rotations</button>}
       </div>
 
       {(recordsQuery.isPending || regionsQuery.isPending) ? (
@@ -150,7 +154,10 @@ function InternshipRecordsManager() {
             onUpdated={handleCreated}
             onConflict={handleConflict}
           />
+          {activeRecord?.id && <div className="mt-4"><CompanyRotations key={activeRecord.id} internshipId={activeRecord.id} compact /></div>}
         </div>
+      ) : tab === "rotations" && activeRecord?.id ? (
+        <CompanyRotations key={activeRecord.id} internshipId={activeRecord.id} />
       ) : (
         <StudentInternshipRecordList
           userInternshipData={records}

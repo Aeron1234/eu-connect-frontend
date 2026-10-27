@@ -74,7 +74,7 @@ function NarrativesPage() {
           />
         </div>
         {canEdit && (
-          <div className="w-full sm:w-auto"><WeeklyNarrativePostButton /></div>
+          <div className="w-full sm:w-auto"><WeeklyNarrativePostButton internshipId={internship.id} /></div>
         )}
       </div>
 

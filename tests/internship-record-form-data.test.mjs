@@ -43,5 +43,6 @@ test("saved dates use Philippine calendar dates and nullable fields stay valid c
   assert.equal(fields.lon, 0);
   assert.equal(fields.total_hours, 0);
   assert.equal(internshipRecordFields({ date_started: "invalid" }).date_started, "");
-  assert.ok(Object.values(internshipRecordFields()).every((value) => value === ""));
+  assert.equal(internshipRecordFields().rotations_enabled, false);
+  assert.ok(Object.entries(internshipRecordFields()).filter(([key]) => key !== "rotations_enabled").every(([, value]) => value === ""));
 });

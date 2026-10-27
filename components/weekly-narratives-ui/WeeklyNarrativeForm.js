@@ -1,9 +1,11 @@
 "use client";
 
+import NarrativeRotationPicker from "./NarrativeRotationPicker";
 import ModalForm from "@/components/ui/ModalForm";
 import { useState } from "react";
 
 function WeeklyNarrativeForm({
+  internshipId,
   handleAction,
   isPending,
   data = null,
@@ -64,6 +66,7 @@ function WeeklyNarrativeForm({
         </ModalForm.Row>
         <p className="text-xs leading-relaxed text-foreground-subtle">Choose the dates covered by this narrative, including both the start and end date. This range appears on the card and printed journal.</p>
 
+        <NarrativeRotationPicker internshipId={internshipId || data?.internship_id} data={data} from={dateFrom} to={dateTo} disabled={isPending} />
         <ModalForm.Field label="Narrative">
           <ModalForm.Textarea
             name="narrative"
