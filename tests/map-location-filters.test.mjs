@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import * as mapFilters from '../components/map-ui/mapFilters.mjs';
 import { groupSitesByCity } from '../components/map-ui/mapVisitPlanning.mjs';
 
 const require = createRequire(import.meta.url);
@@ -30,6 +31,7 @@ function fixture() {
     '@tanstack/react-query': { useQuery: options => options.route ? { refetch() {} } : { data, isError: false }, useQueryClient: () => ({ fetchQuery: async () => ({}) }) },
     '@/contexts/UserContext': { useUser: () => ({ user: { id: 'admin' } }) },
     '@/lib/cache/map-locations-queries': { mapLocationsOptions: () => ({}), mapCompanyRouteOptions: () => ({ route: true }) },
+    './mapFilters.mjs': mapFilters,
     './useMapViewerLocation': () => ({ position: null, routePosition: null }),
     './mapSiteFormatting': { getInitials: name => name.slice(0, 2), formatPeriod: () => '' },
     './mapVisitPlanning.mjs': { DEFAULT_MAP_ORIGIN: { lat: 13.931, lng: 121.423 } },

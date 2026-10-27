@@ -85,9 +85,10 @@ test("text-only narrative edits retain assignment snapshots even after timeline 
 
 test("timeline is read-only for employers/staff and exposes opt-in only to authorized students", () => {
   let snapshot = { enabled: true, rotations: rows, canManage: false, status: "ongoing" };
+  let refreshError = false;
   const empty = () => null;
   const Section = load("components/internship-records-ui/CompanyRotations.js", {
-    "@/lib/hooks/useInternshipRotations": () => ({ data: snapshot }),
+    "@/lib/hooks/useInternshipRotations": () => ({ data: snapshot, isError: refreshError }),
     "@tanstack/react-query": { useQueryClient: () => ({}) }, "@/contexts/UserContext": { useUser: () => ({ user: { id: "viewer" } }) },
     "@/lib/server-actions/rotations-actions": {}, "@/lib/helpers": {},
     "@/lib/cache/student-records-queries": {}, "@/lib/cache/weekly-narratives-queries": {}, "@/lib/cache/student-storage-queries": {},
@@ -97,6 +98,13 @@ test("timeline is read-only for employers/staff and exposes opt-in only to autho
   }).default;
   const readonly = renderToStaticMarkup(React.createElement(Section, { internshipId: "record", readOnly: true }));
   assert.match(readonly, /Housekeeping/); assert.doesNotMatch(readonly, /Add rotation|Turn off|Edit Housekeeping|Delete Housekeeping/);
+  refreshError = true;
+  snapshot = { ...snapshot, canManage: true };
+  const stale = renderToStaticMarkup(React.createElement(Section, { internshipId: "record" }));
+  assert.match(stale, /Housekeeping|Showing previously loaded assignments/);
+  assert.match(stale, /Refresh failed/);
+  assert.doesNotMatch(stale, /Turn off|Add rotation|Edit Housekeeping/);
+  refreshError = false;
   snapshot = { enabled: false, rotations: [], canManage: false };
   assert.equal(renderToStaticMarkup(React.createElement(Section, { internshipId: "record", readOnly: true })), "");
   snapshot = { ...snapshot, canManage: true };

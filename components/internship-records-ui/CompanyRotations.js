@@ -30,14 +30,14 @@ export default function CompanyRotations({ internshipId, readOnly = false, compa
   const busy = useRef(false);
   if (!internshipId) return null;
   if (query.isPending) return <CompanyRotationsSkeleton compact={compact} readOnly={readOnly} className={className} />;
-  if (query.isError) return <ErrorUI compact error={query.error} reset={() => void query.refetch()} logError={false} />;
+  if (query.isError && !query.data) return <ErrorUI compact error={query.error} reset={() => void query.refetch()} logError={false} />;
   const data = query.data;
-  const canManage = !readOnly && data.canManage;
-  if (!canManage && !data.enabled && !data.rotations.length) return null;
+  const canManage = !readOnly && !query.isError && data.canManage;
+  if (!query.isError && !canManage && !data.enabled && !data.rotations.length) return null;
   const current = currentRotation(data.rotations);
 
   async function change(action, args) {
-    if (busy.current) return;
+    if (busy.current || query.isError) return;
     busy.current = true; setPending(true);
     try {
       const result = await toastAndAction({ action, args, loadingLabel: "Saving company rotations…", successLabel: "Company rotations updated.", errorLabel: "Could not save company rotations." });
@@ -54,6 +54,7 @@ export default function CompanyRotations({ internshipId, readOnly = false, compa
   }
 
   return <section className={`min-w-0 rounded-xl border border-border bg-card p-4 sm:p-5 ${className}`} aria-label="Company rotations">
+    {query.isError && <div className="mb-4" role="status"><p className="mb-2 text-xs text-muted-foreground">Showing previously loaded assignments. Refresh failed; retry before making changes.</p><ErrorUI compact error={query.error} reset={() => void query.refetch()} logError={false} /></div>}
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
         <h3 className="flex items-center gap-2 text-base font-semibold"><Repeat2 className="size-4 shrink-0 text-primary-emphasis" />Company rotations{!data.enabled && <span className="text-xs font-normal text-muted-foreground">Optional</span>}</h3>
@@ -83,7 +84,7 @@ export default function CompanyRotations({ internshipId, readOnly = false, compa
       </div>}
     </>}
     <Modal variant="form" open={Boolean(editor)} onOpenChange={open => { if (!open && !pending) setEditor(null); }} title={editor?.id ? "Edit rotation" : "Add company rotation"}>
-      {editor && <RotationForm key={editor.id || "new"} row={editor} data={data} pending={pending} onSave={fields => change(saveInternshipRotation, [internshipId, fields, editor.id])} />}
+      {editor && <RotationForm key={editor.id || "new"} row={editor} data={data} pending={pending || query.isError} onSave={fields => change(saveInternshipRotation, [internshipId, fields, editor.id])} />}
     </Modal>
     <Modal variant="confirmation" open={Boolean(confirmation)} onOpenChange={open => { if (!open && !pending) setConfirmation(null); }} title={confirmation?.kind === "delete" ? "Delete rotation?" : "Turn off company rotations?"}>
       <ModalForm.Root action={() => change(confirmation?.kind === "delete" ? deleteInternshipRotation : setInternshipRotationsEnabled, confirmation?.kind === "delete" ? [internshipId, confirmation.row.id] : [internshipId, false])}>
