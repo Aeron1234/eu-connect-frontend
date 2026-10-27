@@ -84,3 +84,17 @@ test("missing, malformed and duplicated metadata cannot break the log renderer o
   assert(serialized.includes("Eligible courses")); assert(serialized.includes("1 selected"));
   assert(!serialized.includes("private-course-id")); assert(!serialized.includes("[object Object]"));
 });
+
+
+test("rotation activity dates use MM-dd-yyyy without changing stored descriptions or other date text", () => {
+  for (const verb of ["Added", "Updated"]) {
+    const log = { action: "internship_rotations_updated", description: verb + " the Cyber Security rotation at BDO (2027-01-13 to 2027-01-31)." };
+    assert.equal(display.activityDescription(log), verb + " the Cyber Security rotation at BDO (01-13-2027 to 01-31-2027).");
+    assert.ok(log.description.includes("2027-01-13"));
+    assert.equal(display.activityDescription({ ...log, action: "announcement_created" }), log.description);
+  }
+  const invalid = { action: "internship_rotations_updated", description: "Added a rotation (2027-02-30 to 2027-03-01)." };
+  assert.equal(display.activityDescription(invalid), invalid.description);
+  const leap = { action: "internship_rotations_updated", description: "Updated a rotation (2028-02-29 to 2028-03-01)." };
+  assert.equal(display.activityDescription(leap), "Updated a rotation (02-29-2028 to 03-01-2028).");
+});
