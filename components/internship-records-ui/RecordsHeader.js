@@ -60,13 +60,14 @@ function RecordsHeader({ record, internshipId }) {
   const queryClient = useQueryClient();
   const { user } = useUser();
 
-  function handleStatus(status) {
+  function handleStatus(status, reason) {
     const formData = new FormData();
     formData.append("id", internshipId);
     formData.append("status", status);
+    if (status === "rejected") formData.append("rejection_reason", reason);
 
     startTransition(async () => {
-      setConfirmation(null);
+
       const result = await toastAndAction({
         loadingLabel: "Updating record...",
         successLabel: "Record updated.",
@@ -78,6 +79,7 @@ function RecordsHeader({ record, internshipId }) {
         args: [formData],
       });
       if (result?.success) {
+        setConfirmation(null);
         await queryClient.invalidateQueries({
           queryKey: internshipRecordsKeys.all(user.id),
           refetchType: "none",
@@ -99,7 +101,8 @@ function RecordsHeader({ record, internshipId }) {
         destructive={confirmation?.status === "rejected"}
         intent={confirmation?.status === "rejected" ? "decline" : confirmation?.status === "ongoing" ? "approve" : "restore"}
         pending={isPending}
-        onConfirm={() => confirmation && handleStatus(confirmation.status)}
+        reasonRequired={confirmation?.status === "rejected"}
+        onConfirm={(reason) => confirmation && handleStatus(confirmation.status, reason)}
       />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

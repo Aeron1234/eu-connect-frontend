@@ -180,6 +180,12 @@ function Record({ record, onDeleted }) {
         )}
       </div>
 
+      {status === "rejected" && record.rejection_reason && (
+        <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+          <p className="font-semibold text-foreground">Reason for rejection</p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-muted-foreground">{record.rejection_reason}</p>
+        </div>
+      )}
       {supervisor_name && (
         <div className="mt-4 flex min-w-0 items-start gap-2.5 rounded-lg border border-border bg-secondary/50 px-3 py-2.5 text-xs sm:items-center sm:text-sm">
           <UserRoundCheck className="mt-0.5 size-4 flex-shrink-0 text-primary-emphasis sm:mt-0" aria-hidden="true" />

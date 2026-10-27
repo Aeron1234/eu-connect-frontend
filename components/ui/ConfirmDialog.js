@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import ConfirmationContent, {
   confirmationActionGroupClass,
@@ -18,8 +18,23 @@ export default function ConfirmDialog({
   confirmLabel = "Confirm",
   onConfirm,
   pending = false,
+  reasonRequired = false,
   intent = "warning",
 }) {
+  const [reason, setReason] = useState("");
+  const reasonId = useId();
+  const reasonInput = useRef(null);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (open) setReason("");
+  }
+  function confirm() {
+    if (!reasonRequired) return onConfirm();
+    const input = reasonInput.current;
+    input.setCustomValidity(reason.trim() ? "" : "Enter a rejection reason.");
+    if (input.reportValidity()) onConfirm(reason.trim());
+  }
   const [lastOpenContent, setLastOpenContent] = useState({ title, description, confirmLabel, intent });
 
   // Radix keeps the content mounted during its exit animation. Callers may
@@ -45,6 +60,16 @@ export default function ConfirmDialog({
         showCloseButton={!pending}
         intent={content.intent}
       >
+        {reasonRequired && <div className="space-y-2">
+          <label htmlFor={reasonId} className="text-sm font-medium">Reason for rejection</label>
+          <textarea id={reasonId} ref={reasonInput} required maxLength={1000}
+            value={reason} disabled={pending} rows={4}
+            onChange={(event) => { event.target.setCustomValidity(""); setReason(event.target.value); }}
+            placeholder="Explain what the student needs to correct..."
+            className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+          />
+          <p className="text-xs text-muted-foreground">The student will see this reason on their record and notification.</p>
+        </div>}
         <DialogFooter className="w-full">
           <div className={confirmationActionGroupClass}>
             <Button
@@ -59,7 +84,7 @@ export default function ConfirmDialog({
             <Button
               type="button"
               disabled={pending}
-              onClick={onConfirm}
+              onClick={confirm}
               className={confirmationPrimaryClass}
             >
               {pending ? <Spinner className="size-4" /> : content.confirmLabel}

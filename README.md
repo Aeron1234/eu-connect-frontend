@@ -434,3 +434,7 @@ Available per internship across all academic departments; default off. Students 
 Narrative forms suggest every rotation overlapping the coverage dates. The backend validates selections and stores snapshots for cards, preview and printing, preserving old assignment labels after timeline changes. Attendance, map grouping, overall supervision and evaluation uniqueness remain on the original internship.
 
 Apply backend `scripts/2026-10-27-internship-rotations.sql` before deploying both apps. Existing internships default to off; legacy narrative snapshots stay null. No new environment variables. Tests: `internship-rotations.test.mjs` (frontend) and `internship-rotations.test.js` (backend).
+
+### Internship rejection reasons
+
+Apply backend `scripts/2026-10-27-internship-rejection-reason.sql` before deploying both applications. Staff must enter a reason (up to 1,000 characters) when rejecting a pending internship record, from either the list or detail confirmation. The saved reason is the student notification message and appears on their rejected record card. Failed submissions retain the reason; restoring clears it on the record, while previous notifications remain historical. Existing rejected records have no reason until a future rejection. No environment changes are required.

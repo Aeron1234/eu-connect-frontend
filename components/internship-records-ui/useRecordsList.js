@@ -148,11 +148,11 @@ export default function useRecordsList({
     user.id,
   ]);
 
-  function handleStatus(internshipId, status) {
-    setConfirmation(null);
+  function handleStatus(internshipId, status, reason) {
     const formData = new FormData();
     formData.append("id", internshipId);
     formData.append("status", status);
+    if (status === "rejected") formData.append("rejection_reason", reason);
 
     startTransition(async () => {
       const result = await toastAndAction({
@@ -166,6 +166,7 @@ export default function useRecordsList({
       // Only confirmed transitions update the cached status. Drop later pages and
       // refetch all list variants because membership, ordering and totals may have changed.
       if (result?.success) {
+        setConfirmation(null);
         queryClient.setQueryData(
           internshipRecordsKeys.list(user.id, criteria),
           (old) =>
@@ -209,7 +210,8 @@ export default function useRecordsList({
       destructive: confirmation?.status === "rejected",
       intent: confirmation?.status === "rejected" ? "decline" : confirmation?.status === "ongoing" ? "approve" : confirmation?.status === "finished" ? "complete" : "restore",
       pending: isPending,
-      onConfirm: () => confirmation && handleStatus(confirmation.id, confirmation.status),
+      reasonRequired: confirmation?.status === "rejected",
+      onConfirm: (reason) => confirmation && handleStatus(confirmation.id, confirmation.status, reason),
     },
   };
 }

@@ -22,7 +22,7 @@ export const recordsGuide = {
   "summary": "Approve placements and inspect attendance, reports, and confidential evaluations.",
   "steps": [
     "Search by student, company, or course and select a status tab. Use See more to load additional records.",
-    "Review Pending Approval records before approving or rejecting them. Confirm the action. Approval makes a record ongoing; Restore returns a rejected record to pending, and Mark Finished completes an ongoing record.",
+    "Review Pending Approval records before approving or rejecting them. Enter a reason when rejecting; the student sees it on their record and notification. Approval makes a record ongoing; Restore returns a rejected record to pending, and Mark Finished completes an ongoing record.",
     "Select a student's name or View Record to open the overview, DTR, narratives, summary report, evaluations, and documents available to you.",
     "In Overview, click the company pin and choose See on Google Maps to open campus-to-company directions in a new tab.",
     "In DTR, authorized staff can set the attendance pin and radius for an ongoing record. Ask the student to share their dashboard location if you need help placing the pin.",
