@@ -3,7 +3,7 @@ export const mapGuide = {
   "title": "Plan visits with the student map",
   "summary": "Compare cities, inspect interns, and display a road route.",
   "steps": [
-    "Search by student, company, or course and choose a region. Map View, Visit by city, Companies, and recommendations use these filters.",
+    "Search by student, company, or course and choose a department and region. Departments uses acronyms; select Departments to show all. Map View, Visit by city, Companies, and recommendations use these filters.",
     "In Map View, select a company pin to open its details from the left edge of the map. The pin number is the intern count. Scroll inside the panel and use the small panel icon to reopen it.",
     "Visit by city stays on the Map View, beside the map on large screens and below it on small screens. Expand a city for companies and student names across departments. Sort by students, companies, or city name.",
     "Open Recommendations to compare cities with the most students. Ties favor the nearest company by straight-line distance from the route starting point. This is a starting suggestion, not a complete driving itinerary.",

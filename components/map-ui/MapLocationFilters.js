@@ -1,11 +1,12 @@
 "use client";
 
+import DropdownFilter from "../ui/DropdownFilter";
 import SearchBar from "../ui/SearchBar";
 import MapDropdownFilter from "./MapDropdownFilter";
 
-export default function MapLocationFilters({ query, setQuery, regions, regionId, setRegionId }) {
+export default function MapLocationFilters({ query, setQuery, regions, regionId, setRegionId, departments = [], departmentId, setDepartmentId }) {
   return (
-    <div className="flex gap-2 flex-col sm:flex-row">
+    <div className="flex gap-2 flex-col sm:flex-row sm:flex-wrap">
       <div className="relative">
         {/* <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /> */}
         <SearchBar
@@ -17,6 +18,13 @@ export default function MapLocationFilters({ query, setQuery, regions, regionId,
         />
       </div>
 
+      <DropdownFilter
+        value={departmentId}
+        onValueChange={setDepartmentId}
+        options={[{ value: "", label: "Departments" }, ...departments.map(d => ({ value: String(d.id), label: d.code || d.name }))]}
+        placeholder="Departments"
+        className="w-full bg-card p-2 sm:w-auto"
+      />
       <MapDropdownFilter
         regions={regions}
         regionId={regionId}

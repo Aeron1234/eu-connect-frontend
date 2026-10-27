@@ -14,6 +14,7 @@ export default function MapWrapper() {
   const {
     locationsQuery,
     regions,
+    departments, departmentId, setDepartmentId,
     tab,
     setTab,
     query,
@@ -46,6 +47,9 @@ export default function MapWrapper() {
         <MapLocationFilters
           query={query}
           setQuery={setQuery}
+          departments={departments}
+          departmentId={departmentId}
+          setDepartmentId={setDepartmentId}
           regions={regions}
           regionId={regionId}
           setRegionId={setRegionId}

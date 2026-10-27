@@ -11,9 +11,11 @@ import { getInitials, formatPeriod } from "./mapSiteFormatting";
 import useMapViewerLocation from "./useMapViewerLocation";
 import { DEFAULT_MAP_ORIGIN } from "./mapVisitPlanning.mjs";
 
+import { filterMapSites } from "./mapFilters.mjs";
+
 const tabs = ["Map View", "Companies"];
 const emptyCompanies = [];
-// Join company queries, local search/region controls, selected sites and route state.
+// Join company queries, local search/region/department controls, selected sites and route state.
 // Use the session's location origin when available, otherwise the configured campus origin.
 export default function useMapLocationsView() {
   const { user } = useUser();
@@ -23,6 +25,8 @@ export default function useMapLocationsView() {
     enabled: Boolean(user?.id),
   });
   const initialData = locationsQuery.data?.companies || emptyCompanies;
+  const departments = locationsQuery.data?.availableDepartments || [];
+  const [departmentId, setDepartmentId] = useState("");
   const regions = locationsQuery.data?.availableRegions || [];
   const [tab, setTab] = useState(tabs[0]);
   const [regionId, setRegionId] = useState(null); // null = "All Locations"
@@ -50,6 +54,7 @@ export default function useMapLocationsView() {
           studentId: i.student_id,
           name: i.name,
           course: i.course,
+          departmentId: i.department_id,
           courseShortName: i.course_short_name,
           role: i.position,
           progress: i.percent_complete,
@@ -59,26 +64,9 @@ export default function useMapLocationsView() {
     [initialData],
   );
 
-  // Apply region and text filters to one shared set of sites/interns for pins,
-  // company lists, city groups and recommendations. Drop sites with no matching interns.
-  const sites = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return companySites
-      .filter((s) => !regionId || s.region_id === regionId)
-      .map((s) => ({
-        ...s,
-        interns: q
-          ? s.interns.filter(
-              (i) =>
-                i.name.toLowerCase().includes(q) ||
-                i.course.toLowerCase().includes(q) ||
-                i.courseShortName?.toLowerCase().includes(q) ||
-                s.company.toLowerCase().includes(q),
-            )
-          : s.interns,
-      }))
-      .filter((s) => s.interns.length > 0);
-  }, [companySites, regionId, query]);
+  // One filtered set drives pins, company panels, city counts and recommendations.
+  const sites = useMemo(() => filterMapSites(companySites, { regionId, departmentId, query }),
+    [companySites, regionId, departmentId, query]);
 
   const selected = sites.find((s) => s.id === selectedId) ?? null;
   // Show route data only for the currently selected site still present in the filters.
@@ -105,6 +93,7 @@ export default function useMapLocationsView() {
   return {
     locationsQuery,
     regions,
+    departments, departmentId, setDepartmentId,
     tab,
     setTab,
     query,

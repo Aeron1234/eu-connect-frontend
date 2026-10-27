@@ -6,6 +6,7 @@ export default function MapLocationsLoading() {
       <div className="flex flex-col gap-2 sm:flex-row" aria-hidden="true">
         <Skeleton className="h-11 w-full rounded-lg sm:w-80" />
         <Skeleton className="h-10 w-full rounded-lg sm:w-36" />
+        <Skeleton className="h-10 w-full rounded-lg sm:w-36" />
       </div>
 
       <div className="space-y-2 lg:hidden" aria-hidden="true">
