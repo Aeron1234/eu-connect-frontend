@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import {
+  Building2,
+  Repeat2,
   Clock,
   FileCheck,
   FileText,
@@ -19,6 +21,8 @@ import {
 } from "lucide-react";
 
 const iconMap = {
+  overview: Building2,
+  rotations: Repeat2,
   dtr: Clock,
   narratives: FileText,
   "summary-report": ClipboardList,

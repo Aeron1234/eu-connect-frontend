@@ -34,7 +34,7 @@ feedbackEmployer,
   "summary": "Use the student profile tabs available to your role.",
   "steps": [
     "Open the intern from your dashboard or Search Users. Accept the supervision request before managing an intern.",
-    "If the student uses company rotations, open Info for their current assignment and timeline. This is read-only; overall hours, evaluation and the accepted supervisor remain unchanged.",
+    "If the student uses company rotations, open Info for their current assignment and timeline. Use View rotations to expand saved assignments and dates when available. This is read-only; students manage the timeline. Overall hours, evaluation and the accepted supervisor remain unchanged. Narrative assignments are saved with each entry and may differ from a later timeline edit.",
     "An accepted supervision relationship and ongoing internship expose the permitted DTR, weekly narratives, evaluations, certificates, and profile information.",
     "In DTR, review attendance or use Set DTR Location. Narratives let you read the student's saved weekly work.",
     "In Certificates, upload the permitted certificate or supporting file. Wait for the upload result; use the file control to preview PDFs, DOCX, spreadsheets, text, or supported images. Download original file remains available.",

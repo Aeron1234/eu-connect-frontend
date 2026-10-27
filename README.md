@@ -442,3 +442,7 @@ Apply backend `scripts/2026-10-27-internship-rejection-reason.sql` before deploy
 ### Map department filter
 
 The map supports department acronym filtering alongside search and region. Filtering applies to individual interns at mixed-department company sites, and the same results drive pins, company details, city counts and recommendations. The backend includes department metadata from the latest academic row and availableDepartments in the map response. Deploy both applications; no SQL or environment changes are needed.
+
+The student My Records Form tab places Company rotations above the record form for easier access. Record-detail tabs use a building icon for Overview and a repeat-arrows icon for Rotations.
+
+Help and page manuals were synchronized on October 27, 2026 for optional company rotations (top-of-form controls, timeline permissions and narrative snapshots), rejection reason/restore behavior, and combined map department/region/search filters. Profile manuals include read-only rotation access. The proposed Activities feature is not documented as available.

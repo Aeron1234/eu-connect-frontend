@@ -18,11 +18,11 @@ async function StudentLayout({ children }) {
   return (
     <SocketProvider>
       <UserProvider initialUser={session?.user ?? null}>
-        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] h-screen overflow-hidden antialiased text-foreground">
+        <div className="fixed inset-0 grid min-h-0 grid-rows-[minmax(0,1fr)] grid-cols-1 lg:grid-cols-[auto_1fr] h-dvh overflow-clip antialiased text-foreground">
           <SideNavigation />
 
-          <main className="flex flex-col min-w-0 h-screen overflow-hidden bg-canvas w-full">
-            <div className="min-h-0 flex-1 overflow-y-auto">
+          <main className="flex flex-col min-w-0 min-h-0 h-full overflow-hidden bg-canvas w-full">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
               <StickyHeaderSurface>
                 <Header />
                 <Alert />

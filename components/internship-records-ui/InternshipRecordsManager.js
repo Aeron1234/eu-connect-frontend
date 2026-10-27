@@ -145,6 +145,7 @@ function InternshipRecordsManager() {
           }} />
       ) : tab === "form" ? (
         <div className="min-w-0">
+          {activeRecord?.id && <div className="mb-4"><CompanyRotations key={activeRecord.id} internshipId={activeRecord.id} compact /></div>}
           <InternshipRecordForm
             key={activeRecord?.id || currentRecordStatus || "available"}
             regions={regions}
@@ -154,7 +155,7 @@ function InternshipRecordsManager() {
             onUpdated={handleCreated}
             onConflict={handleConflict}
           />
-          {activeRecord?.id && <div className="mt-4"><CompanyRotations key={activeRecord.id} internshipId={activeRecord.id} compact /></div>}
+
         </div>
       ) : tab === "rotations" && activeRecord?.id ? (
         <CompanyRotations key={activeRecord.id} internshipId={activeRecord.id} />

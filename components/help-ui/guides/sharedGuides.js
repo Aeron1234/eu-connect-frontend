@@ -35,6 +35,7 @@ const sharedGuides = [
   "steps": [
     "Select the header bell for recent notifications and use its page controls for older items.",
     "Select a notification to open the related page. Feedback notifications open the discussion; department-head notifications about employer evaluations open the internship record.",
+    "For students, an internship rejection notification contains the reason entered by staff and opens My Records. Find the same reason on the rejected record card. Restoring the record clears the card reason but keeps the old notification as history.",
     "Open Notifications for the full list. Mark items as read, use Mark all as read, or delete a notification.",
     "Employers can accept or decline eligible supervisor requests in Notifications. Unanswered active requests cannot be deleted, even when marked read. Answered or cancelled requests can be dismissed."
   ],
@@ -49,7 +50,7 @@ const sharedGuides = [
     "Enter at least three characters of a person's name in Search Users, then select a result.",
     "When the search is empty, revisit a recently viewed profile. Remove one history entry with X or use clear all.",
     "Students can use Set as Supervisor on an eligible employer's profile and manage the request status there. Employers respond to requests from notifications.",
-    "Company rotations are optional across departments. Authorized staff can view them in a record?s Overview/Rotations or the student?s Info; employers view them for accepted interns. Students manage their own timeline. A rotation supervisor is a text label, not a new platform supervision assignment.",
+    "Company rotations are optional across departments. Authorized staff can view them in a record's Overview/Rotations or the student's Info; employers view them for accepted interns. Students manage their own timeline. A rotation supervisor is a text label, not a new platform supervision assignment.",
     "Department heads can view DTR, Narratives and Evaluations only for students in their own department. Other departments' students show Info only. Existing administrator and accepted-supervisor access still applies; finding a profile does not grant access to confidential evaluations."
   ],
   "href": "/users",

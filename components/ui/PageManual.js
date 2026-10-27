@@ -40,6 +40,7 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
     title = "How to manage your intern";
     steps = [
       "Use the permitted DTR, weekly narratives, evaluations, certificates, and profile tabs to review your accepted intern.",
+      "If rotations are available, open Info for Company rotations and View rotations to read the current assignment and timeline. Students manage their own assignments; rotation supervisors do not replace your accepted supervisor relationship. Narratives retain the assignment labels saved with each entry.",
       "In DTR, review attendance and use Set DTR Location to save the workplace pin and permitted radius.",
       "In Evaluations, complete the student's performance evaluation after the internship start date in Philippine time. Submit posts it immediately. Only one active evaluation is allowed per internship, and students cannot view it.",
       "Preview, print, or download a performance evaluation with the PDF control. Deleting your evaluation hides it from you and allows a replacement, while authorized staff retain a Deleted copy.",
@@ -49,6 +50,7 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
     title = "How to review this student";
     steps = [
       "Use the permitted profile tabs to review the student's attendance, weekly narratives, evaluations, and details.",
+      "In Info, Company rotations shows the current assignment and saved timeline when available. Open the internship record Overview or Rotations tab for read-only rotation history. The student manages assignments; academic department, duty hours, and overall supervision are unchanged.",
       "In DTR, review time records and set or update the attendance pin and radius when needed.",
       "The internship record provides the full record review, including confidential performance evaluations and Deleted evaluation history for authorized staff.",
     ];
@@ -57,6 +59,7 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
     steps = [
       "Review the profile details and tabs available to your role.",
       "Use Search Users to return to the directory or revisit this profile in your recently viewed list.",
+      "Company rotations, when permitted, appear in Info with the current assignment and View rotations. Students manage their own timelines. Department heads cannot view private rotation details for students from another department, even though basic Info remains available.",
       "Confidential internship information is available only to authorized users; viewing a profile does not grant additional access.",
     ];
   } else return null;
