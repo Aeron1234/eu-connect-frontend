@@ -1,9 +1,11 @@
 "use client";
 
+import EditableMapSkeleton from "@/components/skeletons/EditableMapSkeleton";
 import dynamic from "next/dynamic";
 
 const MapForm = dynamic(() => import("./MapForm"), {
   ssr: false,
+  loading: () => <EditableMapSkeleton />,
 });
 
 function MapFormContainer({

@@ -1,5 +1,6 @@
 "use client";
 
+import EvaluationCriteriaSkeleton from "@/components/skeletons/EvaluationCriteriaSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { getEvaluationPostingEligibilityResult } from "@/lib/server-actions/evaluations-actions";
@@ -20,7 +21,7 @@ export default function EvaluationPostingGuard({ direction, studentId, children 
     staleTime: 0, retry: false, enabled: Boolean(user?.id),
   });
   // Start-date restrictions are separate from this active-slot/assignment check.
-  if (query.isPending) return <p role="status" className="py-3 text-sm text-muted-foreground">Checking evaluation availability...</p>;
+  if (query.isPending) return <div role="status" aria-label="Checking evaluation availability"><div aria-hidden="true"><EvaluationCriteriaSkeleton /></div></div>;
   if (query.isError) return <ErrorUI error={query.error} reset={() => void query.refetch()} compact logError={false} />;
   if (!query.data.can_post) return <p role="status" className="rounded-lg border border-border bg-muted p-4 text-sm text-foreground-soft">{query.data.message}</p>;
   return children;

@@ -50,7 +50,7 @@ const sharedGuides = [
     "Enter at least three characters of a person's name in Search Users, then select a result.",
     "When the search is empty, revisit a recently viewed profile. Remove one history entry with X or use clear all.",
     "Students can use Set as Supervisor on an eligible employer's profile and manage the request status there. Employers respond to requests from notifications.",
-    "Company rotations are optional across departments. Authorized staff can view them in a record's Overview/Rotations or the student's Info; employers view them for accepted interns. Students manage their own timeline. A rotation supervisor is a text label, not a new platform supervision assignment.",
+    "Company rotations are optional across departments. On student profiles, only the student's own department head can view the Company rotations panel in Info. Administrators, employers, students, and other department heads do not see that profile panel. Authorized school staff retain the existing record-detail rotation view. Students manage their own timeline. A rotation supervisor is a text label, not a new platform supervision assignment.",
     "Department heads can view DTR, Narratives and Evaluations only for students in their own department. Other departments' students show Info only. Existing administrator and accepted-supervisor access still applies; finding a profile does not grant access to confidential evaluations."
   ],
   "href": "/users",

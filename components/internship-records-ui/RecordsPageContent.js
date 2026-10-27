@@ -3,6 +3,7 @@
 import ErrorUI from "@/components/ui/ErrorUI";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InternshipRecordsPageSkeleton from "@/components/skeletons/InternshipRecordsPageSkeleton";
+import RecordCardSkeleton from "@/components/skeletons/RecordCardSkeleton";
 import RecordsPageHeader from "./RecordsPageHeader";
 import RecordsPageFilter from "./RecordsPageFilter";
 import RecordListCard from "./RecordListCard";
@@ -45,7 +46,11 @@ function RecordsPageContent(props) {
         }} />
       )}
       <div className="space-y-3" aria-busy={isSearching}>
-          {records.map((r) => (
+          {isSearching ? (
+            <div role="status" aria-label="Loading filtered internship records" className="space-y-3">
+              {Array.from({ length: 3 }, (_, index) => <RecordCardSkeleton key={index} />)}
+            </div>
+          ) : records.map((r) => (
             <RecordListCard key={r.id} record={r} {...cardProps} />
           ))}
 

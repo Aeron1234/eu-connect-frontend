@@ -28,6 +28,7 @@ function fixture(file, mocks) {
     "@/components/ui/ConfirmDialog": empty, "../ui/TabBar": empty,
     "../ui/Modal": childrenOnly, "../ui/TitleButton": empty,
     "@/components/skeletons/ModalFormSkeleton": empty,
+    "@/components/skeletons/RecordCardSkeleton": () => React.createElement("article", null, "Record skeleton"),
     "next/link": ({ href, children }) => React.createElement("a", { href }, children), ...mocks,
   };
   const url = new URL(`../components/${file}`, import.meta.url);
@@ -204,4 +205,45 @@ test("profile narratives distinguish initial errors from empty data and retry fa
     assert.equal(html.includes("Saved narrative"), state !== "initial"); view.errors[0].reset();
     assert.equal(result.nextRetries, state === "next" ? 1 : 0); assert.equal(result.retries, state === "next" ? 0 : 1);
   }
+});
+
+
+test("records tab/search transitions show card skeletons without removing filter controls", () => {
+  let isSearching = true;
+  const view = fixture("internship-records-ui/RecordsPageContent.js", {
+    "@/components/skeletons/InternshipRecordsPageSkeleton": empty,
+    "./RecordsPageHeader": () => "Records header",
+    "./RecordsPageFilter": () => "Status tabs",
+    "./RecordListCard": () => "Saved record",
+    "./useRecordsList": () => ({ recordsQuery: { data: {}, isPending: false, isError: false }, records: [{ id: 1 }], isSearching }),
+  });
+  let html = view.render();
+  assert.match(html, /Loading filtered internship records/);
+  assert.equal((html.match(/Record skeleton/g) || []).length, 3);
+  assert.match(html, /Status tabs/); assert.match(html, /Records header/);
+  assert.doesNotMatch(html, /Saved record|No internship records match/);
+  isSearching = false; html = view.render();
+  assert.match(html, /Saved record/); assert.doesNotMatch(html, /Record skeleton/);
+});
+
+
+test("student profile rotation panel is limited to an explicitly authorized department head", () => {
+  let count = 0;
+  const view = fixture("search-user-ui/SearchedUserRecordsManager.js", {
+    "./useSearchedUserTabs": () => ({ tabQuery: { data: {}, isError: false }, activeTab: "info", hideTabs: true }),
+    "./SearchedUserFilter": empty, "../weekly-narratives-ui/StudentNarratives": empty,
+    "../internship-docs-ui/EmployerCertificateUploads": empty, "./ProfileInfoGrid": () => "Basic info",
+    "../skeletons/TabContentSkeleton": empty, "./ProfileDtrTab": empty, "./ProfileEvaluationsTab": empty,
+  });
+  // The shared fixture suppresses CompanyRotations, so its wrapper identifies mounting.
+  for (const role of ["admin", "employer", "student", "department_head"]) {
+    for (const allowed of [true, false, undefined]) {
+      const html = view.render({ userRole: role, searchedUserRole: "student", canViewStudentRecords: allowed, info: { internship_id: "record" } });
+      assert.match(html, /Basic info/);
+      const expected = role === "department_head" && allowed === true;
+      assert.equal(html.includes('class="mt-4"'), expected);
+      if (expected) count++;
+    }
+  }
+  assert.equal(count, 1);
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import SelectionRowsSkeleton from "@/components/skeletons/SelectionRowsSkeleton";
 import { useState } from "react";
 import useInternshipRotations from "@/lib/hooks/useInternshipRotations";
 import { rotationSnapshots, suggestedRotations } from "@/lib/internship-rotations.mjs";
@@ -13,7 +14,7 @@ export default function NarrativeRotationPicker({ internshipId, data, from, to, 
   const [selection, setSelection] = useState(() => data ? { range: `${data.date_from}|${data.date_to}`, ids: saved.map(row => row.id) } : null);
   if (!internshipId) return null;
   if (query.isPending || query.isError) return <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground" role="status">
-    {query.isError ? <>Could not load company assignments. <button type="button" className="text-primary-emphasis underline" onClick={() => void query.refetch()}>Try again</button></> : "Loading company assignments…"}
+    {query.isError ? <>Could not load company assignments. <button type="button" className="text-primary-emphasis underline" onClick={() => void query.refetch()}>Try again</button></> : <SelectionRowsSkeleton label="Loading company assignments" rows={2} />}
     <input type="hidden" required value="" readOnly data-validation-label="Wait for company rotations to load, or retry the request" />
   </div>;
   if (!query.data.enabled) return saved.length ? <><p className="text-xs text-muted-foreground">Saved company assignments (rotation tracking is off)</p><NarrativeRotations narrative={data} /></> : null;

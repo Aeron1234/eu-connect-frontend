@@ -1,5 +1,7 @@
 "use client";
 
+import SelectionRowsSkeleton from "@/components/skeletons/SelectionRowsSkeleton";
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -97,7 +99,7 @@ export default function FeedbackComposer({ userId, onClose, onPosted, initialDat
                 <div aria-label="Related internships" className="min-w-0 space-y-3">
                   {query.isError && <ErrorUI error={query.error} reset={() => void query.refetch()} compact logError={false} />}
                   {query.isPending ? (
-                    <p role="status" className="text-sm text-muted-foreground">Loading your interns...</p>
+                    <SelectionRowsSkeleton label="Loading your interns" search />
                   ) : (
                     <>
                       <ModalForm.Input

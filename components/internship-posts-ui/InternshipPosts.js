@@ -66,7 +66,7 @@ export default function InternshipPosts(props) {
         }} />
       )}
 
-      {isPending && internshipPosts.length === 0 ? (
+      {isPending ? (
         <div className="space-y-4 sm:space-y-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <InternshipPostsListSkeleton key={i} />
@@ -99,7 +99,7 @@ export default function InternshipPosts(props) {
         </div>
       )}
 
-      {postsQuery.hasNextPage && (
+      {!isPending && postsQuery.hasNextPage && (
         <div className="w-full">
           <button
             type="button"

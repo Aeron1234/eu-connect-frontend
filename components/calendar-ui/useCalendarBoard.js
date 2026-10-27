@@ -152,14 +152,14 @@ export default function useCalendarBoard({ initialDate, initialData }) {
     headerProps: { role, showManual, canSchedule, canAddTodo, setEditor },
     monthProps: {
       month, moveMonth, pickDay, activeKinds, visible, setVisible,
-      loading, dates, data, selected, visibleKinds,
+      loading, initialLoading: monthQuery.isPending && !monthQuery.data, dates, data, selected, visibleKinds,
     },
     agendaProps: {
       agendaRef, selected, canAddTodo, setEditor, monthQuery, entries,
       canSchedule, role, user, busy, mutate, setDeletingEntry,
     },
     overviewProps: {
-      selected, month, setMonth, setSelected, pickDay, marked, data, activeKinds,
+      selected, month, setMonth, setSelected, pickDay, marked, data, activeKinds, loading: monthQuery.isPending && !monthQuery.data,
     },
     editorProps: { editor, setEditor, busy, saveEditor, selected, role },
     confirmationProps: {

@@ -1,4 +1,5 @@
 "use client";
+import FeedbackThreadSkeleton from "@/components/skeletons/FeedbackThreadSkeleton";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, MessageSquare, LockKeyhole, Send } from "lucide-react";
@@ -121,7 +122,7 @@ export default function FeedbackThread({ id, user, onBack, onDeleted = onBack })
     </header>
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5">
       {query.isError && <ErrorUI error={query.error} reset={() => void query.refetch()} compact logError={false} />}
-      {query.isPending && <p role="status" className="text-sm text-muted-foreground">Loading discussion...</p>}
+      {query.isPending && <FeedbackThreadSkeleton />}
       {post && <>
         <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs font-medium text-primary-emphasis">{categoryLabel(post.category)}</span>
           {staff ? <div className="w-36"><FeedbackSelect value={post.status} onValueChange={changeStatus} options={feedbackStatuses} label="Discussion status" disabled={statusBusy} /></div> : <span className="rounded-full bg-muted px-2 py-1 text-xs">{statusLabel(post.status)}</span>}

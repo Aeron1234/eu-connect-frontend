@@ -1,9 +1,11 @@
 "use client";
 
+import { CalendarOverviewSkeleton } from "@/components/skeletons/CalendarSkeleton";
 import { Calendar } from "@/components/ui/calendar";
 import { parseDay, dayKey } from "./calendarDateUtils";
 
-export default function CalendarOverview({ selected, month, setMonth, setSelected, pickDay, marked, data, activeKinds }) {
+export default function CalendarOverview({ selected, month, setMonth, setSelected, pickDay, marked, data, activeKinds, loading = false }) {
+  if (loading) return <CalendarOverviewSkeleton />;
   return (
     <aside
       className="hidden space-y-4 xl:block"

@@ -14,7 +14,7 @@ function load(file, mocks = {}, globals = {}) {
   const { code } = transformSync(readFileSync(url, 'utf8'), { filename: url.pathname, babelrc: false, configFile: false,
     presets: [[require('next/babel'), { 'preset-env': { modules: 'commonjs' }, 'preset-react': { runtime: 'automatic' } }]] });
   const mod = { exports: {} };
-  vm.runInNewContext(code, { module: mod, exports: mod.exports, ...globals, require(id) { return Object.hasOwn(mocks, id) ? mocks[id] : require(id); } });
+  vm.runInNewContext(code, { module: mod, exports: mod.exports, ...globals, require(id) { if (id === "@/components/skeletons/EvaluationCriteriaSkeleton") return () => null; return Object.hasOwn(mocks, id) ? mocks[id] : require(id); } });
   return mod.exports;
 }
 const example = { id: 'evaluation', type: 'Performance Evaluation', evaluator_id: 'author', period: 'October 2026', evaluator: 'Employer', submittedDate: 'Oct 21, 2026', breakdown: [] };

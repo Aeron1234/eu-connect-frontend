@@ -96,7 +96,7 @@ function SearchedUserRecordsManager({
             {activeTab === "info" && (
               <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <ProfileInfoGrid info={info} />
-                {info?.internship_id && <div className="mt-4"><CompanyRotations internshipId={info.internship_id} readOnly compact /></div>}
+                {userRole === "department_head" && searchedUserRole === "student" && canViewStudentRecords === true && info?.internship_id && <div className="mt-4"><CompanyRotations internshipId={info.internship_id} readOnly compact /></div>}
               </div>
             )}
           </>

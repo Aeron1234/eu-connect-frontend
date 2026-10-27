@@ -21,6 +21,7 @@ function load(file, mocks) {
   vm.runInNewContext(code, { module: mod, exports: mod.exports, require(id) {
     if (id === "@/lib/internship-rotations.mjs") return rotations;
     if (Object.hasOwn(mocks, id)) return mocks[id];
+    if (id === "@/components/skeletons/SelectionRowsSkeleton") return function LoadingSelection({ label }) { return React.createElement("div", { role: "status", "aria-label": label }); };
     return require(id);
   } });
   return mod.exports;

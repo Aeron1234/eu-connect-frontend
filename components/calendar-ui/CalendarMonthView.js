@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarMonthGridSkeleton } from "@/components/skeletons/CalendarSkeleton";
 import CalendarMonthNavigation from "./CalendarMonthNavigation";
 import CalendarKindFilters from "./CalendarKindFilters";
 import CalendarMonthGrid from "./CalendarMonthGrid";
@@ -12,6 +13,7 @@ export default function CalendarMonthView({
   visible,
   setVisible,
   loading,
+  initialLoading = false,
   dates,
   data,
   selected,
@@ -37,14 +39,14 @@ export default function CalendarMonthView({
           role="status"
           aria-label="Loading calendar"
         />}
-      <CalendarMonthGrid
+      {initialLoading ? <CalendarMonthGridSkeleton days={dates.length || 35} /> : <CalendarMonthGrid
         dates={dates}
         month={month}
         data={data}
         selected={selected}
         visibleKinds={visibleKinds}
         pickDay={pickDay}
-      />
+      />}
     </section>
   );
 }

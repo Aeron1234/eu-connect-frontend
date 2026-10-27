@@ -1,3 +1,4 @@
+import CompanyRotationsSkeleton from "./CompanyRotationsSkeleton";
 import SetDtrLocationSkeleton from "./SetDtrLocationSkeleton";
 import EvaluationListSkeleton from "./EvaluationListSkeleton";
 import RecordsDocumentsSkeleton from "./RecordsDocumentsSkeleton";
@@ -7,6 +8,8 @@ import NarrativesSkeleton from "./NarrativesSkeleton";
 import RecordsSummaryReportSkeleton from "./RecordsSummaryReportSkeleton";
 
 function RecordsTabContentSkeleton({ tab }) {
+  if (tab === "rotations") return <CompanyRotationsSkeleton readOnly />;
+
   if (tab === "overview") {
     return <RecordsOverviewSkeleton />;
   }

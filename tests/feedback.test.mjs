@@ -18,6 +18,7 @@ function load(relative, mocks, globals = {}) {
   vm.runInNewContext(code, { module: mod, exports: mod.exports, FormData: globals.FormData || FormData, console, ...globals,
     require(id) {
       if (Object.hasOwn(mocks, id)) return mocks[id];
+      if (["@/components/skeletons/FeedbackThreadSkeleton", "@/components/skeletons/SelectionRowsSkeleton"].includes(id)) return function LoadingSelection({ label }) { return React.createElement("div", { role: "status", "aria-label": label || "Loading discussion" }); };
       if (id === "@/components/ui/PdfPreviewProvider") return { usePdfPreview: () => ({ previewPdf() {} }) };
       if (id === "./FeedbackAttachments") return load("components/feedback-ui/FeedbackAttachments.js", {
         react: React, "next/image": props => { const attributes = { ...props }; delete attributes.unoptimized; return e("img", attributes); },

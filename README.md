@@ -429,7 +429,7 @@ Changing the hosting arrangement does not move the database or storage automatic
 
 ## Optional company rotations
 
-Available per internship across all academic departments; default off. Students opt in on the internship form or later in My Records. Dated assignments are managed on an ongoing internship; finished timelines are read-only. School record Overview/Rotations and accepted-employer profile Info provide authorized read-only views. Disabling retains history.
+Available per internship across all academic departments; default off. Students opt in on the internship form or later in My Records. Dated assignments are managed on an ongoing internship; finished timelines are read-only. Authorized school staff can use record Overview/Rotations. On searched student profiles, the Info rotation panel is available only to the student's own department head. Disabling retains history.
 
 Narrative forms suggest every rotation overlapping the coverage dates. The backend validates selections and stores snapshots for cards, preview and printing, preserving old assignment labels after timeline changes. Attendance, map grouping, overall supervision and evaluation uniqueness remain on the original internship.
 
@@ -450,3 +450,11 @@ Help and page manuals were synchronized on October 27, 2026 for optional company
 Company rotation loading states use CompanyRotationsSkeleton in compact panels and full timelines. My Records includes the compact skeleton above the form during route and initial query loading.
 
 Rotation reads use authenticated, no-store GET /api/internship-records/:internshipId/rotations instead of the browser Server Action queue. Reads have bounded deadlines and retry transient failures once. Successful data stays visible after refresh failure with a retry warning; editing is blocked until refreshed. Authentication/authorization loss or record removal hides cached private data. Narrative assignment forms continue to block saving when their rotation lookup fails. No backend, SQL, dependency, or environment changes are required.
+
+### Student-profile rotation visibility
+
+The Company rotations panel in searched student profiles is visible only to the student's current department head. The profile response exposes the rotation internship ID only after a current database department match; the frontend requires explicit permission and the head role. Student My Records management and existing authorized staff record-detail views retain their permissions. Deploy both applications. No SQL or environment changes.
+
+### Page, tab, and form loading skeletons
+
+Internship listings show list skeletons during changed search/filter criteria, including when old placeholder rows exist. Feedback discussion and intern selection, evaluation eligibility, narrative rotation choices, editable Leaflet chunks, and record Rotations tab transitions use matching skeletons. Calendar has its own route fallback plus uncached month-grid/sidebar skeletons; cached background refreshes retain the calendar with a progress indicator. Loading placeholders are decorative and do not bypass validation, eligibility, or role permissions. No backend, SQL, environment, or dependency changes are required.
