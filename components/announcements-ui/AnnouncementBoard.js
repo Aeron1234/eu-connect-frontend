@@ -69,14 +69,27 @@ function AnnouncementBoardContent(props) {
       <SelectedAnnouncement targetId={targetId} targetQuery={targetQuery} />
 
       {categoriesQuery.isError && (
-        <ErrorUI error={categoriesQuery.error} reset={() => void categoriesQuery.refetch()} compact logError={false} />
+        <ErrorUI
+          error={categoriesQuery.error}
+          reset={() => void categoriesQuery.refetch()}
+          compact
+          logError={false}
+        />
       )}
-      {!isSearching && announcementsQuery.isError && announcementsQuery.data && (
-        <ErrorUI error={announcementsQuery.error} compact logError={false} reset={() => {
-          if (announcementsQuery.isFetchNextPageError) void announcementsQuery.fetchNextPage();
-          else void announcementsQuery.refetch();
-        }} />
-      )}
+      {!isSearching &&
+        announcementsQuery.isError &&
+        announcementsQuery.data && (
+          <ErrorUI
+            error={announcementsQuery.error}
+            compact
+            logError={false}
+            reset={() => {
+              if (announcementsQuery.isFetchNextPageError)
+                void announcementsQuery.fetchNextPage();
+              else void announcementsQuery.refetch();
+            }}
+          />
+        )}
 
       {isSearching ? (
         <div className="space-y-3">
@@ -85,7 +98,11 @@ function AnnouncementBoardContent(props) {
           ))}
         </div>
       ) : announcementsQuery.isError && !announcementsQuery.data ? (
-        <ErrorUI error={announcementsQuery.error} reset={() => void announcementsQuery.refetch()} logError={false} />
+        <ErrorUI
+          error={announcementsQuery.error}
+          reset={() => void announcementsQuery.refetch()}
+          logError={false}
+        />
       ) : (
         <AnnouncementGroups
           isPinnedExist={isPinnedExist}

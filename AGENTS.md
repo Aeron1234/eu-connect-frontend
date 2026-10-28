@@ -1,6 +1,6 @@
 # Frontend agent guide
 
-This guide applies to this frontend repository and its descendants. It records the frontend behavior established during the current project work, as of October 24, 2026. Use it as a handoff and a list of behavior to preserve. Check the current implementation before changing a contract; historical test counts and screenshots do not prove current deployment behavior.
+This guide applies to this frontend repository and its descendants. It records the frontend behavior established during the current project work, as of October 28, 2026. Use it as a handoff and a list of behavior to preserve. Check the current implementation before changing a contract; historical test counts and screenshots do not prove current deployment behavior.
 
 ## Project structure and runtime
 
@@ -78,7 +78,7 @@ Primary directory: `components/map-ui/`. Detailed routing notes: `app/api/map/RE
 - Preserve the original search across students, companies, and courses, together with the region filter.
 - Cities belong beside the map in the same Map View, rather than a separate Cities tab. Keep the Companies view.
 - Desktop uses a narrower map with a city sidebar. Small-screen controls remain compact so the map is reachable without scrolling through planning cards.
-- City/municipality groups show unique student counts across departments within the active search and region filters. Expand groups to show companies and student names.
+- City/municipality groups show unique student counts across departments within the active search, region and department filters. Expand groups to show companies and student names.
 - Preserve city/province normalization and keep unclassified records discoverable.
 - Recommendations prioritize cities with more distinct students. Ties use proximity to the nearest company from the selected origin, then the existing deterministic company/name tie breakers.
 - Clearly distinguish straight-line proximity from road distance/travel time. Recommendations are visit priorities, not a solved multi-stop itinerary.
@@ -350,3 +350,8 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 - Student-profile Company rotations is limited to the matching department head, verified using current database membership. Do not show the profile panel to admin, employer, student, or another department head. Students still manage My Records; authorized staff record-detail rotation views retain their existing access.
 
 - Preserve matching skeletons for listing criteria transitions, Feedback discussions/intern selectors, evaluation eligibility, narrative rotation selectors, editable Leaflet chunk loading, and Rotations tab transitions. Calendar route and uncached month reads use CalendarSkeleton; retain valid cached calendar content during background refresh. Skeleton controls are decorative; existing validation and role/eligibility guards remain authoritative.
+
+
+## Next.js security baseline
+
+Next.js and eslint-config-next are aligned at 16.4.3 following the October 2026 security update. Keep the package lock with this change and rebuild/redeploy the frontend. This update requires no backend, SQL or environment changes.

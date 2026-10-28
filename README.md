@@ -337,14 +337,14 @@ See the [preview implementation notes](components/ui/PDF_PREVIEW.md) and [print-
 
 ## Maps and location
 
-The map uses React-Leaflet with OpenStreetMap data. Search and region filters also apply to company lists, city groups, and visit recommendations.
+The map uses React-Leaflet with OpenStreetMap data. Search, region and department filters also apply to company lists, city groups, and visit recommendations.
 
 - City groups show student names and unique student counts across departments.
 - Recommendations prioritize cities with more students; ties use straight-line proximity to the nearest company.
 - Routes start at MSEUF-CI in Candelaria (`13.9304557, 121.4312752`) or the viewer's opt-in current location.
 - Successful road routes display geometry, distance, and estimated driving time. Traffic and stops are excluded.
 - Google Maps directions remain available for fallback and navigation while travelling.
-- Company details slide out inside the map on desktop and mobile.
+- Company details slide out inside the map on desktop and mobile. The mobile panel covers the map height and scrolls internally. Routing keeps it open while loading or after failure, and closes it only after success. A small in-map icon reopens it; route controls are not duplicated below the map.
 - In `/internship-records/[internshipId]` → Overview, the company pin popup includes **See on Google Maps**. It uses the saved company coordinates and the same campus-to-company directions helper as `/map`, opening in a new tab without requesting a road route.
 
 Viewer location is refreshed approximately 10 seconds after each completed location read. Active routes refresh after movement/time thresholds; location access requires permission and HTTPS or localhost. Position updates are scoped to the viewer's map session and stop when the page is left. Coordinates used to calculate routes are sent to the configured routing provider.
@@ -458,3 +458,8 @@ The Company rotations panel in searched student profiles is visible only to the 
 ### Page, tab, and form loading skeletons
 
 Internship listings show list skeletons during changed search/filter criteria, including when old placeholder rows exist. Feedback discussion and intern selection, evaluation eligibility, narrative rotation choices, editable Leaflet chunks, and record Rotations tab transitions use matching skeletons. Calendar has its own route fallback plus uncached month-grid/sidebar skeletons; cached background refreshes retain the calendar with a progress indicator. Loading placeholders are decorative and do not bypass validation, eligibility, or role permissions. No backend, SQL, environment, or dependency changes are required.
+
+
+### Next.js security baseline
+
+Next.js and eslint-config-next are aligned at 16.4.3 following the October 2026 security update. Keep the package lock with this change and rebuild/redeploy the frontend. This update requires no backend, SQL or environment changes.
