@@ -159,13 +159,13 @@ Primary directory: `components/evaluations-ui/`; actions: `lib/server-actions/ev
 - Students must never see employer performance scores, including through cached summaries, record tabs, print actions, or notification navigation.
 - Students retain access to their own supervisor feedback. The submitting employer and authorized department head/admin can view/print performance evaluations within backend-enforced scope.
 - Posting is immediate: no pending/posted status selector and no extra posting confirmation.
-- Permit one active evaluation per internship record in each evaluation direction.
-- `EvaluationPostingGuard` must fail closed while eligibility is loading or failed. Frontend guards do not replace atomic backend uniqueness enforcement.
-- Author deletion is a soft delete using deleted_at. Hide that evaluation's summary from its author and allow a replacement, with only one active evaluation at a time.
+- Allow multiple employer-authored performance evaluations per ongoing internship record for all departments. Do not require deletion of earlier reviews or enforce automatic 200-hour milestones. Student-authored supervisor evaluations retain one active entry per internship.
+- `EvaluationPostingGuard` must fail closed while eligibility is loading or failed. Backend assignment/start-date authorization remains required in both directions; atomic uniqueness applies only to student-authored supervisor evaluations.
+- Author deletion is a soft delete using deleted_at. Hide only that evaluation from its author. Student-authored supervisor feedback may be replaced after deletion; employer performance reviews can already repeat without deletion.
 - Authorized staff retain deleted history with a Deleted label.
 - Staff permanent deletion is available only for evaluations already soft-deleted, within the existing access rules.
 - Employer evaluation notifications target /internship-records/[internshipId], not a student profile ID. Refresh the relevant evaluation data on notification actions.
-- Database lifecycle/uniqueness migrations belong to the backend. Do not reintroduce status requirements after their removal.
+- Database lifecycle/uniqueness migrations belong to the backend. Apply `scripts/2026-10-29-multiple-performance-evaluations.sql` to drop only `uq_student_evaluation_active_slot`; retain `uq_employer_evaluation_active_slot`. Do not replay the older consolidation migration afterward or reintroduce status requirements.
 
 ## Weekly narrative coverage dates
 

@@ -47,7 +47,12 @@ function StudentEvaluationCriteria({
         <>
           <EvaluationsCriteria />
 
-          <h3 className="text-base font-semibold">Submit New Evaluation</h3>
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold">Submit New Evaluation</h3>
+            <p className="text-sm text-muted-foreground">
+              You can submit multiple progress evaluations for this internship. Previous evaluations stay in the history.
+            </p>
+          </div>
 
           <EvaluationPostingGuard direction="performance" studentId={searchedUserId}>
           <StudentEvaluationForm

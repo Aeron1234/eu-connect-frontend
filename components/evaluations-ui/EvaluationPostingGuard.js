@@ -8,7 +8,7 @@ import ErrorUI from "@/components/ui/ErrorUI";
 
 // Check availability per viewer, evaluation direction and target student.
 // Keep the form hidden while loading or after a failed check. This is a UI gate;
-// the write endpoint rechecks ownership, assignment and the active slot.
+// the write endpoint rechecks ownership/assignment and the supervisor-feedback slot.
 export default function EvaluationPostingGuard({ direction, studentId, children }) {
   const { user } = useUser();
   const query = useQuery({

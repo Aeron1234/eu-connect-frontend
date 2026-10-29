@@ -29,7 +29,7 @@ export const recordsGuide = {
     "In Overview, click the company pin and choose See on Google Maps to open campus-to-company directions in a new tab.",
     "In DTR, authorized staff can set the attendance pin and radius for an ongoing record. Ask the student to share their dashboard location if you need help placing the pin.",
     "Employer performance evaluations are confidential to the employer and authorized staff. Evaluation notifications open the related internship record. Use the available PDF control to preview, print, or download.",
-    "Deleted evaluations remain visible to authorized staff with a Deleted label. Staff can permanently delete these copies; authors can submit a replacement after deleting their active evaluation."
+    "Employers may post multiple performance evaluations per internship. Students may have one active supervisor evaluation and replace it after deletion. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies."
   ],
   "href": "/internship-records",
   "linkText": "Open Records"

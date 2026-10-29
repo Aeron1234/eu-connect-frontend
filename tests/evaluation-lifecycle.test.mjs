@@ -48,7 +48,7 @@ test('deleted cached summaries are hidden from both author roles but remain visi
   }
 });
 
-test('posting guard fails closed on loading/errors and hides the form until an active slot is available', () => {
+test('posting guard fails closed until the backend confirms evaluation eligibility', () => {
   for (const state of [{ isPending: true }, { isError: true, error: Error('offline') }, { data: { can_post: false, message: 'Already evaluated' } }, { data: { can_post: true } }]) {
     const Guard = load('components/evaluations-ui/EvaluationPostingGuard.js', {
       '@tanstack/react-query': { useQuery: () => state }, '@/contexts/UserContext': { useUser: () => ({ user: { id: 'author' } }) },
@@ -56,6 +56,23 @@ test('posting guard fails closed on loading/errors and hides the form until an a
     }).default;
     const html = renderToStaticMarkup(React.createElement(Guard, { direction: 'performance', studentId: 'student' }, 'Evaluation form'));
     assert.equal(html.includes('Evaluation form'), Boolean(state.data?.can_post));
+  }
+});
+
+test('multiple performance reviews for one internship remain separate history cards and confidential from students', () => {
+  const items = [
+    { ...example, id: 'review-400', internship_record_id: 'record', comments: 'Review at 400 hours' },
+    { ...example, id: 'review-200', internship_record_id: 'record', comments: 'Review at 200 hours' },
+  ];
+  for (const role of ['employer', 'admin', 'department_head', 'student']) {
+    const Card = load('components/evaluations-ui/EvaluationCard.js', {
+      './useEvaluationItems': () => ({ items }), '@/contexts/UserContext': { useUser: () => ({ user: { role } }) },
+      './PostedEvaluationItem': ({ ev }) => React.createElement('article', { 'data-review': ev.id }, ev.comments),
+      './EvaluationEmptyState': () => 'No evaluations',
+    }).default;
+    const html = renderToStaticMarkup(React.createElement(Card, { evaluations: items }));
+    for (const item of items) assert.equal(html.includes(item.id), role !== 'student');
+    assert.equal((html.match(/<article/g) || []).length, role === 'student' ? 0 : 2);
   }
 });
 

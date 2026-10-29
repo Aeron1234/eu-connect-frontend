@@ -49,9 +49,9 @@ feedbackEmployer,
   "steps": [
     "Open an accepted supervised intern's profile and select Evaluations. Submission becomes available when the internship start date arrives in Philippine time.",
     "Score every criterion and add optional remarks, then Submit Evaluation. It posts immediately without a status selector or extra posting confirmation.",
-    "Only one active performance evaluation is allowed per internship. Your evaluation is visible to you and authorized school staff; students cannot view it.",
+    "You can submit multiple performance evaluations during the same ongoing internship, including progress reviews required by a department. Evaluations are visible to you and authorized school staff; students cannot view them.",
     "The student's department head is notified and opens the internship record from the notification. Use the PDF control to preview, print, or download the evaluation.",
-    "Delete your own evaluation to hide it from your summary and allow a replacement. Staff retain the Deleted copy for review and can permanently remove it."
+    "Delete an evaluation to hide only that entry from your summary. Staff retain the Deleted copy for review and can permanently remove it. You do not need to delete earlier evaluations to post another."
   ],
   "href": "/users",
   "linkText": "Search Users"

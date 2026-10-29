@@ -22,7 +22,8 @@ function StudentEvaluationDeleteForm({ evaluationId, evaluationType, permanent =
         action: deleteEvaluation,
         args: [formData],
       });
-      // Only a confirmed deletion refreshes eligibility so an author may post a replacement.
+      // Refresh eligibility after confirmed deletion; student-authored supervisor feedback
+      // needs a free active slot, while performance evaluations can already repeat.
       if (result?.success) {
         void queryClient.invalidateQueries({ queryKey: ["evaluation-posting"] });
         onSuccess?.();
@@ -34,7 +35,7 @@ function StudentEvaluationDeleteForm({ evaluationId, evaluationType, permanent =
 
   return (
     <DeleteForm
-      description={permanent ? "Permanently remove this deleted evaluation and its scores? This cannot be undone." : "Remove this evaluation from your history? Staff will retain a copy labeled Deleted. You can post a replacement afterward."}
+      description={permanent ? "Permanently remove this deleted evaluation and its scores? This cannot be undone." : evaluationType === "Performance Evaluation" ? "Remove this evaluation from your history? Staff will retain a copy labeled Deleted. Other evaluations are kept." : "Remove this evaluation from your history? Staff will retain a copy labeled Deleted. You can post a replacement afterward."}
       submitLabel={permanent ? "Permanently delete" : "Delete"}
       handleAction={handleAction}
       id={evaluationId}
