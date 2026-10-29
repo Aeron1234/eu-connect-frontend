@@ -23,7 +23,7 @@ export default function AccountFormPreview({ accountForm, selectedRoleName, role
         </dl>
         <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-border bg-card p-3.5">
           <LockKeyhole className="mt-0.5 size-4 shrink-0 text-primary-emphasis" aria-hidden="true" />
-          <p className="text-xs leading-relaxed text-muted-foreground">Share the sign-in details with the account holder. They can update their password in their account settings.</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">A setup invitation will be emailed to this address. The account holder chooses a password before they can sign in.</p>
         </div>
       </div>
     </aside>

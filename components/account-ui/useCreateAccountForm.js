@@ -9,7 +9,6 @@ const EMPTY_ACCOUNT_FORM = {
   middle_initial: "",
   last_name: "",
   username: "",
-  password: "qwerty12345",
   email: "",
 };
 
@@ -18,7 +17,7 @@ const EMPTY_ACCOUNT_FORM = {
 export default function useCreateAccountForm({ roles, courses, departments, onCreated }) {
   const [isPending, startTransition] = useTransition();
 
-  const [show, setShow] = useState(false);
+  const [creationResult, setCreationResult] = useState(null);
   const [accountForm, setAccountForm] = useState(EMPTY_ACCOUNT_FORM);
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
@@ -26,6 +25,7 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
   const [selectedGender, setSelectedGender] = useState("");
 
   function handleAction(formData) {
+    setCreationResult(null);
     startTransition(async () => {
       const result = await toastAndAction({
         loadingLabel: "Creating account...",
@@ -38,6 +38,7 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
       // Reset fields and notify the parent only after confirmed creation; failed actions
       // leave the entered values available for correction.
       if (result?.success) {
+        setCreationResult(result);
         setAccountForm(EMPTY_ACCOUNT_FORM);
         setSelectedCourseId("");
         setSelectedDepartmentId("");
@@ -81,6 +82,11 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
   return {
     handleAction,
     isPending,
+    creationResult,
+    onInvitationResent(result) {
+      setCreationResult(previous => ({ ...previous, invitation_sent: Boolean(result.invitation_sent), message: result.message || result.error || previous?.message }));
+      onCreated?.();
+    },
     showConditionalRow,
     selectedRoleName,
     roleProps: {
@@ -99,7 +105,6 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
     },
     credentialsProps: {
       accountForm, setAccountForm, isPending,
-      show, setShow,
     },
     assignmentProps: {
       showCourse, showDepartment, showGender, courses, departments, isPending,

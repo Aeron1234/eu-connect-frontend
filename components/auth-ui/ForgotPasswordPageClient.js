@@ -17,7 +17,7 @@ function ForgotPasswordPageClient() {
       <div className="w-full max-w-md">
         <h2 className="font-display text-3xl font-bold">Reset your password</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Enter your registered email and we&apos;ll send you a temporary code.
+          Enter your registered email and we&apos;ll send you a password setup link.
         </p>
 
         {state?.success ? (
@@ -63,7 +63,7 @@ function ForgotPasswordPageClient() {
                 <Spinner className={"size-6 stroke-3 stroke-primary-50"} />
               ) : (
                 <>
-                  Send Reset Code <ArrowRight className="h-4 w-4" />
+                  Send Reset Link <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>

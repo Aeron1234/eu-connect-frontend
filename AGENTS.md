@@ -244,7 +244,7 @@ Primary component: `components/past-internship-ui/PastInternshipsPageContent.js`
 
 - `lib/notification-routes.js` centralizes notification targets. Preserve encoded IDs, relevant record/profile tabs, schedule destinations, and announcement feed targeting.
 - `lib/favorite-toggle-sync.mjs` reconciles rapid favorite toggles without letting an older response overwrite newer intent.
-- Account creation keeps the responsive form/preview, role-sensitive department/course assignments, and optional email/middle-initial handling; do not display undefined name fragments.
+- Account creation requires a valid email address for every new role in both the form and backend. Trim email before duplicate checks/storage; reject blank, non-string and malformed values. Middle initial stays optional. Preserve the responsive form/preview and role-sensitive department/course assignments; do not display undefined name fragments. Existing accounts without email are not modified. New accounts use EmailJS invitation-only setup: no password field/shared default; backend inserts pending accounts with a random unusable placeholder. Preserve pending/completed labels, resend and committed-account/unconfirmed-delivery feedback. Public /set-password accepts an emailed token; only successful completion leads to normal sign-in. Setup-only legacy recovery tokens must not enter ordinary session helpers or private pages. Apply backend scripts/2026-10-29-account-invitations.sql and configure EmailJS on the backend; keep existing users usable.
 - Role-aware help content must agree with actual calendar, announcement, evaluation, and document access.
 - Admin cache diagnostics compare compatible snapshots from the same server process and reset comparisons after restart; unavailable metrics are not zero.
 - Error-tracking deletion/count/pagination updates must reflect confirmed server results and preserve useful cached content on refresh failures.
@@ -351,7 +351,11 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 
 - Preserve matching skeletons for listing criteria transitions, Feedback discussions/intern selectors, evaluation eligibility, narrative rotation selectors, editable Leaflet chunk loading, and Rotations tab transitions. Calendar route and uncached month reads use CalendarSkeleton; retain valid cached calendar content during background refresh. Skeleton controls are decorative; existing validation and role/eligibility guards remain authoritative.
 
-
 ## Next.js security baseline
 
 Next.js and eslint-config-next are aligned at 16.4.3 following the October 2026 security update. Keep the package lock with this change and rebuild/redeploy the frontend. This update requires no backend, SQL or environment changes.
+
+
+## Password setup interface
+
+The /set-password page uses EU-Connect school branding, the shared form styles, theme switching, accessible password-visibility controls, and a matching loading skeleton. Desktop shows the maroon brand panel; small screens keep the form first in a single column. Preserve the invitation token, password field names, action, validation and restricted-session behavior. This UI change requires no backend, SQL, package or environment changes.

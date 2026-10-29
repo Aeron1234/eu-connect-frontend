@@ -9,7 +9,7 @@ import {
   refreshTokens,
 } from "@/lib/server-actions/auth-shared";
 
-const PUBLIC_EXACT_PATHS = ["/"];
+const PUBLIC_EXACT_PATHS = ["/", "/set-password"];
 const PUBLIC_PREFIX_PATHS = ["/login", "/forgot-password"];
 
 function isPublicPath(pathname) {
@@ -42,6 +42,7 @@ export async function proxy(request) {
   const payload = verifyAccessToken(accessToken);
 
   if (payload) {
+    if (payload.purpose === "password_setup") return NextResponse.redirect(new URL("/set-password", request.url));
     return NextResponse.next();
   }
 

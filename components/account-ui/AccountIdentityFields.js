@@ -22,8 +22,8 @@ export default function AccountIdentityFields({ accountForm, setAccountForm, isP
       </div>
       <p id="middle-initial-help" className="text-xs leading-relaxed text-muted-foreground">Enter one letter for the middle initial, or leave it blank.</p>
       <div>
-        <label htmlFor="email" className={labelClass}>Email address <span className="font-normal text-muted-foreground">(optional)</span></label>
-        <input type="email" id="email" name="email" placeholder="juan@example.com" className={inputClass} value={accountForm.email} onChange={change("email")} disabled={isPending} autoComplete="email" aria-describedby="account-email-help" />
+        <label htmlFor="email" className={labelClass}>Email address <span className="text-primary-emphasis">*</span></label>
+        <input type="email" id="email" name="email" placeholder="juan@example.com" className={inputClass} value={accountForm.email} onChange={change("email")} disabled={isPending} autoComplete="email" aria-describedby="account-email-help" required />
         <p id="account-email-help" className={hintClass}>A valid email address lets the account holder recover their password.</p>
       </div>
     </div>

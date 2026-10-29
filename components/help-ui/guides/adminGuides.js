@@ -18,8 +18,9 @@ feedbackStaff,
   "title": "Manage accounts",
   "summary": "Create accounts and control sign-in access.",
   "steps": [
-    "In Form, enter the person's details and temporary password and choose a role. Complete course or department fields for the roles that require them.",
-    "Select Create Account. Required fields must be completed before submission.",
+    "In Form, enter the person's details, a valid email address and username, then choose a role. Email is required for every new account; the middle initial is optional. Complete course or department fields for the roles that require them. The account holder chooses their own password through the emailed setup link.",
+    "Select Create Account. The new account remains pending password setup until its one-use link is completed. Invitations expire after 24 hours. If delivery is unconfirmed, keep the created account and use Resend invitation rather than creating it again.",
+    "In Accounts, check Pending password setup and use Resend invitation when needed. Wait one minute between resend attempts. A new invitation replaces earlier links; completed accounts no longer offer this action.",
     "Use Accounts to search names or email addresses and filter by role.",
     "Use the account's available activate or deactivate control and confirm the change when prompted. Deactivation prevents sign-in."
   ],

@@ -1,3 +1,4 @@
+import ResendAccountInvitation from "./ResendAccountInvitation";
 import {
   Briefcase,
   Crown,
@@ -49,6 +50,7 @@ function AccountCard({ account, onActionSuccess }) {
     company_name,
     status,
     created_at,
+    password_setup_required,
     avatar,
   } = account;
 
@@ -96,6 +98,8 @@ function AccountCard({ account, onActionSuccess }) {
         <p className="text-[11px] text-muted-foreground tracking-wide">
           Created: {format(new Date(created_at), "MMM d, yyyy")}
         </p>
+        {password_setup_required !== undefined && <span className="text-xs font-medium text-muted-foreground">{Number(password_setup_required) ? "Pending password setup" : "Password setup complete"}</span>}
+        {status === "active" && Boolean(Number(password_setup_required)) && <ResendAccountInvitation accountId={id} onSuccess={onActionSuccess} />}
         {status === "active" && (
           <DeactivateAccount
             id={id}

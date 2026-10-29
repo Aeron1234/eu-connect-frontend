@@ -58,6 +58,7 @@ This repository contains the **Next.js frontend**, including its server-rendered
 - Announcements, event date ranges, calendar schedules, and student to-dos according to role.
 - Registrar SIPP Annex C and Annex D reporting with dynamic tables and printable school templates.
 - Administrator tools for accounts, departments, courses, evaluation criteria, activity logs, cache monitoring, and error tracking.
+- Creating a new account requires email and username, with no administrator-chosen password. EmailJS sends a one-use 24-hour setup link; the user chooses a password before sign-in. Pending accounts support Resend invitation. Existing users retain access. Apply backend `scripts/2026-10-29-account-invitations.sql`, configure backend EmailJS settings, and deploy both applications. See backend `docs/account-invitations.md`. Forgot Password sends a 30-minute setup link; no EmailJS keys belong in the frontend.
 
 ### Shared experience
 
@@ -463,3 +464,8 @@ Internship listings show list skeletons during changed search/filter criteria, i
 ### Next.js security baseline
 
 Next.js and eslint-config-next are aligned at 16.4.3 following the October 2026 security update. Keep the package lock with this change and rebuild/redeploy the frontend. This update requires no backend, SQL or environment changes.
+
+
+### Password setup interface
+
+The /set-password page uses EU-Connect school branding, the shared form styles, theme switching, accessible password-visibility controls, and a matching loading skeleton. Desktop shows the maroon brand panel; small screens keep the form first in a single column. Preserve the invitation token, password field names, action, validation and restricted-session behavior. This UI change requires no backend, SQL, package or environment changes.
