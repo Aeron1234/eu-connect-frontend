@@ -1,19 +1,22 @@
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, BookOpen } from "lucide-react";
+import Modal from "@/components/ui/Modal";
 
 export default function HelpGuideCard({ guide, accountHref }) {
   const href = guide.href ?? accountHref;
 
   return (
-    <details className="group rounded-xl border border-border bg-card transition-colors open:border-primary-emphasis/40">
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-4 marker:hidden sm:p-5 [&::-webkit-details-marker]:hidden">
+    <Modal title={guide.title} description={guide.summary}
+      triggerStyles="flex h-full w-full items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary-emphasis/40 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:p-5"
+      trigger={<>
         <span className="min-w-0">
           <span className="block font-semibold text-foreground">{guide.title}</span>
           <span className="mt-1 block text-sm text-foreground-soft">{guide.summary}</span>
         </span>
-        <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-foreground-soft transition-transform group-open:rotate-180" aria-hidden="true" />
-      </summary>
-      <div className="border-t border-border px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
+        <BookOpen className="mt-0.5 size-4 shrink-0 text-primary-emphasis" aria-hidden="true" />
+      </>}
+    >
+      <div className="min-w-0 break-words">
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground-soft">
           {guide.steps.map((step) => <li key={step}>{step}</li>)}
         </ol>
@@ -21,6 +24,6 @@ export default function HelpGuideCard({ guide, accountHref }) {
           {guide.linkText} <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
-    </details>
+    </Modal>
   );
 }

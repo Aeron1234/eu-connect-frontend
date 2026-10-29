@@ -15,6 +15,7 @@ import { activeStorageRecordOptions } from "@/lib/cache/student-storage-queries"
 import Modal from "../ui/Modal";
 import ModalForm from "../ui/ModalForm";
 import ErrorUI from "../ui/ErrorUI";
+import HelpManual from "@/components/help-ui/HelpManual";
 import { Button } from "../ui/button";
 
 // Shared student editor/read-only timeline. Server capability flags control tools;
@@ -57,7 +58,7 @@ export default function CompanyRotations({ internshipId, readOnly = false, compa
     {query.isError && <div className="mb-4" role="status"><p className="mb-2 text-xs text-muted-foreground">Showing previously loaded assignments. Refresh failed; retry before making changes.</p><ErrorUI compact error={query.error} reset={() => void query.refetch()} logError={false} /></div>}
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <h3 className="flex items-center gap-2 text-base font-semibold"><Repeat2 className="size-4 shrink-0 text-primary-emphasis" />Company rotations{!data.enabled && <span className="text-xs font-normal text-muted-foreground">Optional</span>}</h3>
+        <div className="flex flex-wrap items-center gap-1"><h3 className="flex items-center gap-2 text-base font-semibold"><Repeat2 className="size-4 shrink-0 text-primary-emphasis" />Company rotations{!data.enabled && <span className="text-xs font-normal text-muted-foreground">Optional</span>}</h3><HelpManual guideId="rotations" title="How to use company rotations" /></div>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Assignments within the same company. Your internship hours and overall supervisor stay the same.</p>
       </div>
       {canManage && <Button size="sm" variant="outline" disabled={pending} onClick={() => data.enabled ? setConfirmation({ kind: "disable" }) : void change(setInternshipRotationsEnabled, [internshipId, true])}>{data.enabled ? "Turn off" : "Enable rotations"}</Button>}
@@ -101,9 +102,10 @@ function RotationForm({ row, data, pending, onSave }) {
     <ModalForm.Section title="Assignment details">
       <ModalForm.Field label="Company department or unit"><ModalForm.Input name="department_name" defaultValue={row.department_name || ""} maxLength={120} placeholder="e.g. Food and Beverage" required disabled={pending} /></ModalForm.Field>
       <ModalForm.Row>
-        <ModalForm.Field label="Start date"><ModalForm.Input name="date_from" type="date" value={from} onChange={event => setFrom(event.target.value)} min={data.dateStarted} max={data.dateEnded} required disabled={pending} /></ModalForm.Field>
-        <ModalForm.Field label="End date"><ModalForm.Input name="date_to" type="date" defaultValue={row.date_to || ""} min={from || data.dateStarted} max={data.dateEnded} required disabled={pending} /></ModalForm.Field>
+        <ModalForm.Field label="Start date"><ModalForm.Input name="date_from" type="date" value={from} onChange={event => setFrom(event.target.value)} min={data.dateStarted} required disabled={pending} /></ModalForm.Field>
+        <ModalForm.Field label="End date"><ModalForm.Input name="date_to" type="date" defaultValue={row.date_to || ""} min={from || data.dateStarted} required disabled={pending} /></ModalForm.Field>
       </ModalForm.Row>
+      <p className="text-xs leading-relaxed text-muted-foreground">Rotations may extend beyond the estimated internship end date. Assignments must start on or after the internship start date and cannot overlap.</p>
       <ModalForm.Field label="Rotation supervisor (optional)"><ModalForm.Input name="supervisor_name" defaultValue={row.supervisor_name || ""} maxLength={120} disabled={pending} /></ModalForm.Field>
       <ModalForm.Field label="Notes (optional)"><ModalForm.Textarea name="notes" defaultValue={row.notes || ""} maxLength={1000} disabled={pending} /></ModalForm.Field>
     </ModalForm.Section>

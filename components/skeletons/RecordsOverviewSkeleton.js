@@ -6,7 +6,7 @@ function RecordsOverviewSkeleton() {
       <div className="rounded-xl border border-border shadow-sm bg-card p-4 sm:p-5">
         <Skeleton className="h-5 w-40" />
         <dl className="mt-3 space-y-2.5">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex justify-between gap-4">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="h-3 w-28" />

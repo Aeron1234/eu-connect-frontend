@@ -33,8 +33,16 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
     title = "How to manage your supervisor";
     steps = [
       "Review the employer's profile and select Set as Supervisor when available to request supervision.",
+      "In Info, Supervised interns appears below the employer details when ongoing or completed placements exist. Each student has one card listing all ongoing and completed positions and dates under that supervisor, with five students per page. Open a student's View profile link or use Previous and Next for more history. Every signed-in role can see these basic placement details; student work tabs keep their normal access rules.",
       "Check the button for the request status. You can manage a pending request or remove an existing supervisor from the profile.",
       "The employer responds to the request through notifications. Your submitted supervisor evaluations are under Evaluations in your student menu.",
+    ];
+  } else if (page === "user-profile" && searchedRole === "employer") {
+    title = "How to review this employer";
+    steps = [
+      "Review the employer's contact and company details in Info.",
+      "Supervised interns appears in a separate card below the employer details when ongoing or completed placements exist. It shows five students per page, with one card per student listing their course and all ongoing and completed positions, companies and internship dates under that supervisor. Use Previous and Next to browse.",
+      "Select View profile to open a current or former intern's profile. This history is visible to every signed-in role; it does not grant access to private attendance, narratives, evaluations or documents.",
     ];
   } else if (page === "user-profile" && searchedRole === "student" && hasOngoingInternship && role === "employer" && supervisionStatus === "accepted") {
     title = "How to manage your intern";

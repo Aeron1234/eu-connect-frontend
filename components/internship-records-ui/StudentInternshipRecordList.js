@@ -2,6 +2,7 @@
 
 import CompanyRotations from "./CompanyRotations";
 import { format } from "date-fns";
+import { companyWebsiteHref } from "@/lib/company-website.mjs";
 import { useTransition } from "react";
 import { deleteOwnInternshipRecord } from "@/lib/server-actions/internship-records-actions";
 import { toastAndAction } from "@/lib/helpers";
@@ -97,6 +98,7 @@ function Record({ record, onDeleted }) {
     total_hours,
     supervisor_name,
   } = record;
+  const websiteHref = companyWebsiteHref(company_website);
 
   function handleDelete(formData) {
     startTransition(async () => {
@@ -168,14 +170,14 @@ function Record({ record, onDeleted }) {
         {company_website && (
           <span className="flex items-center gap-1.5 sm:col-span-2 min-w-0">
             <Globe className="size-3.5 flex-shrink-0" />
-            <a
-              href={`https://${company_website}`}
+            {websiteHref ? <a
+              href={websiteHref}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-emphasis underline truncate"
             >
               {company_website}
-            </a>
+            </a> : <span className="truncate">{company_website}</span>}
           </span>
         )}
       </div>

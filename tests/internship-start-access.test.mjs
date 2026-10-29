@@ -33,7 +33,7 @@ function load(file, mocks = {}, globals = {}) {
     "next/link": childrenOnly, ...mocks,
   };
   vm.runInNewContext(code, { module: compiledModule, exports: compiledModule.exports,
-    require(id) { if (id.endsWith("/CompanyRotations") || id.endsWith("/NarrativeRotations")) return () => null; return Object.hasOwn(defaults, id) ? defaults[id] : require(id); }, ...globals });
+    require(id) { if (id.endsWith("/CompanyRotations") || id.endsWith("/NarrativeRotations") || id.endsWith("/EmployerSupervisionHistory")) return () => null; return Object.hasOwn(defaults, id) ? defaults[id] : require(id); }, ...globals });
   return compiledModule.exports.default;
 }
 

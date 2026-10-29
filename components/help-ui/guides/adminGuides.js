@@ -1,4 +1,4 @@
-import { feedbackStaff, recordsGuide, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
+import { feedbackStaff, recordsGuide, rotationsGuide, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
 
 const adminGuides = [
 {
@@ -15,12 +15,14 @@ const adminGuides = [
 feedbackStaff,
 {
   "id": "accounts",
-  "title": "Manage accounts",
-  "summary": "Create accounts and control sign-in access.",
+  "title": "Create and manage accounts",
+  "summary": "Choose an account type, send a password setup invitation, and manage access.",
   "steps": [
-    "In Form, enter the person's details, a valid email address and username, then choose a role. Email is required for every new account; the middle initial is optional. Complete course or department fields for the roles that require them. The account holder chooses their own password through the emailed setup link.",
-    "Select Create Account. The new account remains pending password setup until its one-use link is completed. Invitations expire after 24 hours. If delivery is unconfirmed, keep the created account and use Resend invitation rather than creating it again.",
-    "In Accounts, check Pending password setup and use Resend invitation when needed. Wait one minute between resend attempts. A new invitation replaces earlier links; completed accounts no longer offer this action.",
+    "Open Form and select the account type under Who is this account for? The form shows the fields needed for that role. Enter first and last name, a working email address, and a unique username. Middle initial is optional and accepts one letter, optionally followed by a period.",
+    "For a student, select a course and gender; the department comes from the selected course. For a department head, select the department they will manage. Employers do not need academic assignments. Check the account preview before submitting.",
+    "Select Create Account. You do not choose or receive the user's password. EmailJS sends a one-use setup link to the email you entered, valid for 24 hours. The user opens Set your password, saves and confirms their own password, then signs in with the username and new password. Until setup is complete, the account cannot sign in.",
+    "If email delivery is unconfirmed, the account has still been created. Keep it and use Resend invitation instead of creating it again. Ask the recipient to check Spam or Junk if the message is missing.",
+    "In Accounts, check Pending password setup and use Resend invitation for an active pending account when needed. Wait one minute between resend attempts. A new invitation replaces earlier links; completed accounts no longer offer this action. Existing users recover access through Forgot password using their registered email.",
     "Use Accounts to search names or email addresses and filter by role.",
     "Use the account's available activate or deactivate control and confirm the change when prompted. Deactivation prevents sign-in."
   ],
@@ -80,6 +82,7 @@ feedbackStaff,
   "linkText": "Open Evaluation Criteria"
 },
 recordsGuide,
+rotationsGuide,
 mapGuide,
 {
   "id": "error-tracking",

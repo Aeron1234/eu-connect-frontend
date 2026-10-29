@@ -20,7 +20,7 @@ export default function NotificationDropdownItem({
       key={notif.ui_key || notif.id}
       className={cx(
         "relative transition-colors hover:bg-accent/60",
-        !notif.is_read && "bg-primary/5",
+        !notif.is_read && "bg-primary/5 dark:bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] dark:hover:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]",
       )}
     >
       {!notif.is_read && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-primary" />}

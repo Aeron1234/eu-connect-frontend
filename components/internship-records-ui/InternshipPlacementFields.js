@@ -78,10 +78,14 @@ export default function InternshipPlacementFields({
   
         <Input
           name={"company_website"}
-          label={"Company Website (optional)"}
+          label={"Company Website *"}
           type={"text"}
           value={internshipForm.company_website}
-          placeholder={"www.jollibee.com.ph, link of fb page, etc..."}
+          placeholder={"https://company.com or its official social page"}
+          hint="Use the company's official website or social media page so your department head can review it."
+          inputMode="url"
+          autoComplete="url"
+          maxLength={255}
           onChange={(e) =>
             setInternshipForm({
               ...internshipForm,
@@ -89,7 +93,7 @@ export default function InternshipPlacementFields({
             })
           }
           disabled={isPending || status}
-          required={false}
+          required
         />
       </div>
 

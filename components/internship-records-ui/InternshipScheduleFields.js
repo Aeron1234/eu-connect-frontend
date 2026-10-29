@@ -4,37 +4,29 @@ import InternshipFormSection from "./InternshipFormSection";
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Input from "./InternshipFormInput";
+import InternshipDateInput from "./InternshipDateInput";
 import { labelClass, selectTriggerClass } from "./internshipFormStyles";
 
 export default function InternshipScheduleFields({ internshipForm, setInternshipForm, isPending, status }) {
   return (
     <InternshipFormSection number="02" title="Schedule and hours" description="Add your expected internship dates and required hours.">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-        <Input
+        <InternshipDateInput
+          key={status ? "saved-start" : "draft-start"}
           name={"date_started"}
           label={"Start date *"}
-          type={"date"}
           value={internshipForm.date_started}
-          onChange={(e) =>
-            setInternshipForm({
-              ...internshipForm,
-              date_started: e.target.value,
-            })
-          }
+          onChange={value => setInternshipForm(previous => ({ ...previous, date_started: value }))}
           disabled={isPending || status}
         />
   
-        <Input
+        <InternshipDateInput
+          key={status ? "saved-end" : "draft-end"}
           name={"date_ended"}
           label={"Date end (estimated) *"}
-          type={"date"}
           value={internshipForm.date_ended}
-          onChange={(e) =>
-            setInternshipForm({
-              ...internshipForm,
-              date_ended: e.target.value,
-            })
-          }
+          onChange={value => setInternshipForm(previous => ({ ...previous, date_ended: value }))}
+          min={internshipForm.date_started}
           disabled={isPending || status}
         />
       </div>

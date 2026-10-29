@@ -38,17 +38,12 @@ function formatDate(dateString) {
 
 function mapIntern(row) {
   return {
-    internshipId: row.internship_id,
     id: row.student_id,
-    name: `${row.first_name || ""} ${row.last_name || ""}`.trim() || "Unknown",
-    status: row.status === "finished" ? "completed" : row.status,
-    role: row.internship_position,
-    program: row.course_name || "—",
+    name: [row.first_name, row.last_name].filter(Boolean).join(" ").trim() || "Unknown",
+    program: row.course_name || "-",
     programShort: row.short_name || "",
-    startDate: row.date_started,
-    hoursCompleted: Number(row.accumulated_hours) || 0,
-    hoursRequired: Number(row.total_hours) || 0,
     email: row.email,
+    placements: row.placements || [row],
   };
 }
 
@@ -127,7 +122,7 @@ function InternsSupervisedCard({ initialPage }) {
         ) : (
           interns.map((intern) => (
             <div
-              key={intern.internshipId}
+              key={intern.id}
               className="flex w-full min-w-0 flex-col items-start justify-between gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center"
             >
               <div className="flex items-start gap-3 min-w-0">
@@ -143,33 +138,30 @@ function InternsSupervisedCard({ initialPage }) {
                     <p className="text-sm font-semibold text-foreground">
                       {intern.name}
                     </p>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${statusBadgeStyles[intern.status] || "bg-muted text-foreground-soft"}`}
-                    >
-                      {intern.status}
-                    </span>
+
                   </div>
                   <p
                     className="mt-0.5 break-words text-xs text-muted-foreground"
                     title={intern.programShort || undefined}
                   >
-                    {intern.role} · {intern.program}
+                    {intern.program}
                   </p>
-                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-foreground-soft">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {formatDate(intern.startDate)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {intern.hoursCompleted?.toFixed(1)}/{intern.hoursRequired}{" "}
-                      hrs
-                    </span>
-                    <span className="flex min-w-0 items-start gap-1">
-                      <Mail className="mt-0.5 w-3.5 h-3.5 shrink-0" />
-                      <span className="break-all">{intern.email}</span>
-                    </span>
-                  </div>
+                  {intern.email && <p className="mt-2 flex min-w-0 items-start gap-1 text-xs text-foreground-soft"><Mail className="mt-0.5 size-3.5 shrink-0" /><span className="break-all">{intern.email}</span></p>}
+                  <ul aria-label={`Internship positions of ${intern.name}`} className="mt-3 space-y-3">
+                    {intern.placements.map((placement) => {
+                      const status = placement.status === "finished" ? "completed" : placement.status;
+                      return <li key={placement.internship_id} className="border-l-2 border-border pl-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="break-words text-xs font-medium text-foreground">{placement.internship_position || "Intern"}</p>
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeStyles[status] || "bg-muted text-foreground-soft"}`}>{status}</span>
+                        </div>
+                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-foreground-soft">
+                          <span className="flex items-center gap-1"><Calendar className="size-3.5" />{formatDate(placement.date_started)}</span>
+                          <span className="flex items-center gap-1"><Clock className="size-3.5" />{(Number(placement.accumulated_hours) || 0).toFixed(1)}/{Number(placement.total_hours) || 0} hrs</span>
+                        </div>
+                      </li>;
+                    })}
+                  </ul>
                 </div>
               </div>
               <Link

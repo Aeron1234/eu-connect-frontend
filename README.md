@@ -30,7 +30,7 @@ This repository contains the **Next.js frontend**, including its server-rendered
 ### Student internship workspace
 
 - A dashboard with internship progress, completed hours, attendance, favorite opportunities, unread announcements, stored documents, and missing requirements.
-- Internship record submission with company details, dates, required hours, and a map-selected workplace. Pending records can be edited before approval.
+- Internship record submission with company details, a required official company website/social page, dates, required hours, and a map-selected workplace. Pending records can be edited before approval and require the website when saved. Staff record Overview shows a safe clickable website link, or `-` for older records without one. Deploy the matching backend validation/overview response; no SQL or environment changes are needed.
 - Daily Time Records (DTR), including clock-in, breaks, resume duty, and clock-out with location checks against the approved attendance area.
 - Weekly narratives with saved coverage dates, readable cards, editing, and printable journals.
 - Summary reports with structured reflections, optional memorabilia images, and PDF export.
@@ -262,7 +262,7 @@ Page access and available actions depend on the session and backend permissions.
 | `/admin/error-tracking` | Recorded backend error groups and occurrences. |
 | `/student/account`, `/employer/account`, `/department_head/account`, `/admin/account` | Role-specific account and password settings. |
 | `/internships` | Opportunity browsing, favorites, and employer posting controls. |
-| `/users`, `/users/[userId]` | User search, profiles, and permitted internship tabs. |
+| `/users`, `/users/[userId]` | User search, profiles, permitted internship tabs, and employer completed-supervision history. |
 | `/internship-records`, `/internship-records/[internshipId]` | Administrator/department-head record review. |
 | `/map` | Administrator/department-head visit planning. |
 | `/past-internships` | Alumni placements for students and school staff. |
@@ -271,6 +271,24 @@ Page access and available actions depend on the session and backend permissions.
 | `/feedback` | Employer and authorized school-staff discussions. |
 | `/notifications` | Notification inbox and supervisor-request responses. |
 | `/help` | Role-aware instructions and page manuals. |
+
+Student internship approval notifications open `/student/internship-record`
+from the live toast, header dropdown and full inbox. Opening refreshes the
+student's record cache to reflect approval. Unread notifications use a subtle
+maroon tint in dark mode; read notifications retain their normal background.
+Closing a live toast only dismisses the popup. No backend, SQL or environment
+changes are required for this notification UI update.
+
+Employer profiles show a separate Supervised interns card below Info
+when ongoing or completed placements exist. All four signed-in roles can browse five
+students per page and open each student's profile. History includes
+basic name/course/placement/date fields; it excludes contact, attendance and
+evaluation data. Pending/rejected and deleted placements are excluded.
+Each student has one card listing all ongoing and completed positions, companies and date
+ranges under that supervisor. Students are paginated before their placements
+are loaded, keeping their history together. Private student tabs retain their guards.
+Deploy the matching backend endpoint; no SQL, package or environment change is
+needed. The employer dashboard also groups its assigned internships into one card per student, with each position's status, date and hours shown separately. Its filters apply to positions and pagination counts five students per page.
 
 ### Next.js API handlers
 
@@ -430,11 +448,18 @@ Changing the hosting arrangement does not move the database or storage automatic
 
 ## Optional company rotations
 
-Available per internship across all academic departments; default off. Students opt in on the internship form or later in My Records. Dated assignments are managed on an ongoing internship; finished timelines are read-only. Authorized school staff can use record Overview/Rotations. On searched student profiles, the Info rotation panel is available only to the student's own department head. Disabling retains history.
+Available per internship across all academic departments; default off. Students opt in on the internship form or later in My Records. Dated assignments are managed on an ongoing internship; finished timelines are read-only. Dates must be valid, start on or after the internship start date, and avoid inclusive overlaps. Rotations may extend beyond the estimated internship end date; that estimate imposes no upper bound. Authorized school staff can use record Overview/Rotations. On searched student profiles, the Info rotation panel is available only to the student's own department head. Disabling retains history.
 
 Narrative forms suggest every rotation overlapping the coverage dates. The backend validates selections and stores snapshots for cards, preview and printing, preserving old assignment labels after timeline changes. Attendance, map grouping, overall supervision and evaluation uniqueness remain on the original internship.
 
 Apply backend `scripts/2026-10-27-internship-rotations.sql` before deploying both apps. Existing internships default to off; legacy narrative snapshots stay null. No new environment variables. Tests: `internship-rotations.test.mjs` (frontend) and `internship-rotations.test.js` (backend).
+
+Weekly narrative rotation choices use readable dates and coverage overlap,
+including assignments beyond the estimated internship end date. Cards and journal
+PDFs retain saved assignment labels after live rotations change or are removed;
+finished history stays readable. The full linked-feature audit is in backend
+docs/company-rotations-integrations.md. No additional SQL or environment changes
+are needed for these narrative guidance/display updates.
 
 ### Internship rejection reasons
 
@@ -447,6 +472,15 @@ The map supports department acronym filtering alongside search and region. Filte
 The student My Records Form tab places Company rotations above the record form for easier access. Record-detail tabs use a building icon for Overview and a repeat-arrows icon for Rotations.
 
 Help and page manuals were synchronized on October 27, 2026 for optional company rotations (top-of-form controls, timeline permissions and narrative snapshots), rejection reason/restore behavior, and combined map department/region/search filters. Profile manuals include read-only rotation access. The proposed Activities feature is not documented as available.
+
+Help feature cards now open the shared, scrollable popup modal instead of
+expanding inline. Role-aware search and page manuals still use the same guide
+content. The admin Accounts manual follows role selection, student/course and
+department assignments, account preview, EmailJS invitations, pending setup and
+resend. Student record start/estimated-end fields display MM/dd/yyyy with typed
+entry and calendar selection, while submitting ISO yyyy-MM-dd to the existing
+API. Deploy both applications for the updated rotation end-estimate policy;
+these UI/date-policy changes require no SQL, packages or environment updates.
 
 Company rotation loading states use CompanyRotationsSkeleton in compact panels and full timelines. My Records includes the compact skeleton above the form during route and initial query loading.
 
@@ -469,3 +503,9 @@ Next.js and eslint-config-next are aligned at 16.4.3 following the October 2026 
 ### Password setup interface
 
 The /set-password page uses EU-Connect school branding, the shared form styles, theme switching, accessible password-visibility controls, and a matching loading skeleton. Desktop shows the maroon brand panel; small screens keep the form first in a single column. Preserve the invitation token, password field names, action, validation and restricted-session behavior. This UI change requires no backend, SQL, package or environment changes.
+
+### Feature manuals and Help audit (October 30, 2026)
+
+The page info icons and `/help` share role-filtered guide content. The current source audit covers the application routes and supporting workflows, including invitation/recovery, grouped supervisor lists, DTR completion, rotation rules, confidentiality, upload/preview limits and SIPP draft editing. Company rotations has a dedicated guide and info button; password setup/recovery has a searchable Help guide. See [manual-audit.md](docs/manual-audit.md) for feature coverage, checked sources and maintenance boundaries. This documentation/UI update requires no SQL, environment or dependency changes.
+
+The Help page's Need more help? section shows available email/phone contacts of active administrators to students and department heads through authenticated GET `/api/v1/help/admin-contacts`. Employers receive instructions and a link to create a Feedback & Concerns post. Contacts use the admin's existing account email/profile number, omit invalid or missing values, and include loading, retry and empty states. Deploy the matching backend; no SQL or environment changes.

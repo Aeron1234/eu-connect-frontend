@@ -23,7 +23,7 @@ function NotificationItem({ item, onChanged }) {
         "relative flex items-start gap-3 rounded-lg border px-4 py-3 transition-colors",
         item.is_read
           ? "border-border bg-background"
-          : "border-primary-200 bg-primary-50/40",
+          : "border-primary-200 bg-primary-50/40 dark:border-primary dark:bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))]",
         isClickable && "cursor-pointer hover:shadow-sm",
       )}
     >

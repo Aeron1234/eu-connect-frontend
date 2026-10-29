@@ -6,8 +6,8 @@ const employerGuides = [
   "title": "Review your intern overview",
   "summary": "Monitor supervised interns and posted opportunities.",
   "steps": [
-    "Use the dashboard's overview cards for your internships, interns, and documents.",
-    "In the supervised interns list, switch between ongoing and finished placements and use its filters and page controls. Check hours and internship dates, then open a student's profile for details.",
+    "Use the dashboard's overview cards for your postings, supervised internships, and uploaded documents. The current and past intern statistics count internship records, while the supervised list counts distinct students; a student with two placements can contribute twice to a statistic but has one list card.",
+    "The supervised interns list has one card per student, listing each position with its status, start date and hours. Switch between All, Ongoing and Completed to filter positions. Pagination counts students, five per page. Open View profile for student details.",
     "Review your posted jobs and recent activity, or use the quick actions to manage opportunities and find students.",
     "Accept or decline supervision requests from notifications before managing a student's internship tools."
   ],
@@ -36,7 +36,7 @@ feedbackEmployer,
     "Open the intern from your dashboard or Search Users. Accept the supervision request before managing an intern.",
     "An accepted supervision relationship and ongoing internship expose the permitted DTR, weekly narratives, evaluations, certificates, and profile information.",
     "In DTR, review attendance or use Set DTR Location. Narratives let you read the student's saved weekly work.",
-    "In Certificates, upload the permitted certificate or supporting file. Wait for the upload result; use the file control to preview PDFs, DOCX, spreadsheets, text, or supported images. Download original file remains available.",
+    "In Certificates, upload one permitted certificate or supporting file up to 50 MB. The student must accept a pending upload before it counts toward a requirement. Wait for the upload result; use the file control to preview PDFs, DOCX, spreadsheets, text, or supported images. Download original file remains available.",
     "You can delete your own pending uploads. Accepted documents are managed under the student's document permissions."
   ],
   "href": "/users",

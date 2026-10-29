@@ -11,6 +11,10 @@ export default function InternshipFormInput({
   onChange,
   disabled,
   required = true,
+  hint,
+  inputMode,
+  autoComplete,
+  maxLength,
 }) {
   return (
     <div className="flex min-w-0 flex-col">
@@ -27,7 +31,12 @@ export default function InternshipFormInput({
         onChange={onChange}
         disabled={disabled}
         required={required}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        maxLength={maxLength}
+        aria-describedby={hint ? `${name}-hint` : undefined}
       />
+      {hint && <p id={`${name}-hint`} className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{hint}</p>}
     </div>
   );
 }

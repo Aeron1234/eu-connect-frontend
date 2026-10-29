@@ -35,8 +35,9 @@ const sharedGuides = [
   "steps": [
     "Select the header bell for recent notifications and use its page controls for older items.",
     "Select a notification to open the related page. Feedback notifications open the discussion; department-head notifications about employer evaluations open the internship record.",
+    "For students, Internship Record Approved opens My Records from the live notification popup, header dropdown, or notification list. Unread notifications have a subtle maroon tint in dark mode. Closing a popup dismisses it without deleting or marking the saved notification as read.",
     "For students, an internship rejection notification contains the reason entered by staff and opens My Records. Find the same reason on the rejected record card. Restoring the record clears the card reason but keeps the old notification as history.",
-    "Open Notifications for the full list. Mark items as read, use Mark all as read, or delete a notification.",
+    "Open Notifications for the full list. Mark items as read, use Mark all as read, or delete an eligible notification. Deleting a notification removes the alert, not the underlying record or feedback discussion.",
     "Employers can accept or decline eligible supervisor requests in Notifications. Unanswered active requests cannot be deleted, even when marked read. Answered or cancelled requests can be dismissed."
   ],
   "href": "/notifications",
@@ -50,6 +51,7 @@ const sharedGuides = [
     "Enter at least three characters of a person's name in Search Users, then select a result.",
     "When the search is empty, revisit a recently viewed profile. Remove one history entry with X or use clear all.",
     "Students can use Set as Supervisor on an eligible employer's profile and manage the request status there. Employers respond to requests from notifications.",
+    "On an employer's Info tab, Supervised interns appears below the information card when ongoing or completed placements exist. Every signed-in role can browse five students per page and open each student's profile. Each student has one card listing all ongoing and completed positions, companies and dates under that supervisor. Email, attendance hours, evaluations and documents are not included in this history; existing student-profile permissions still apply.",
     "Company rotations are optional across departments. On student profiles, only the student's own department head can view the Company rotations panel in Info. Administrators, employers, students, and other department heads do not see that profile panel. Authorized school staff retain the existing record-detail rotation view. Students manage their own timeline. A rotation supervisor is a text label, not a new platform supervision assignment.",
     "Department heads can view DTR, Narratives and Evaluations only for students in their own department. Other departments' students show Info only. Existing administrator and accepted-supervisor access still applies; finding a profile does not grant access to confidential evaluations."
   ],
@@ -63,12 +65,26 @@ const sharedGuides = [
   "steps": [
     "Open your account from the profile card near the bottom of the sidebar.",
     "Select Edit Profile, change the fields available to your role, then Save Changes. Cancel discards unsaved profile edits.",
-    "Use the security section to change your password. Enter your current password, a new password of at least eight characters, and matching confirmation, then check the result message."
+    "Use the security section to change your password. Enter your current password, a new password of at least eight characters, and matching confirmation, then check the result message. If you cannot sign in, use Forgot password on the sign-in page with your registered email; see the password setup and recovery guide."
   ],
   "href": null,
   "linkText": "Open my account"
 },
 pdfGuide,
+{
+  "id": "password-setup",
+  "title": "Set up or recover your password",
+  "summary": "Use your invitation or request a new link through your registered email.",
+  "steps": [
+    "For a new account, the administrator enters your email and username. Open the invitation email and its Set your password link within 24 hours. You choose your own password; the email does not contain a password.",
+    "For an existing account, open Forgot password from sign-in, enter your registered email and select Send Reset Link. A recovery link is valid for 30 minutes. The same generic confirmation is shown even if an address is not registered or delivery cannot be confirmed; it is not proof that an email arrived.",
+    "Check Spam or Junk and use the newest email. Requesting a new link replaces older links. If an invitation is missing, ask the administrator to check your email address and use Resend invitation rather than creating a duplicate account.",
+    "On Set your password, enter a password of at least eight characters and at most 72 UTF-8 bytes (some characters use more than one byte) and matching confirmation, then save. Each link can be used once. An invalid, expired or used link needs a new email. Sign in with your username and new password after success.",
+    "Requesting recovery does not immediately change your current password. Saving a new password invalidates existing sessions. An inactive account needs administrator assistance; a password link does not reactivate it."
+  ],
+  "href": "/forgot-password",
+  "linkText": "Open password recovery"
+},
 {
   "id": "unavailable-tools",
   "title": "Why is an internship tool unavailable?",

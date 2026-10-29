@@ -75,6 +75,29 @@ test("ordinary internships hide picker controls, disabled tracking retains saved
   assert.match(saved, /Saved company assignment/); assert.doesNotMatch(saved, /name="rotation_ids"/);
 });
 
+test("narrative picker includes assignments after the internship estimate and displays readable dates", () => {
+  const Picker = load("components/weekly-narratives-ui/NarrativeRotationPicker.js", {
+    "@/lib/hooks/useInternshipRotations": () => ({ data: { enabled: true, dateStarted: "2026-10-01", dateEnded: "2026-10-31", rotations: rows } }),
+    "./NarrativeRotations": () => null,
+  }).default;
+  const html = renderToStaticMarkup(React.createElement(Picker, { internshipId: "record", from: "2026-11-05", to: "2026-11-10" }));
+  assert.equal((html.match(/checked=""/g) || []).length, 2);
+  assert.match(html, /November 1, 2026/); assert.match(html, /November 14, 2026/);
+  assert.doesNotMatch(html, /disabled=""/); assert.match(html, /estimated internship end date/);
+  assert.equal(rotations.currentRotation(rows, "2026-11-05").id, "one");
+});
+
+test("printed journals keep original assignments beyond the estimate after the live timeline is changed or removed", () => {
+  const saved = { ...rows[0] };
+  const record = { company_name: "Hotel", status: "finished", date_ended: "2026-10-31", narratives: [{ week_number: 4, title: "Extended internship", narrative: "Worked in the company unit", date_from: "2026-11-01", date_to: "2026-11-07", rotation_assignments: JSON.stringify([saved]) }] };
+  const original = weeklyNarrativesHtml(record);
+  for (const live of [[], [{ ...saved, department_name: "Renamed company unit", date_from: "2026-12-01", date_to: "2026-12-07" }]]) {
+    const html = weeklyNarrativesHtml({ ...record, rotations: live });
+    assert.equal(html, original); assert.match(html, /Food and Beverage/); assert.match(html, /November 1, 2026/);
+    assert.doesNotMatch(html, /Renamed company unit/);
+  }
+});
+
 test("text-only narrative edits retain assignment snapshots even after timeline dates/names change", () => {
   const Picker = load("components/weekly-narratives-ui/NarrativeRotationPicker.js", {
     "@/lib/hooks/useInternshipRotations": () => ({ data: { enabled: true, rotations: [{ ...rows[0], department_name: "Renamed unit", date_from: "2026-12-01", date_to: "2026-12-07" }] } }),
@@ -94,6 +117,7 @@ test("timeline is read-only for employers/staff and exposes opt-in only to autho
     "@/lib/server-actions/rotations-actions": {}, "@/lib/helpers": {},
     "@/lib/cache/student-records-queries": {}, "@/lib/cache/weekly-narratives-queries": {}, "@/lib/cache/student-storage-queries": {},
     "@/components/skeletons/CompanyRotationsSkeleton": empty,
+    "@/components/help-ui/HelpManual": empty,
     "../ui/Modal": empty, "../ui/ModalForm": {}, "../ui/ErrorUI": empty,
     "../ui/button": { Button: ({ children, ...props }) => { delete props.variant; delete props.size; return React.createElement("button", props, children); } },
   }).default;

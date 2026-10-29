@@ -43,7 +43,7 @@ function InternshipRecordForm({ regions = [], recordStatus = "", activeRecord = 
             <InternshipFormPreview internshipForm={fieldProps.internshipForm} recordStatus={recordStatus} isEditing={isEditing} region={regions.find((region) => String(region.id) === regionProps.selectedRegion)} />
           </div>
           <div className="flex flex-col gap-3 border-t border-border bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p className="text-xs leading-relaxed text-muted-foreground">{status ? "Your saved internship details are shown above." : <><span className="font-semibold text-primary-emphasis">*</span> Required fields. Company website is optional.</>}</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">{status ? "Your saved internship details are shown above." : <><span className="font-semibold text-primary-emphasis">*</span> Required fields, including the company website.</>}</p>
             {(!isCurrentRecord || canEdit) && (
             <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center">
             {isEditing && (

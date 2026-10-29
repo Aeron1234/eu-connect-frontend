@@ -77,6 +77,7 @@ test("performance PDF actions are available to the submitting employer and staff
 test("opening an evaluation notification refreshes that record's evaluations tab", () => {
   const { invalidateNotificationTarget } = load("components/notifications-ui/notificationActions.js", {
     sonner: {}, "@/lib/server-actions/notifications-actions": {}, "@/lib/cache/user-profile-queries": {},
+    "@/lib/cache/student-records-queries": {},
   });
   const calls = [];
   invalidateNotificationTarget({ invalidateQueries: options => calls.push(options.queryKey) }, "head", { type: "evaluation_submitted", link: "record" });

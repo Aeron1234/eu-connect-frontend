@@ -3,7 +3,7 @@
 import SelectionRowsSkeleton from "@/components/skeletons/SelectionRowsSkeleton";
 import { useState } from "react";
 import useInternshipRotations from "@/lib/hooks/useInternshipRotations";
-import { rotationSnapshots, suggestedRotations } from "@/lib/internship-rotations.mjs";
+import { rotationDate, rotationSnapshots, suggestedRotations } from "@/lib/internship-rotations.mjs";
 import NarrativeRotations from "./NarrativeRotations";
 
 // Suggest every overlapping assignment, including weeks spanning two company units.
@@ -25,7 +25,7 @@ export default function NarrativeRotationPicker({ internshipId, data, from, to, 
   const ids = selection?.range === range ? selection.ids : suggestedRotations(query.data.rotations, from, to);
   return <fieldset disabled={disabled} className="space-y-2 rounded-lg border border-border p-3">
     <legend className="px-1 text-xs font-semibold">Company departments / rotations (optional)</legend>
-    <p className="text-xs leading-relaxed text-muted-foreground">Suggested from your date range. Select all departments covered this week.</p>
+    <p className="text-xs leading-relaxed text-muted-foreground">Select the departments covered by your dates. Rotations after the estimated internship end date are included.</p>
     <input type="hidden" name="rotation_ids" value={JSON.stringify(ids)} />
     {!available.length && <p className="text-xs text-muted-foreground">Add assignments in My Records → Company rotations first.</p>}
     {available.map(row => {
@@ -33,7 +33,7 @@ export default function NarrativeRotationPicker({ internshipId, data, from, to, 
       return <label key={row.id} className={`flex items-start gap-2 text-sm ${!overlaps ? "text-muted-foreground" : ""}`}>
         <input type="checkbox" checked={ids.includes(row.id)} disabled={disabled || !overlaps} className="mt-1 accent-primary"
           onChange={event => setSelection({ range, ids: event.target.checked ? [...ids, row.id] : ids.filter(id => id !== row.id) })} />
-        <span className="min-w-0 break-words">{row.department_name}<span className="block text-xs text-muted-foreground">{row.date_from} – {row.date_to}{!query.data.rotations.some(item => item.id === row.id) ? " · Saved assignment" : ""}</span></span>
+        <span className="min-w-0 break-words">{row.department_name}<span className="block text-xs text-muted-foreground">{rotationDate(row.date_from)} – {rotationDate(row.date_to)}{!query.data.rotations.some(item => item.id === row.id) ? " · Saved assignment" : ""}</span></span>
       </label>;
     })}
   </fieldset>;

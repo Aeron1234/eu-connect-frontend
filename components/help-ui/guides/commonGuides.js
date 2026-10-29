@@ -1,3 +1,21 @@
+export const rotationsGuide = {
+  id: "rotations",
+  title: "Track optional company rotations",
+  summary: "Record company units and dates without changing the internship or accepted supervisor.",
+  steps: [
+    "Rotations are optional for every academic department. Students enable them on a new record or in Company rotations above the saved Form. Pending records can enable tracking, but assignments can be added only after approval makes the internship ongoing.",
+    "The owning student opens Rotations and selects Add rotation. Enter the company department or unit, start and end dates, and optional supervisor name and notes. These are company units, such as Food and Beverage or Housekeeping, rather than the student's academic department.",
+    "Start on or after the internship start date and end on or after the rotation start. Rotations may extend beyond the estimated internship end date while the record remains ongoing. Date ranges cannot overlap, including boundary days; a following assignment must start after the previous one ends.",
+    "The current assignment is based on today's date. No assignment for today can mean a future assignment or a gap, rather than a loading error. Use View rotations in a compact panel to expand the saved timeline.",
+    "The student can edit or remove assignments while tracking is enabled on an ongoing record. Confirm removals. Turn off preserves the timeline; finished records remain read-only. A named rotation supervisor does not become the platform supervisor, and rotations do not reset duty hours.",
+    "When submitting a weekly narrative, students can optionally select assignments overlapping its coverage dates. A week spanning two units can include both. Saved narrative labels remain as recorded after later rotation edits, deletion or disabling.",
+    "Authorized staff read rotations in internship record details. In a searched student's Info tab, only that student's own department head sees the rotation panel. Finding a profile or being named as a rotation supervisor does not grant private record access.",
+    "Wait for the skeleton to finish. If loading fails, use Retry. Previously loaded assignments stay visible during a refresh failure, but editing is unavailable until a successful refresh."
+  ],
+  href: "/internship-records",
+  linkText: "Open Records"
+};
+
 export const mapGuide = {
   "id": "map",
   "title": "Plan visits with the student map",
@@ -24,12 +42,14 @@ export const recordsGuide = {
     "Search by student, company, or course and select a status tab. Use See more to load additional records.",
     "Review Pending Approval records before approving or rejecting them. Reject opens a confirmation with a required reason of up to 1,000 characters. The student sees this exact note in their notification and rejected record card. If saving fails, the dialog stays open with the entered reason. Approval makes a record ongoing; Restore returns a rejected record to pending and clears its saved rejection reason, while earlier notifications remain as history, and Mark Finished completes an ongoing record.",
     "Select a student's name or View Record to open the overview, DTR, narratives, summary report, evaluations, and documents available to you.",
+    "In Overview, open Company website to review the company's official website or social media page in a new tab alongside the placement details. Older records without a website display a dash (-).",
     "Overview uses a building icon; Rotations uses repeat arrows. For records with tracking enabled or saved rotation history, open Rotations for the dated timeline. The Company rotations panel in Overview shows the current assignment and View rotations. Staff can read assignments but only the owning student manages them; company units do not change the academic department, accepted supervisor, or duty hours.",
-    "In Narratives, selected company rotations appear with the saved coverage dates and in the printed journal. These are saved labels, so later timeline changes do not rewrite old narrative assignments.",
+    "Rotations may continue past the estimated internship end date while the record is ongoing. In Narratives, selected company rotations appear with the saved coverage dates and in the printed journal, including work beyond that estimate. These are saved labels, so later timeline changes do not rewrite old narrative assignments. Finished records keep their timeline and journals available for review.",
     "In Overview, click the company pin and choose See on Google Maps to open campus-to-company directions in a new tab.",
-    "In DTR, authorized staff can set the attendance pin and radius for an ongoing record. Ask the student to share their dashboard location if you need help placing the pin.",
+    "In DTR, authorized staff can set the attendance pin and radius for an ongoing record. Ask the student to share their dashboard location if you need help placing the pin. Review saved shifts, break time and credited hours before making completion decisions.",
     "Employer performance evaluations are confidential to the employer and authorized staff. Evaluation notifications open the related internship record. Use the available PDF control to preview, print, or download.",
-    "Employers may post multiple performance evaluations per internship. Students may have one active supervisor evaluation and replace it after deletion. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies."
+    "Employers may post multiple performance evaluations per internship. Students may have one active supervisor evaluation and replace it after deletion. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies only after author deletion.",
+    "Mark Finished is a staff completion decision and does not require credited hours to meet the required total. Check the student's record first. The student's Finish Internship Record control requires the hours target and no open shift. Completion preserves history; it does not delete attendance, narratives or rotations."
   ],
   "href": "/internship-records",
   "linkText": "Open Records"
@@ -57,8 +77,8 @@ export const pdfGuide = {
   "steps": [
     "Select Export PDF or an available PDF preview control. Wait for the preview to load; reports do not download automatically.",
     "The preview starts at 75%. Use page navigation, zoom, or Fit width to inspect the document.",
-    "Select Print to print all PDF pages, or Download to save the original PDF. If loading fails, use Retry. Large non-PDF previews can be limited; partial previews show a notice and require the original file for full printing.",
-    "DOCX, XLS, XLSX, CSV, text, and supported images open in the same preview-style dialog with Download original file. Select a worksheet to preview and print it. Word prints all document pages. Legacy .doc files cannot be previewed and keep the original download option."
+    "Select Print to print all PDF pages, or Download to save the original PDF. If loading fails, use Retry. Uploaded non-PDF files have a 25 MB browser-preview limit. A file can be accepted for upload yet exceed this preview limit; use Download original file in that case. Partial previews show a notice and require the original file for full printing.",
+    "DOCX, XLS, XLSX, CSV, text, and supported images open in the same preview-style dialog with Download original file. Select a worksheet to preview and print it. Word prints all document pages when the preview is complete. Browser previews may lay out Word files differently from Microsoft Word; use the original file when exact original formatting is needed. Legacy .doc files cannot be previewed and keep the original download option."
   ],
   "href": "/help",
   "linkText": "Open Help"
@@ -71,7 +91,7 @@ export const feedbackEmployer = {
   "steps": [
     "Select Create feedback. Choose a category and enter the subject and description. Only employers create these posts.",
     "General Feedback is visible to you, Admin, and all department heads. Platform Feedback and Technical Issue are visible only to you and Admin.",
-    "For Internship Feedback & Concerns, optionally tag one or more internships you supervise. The department heads of the tagged students can see the whole discussion and receive notifications. Without tags, only you and Admin can see it. Check the audience shown in the form.",
+    "For Internship Feedback & Concerns, optionally tag one or more ongoing or finished internships assigned to you. The department heads of the tagged students can see the whole discussion and receive notifications. Without tags, only you and Admin can see it. Check the audience shown in the form.",
     "Optionally attach up to three PDF, JPG, PNG, or WebP files, each 5 MB or smaller. Images appear inline and can be enlarged. PDFs open in the preview with Print and Download; use the download icon to save an attachment explicitly.",
     "Use search, Category, Status, and the page controls to find posts. Select a post to open its discussion. On small screens, use the back arrow to return to the feed.",
     "Reply in the discussion. Staff manage Open, In review, and Resolved status; a resolved discussion must be reopened by staff before you can add another reply.",
@@ -107,7 +127,7 @@ export const calendarStudent = {
   "steps": [
     "Use the arrows to change months and Today to return to the current date. Select a day to read its agenda.",
     "Use the checkboxes to show or hide item types. Announcement events and schedules with date ranges appear on every included day.",
-    "Select a day within your ongoing internship dates and choose Add to-do. Enter a title and save. Your tasks are private.",
+    "Select a day within your saved ongoing internship start and end dates and choose Add to-do. Enter a title and save. Your tasks are private. This calendar date range is separate from rotation dates; adding a rotation beyond the estimated end does not change the calendar's eligible dates.",
     "In the agenda, use the checkmark to complete or reopen a task, the pencil to edit it, or the trash icon to delete it after confirmation."
   ],
   "href": "/calendar",
@@ -165,9 +185,10 @@ export const dtrLocationGuide = {
   "summary": "Place the attendance pin and choose its permitted radius.",
   "steps": [
     "Open an ongoing internship's DTR tab and select Set DTR Location. Employers use the profile of an intern whose supervision request they accepted.",
-    "Search for the workplace or place the map pin manually. A short delay prevents repeated location searches; wait for the loading indicator and suggestions.",
+    "Search for the workplace or place the map pin manually. A short delay prevents repeated location searches; wait for the loading indicator and suggestions. Choose an allowed radius from 20 to 2,000 metres and optionally add a location label.",
     "Ask the student to Share location from their dashboard when needed. Check the temporary position and accuracy circle before choosing the workplace pin and attendance radius.",
-    "Save the location and ask the student to stop sharing after setup. Map position sharing does not replace the separate location checks when clocking in or out."
+    "Save the location and ask the student to stop sharing after setup. Map position sharing does not replace the separate location checks when clocking in or out.",
+    "Remove a saved custom DTR location only after reviewing the confirmation: attendance returns to the saved company location and default radius. Removing an unsaved pin only clears that form selection."
   ],
   "href": "/internship-records",
   "linkText": "Open Records"

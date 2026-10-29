@@ -1,6 +1,8 @@
 "use client";
 
 import { format, isValid } from "date-fns";
+import { ExternalLink } from "lucide-react";
+import { companyWebsiteHref } from "@/lib/company-website.mjs";
 import CompanyRotations from "./CompanyRotations";
 import ProgressBar from "../ui/ProgressBar";
 import RecordsCompanyMap from "./RecordsCompanyMap";
@@ -12,6 +14,7 @@ function formatOverviewDate(value) {
 }
 
 export default function RecordOverviewTab({ record, internshipId }) {
+  const websiteHref = companyWebsiteHref(record.company_website);
   const startDate = formatOverviewDate(record.date_started);
   const endDate = record.status === "ongoing"
     ? "still ongoing"
@@ -30,6 +33,13 @@ export default function RecordOverviewTab({ record, internshipId }) {
         <dl className="mt-3 space-y-2 text-sm">
           {[
             ["Company", record.company_name],
+            ["Company website", websiteHref ? (
+              <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-start gap-1.5 text-primary-emphasis underline underline-offset-4 hover:opacity-80">
+                <span className="min-w-0 break-all">{record.company_website.trim()}</span>
+                <ExternalLink className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : record.company_website?.trim() || "-"],
             [
               "Supervisor",
               `${record.supervisor_name ? record.supervisor_name : "–"}`,
@@ -38,8 +48,8 @@ export default function RecordOverviewTab({ record, internshipId }) {
             ["Submitted", formatOverviewDate(record.created_at) || "–"],
           ].map(([k, v]) => (
             <div key={k} className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{k}</dt>
-              <dd className="text-right font-medium text-foreground">
+              <dt className="shrink-0 text-muted-foreground">{k}</dt>
+              <dd className="min-w-0 break-words text-right font-medium text-foreground">
                 {v}
               </dd>
             </div>

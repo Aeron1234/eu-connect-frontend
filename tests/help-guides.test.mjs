@@ -41,6 +41,25 @@ const viewers = [
   { role: "department_head", department_code: "REG" }, { role: "admin" },
 ];
 
+test("Help functionality cards use the shared popup with the selected guide and its destination", () => {
+  const SharedModal = () => null;
+  const scoped = loader({ "@/components/ui/Modal": SharedModal, "next/link": ({ children, ...props }) => React.createElement("a", props, children) });
+  const Card = scoped("components/help-ui/HelpGuideCard.js").default;
+  const guide = getPageGuide({ role: "admin" }, "accounts");
+  const popup = Card({ guide, accountHref: "/admin/account" });
+  assert.equal(popup.type, SharedModal); assert.equal(popup.props.title, guide.title); assert.equal(popup.props.description, guide.summary);
+  const trigger = renderToStaticMarkup(popup.props.trigger), content = renderToStaticMarkup(popup.props.children);
+  assert(trigger.includes(guide.title)); assert(!trigger.includes("<details"));
+  assert(content.includes('href="/admin/create-account"')); assert.equal((content.match(/<li>/g) || []).length, guide.steps.length);
+});
+
+test("admin account manual describes current role-first creation and invitation setup", () => {
+  const guide = getPageGuide({ role: "admin" }, "accounts");
+  const text = guide.steps.join(" ");
+  for (const detail of ["Who is this account for?", "course and gender", "department", "account preview", "EmailJS", "24 hours", "Resend invitation", "Spam or Junk", "username and new password"]) assert(text.includes(detail), detail);
+  assert(text.includes("You do not choose or receive the user's password"));
+});
+
 test("each role's sidebar destinations have a guide and page lookup uses that same content", () => {
   for (const user of viewers) {
     const guides = getHelpSections(user).flatMap(section => section.guides);
@@ -64,10 +83,13 @@ test("help and page manual lookups exclude restricted roles and registrar-only w
   const student = { role: "student" };
   for (const id of ["feedback", "map", "records", "sipp"]) assert.equal(getPageGuide(student, id), undefined);
   const employer = { role: "employer" };
-  for (const id of ["calendar", "announcements", "past-internships", "records", "sipp"]) assert.equal(getPageGuide(employer, id), undefined);
+  for (const id of ["calendar", "announcements", "past-internships", "records", "sipp", "rotations"]) assert.equal(getPageGuide(employer, id), undefined);
   const registrar = { role: "department_head", department_code: "REG" };
   assert(getPageGuide(registrar, "sipp"));
-  for (const id of ["records", "dashboard", "dtr-location"]) assert.equal(getPageGuide(registrar, id), undefined);
+  for (const id of ["records", "dashboard", "dtr-location", "rotations"]) assert.equal(getPageGuide(registrar, id), undefined);
+  for (const user of viewers) assert.equal(getPageGuide(user, "password-setup").href, "/forgot-password");
+  assert.equal(getPageGuide(student, "rotations").href, "/student/internship-record");
+  assert.equal(getPageGuide({ role: "admin" }, "rotations").href, "/internship-records");
   assert.equal(getPageGuide({ role: "admin", department_code: "REG" }, "sipp"), undefined);
   assert.equal(getPageGuide({ role: "department_head", department_code: "CCS" }, "sipp"), undefined);
   assert.match(getPageGuide(registrar, "announcements").steps[0], /General/);
@@ -112,4 +134,37 @@ test("Help searches the same full steps used in page manuals without surfacing h
     }
     if (user.role === "student") assert(!found.some(guide => guide.id === "feedback"));
   }
+});
+
+test("Help contact instructions show admin contacts only to students and heads", () => {
+  for (const role of ["student", "department_head", "employer", "admin"]) {
+    const scoped = loader({
+      "@/contexts/UserContext": { useUser: () => ({ user: { id: "viewer", role } }) },
+      "./AdminSupportContacts": () => React.createElement("div", null, "Administrator contact list"),
+      "next/link": ({ children, ...props }) => React.createElement("a", props, children),
+    });
+    const Contact = scoped("components/help-ui/HelpContact.js").default;
+    const html = renderToStaticMarkup(React.createElement(Contact));
+    assert.equal(html.includes("Administrator contact list"), ["student", "department_head"].includes(role));
+    if (role === "employer") { assert(html.includes('href="/feedback"')); assert(html.includes("Create feedback")); }
+  }
+});
+
+test("administrator contacts render email/phone links and distinct loading, empty and failed states", () => {
+  let state;
+  const scoped = loader({
+    "@tanstack/react-query": { useQuery: () => state },
+    "@/lib/server-actions/help-actions": {},
+    "@/components/ui/skeleton": { Skeleton: () => null },
+    "@/components/ui/ErrorUI": ({ error }) => React.createElement("div", { role: "alert" }, error.message),
+  });
+  const Contacts = scoped("components/help-ui/AdminSupportContacts.js").default;
+  const render = () => renderToStaticMarkup(React.createElement(Contacts, { viewerId: "viewer" }));
+  state = { isPending: true }; assert(render().includes("Loading administrator contacts"));
+  state = { data: [] }; assert(render().includes("No administrator email or phone number"));
+  const data = [{ name: "Admin", email: "support@example.test", contact_number: "+63 912 345 6789" }];
+  state = { data }; assert(render().includes('href="mailto:support%40example.test"')); assert(render().includes('href="tel:+639123456789"'));
+  state = { data, isError: true, error: Object.assign(new Error("Refresh failed"), { status: 503 }) };
+  assert(render().includes("Refresh failed")); assert(render().includes("support@example.test"));
+  state.error.status = 403; assert(!render().includes("support@example.test"));
 });

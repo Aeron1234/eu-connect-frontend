@@ -84,6 +84,22 @@ for (const scenario of dashboardCases) {
   });
 }
 
+test("employer dashboard renders repeated positions inside one student card", () => {
+  const result = query({ interns: [{ student_id: "student-1", first_name: "Tsunayoshi", last_name: "Sawada", email: "student@example.test", course_name: "Computer Science", placements: [
+    { internship_id: "record-2", internship_position: "AI Agent Engineer", status: "finished", date_started: "2026-08-31", total_hours: 100, accumulated_hours: 103.2 },
+    { internship_id: "record-1", internship_position: "SE intern", status: "finished", date_started: "2026-07-27", total_hours: 100, accumulated_hours: 103.6 },
+  ] }], total: 1, page: 1, totalPages: 1 }, { isError: false });
+  const view = fixture("dashboard-ui/InternsSupervisedCard.js", {
+    "@tanstack/react-query": { useQuery: () => result, useQueryClient: () => ({}) },
+    "@/lib/cache/dashboard-lists-queries": { employerInternsPageOptions: () => ({}) },
+  });
+  const html = view.render();
+  assert.equal((html.match(/View profile/g) || []).length, 1);
+  assert.equal((html.match(/student@example.test/g) || []).length, 1);
+  for (const value of ["AI Agent Engineer", "SE intern", "103.2", "103.6", "1 intern"]) assert(html.includes(value), value);
+  assert(html.includes('aria-label="Internship positions of Tsunayoshi Sawada"'));
+});
+
 test("Annex C errors retain loaded reports and retry the failed page operation", () => {
   for (const state of ["failed", "refresh", "next"]) {
     const result = query(state === "failed" ? undefined : { pages: [] }, { isFetchNextPageError: state === "next" });

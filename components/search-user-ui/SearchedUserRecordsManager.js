@@ -6,6 +6,7 @@ import SearchedUserFilter from "./SearchedUserFilter";
 import StudentNarratives from "../weekly-narratives-ui/StudentNarratives";
 import EmployerCertificateUploads from "../internship-docs-ui/EmployerCertificateUploads";
 import ProfileInfoGrid from "./ProfileInfoGrid";
+import EmployerSupervisionHistory from "./EmployerSupervisionHistory";
 import TabContentSkeleton from "../skeletons/TabContentSkeleton";
 import ProfileDtrTab from "./ProfileDtrTab";
 import ProfileEvaluationsTab from "./ProfileEvaluationsTab";
@@ -94,9 +95,12 @@ function SearchedUserRecordsManager({
             )}
 
             {activeTab === "info" && (
+              <div className="space-y-4">
               <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6">
                 <ProfileInfoGrid info={info} />
                 {userRole === "department_head" && searchedUserRole === "student" && canViewStudentRecords === true && info?.internship_id && <div className="mt-4"><CompanyRotations internshipId={info.internship_id} readOnly compact /></div>}
+              </div>
+              {searchedUserRole === "employer" && <EmployerSupervisionHistory key={searchedUserId} employerId={searchedUserId} viewerId={userId} />}
               </div>
             )}
           </>

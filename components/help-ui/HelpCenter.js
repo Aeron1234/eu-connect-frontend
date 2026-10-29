@@ -12,7 +12,7 @@ export default function HelpCenter() {
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <PageTitle Icon={CircleHelp} title="Help" description="Search guides for your role, or use the info icon beside a page title for its manual." />
+      <PageTitle Icon={CircleHelp} title="Help" description="Select a guide to open its instructions, or use the info icon beside a page title for its manual." />
 
       <HelpSearch role={role} query={query} setQuery={setQuery} />
 

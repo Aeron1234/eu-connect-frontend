@@ -3,8 +3,14 @@
 import { toast } from "sonner";
 import { openAnnouncementNotification } from "@/lib/server-actions/notifications-actions";
 import { userProfileKeys } from "@/lib/cache/user-profile-queries";
+import { studentRecordsKeys } from "@/lib/cache/student-records-queries";
 
 export function invalidateNotificationTarget(queryClient, userId, notification) {
+  if (notification?.type === "internship_record_approved") {
+    // The student may still have a freshly cached pending record when the
+    // approval arrives. Invalidate only this viewer's My Records before opening.
+    void queryClient.invalidateQueries({ queryKey: studentRecordsKeys.all(userId) });
+  }
   if (["feedback_mentioned", "feedback_reply", "feedback_status"].includes(notification?.type)) {
     void queryClient.invalidateQueries({ queryKey: ["feedback", String(userId)] });
   }

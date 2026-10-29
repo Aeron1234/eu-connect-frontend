@@ -2,6 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getNotificationTargetPath } from "../lib/notification-routes.js";
 
+test("student approval notifications open My Records for socket payloads and read/unread inbox items", () => {
+  for (const payload of [{}, { link_uuid: "internship-id", is_read: false }, { link_uuid: "internship-id", is_read: true }, { link: "legacy-record" }]) {
+    assert.equal(getNotificationTargetPath({ ...payload, type: "internship_record_approved" }), "/student/internship-record");
+  }
+});
+
 test("department-head evaluation notifications navigate to the internship record instead of the evaluation UUID", () => {
   for (const is_read of [true, false]) {
     assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "internship-uuid", link_uuid: "evaluation-uuid", is_read }), "/internship-records/internship-uuid");
