@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   LibraryBig,
   MapPin,
+  Map as MapIcon,
   Megaphone,
   SlidersHorizontal,
   UserPlus,
@@ -76,7 +77,7 @@ function roleRouteGroups(userRole, userDepartment) {
       {
         name: "Map",
         href: "/map",
-        icon: <MapPin className="h-5 w-5 shrink-0" />,
+        icon: <MapIcon className="h-5 w-5 shrink-0" />,
       },
       {
         name: "Past Internships",
@@ -86,6 +87,7 @@ function roleRouteGroups(userRole, userDepartment) {
     );
 
     if (userDepartment !== "REG") {
+      staffRoutes.push({ name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({
         name: "Records",
         href: "/internship-records",
@@ -136,10 +138,11 @@ function roleRouteGroups(userRole, userDepartment) {
       {
         label: "Staff tools",
         routes: [
+          { name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> },
           {
             name: "Map",
             href: "/map",
-            icon: <MapPin className="h-5 w-5 shrink-0" />,
+            icon: <MapIcon className="h-5 w-5 shrink-0" />,
           },
           {
             name: "Records",
@@ -156,6 +159,7 @@ function roleRouteGroups(userRole, userDepartment) {
     ];
   }
 
+  if (userRole === "employer") return [{ label: "Intern tools", routes: [{ name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> }] }];
   return [];
 }
 

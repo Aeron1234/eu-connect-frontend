@@ -172,7 +172,7 @@ export const generalAnnouncements = {
     "Select Announce. Admin and registrar department heads post in General; the form offers only this category.",
     "Enter the title and content. Optionally choose Event date and Until date for an inclusive date range. Until date requires Event date and cannot be earlier; leave it blank for a one-day event.",
     "Optionally check Visible to employers to share this post with all employers as well as its usual school audience. The option starts unchecked. You can change it when editing; turning it off removes employer access and its saved employer alerts. Post the announcement. Dated events appear on permitted calendars; this option does not grant employers full Calendar access.",
-    "Search or filter the feed and select See more for long content. Edit your own posts and use the available pin or delete controls. Admin can also pin or delete other authors' posts; confirm deletion."
+    "Search or filter the feed and select See more for long content. Edit your own posts and use the available pin or delete controls. Admin can also pin or delete other authors' posts; confirm deletion. On Department posts, Admin sees the author's department name and acronym on the card and expanded content."
   ],
   "href": "/announcements",
   "linkText": "Open Announcements",
@@ -184,7 +184,7 @@ export const dtrLocationGuide = {
   "title": "Set a student's DTR location",
   "summary": "Place the attendance pin and choose its permitted radius.",
   "steps": [
-    "Open an ongoing internship's DTR tab and select Set DTR Location. Employers use the profile of an intern whose supervision request they accepted.",
+    "Open an ongoing internship's DTR tab and select Set DTR Location. Employers use the profile of an intern whose supervision request they accepted. Admins, non-Registrar department heads and employers can also use DTR Locations in the sidebar to select one or many authorized ongoing interns at once; see the separate individual/bulk assignment guide.",
     "Search for the workplace or place the map pin manually. A short delay prevents repeated location searches; wait for the loading indicator and suggestions. Choose an allowed radius from 20 to 2,000 metres and optionally add a location label.",
     "Ask the student to Share location from their dashboard when needed. Check the temporary position and accuracy circle before choosing the workplace pin and attendance radius.",
     "Save the location and ask the student to stop sharing after setup. Map position sharing does not replace the separate location checks when clocking in or out.",

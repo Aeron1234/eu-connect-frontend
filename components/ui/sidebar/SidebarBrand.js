@@ -12,11 +12,12 @@ export default function SidebarBrand({ homeHref, closeMobile, isCollapsed }) {
       <div className="shrink-0 rounded-full bg-white p-0.5 transition-transform group-hover:scale-105">
         <Logo small />
       </div>
-      <h2
-        className={`text-sm font-bold tracking-wide ${isCollapsed ? "lg:hidden" : ""}`}
-      >
-        EU-Connect
-      </h2>
+      <div className={`min-w-0 ${isCollapsed ? "lg:hidden" : ""}`}>
+        <h2 className="text-sm font-bold tracking-wide">EU-Connect</h2>
+        <p className="mt-0.5 text-[10px] leading-tight opacity-75">
+          Internship Management System
+        </p>
+      </div>
     </Link>
   );
 }

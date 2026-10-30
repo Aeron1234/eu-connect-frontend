@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin } from "lucide-react";
+import { Map as MapIcon } from "lucide-react";
 import PageTitle from "../ui/PageTitle";
 import StudentMapHelp from "./StudentMapHelp";
 
@@ -8,7 +8,7 @@ export default function StudentMapHeader({ tabs, tab, setTab }) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <PageTitle
-        Icon={MapPin}
+        Icon={MapIcon}
         title={"Student Map"}
         description={
           "Showing all the interns and their company across the map."

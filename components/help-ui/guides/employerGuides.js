@@ -1,6 +1,8 @@
 import { feedbackEmployer, dtrLocationGuide } from "./commonGuides";
 
+import { bulkDtrGuide } from './bulkDtrGuide';
 const employerGuides = [
+bulkDtrGuide('employer'),
 {
   "id": "dashboard",
   "title": "Review your intern overview",
@@ -15,7 +17,7 @@ const employerGuides = [
   "linkText": "Open dashboard"
 },
 feedbackEmployer,
-{ id: "announcements", title: "Read announcements shared with employers", summary: "Read school updates whose author included employers.", steps: ["Open Announcements from the sidebar. Only posts whose author checked Visible to employers are included; this applies to both General and Department announcements.", "Use search and category filters, open See more for long content, and follow announcement notifications to the shared post. Employers cannot create, edit, pin or delete announcements.", "If the author turns employer visibility off or deletes the post, it is no longer available. The full Calendar page remains unavailable to employers."], href: "/announcements", linkText: "Open Announcements" },
+{ id: "announcements", title: "Read announcements shared with employers", summary: "Read school updates whose author included employers.", steps: ["Open Announcements from the sidebar. Only posts whose author checked Visible to employers are included; this applies to both General and Department announcements.", "Use search and category filters, open See more for long content, and follow announcement notifications to the shared post. Department posts show the posting department name and acronym on the card and expanded content. Employers cannot create, edit, pin or delete announcements.", "If the author turns employer visibility off or deletes the post, it is no longer available. The full Calendar page remains unavailable to employers."], href: "/announcements", linkText: "Open Announcements" },
 {
   "id": "internships",
   "title": "Manage internship postings",

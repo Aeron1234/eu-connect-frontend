@@ -35,6 +35,10 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
 
   const isAuthor = userId === author_id;
   const canManage = ["department_head", "admin"].includes(userRole) && (isAuthor || userRole === "admin");
+  const showDepartment = category === "Department" && ["employer", "admin"].includes(userRole);
+  const departmentLabel = announcement.author_department_name
+    ? `${announcement.author_department_name}${announcement.author_department_code ? ` (${announcement.author_department_code})` : ""}`
+    : announcement.author_department_code || "-";
   const isPinned = Boolean(is_pinned);
   const previewRef = useRef(null);
   const [isContentClipped, setIsContentClipped] = useState(false);
@@ -148,6 +152,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
         >
           {category}
         </span>
+        {showDepartment && <span className={`min-w-0 break-words text-xs ${isPinned ? "text-white/80" : "text-muted-foreground"}`}>Department: {departmentLabel}</span>}
         {canManage && Number(announcement.visible_to_employers) === 1 && <span className={`text-xs ${isPinned ? "text-white/80" : "text-muted-foreground"}`}>Also visible to employers</span>}
         <time
           dateTime={created_at}
@@ -179,6 +184,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
               >
                 {category}
               </span>
+              {showDepartment && <span className="min-w-0 break-words text-xs text-muted-foreground">Department: {departmentLabel}</span>}
               <time dateTime={created_at} className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="size-3.5" aria-hidden="true" />
                 Posted {format(new Date(created_at), "MMM d, yyyy")}

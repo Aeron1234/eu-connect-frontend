@@ -19,6 +19,8 @@ printed page layout was exercised. No live database was queried.
 
 ## Audited coverage
 
+October 30: Added role-specific **DTR Locations** guidance to `/help` and the page manual using `guides/bulkDtrGuide.js`, with full workflow in [bulk-dtr-locations.md](bulk-dtr-locations.md). Covers individual/bulk selection, page-scoped Select all, retained selections, dependent admin filters, 100-record limit, map/group membership privacy, confirmation/reassignment, results/retry, radius and student/grouped employer notifications. Registrar heads and students do not receive this management guide. The existing single-location guide links to the bulk workflow and retains live sharing/removal instructions.
+
 Paths below are repository-relative; backend sources are in the companion backend repository.
 
 | Feature | Current manual contract | Main source checked |

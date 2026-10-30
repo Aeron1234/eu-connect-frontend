@@ -6,6 +6,11 @@ import { userProfileKeys } from "@/lib/cache/user-profile-queries";
 import { studentRecordsKeys } from "@/lib/cache/student-records-queries";
 
 export function invalidateNotificationTarget(queryClient, userId, notification) {
+  if (notification?.type === "dtr_location_set") {
+    for (const key of ["bulk-dtr-locations", "dashboard-overview", "user-profile", "internship-records"]) {
+      void queryClient.invalidateQueries({ queryKey: [key, String(userId)] });
+    }
+  }
   if (notification?.type === "internship_record_approved") {
     // The student may still have a freshly cached pending record when the
     // approval arrives. Invalidate only this viewer's My Records before opening.

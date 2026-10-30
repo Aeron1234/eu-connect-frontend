@@ -1,6 +1,8 @@
 import { feedbackStaff, recordsGuide, rotationsGuide, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
 
+import { bulkDtrGuide } from './bulkDtrGuide';
 const adminGuides = [
+bulkDtrGuide('admin'),
 {
   "id": "dashboard",
   "title": "Review the system dashboard",

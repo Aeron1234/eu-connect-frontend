@@ -81,12 +81,18 @@ test("help and page manual lookups exclude restricted roles and registrar-only w
     assert.equal(getPageGuide(user, "feedback"), undefined);
   }
   const student = { role: "student" };
-  for (const id of ["feedback", "map", "records", "sipp"]) assert.equal(getPageGuide(student, id), undefined);
+  for (const id of ["feedback", "map", "records", "sipp", "bulk-dtr-locations"]) assert.equal(getPageGuide(student, id), undefined);
   const employer = { role: "employer" };
   for (const id of ["calendar", "past-internships", "records", "sipp", "rotations"]) assert.equal(getPageGuide(employer, id), undefined);
   const registrar = { role: "department_head", department_code: "REG" };
   assert(getPageGuide(registrar, "sipp"));
-  for (const id of ["records", "dashboard", "dtr-location", "rotations"]) assert.equal(getPageGuide(registrar, id), undefined);
+  for (const id of ["records", "dashboard", "dtr-location", "rotations", "bulk-dtr-locations"]) assert.equal(getPageGuide(registrar, id), undefined);
+  for (const user of viewers) {
+    const permitted = ["admin", "employer", "department_head"].includes(user.role) && !(user.role === "department_head" && user.department_code === "REG");
+    const hasRoute = getSidebarRouteGroups(user.role, user.department_code, "/").flatMap(group => group.routes).some(route => route.href === "/dtr-locations");
+    assert.equal(hasRoute, permitted);
+    assert.equal(Boolean(getPageGuide(user, "bulk-dtr-locations")), permitted);
+  }
   for (const user of viewers) assert.equal(getPageGuide(user, "password-setup").href, "/forgot-password");
   assert.equal(getPageGuide(student, "rotations").href, "/student/internship-record");
   assert.equal(getPageGuide({ role: "admin" }, "rotations").href, "/internship-records");

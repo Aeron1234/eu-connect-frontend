@@ -38,7 +38,7 @@ const studentGuides = [
   "title": "Clock in, take a break, and clock out",
   "summary": "Record attendance from your assigned workplace.",
   "steps": [
-    "An approved ongoing internship whose start date has arrived in Philippine time is required. Allow browser location access on HTTPS or localhost. Attendance uses the company location unless your supervisor or authorized staff saves a custom DTR pin and radius. Ask them to review an inaccurate attendance area.",
+    "An approved ongoing internship whose start date has arrived in Philippine time is required. Allow browser location access on HTTPS or localhost. Attendance uses the company location unless your supervisor or authorized staff saves a custom DTR pin and radius. Individual or bulk assignments notify you with the location, radius and clock-in/out instructions. Review your notification and dashboard attendance location; ask your supervisor or coordinator to correct an inaccurate area. Students cannot open the DTR Locations management page.",
     "At the approved location, select Clock in on Today, allow browser location access, and confirm with Save.",
     "Select Start break and confirm when pausing work. Select Resume duty when you return; break time is excluded from counted duty.",
     "Resume from any break before Clock out and confirm with Save. Your current position is checked again.",

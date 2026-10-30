@@ -27,6 +27,12 @@ This repository contains the **Next.js frontend**, including its server-rendered
 
 ## Features
 
+### Individual and bulk DTR locations
+
+The **DTR Locations** sidebar page pairs an editable Leaflet map with a paginated intern table. Admins filter all ongoing interns by department and dependent course; non-Registrar heads see only their department and course filter; employers see only their supervised ongoing interns. Select one or many (up to 100), retain selections across filters/pages, review the location/radius and confirm reassignment. Select all applies only to the current page. Shared map pins list only authorized students at each saved custom location. Changed students receive attendance instructions; admin/head actions send grouped notices to assigned employers. The backend rechecks permissions and ongoing status, and persists assignments/notifications transactionally. See [the manual and handoff](docs/bulk-dtr-locations.md).
+
+Deploy both repositories together. No new environment variables or packages are required. The existing per-internship DTR override and notification structures are reused; run the backend's read-only `scripts/2026-10-30-bulk-dtr-locations.sql` verification migration first. No DDL or data backfill is needed for the inspected schema.
+
 ### Student internship workspace
 
 - A dashboard with internship progress, completed hours, attendance, favorite opportunities, unread announcements, stored documents, and missing requirements.
@@ -265,6 +271,7 @@ Page access and available actions depend on the session and backend permissions.
 | `/users`, `/users/[userId]` | User search, profiles, permitted internship tabs, and employer completed-supervision history. |
 | `/internship-records`, `/internship-records/[internshipId]` | Administrator/department-head record review. |
 | `/map` | Administrator/department-head visit planning. |
+| `/dtr-locations` | Individual/bulk DTR geofence assignment for admins, non-Registrar heads and supervising employers. |
 | `/past-internships` | Alumni placements for students and school staff. |
 | `/announcements` | Announcements for students and school staff. |
 | `/calendar` | Student and school-staff calendar tools. |
@@ -513,3 +520,5 @@ The Help page's Need more help? section shows available email/phone contacts of 
 ### Optional employer announcement audience (October 30, 2026)
 
 Apply backend `scripts/2026-10-30-announcement-employer-visibility.sql` first, then deploy both applications. It adds `announcements.visible_to_employers TINYINT(1) NOT NULL DEFAULT 0`, keeping all existing posts hidden from employers. Allowed authors can opt in on create/edit; flagged General or Department posts are visible to all employers, independent of academic department. Employers have read-only feed, pinned/search/filter and notification-link access. School audiences and posting categories remain unchanged. Granting visibility creates employer alerts; revoking it removes employer announcement alerts and refreshes viewer-scoped caches after commit. Ordinary edits do not duplicate employer alerts. Calendar access is unchanged. No package or environment updates are required.
+
+Department-category announcement cards and expanded content show the author department name and acronym to employer and admin viewers. The API adds nullable author_department_name/author_department_code to pinned, regular, direct-link and update responses using the author's current department assignment, consistent with existing feed scope. Missing details display a dash; General posts omit the label. No additional migration or environment changes; deploy both applications.

@@ -69,6 +69,29 @@ test("employer visibility is opt-in on creation and restores saved checkbox stat
   assert(editCheckbox.includes('checked=""'));
 });
 
+test("Department announcement cards and expanded posts label the author's department only for employers/admins", () => {
+  for (const role of ["employer", "admin", "student", "department_head"]) {
+    const Card = load("components/announcements-ui/AnnouncementCard.js", {
+      react: { ...React, useEffect() {}, useRef: () => ({ current: null }), useState: () => [true, () => {}] },
+      "@/contexts/UserContext": { useUser: () => ({ user: { id: "viewer", role } }) },
+      "@/lib/announcement-event-dates.mjs": {},
+      "../ui/Modal": childrenOnly, "./AnnouncementTogglePin": empty, "./AnnouncementUpdate": empty, "./AnnouncementDelete": empty,
+      "next/link": ({ children, ...props }) => React.createElement("a", props, children),
+    }).default;
+    const announcement = { id: "post", author_id: "author", category: "Department", title: "Department notice", content: "Long content", created_at: "2026-10-30", role: "department_head", author_department_name: "College of Computer Studies", author_department_code: "CCS" };
+    for (const is_pinned of [0, 1]) {
+      const html = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, is_pinned } }));
+      assert.equal((html.match(/Department: College of Computer Studies \(CCS\)/g) || []).length, ["employer", "admin"].includes(role) ? 2 : 0);
+    }
+    const general = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, category: "General" } }));
+    assert(!general.includes("Department: College"));
+    if (["employer", "admin"].includes(role)) {
+      const missing = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, author_department_name: null, author_department_code: null } }));
+      assert(missing.includes("Department: -"));
+    }
+  }
+});
+
 test("employer navigation and Help allow shared announcements while Calendar stays restricted", () => {
   const { getSidebarRouteGroups } = load("components/ui/sidebar/sidebarRoutes.js");
   const routes = role => getSidebarRouteGroups(role, "CCS", `/${role}`).flatMap(group => group.routes);

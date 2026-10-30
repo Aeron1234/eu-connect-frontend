@@ -1,6 +1,8 @@
 import { feedbackStaff, recordsGuide, rotationsGuide, mapGuide, calendarStaff, deptAnnouncements, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
 
+import { bulkDtrGuide } from './bulkDtrGuide';
 const departmentHeadGuides = [
+bulkDtrGuide('department_head'),
 {
   "id": "dashboard",
   "hideForRegistrar": true,

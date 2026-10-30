@@ -19,6 +19,7 @@ function MapForm({
   radius = null,
   setRadius = null,
   liveLocation = null,
+  children = null,
 }) {
   const {
     selectedPosition,
@@ -47,6 +48,7 @@ function MapForm({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {children}
 
         <MapViewSync position={selectedPosition} livePosition={sharedPosition} />
 

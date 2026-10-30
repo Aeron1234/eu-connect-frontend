@@ -42,6 +42,8 @@ function DropdownFilter({
   placeholder = "Select...",
   className = "h-8 w-[170px] text-xs px-2",
   itemClassName = "text-xs",
+  disabled = false,
+  "aria-label": ariaLabel,
 }) {
   const normalizedValue = value ?? "";
   const selected = options.find((opt) => opt.value === normalizedValue);
@@ -54,8 +56,9 @@ function DropdownFilter({
     <Select
       value={normalizedValue === "" ? ALL_VALUE : normalizedValue}
       onValueChange={handleValueChange}
+      disabled={disabled}
     >
-      <SelectTrigger className={className}>
+      <SelectTrigger className={className} aria-label={ariaLabel}>
         <SelectValue placeholder={placeholder}>
           {selected?.label ?? placeholder}
         </SelectValue>
