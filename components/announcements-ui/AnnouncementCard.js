@@ -34,7 +34,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
   const userRole = user.role;
 
   const isAuthor = userId === author_id;
-  const canManage = isAuthor || userRole === "admin";
+  const canManage = ["department_head", "admin"].includes(userRole) && (isAuthor || userRole === "admin");
   const isPinned = Boolean(is_pinned);
   const previewRef = useRef(null);
   const [isContentClipped, setIsContentClipped] = useState(false);
@@ -148,6 +148,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
         >
           {category}
         </span>
+        {canManage && Number(announcement.visible_to_employers) === 1 && <span className={`text-xs ${isPinned ? "text-white/80" : "text-muted-foreground"}`}>Also visible to employers</span>}
         <time
           dateTime={created_at}
           className={`inline-flex items-center gap-1 text-xs ${isPinned ? "text-white/80" : "text-muted-foreground"}`}

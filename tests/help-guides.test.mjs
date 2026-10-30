@@ -83,7 +83,7 @@ test("help and page manual lookups exclude restricted roles and registrar-only w
   const student = { role: "student" };
   for (const id of ["feedback", "map", "records", "sipp"]) assert.equal(getPageGuide(student, id), undefined);
   const employer = { role: "employer" };
-  for (const id of ["calendar", "announcements", "past-internships", "records", "sipp", "rotations"]) assert.equal(getPageGuide(employer, id), undefined);
+  for (const id of ["calendar", "past-internships", "records", "sipp", "rotations"]) assert.equal(getPageGuide(employer, id), undefined);
   const registrar = { role: "department_head", department_code: "REG" };
   assert(getPageGuide(registrar, "sipp"));
   for (const id of ["records", "dashboard", "dtr-location", "rotations"]) assert.equal(getPageGuide(registrar, id), undefined);

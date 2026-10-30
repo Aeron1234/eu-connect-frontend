@@ -60,10 +60,19 @@ test("registrar heads and admins both have a fixed General category", () => {
   assert.match(admin, /name="category_id"[^>]*value="7"/);
 });
 
-test("employer navigation, quick actions, dashboard and help have no announcement entry", () => {
+test("employer visibility is opt-in on creation and restores saved checkbox state during editing", () => {
+  const user = { role: "admin" };
+  assert.match(renderForm(user), /type="hidden" name="visible_to_employers" value="0"/);
+  const createCheckbox = renderForm(user).match(/<input type="checkbox"[^>]*>/)[0];
+  assert(!createCheckbox.includes("checked"));
+  const editCheckbox = renderForm(user, "edit", { id: "shared", visible_to_employers: 1 }).match(/<input type="checkbox"[^>]*>/)[0];
+  assert(editCheckbox.includes('checked=""'));
+});
+
+test("employer navigation and Help allow shared announcements while Calendar stays restricted", () => {
   const { getSidebarRouteGroups } = load("components/ui/sidebar/sidebarRoutes.js");
   const routes = role => getSidebarRouteGroups(role, "CCS", `/${role}`).flatMap(group => group.routes);
-  assert(!routes("employer").some(route => route.href === "/announcements"));
+  assert(routes("employer").some(route => route.href === "/announcements"));
   assert(!routes("employer").some(route => route.href === "/calendar"));
   for (const role of ["student", "department_head", "admin"]) assert(routes(role).some(route => route.href === "/announcements"));
 
@@ -91,10 +100,10 @@ test("employer navigation, quick actions, dashboard and help have no announcemen
     "@/contexts/UserContext": { useUser: () => ({ user: { role: "employer" } }) },
     "./helpContent": helpContent,
   }).default;
-  assert(!useGuides().visibleSections.flatMap(section => section.guides).some(guide => guide.href === "/announcements"));
+  assert(useGuides().visibleSections.flatMap(section => section.guides).some(guide => guide.href === "/announcements"));
 });
 
-test("direct navigation to the announcement page redirects employers to their dashboard", async () => {
+test("direct navigation to the announcement page allows signed-in employers", async () => {
   const Layout = load("app/announcements/layout.js", {
     "next/navigation": { redirect: path => { throw new Error(`Redirect:${path}`); } },
     "../../lib/server-actions/auth": { getUserSession: async () => ({ user: { role: "employer" } }) },
@@ -102,7 +111,7 @@ test("direct navigation to the announcement page redirects employers to their da
     "../../components/ui/SideNavigation": empty, "../../components/ui/Alert": empty,
     "../../components/ui/SocketProvider": empty, "@/contexts/UserContext": { UserProvider: empty },
   }).default;
-  await assert.rejects(() => Layout({ children: null }), /Redirect:\/employer/);
+  assert.ok(await Layout({ children: null }));
 });
 
 test("employer calendar hides announcement filters and entries even with an old cached month", () => {

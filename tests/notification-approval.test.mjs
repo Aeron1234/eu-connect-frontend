@@ -76,7 +76,7 @@ test("opening a live approval refreshes My Records and leaving the page removes 
   const invalidated = []; let handle, cleanup, popup;
   const Alert = load("components/ui/Alert.js", {
     react: { useEffect: effect => { cleanup = effect(); } },
-    "./SocketProvider": { socket: { on: (event, callback) => { assert.equal(event, "new_notification"); handle = callback; }, off: (event, callback) => { assert.equal(event, "new_notification"); assert.equal(callback, handle); } } },
+    "./SocketProvider": { socket: { on: (event, callback) => { if (event === "new_notification") handle = callback; }, off: (event, callback) => { if (event === "new_notification") assert.equal(callback, handle); } } },
     "./NotificationToast": { showNotificationToast: (_data, options) => { popup = options; } },
     "@tanstack/react-query": { useQueryClient: () => ({ invalidateQueries: ({ queryKey }) => invalidated.push(queryKey) }) },
     "@/contexts/UserContext": { useUser: () => ({ user: { id: "student" } }) },
@@ -84,6 +84,6 @@ test("opening a live approval refreshes My Records and leaving the page removes 
   }).default;
   Alert(); handle({ type: "internship_record_approved" }); assert.equal(invalidated.length, 0);
   popup.onOpen(); assert.deepEqual(invalidated, [["student-records", "student"]]);
-  handle({ type: "announcement" }); popup.onOpen(); assert.equal(invalidated.length, 1);
+  handle({ type: "announcement" }); popup.onOpen(); assert.equal(invalidated.length, 2);
   cleanup();
 });

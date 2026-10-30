@@ -193,7 +193,7 @@ function getFormattedRole(role) {
 }
 
 // Combine role tools with shared links. Employers have Feedback but no full
-// Calendar/Announcements links; students have no Feedback link.
+// Calendar link; students have no Feedback link. Employers can read opted-in announcements.
 export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
   return (
     [
@@ -227,7 +227,7 @@ export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
           },
         ],
       }] : []),
-      { label: "Public", routes: publicRoutes.filter(route => userRole !== "employer" || route.href !== "/announcements") },
+      { label: "Public", routes: publicRoutes },
     ]
   );
 }

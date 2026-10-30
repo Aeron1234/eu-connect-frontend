@@ -72,6 +72,11 @@ function CreateUpdateAnnouncementForm({
       {isEdit && <input type="hidden" name="id" defaultValue={data.id} />}
 
       <ModalForm.Section title="Announcement Details">
+        <input type="hidden" name="visible_to_employers" value="0" />
+        <label className="flex items-start gap-3 rounded-lg border border-border p-3">
+          <input type="checkbox" name="visible_to_employers" value="1" defaultChecked={isEdit && Number(data?.visible_to_employers) === 1} disabled={isPending} className="mt-1 size-4 shrink-0 accent-primary" />
+          <span className="min-w-0"><span className="block text-sm font-medium">Visible to employers</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">Also share this announcement with all employer accounts. Leave unchecked to keep the usual school audience.</span></span>
+        </label>
         <ModalForm.Row>
           <label className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-xs font-medium leading-5 text-foreground-soft">
@@ -179,7 +184,7 @@ function TogglePinAnnouncementForm({
       />
 
       <ModalForm.Confirmation>
-        This announcement will be {is_pinned > 0 ? "unpinned" : "pinned"} for all users.
+        This announcement will be {is_pinned > 0 ? "unpinned" : "pinned"} for its audience.
       </ModalForm.Confirmation>
       <ModalForm.Actions isPending={isPending} submitLabel="Save" />
     </ModalForm.Root>

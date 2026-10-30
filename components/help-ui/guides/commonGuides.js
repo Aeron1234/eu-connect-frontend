@@ -156,7 +156,7 @@ export const deptAnnouncements = {
   "steps": [
     "Select Announce. Your category is Department; regular department heads cannot post General announcements but can read them.",
     "Enter the title and content. Optionally choose Event date and Until date for an inclusive date range. Until date requires Event date and cannot be earlier; leave it blank for a one-day event.",
-    "Post the announcement. Its dated event appears on the calendar for people who can view it.",
+    "Optionally check Visible to employers to share this post with all employers as well as its usual school audience. The option starts unchecked. You can change it when editing; turning it off removes employer access and its saved employer alerts. Post the announcement. Dated events appear on permitted calendars; this option does not grant employers full Calendar access.",
     "Use search and the category filter to find posts, and See more to read long content. Use available author controls to edit, pin or unpin, or delete your own posts; confirm deletion."
   ],
   "href": "/announcements",
@@ -171,7 +171,7 @@ export const generalAnnouncements = {
   "steps": [
     "Select Announce. Admin and registrar department heads post in General; the form offers only this category.",
     "Enter the title and content. Optionally choose Event date and Until date for an inclusive date range. Until date requires Event date and cannot be earlier; leave it blank for a one-day event.",
-    "Post the announcement. Its dated event appears on the calendar for people who can view it.",
+    "Optionally check Visible to employers to share this post with all employers as well as its usual school audience. The option starts unchecked. You can change it when editing; turning it off removes employer access and its saved employer alerts. Post the announcement. Dated events appear on permitted calendars; this option does not grant employers full Calendar access.",
     "Search or filter the feed and select See more for long content. Edit your own posts and use the available pin or delete controls. Admin can also pin or delete other authors' posts; confirm deletion."
   ],
   "href": "/announcements",

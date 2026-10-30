@@ -8,7 +8,7 @@ const sharedGuides = [
   "steps": [
     "Search the announcement feed or choose a category, then See more to read long posts.",
     "General updates and department posts are shown according to your access. An event with start and end dates appears on every included calendar day.",
-    "Employers do not have access to Announcements."
+    "Employers see only announcements whose author explicitly included employers; this does not change your normal school or department audience."
   ],
   "href": "/announcements",
   "linkText": "Open Announcements",

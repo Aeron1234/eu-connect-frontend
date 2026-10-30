@@ -15,6 +15,7 @@ const employerGuides = [
   "linkText": "Open dashboard"
 },
 feedbackEmployer,
+{ id: "announcements", title: "Read announcements shared with employers", summary: "Read school updates whose author included employers.", steps: ["Open Announcements from the sidebar. Only posts whose author checked Visible to employers are included; this applies to both General and Department announcements.", "Use search and category filters, open See more for long content, and follow announcement notifications to the shared post. Employers cannot create, edit, pin or delete announcements.", "If the author turns employer visibility off or deletes the post, it is no longer available. The full Calendar page remains unavailable to employers."], href: "/announcements", linkText: "Open Announcements" },
 {
   "id": "internships",
   "title": "Manage internship postings",
@@ -63,7 +64,7 @@ feedbackEmployer,
   "summary": "Check dates without opening the planning page.",
   "steps": [
     "Select the calendar icon beside notifications for a simple month calendar.",
-    "Employers do not have access to the full Calendar page or Announcements. The header calendar has no link to the full planning page."
+    "Employers do not have access to the full Calendar page; shared announcements are available separately. The header calendar has no link to the full planning page."
   ],
   "href": "/employer",
   "linkText": "Open dashboard"

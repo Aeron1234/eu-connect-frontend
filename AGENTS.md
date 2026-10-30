@@ -131,7 +131,7 @@ Primary directory: `components/map-ui/`. Detailed routing notes: `app/api/map/RE
 
 ## Announcements and calendar permissions
 
-- Employers are excluded from announcements, including navigation, quick actions, help content, and direct route access.
+- Employers have read-only Announcements navigation/help/direct-page access, but backend feed/count/pinned/UUID/legacy-link reads require visible_to_employers = 1. The create/edit checkbox is optional and defaults off; existing rows remain hidden. Admin and department-head category/author management rules are unchanged. Unchecking revokes employer access, removes employer announcement alerts and refreshes their caches via announcements_changed; granting visibility sends employer alerts without duplicates. Apply backend scripts/2026-10-30-announcement-employer-visibility.sql before deployment.
 - Ordinary department heads can post **Department** announcements only, while continuing to view General announcements.
 - Registrar department heads (department_code REG) and administrators use **General** posting.
 - Use actual category IDs resolved from category data. The form shows the permitted category and submits its ID; do not infer IDs from display ordering or expose prohibited choices.
@@ -302,7 +302,7 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 ## Help and page manuals
 
 - Role guides in components/help-ui/guides/ are shared by /help and the page info dialogs through HelpManual and getHelpSections/getPageGuide. Update the shared guide when changing a workflow; do not duplicate instructions in separate modals.
-- Preserve role and registrar filtering: students have no Feedback guide, employers have no full Calendar or Announcements links, and registrar accounts use SIPP Reports instead of the department dashboard/Records guides.
+- Preserve role and registrar filtering: students have no Feedback guide, employers have no full Calendar link and can read only opted-in Announcements, and registrar accounts use SIPP Reports instead of the department dashboard/Records guides.
 - Manuals remain useful in empty or locked states. They explain eligibility without exposing unavailable actions. Use ManualDialog for scrollable mobile dialogs and its existing accessible info trigger.
 - Feedback manuals distinguish employer authors from staff: category audiences, tagged-student notifications, internal notes, status/reopening, author-only post/reply changes, attachment previews, and actual file deletion must match the implementation.
 

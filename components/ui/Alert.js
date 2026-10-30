@@ -12,6 +12,9 @@ function Alert() {
   const { user } = useUser();
   useEffect(() => {
     const handleNewNotification = (data) => {
+      if (user?.id && data?.type === "announcement") {
+        void queryClient.invalidateQueries({ queryKey: ["announcements", String(user.id)] });
+      }
       showNotificationToast(data, {
         onOpen: () => {
           if (user?.id && data?.type === "internship_record_approved") invalidateNotificationTarget(queryClient, user.id, data);
@@ -20,9 +23,16 @@ function Alert() {
     };
 
     socket.on("new_notification", handleNewNotification);
+    const handleAnnouncementChange = () => {
+      if (!user?.id) return;
+      void queryClient.invalidateQueries({ queryKey: ["announcements", String(user.id)] });
+      void queryClient.invalidateQueries({ queryKey: ["notifications", String(user.id)] });
+    };
+    socket.on("announcements_changed", handleAnnouncementChange);
 
     return () => {
       socket.off("new_notification", handleNewNotification);
+      socket.off("announcements_changed", handleAnnouncementChange);
     };
   }, [queryClient, user?.id]);
 
