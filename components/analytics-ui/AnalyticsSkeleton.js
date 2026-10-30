@@ -1,0 +1,2 @@
+import { Skeleton } from '@/components/ui/skeleton';
+export default function AnalyticsSkeleton(){return <div role="status" aria-label="Loading analytics" className="min-w-0 space-y-5 p-4 sm:p-6 lg:p-8"><Skeleton className="h-8 w-52"/><Skeleton className="h-20 w-full"/><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">{[0,1,2,3].map(i=><Skeleton key={i} className="h-28 w-full"/>)}</div><div className="grid gap-4 lg:grid-cols-2"><Skeleton className="h-72 w-full"/><Skeleton className="h-72 w-full"/></div><Skeleton className="h-52 w-full"/></div>}

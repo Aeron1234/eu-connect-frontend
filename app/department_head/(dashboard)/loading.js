@@ -1,3 +1,5 @@
+import { getUserSession } from '@/lib/server-actions/auth';
+import AnalyticsSkeleton from '@/components/analytics-ui/AnalyticsSkeleton';
 import RecentActivityCardSkeleton from "@/components/skeletons/RecentActivityCardSkeleton";
 import PageTitleSkeleton from "@/components/skeletons/PageTitleSkeleton";
 import DashboardStatsSkeleton from "@/components/skeletons/DashboardStatsSkeleton";
@@ -7,7 +9,9 @@ import EvaluationScoresChartSkeleton from "@/components/skeletons/EvaluationScor
 import HoursDistributionDonutSkeleton from "@/components/skeletons/HoursDistributionDonutSkeleton";
 import StudentHoursTrackerSkeleton from "@/components/skeletons/StudentHoursTrackerSkeleton";
 
-function DepartmentHeadDashboardLoading() {
+async function DepartmentHeadDashboardLoading() {
+  const session=await getUserSession();
+  if(session?.user?.department_code==='REG')return <AnalyticsSkeleton/>;
   return (
     <div className="space-y-6">
       <PageTitleSkeleton />

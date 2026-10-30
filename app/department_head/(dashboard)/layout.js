@@ -1,5 +1,4 @@
 import { getUserSession } from "@/lib/server-actions/auth";
-import { redirect } from "next/navigation";
 
 async function DepartmentHeadDashboardLayout({ children }) {
   const session = await getUserSession();
@@ -9,8 +8,8 @@ async function DepartmentHeadDashboardLayout({ children }) {
 
   const department = session?.user?.department_code;
 
-  // Registrar accounts enter SIPP Reports through the department-head role.
-  if (department === "REG") return redirect("/department_head/sipp-reports");
+  // The Registrar overview owns its responsive spacing; keep SIPP Reports linked.
+  if (department === 'REG') return children;
 
   return (
     <div className="min-w-0 p-4 sm:p-6 lg:p-8">{children}</div>

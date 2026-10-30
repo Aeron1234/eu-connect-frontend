@@ -1,7 +1,9 @@
+import { companyAnalyticsGuide } from './analyticsGuides';
 import { feedbackStaff, recordsGuide, rotationsGuide, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
 
 import { bulkDtrGuide } from './bulkDtrGuide';
 const adminGuides = [
+companyAnalyticsGuide,
 bulkDtrGuide('admin'),
 {
   "id": "dashboard",

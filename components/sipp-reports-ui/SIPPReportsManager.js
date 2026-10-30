@@ -24,8 +24,9 @@ function SIPPReportsManager({
   availableAcadYear = [],
   initialAnnexC,
   initialAnnexD,
+  initialScope = 'annex-c',
 }) {
-  const [scope, setScope] = useState("annex-c");
+  const [scope, setScope] = useState(initialScope);
   const { user } = useUser();
   const yearsQuery = useQuery({
     ...sippAcademicYearsOptions(user?.id),

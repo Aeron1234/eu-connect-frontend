@@ -18,7 +18,7 @@ export default function useAnnexCReports(initialPage) {
   const userId = user?.id;
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(initialPage);
-  const [tab, setTab] = useState("form");
+  const [tab, setTab] = useState(initialPage?.tab === 'reports' ? 'reports' : 'form');
 
   // Form values are local draft state; four starter rows are editable scaffolding,
   // not a requirement for four stored or printed entries.
@@ -40,11 +40,11 @@ export default function useAnnexCReports(initialPage) {
 
   // Each year, status, and search combination has its own cached pages.
   const [reportsYear, setReportsYear] = useState(initialPage?.academicYear || "");
-  const [reportsStatus, setReportsStatus] = useState("");
+  const [reportsStatus, setReportsStatus] = useState(initialPage?.status || '');
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({
     academicYear: initialPage?.academicYear || "",
-    status: "",
+    status: initialPage?.status || '',
     search: "",
   });
 

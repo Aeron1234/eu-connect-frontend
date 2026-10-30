@@ -27,6 +27,16 @@ This repository contains the **Next.js frontend**, including its server-rendered
 
 ## Features
 
+### Company analytics and Registrar overview
+
+Admins and non-Registrar heads can open `/company-analytics` from the sidebar or dashboard. It ranks confirmed ongoing/finished placements by distinct student/company, with scoped department/course/year/term/start-date filters, most/least lists, distribution/trends, a paginated status report, separate zero-match directory and full CSV/print-to-PDF export. Registrar heads cannot access company popularity. At `/department_head`, Registrar now has its own SIPP-only dashboard: Annex C total/draft/submitted counts, Annex D student/course/department coverage, submission trends and recent reports. Card links retain year/tab/status in existing SIPP pages. No private attendance/evaluation/document-review permissions are added.
+
+Read [the analytics manual and setup](docs/analytics-dashboards.md) for exact counting/period/zero definitions and limitations. Run the backend's **read-only** `scripts/2026-10-31-company-analytics.sql` checks before deploying backend then frontend. No schema/backfill, dependency or environment changes are required. Both screens reuse existing mobile card/chart/filter/table patterns; `/help` and page manuals provide role-specific guidance.
+
+Announcement **Audience** now offers usual department/General sharing (default) or **Tagged students only**. Targeted posts are visible to selected students, their department heads, the author and admins; admins are not automatically notified. Optional employer sharing adds only selected students' supervisors. Targeted calendar entries and notification links enforce the same privacy. Apply backend `2026-10-31-targeted-announcement-audience.sql` after the student-tags migration, then deploy both repositories. No env/package changes.
+
+Announcement create/edit now supports searching and tagging up to 100 ongoing students. **Visible to employers** shares with only tagged students' current supervisors; without tags it shares with all employers. Unchecked means school audience only. Regular heads select within their department; admins/Registrar heads can select all ongoing interns. Selections persist while searching and restore on edit. School visibility remains unchanged. Apply backend `scripts/2026-10-31-announcement-student-tags.sql` before deploying both applications; no new environment variables or dependencies.
+
 ### Individual and bulk DTR locations
 
 The **DTR Locations** sidebar page pairs an editable Leaflet map with a paginated intern table. Admins filter all ongoing interns by department and dependent course; non-Registrar heads see only their department and course filter; employers see only their supervised ongoing interns. Select one or many (up to 100), retain selections across filters/pages, review the location/radius and confirm reassignment. Select all applies only to the current page. Shared map pins list only authorized students at each saved custom location. Changed students receive attendance instructions; admin/head actions send grouped notices to assigned employers. The backend rechecks permissions and ongoing status, and persists assignments/notifications transactionally. See [the manual and handoff](docs/bulk-dtr-locations.md).
@@ -271,6 +281,7 @@ Page access and available actions depend on the session and backend permissions.
 | `/users`, `/users/[userId]` | User search, profiles, permitted internship tabs, and employer completed-supervision history. |
 | `/internship-records`, `/internship-records/[internshipId]` | Administrator/department-head record review. |
 | `/map` | Administrator/department-head visit planning. |
+| `/company-analytics` | Confirmed company placement analytics for admins and non-Registrar department heads. |
 | `/dtr-locations` | Individual/bulk DTR geofence assignment for admins, non-Registrar heads and supervising employers. |
 | `/past-internships` | Alumni placements for students and school staff. |
 | `/announcements` | Announcements for students and school staff. |

@@ -1,4 +1,4 @@
-import { Building2 } from "lucide-react";
+import { History } from "lucide-react";
 import PastInternshipsPageContent from "../../components/past-internship-ui/PastInternshipsPageContent";
 import PastInternshipPostButton, { PastInternshipsManual } from "../../components/past-internship-ui/PastInternshipPostButton";
 import PageTitle from "../../components/ui/PageTitle";
@@ -14,7 +14,7 @@ async function PastInternshipsPage({ searchParams }) {
     <div className="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <PageTitle
-          Icon={Building2}
+          Icon={History}
           title={"Past Internships"}
           description={
             "List of past internships and companies that have accepted interns from our school."

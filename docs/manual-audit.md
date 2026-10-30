@@ -19,6 +19,12 @@ printed page layout was exercised. No live database was queried.
 
 ## Audited coverage
 
+Company analytics / Registrar update: `/help` and both page manuals now share `guides/analyticsGuides.js`. Admin/ordinary-head guidance defines confirmed distinct student/company counts, scoped filters, zero directory, status precedence, non-additive month trends and full aggregate CSV/print export. Registrar guidance describes only existing Annex C statuses and Annex D population/coverage, default current year and filtered links to SIPP; no popularity or private approval/document metrics. Dashboard is restored to REG navigation and its former SIPP redirect removed. See [analytics-dashboards.md](analytics-dashboards.md) and the backend read-only SQL verification migration.
+
+Announcement audience update: manuals now distinguish usual school/department sharing from **Tagged students only**. Targeted posts require at least one tag and restrict viewing/notifications to involved people, with admin read access but no automatic admin alert. The employer checkbox adds tagged supervisors. Backend audience/privacy checks cover calendar and notifications too; apply the targeted-audience migration after student tags before deployment.
+
+October 31 announcement update: create/edit forms support optional searchable student tags, persistent selection and removal. Checked employer visibility targets current supervisors when students are tagged, otherwise all employers; unchecked excludes employers. School visibility and category restrictions remain unchanged. Help/page manuals explain scope and notifications. Backend migration: `2026-10-31-announcement-student-tags.sql`; deploy it before the matching applications.
+
 October 30: Added role-specific **DTR Locations** guidance to `/help` and the page manual using `guides/bulkDtrGuide.js`, with full workflow in [bulk-dtr-locations.md](bulk-dtr-locations.md). Covers individual/bulk selection, page-scoped Select all, retained selections, dependent admin filters, 100-record limit, map/group membership privacy, confirmation/reassignment, results/retry, radius and student/grouped employer notifications. Registrar heads and students do not receive this management guide. The existing single-location guide links to the bulk workflow and retains live sharing/removal instructions.
 
 Paths below are repository-relative; backend sources are in the companion backend repository.

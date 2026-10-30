@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import vm from "node:vm";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { JSDOM } from 'jsdom';
 
 const require = createRequire(import.meta.url);
 const { transformSync } = require("next/dist/compiled/babel/core");
@@ -23,8 +24,31 @@ function load(file, mocks = {}) {
 }
 
 const categories = [{ id: 7, name: "General" }, { id: 9, name: "Department" }];
+test('student tag picker restores named selections and serializes them without changing employer opt-in', () => {
+  const id='00000000-0000-4000-8000-000000000001';
+  const second='00000000-0000-4000-8000-000000000002';
+  const Tags=load('components/announcements-ui/AnnouncementStudentTags.js', {
+    '@/contexts/UserContext':{useUser:()=>({user:{id:'author',role:'admin'}})},
+    '@tanstack/react-query':{useQuery:()=>({data:[{id,first_name:'Tagged',last_name:'Student'},{id:second,first_name:'Second',last_name:'Student'}],isFetching:false,isError:false})},
+    '@/lib/server-actions/announcements-actions':{},
+    '@/components/ui/checkbox':{Checkbox:({checked,disabled})=>React.createElement('input',{type:'checkbox',checked,disabled,readOnly:true})},
+    '@/components/ui/skeleton':{Skeleton:empty},
+  }).default;
+  const dom=new JSDOM(renderToStaticMarkup(React.createElement(Tags,{initialIds:JSON.stringify([id,second]),initialStudents:JSON.stringify([{id,name:'Tagged Student'},{id:second,name:'Second Student'}]),disabled:false})));
+  try {
+    assert.deepEqual(JSON.parse(dom.window.document.querySelector('input[name="tagged_student_ids"]').value),[id,second]);
+    assert.match(dom.window.document.querySelector('button').textContent,/Tagged Student/);
+    assert.equal(dom.window.document.querySelector('input[type="checkbox"]').checked,true);
+    assert.equal(dom.window.document.querySelectorAll('input[type="checkbox"]:checked').length,2);
+    assert.match(dom.window.document.body.textContent,/Select multiple ongoing students from any department/);
+    assert.match(dom.window.document.body.textContent,/only tagged students/);
+    assert.equal(dom.window.document.querySelector('[name="visible_to_employers"]'),null);
+  } finally {dom.window.close();}
+});
 function renderForm(user, type = "create", data = null) {
   const Form = load("components/announcements-ui/AnnouncementForm.js", {
+    './AnnouncementStudentTags': empty,
+    '@/components/ui/DropdownFilter': empty,
     "@/contexts/UserContext": { useUser: () => ({ user }) },
     "@/components/ui/ModalForm": { __esModule: true, controlClass: "input", default: {
       Root: childrenOnly, Section: childrenOnly, Row: childrenOnly, Field: childrenOnly,
@@ -35,6 +59,17 @@ function renderForm(user, type = "create", data = null) {
   }).default;
   return renderToStaticMarkup(React.createElement(Form, { categories, type, data }));
 }
+
+test('announcement audience defaults broad and restores targeted mode on edit', () => {
+  const user={id:'admin',role:'admin'};
+  for(const [type,data,value] of [['create',null,'0'],['edit',{id:'post',tagged_students_only:1,tagged_student_ids:[],title:'Private',content:'Body'},'1']]) {
+    const dom=new JSDOM(renderForm(user,type,data));
+    try {
+      assert.equal(dom.window.document.querySelector('[name="tagged_students_only"]').value,value);
+      if(value==='1') assert.match(dom.window.document.body.textContent,/admins retain access without an automatic alert/);
+    } finally {dom.window.close();}
+  }
+});
 
 test("department heads have a fixed Department category for creation and editing", () => {
   const user = { role: "department_head", department_code: "CCS" };
@@ -113,7 +148,7 @@ test("employer navigation and Help allow shared announcements while Calendar sta
 
   const common = load("components/help-ui/guides/commonGuides.js");
   const sharedGuides = load("components/help-ui/guides/sharedGuides.js", { "./commonGuides": common }).default;
-  const employerGuides = load("components/help-ui/guides/employerGuides.js", { "./commonGuides": common }).default;
+  const employerGuides = load("components/help-ui/guides/employerGuides.js", { "./commonGuides": common, "./bulkDtrGuide": load('components/help-ui/guides/bulkDtrGuide.js') }).default;
   const helpContent = load("components/help-ui/helpContent.js", {
     "./guides/studentGuides": [], "./guides/employerGuides": employerGuides,
     "./guides/departmentHeadGuides": [], "./guides/adminGuides": [], "./guides/sharedGuides": sharedGuides,

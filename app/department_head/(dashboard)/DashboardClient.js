@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useQuery } from "@tanstack/react-query";
 import { activityDescription } from "@/lib/activity-log-display.mjs";
@@ -97,6 +98,7 @@ function DepartmentHeadDashboardPage() {
         titleAction={<PageManual page="dashboard" />}
         description="Overview of internships and student activity in your department."
       />
+      <Link href="/company-analytics" className="inline-flex rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-primary-emphasis">View internship company analytics</Link>
 
       <DashboardStatsSection stats={dashboardRes.stats} />
 

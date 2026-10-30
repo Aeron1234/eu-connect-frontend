@@ -13,6 +13,7 @@ import DropdownFilter from '@/components/ui/DropdownFilter';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import ErrorUI from '@/components/ui/ErrorUI';
 import HelpManual from '@/components/help-ui/HelpManual';
+import PageTitle from '@/components/ui/PageTitle';
 import EditableMapSkeleton from '@/components/skeletons/EditableMapSkeleton';
 import { getBulkDtrStudents, getBulkDtrPins, assignBulkDtrLocations } from '@/lib/server-actions/bulk-dtr-actions';
 import { MAX_DTR_SELECTION, selectDtrPage, remainingDtrSelection, validDtrDraft } from '@/lib/bulk-dtr-selection.mjs';
@@ -110,7 +111,7 @@ function AssignmentPage({ user }) {
   if (denied) return <ErrorUI error={denied} reset={() => { setSelection(new Map()); void refresh(); }} compact />;
   const scopeText = user.role === 'admin' ? 'All ongoing internships. Filter by department and course.' : user.role === 'department_head' ? 'Ongoing interns in your department. Filter by course.' : 'Your supervised interns with ongoing internships.';
   return <div className="space-y-5 p-4 sm:p-6 lg:p-8">
-    <header className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="flex items-center gap-2 text-2xl font-bold"><MapPin className="size-7 text-primary-emphasis" />DTR Location Assignment<HelpManual guideId="bulk-dtr-locations" /></h1><p className="mt-1 text-sm text-foreground-soft">{scopeText}</p></div><Button variant="outline" onClick={refresh} disabled={saving || students.isFetching || pins.isFetching}><RefreshCw className="size-4" />Refresh</Button></header>
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><PageTitle Icon={MapPin} title="DTR Location Assignment" description={scopeText} titleAction={<HelpManual guideId="bulk-dtr-locations" />} /><Button variant="outline" className="self-start sm:self-auto" onClick={refresh} disabled={saving || students.isFetching || pins.isFetching}><RefreshCw className="size-4" />Refresh</Button></header>
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <label className="relative min-w-0 sm:max-w-sm sm:flex-1"><Search className="absolute left-3 top-2.5 size-4 text-foreground-soft" /><span className="sr-only">Search students by name</span><input value={search} maxLength={100} onChange={event => setSearch(event.target.value)} placeholder="Search student name…" className={`${fieldClass} pl-9`} disabled={saving} /></label>
       {user.role === 'admin' && <FilterSelect label="Departments" value={department} disabled={saving} options={students.data?.departments || []} onChange={value => { setDepartment(value); setCourse('all'); setPage(1); }} />}
@@ -119,7 +120,7 @@ function AssignmentPage({ user }) {
     {outcome && <div role="status" className="rounded-xl border border-border bg-card p-4 text-sm"><p className="font-semibold">{outcome.error || outcome.message}</p>{outcome.results?.some(item => item.status === 'failed') && <ul className="mt-2 list-disc space-y-1 pl-5">{outcome.results.filter(item => item.status === 'failed').map(item => <li key={item.internship_id}>{item.name}: {item.reason}</li>)}</ul>}<p className="mt-1 text-foreground-soft">{outcome.error ? 'No success is confirmed. Refresh before trying again.' : 'Students not assigned remain selected. Successful changes notify students; staff changes also notify their supervisors.'}</p></div>}
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       <section className="min-w-0 overflow-hidden rounded-xl border border-border bg-card" aria-label="DTR location map and assignment">
-        <div className="border-b border-border p-4"><h2 className="font-semibold">Choose a DTR location</h2><p className="mt-1 text-xs text-foreground-soft">Search or click the map. Blue pins group saved assignments in the current filters; the maroon pin previews your selection. Company defaults appear in the table.</p></div>
+        <div className="border-b border-border p-4"><h2 className="font-semibold">Choose a DTR location</h2><p className="mt-1 text-xs text-foreground-soft">Search or click the map. Blue pins group custom and company-default DTR locations in your current filters; the maroon pin previews your selection.</p></div>
         {pins.isPending ? <div className="h-[360px] sm:h-[460px]"><EditableMapSkeleton /></div> : pins.isError && !pins.data ? <ErrorUI error={pins.error} reset={pins.refetch} compact /> : <>
           {pins.isError && <p role="alert" className="p-3 text-sm text-destructive">Could not refresh map pins. Showing the last saved view. <button className="underline" onClick={() => pins.refetch()}>Retry</button></p>}
           <div className="relative h-[360px] sm:h-[460px]" aria-busy={pins.isFetching}>
@@ -127,7 +128,7 @@ function AssignmentPage({ user }) {
             {pins.isFetching && <span role="status" className="absolute bottom-2 left-2 z-[500] rounded bg-background px-2 py-1 text-xs">Refreshing pins…</span>}
             {saving && <div className="absolute inset-0 z-[1200] bg-background/30" aria-label="Saving assignments" />}
           </div>
-          {!pins.data?.locations.length && <p className="px-4 pt-3 text-xs text-foreground-soft">No custom DTR locations in these filters yet.</p>}
+          {!pins.data?.locations.length && <p className="px-4 pt-3 text-xs text-foreground-soft">No valid DTR locations in these filters.</p>}
         </>}
         <form onSubmit={review} className="space-y-3 p-4">
           <div><label htmlFor="dtr-address" className="text-xs font-medium">Location / address</label><input id="dtr-address" className={fieldClass} maxLength={255} value={draft.address || ''} disabled={saving} onChange={event => setDraft(previous => ({ ...previous, address: event.target.value }))} placeholder="Choose a pin, then confirm or shorten the address" /><p className="mt-1 text-xs text-foreground-soft">{draft.lat !== '' && draft.lon !== '' ? `${Number(draft.lat).toFixed(6)}, ${Number(draft.lon).toFixed(6)}` : 'No location selected.'}</p></div>

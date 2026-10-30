@@ -9,6 +9,7 @@ import {
   FileText,
   FolderOpen,
   Gauge,
+  History,
   Layers,
   LayoutDashboard,
   LibraryBig,
@@ -56,7 +57,7 @@ function roleRouteGroups(userRole, userDepartment) {
           {
             name: "Past Internships",
             href: "/past-internships",
-            icon: <Building2 className="h-5 w-5 shrink-0" />,
+            icon: <History className="h-5 w-5 shrink-0" />,
           },
         ],
       },
@@ -82,11 +83,12 @@ function roleRouteGroups(userRole, userDepartment) {
       {
         name: "Past Internships",
         href: "/past-internships",
-        icon: <Building2 className="h-5 w-5 shrink-0" />,
+        icon: <History className="h-5 w-5 shrink-0" />,
       },
     );
 
     if (userDepartment !== "REG") {
+      staffRoutes.push({ name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({ name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({
         name: "Records",
@@ -138,6 +140,7 @@ function roleRouteGroups(userRole, userDepartment) {
       {
         label: "Staff tools",
         routes: [
+          { name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> },
           { name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> },
           {
             name: "Map",
@@ -152,7 +155,7 @@ function roleRouteGroups(userRole, userDepartment) {
           {
             name: "Past Internships",
             href: "/past-internships",
-            icon: <Building2 className="h-5 w-5 shrink-0" />,
+            icon: <History className="h-5 w-5 shrink-0" />,
           },
         ],
       },
@@ -201,21 +204,7 @@ function getFormattedRole(role) {
 export function getSidebarRouteGroups(userRole, userDepartment, homeHref) {
   return (
     [
-      ...(userDepartment !== "REG"
-        ? [
-            {
-              label: "Overview",
-              routes: [
-                {
-                  name: "Dashboard",
-                  href: homeHref,
-                  icon: <LayoutDashboard size={20} />,
-                  exact: true,
-                },
-              ],
-            },
-          ]
-        : []),
+      { label: 'Overview', routes: [{ name: 'Dashboard', href: homeHref, icon: <LayoutDashboard size={20}/>, exact: true }] },
       ...roleRouteGroups(userRole, userDepartment),
       ...(["employer", "department_head", "admin"].includes(userRole) ? [{
         label: "Communication",

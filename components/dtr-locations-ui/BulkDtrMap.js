@@ -19,7 +19,7 @@ function SavedPins({ locations, hasDraft }) {
         <strong className="block break-words">{group.address || `${group.lat}, ${group.lon}`}</strong>
         <span>{group.students.length} assigned {group.students.length === 1 ? 'student' : 'students'} in your current filters</span>
         <ul className="max-h-56 space-y-2 overflow-y-auto" aria-label="Assigned students">{group.students.map(student => <li key={student.internship_id} className="flex items-center gap-2">
-          <StudentAvatar student={student} /><span><span className="block font-medium">{student.name}</span><span className="text-xs">{student.location.radius_meters} m{student.location.label ? ` · ${student.location.label}` : ''}</span></span>
+          <StudentAvatar student={student} /><span><span className="block font-medium">{student.name}</span><span className="text-xs">{student.location.radius_meters} m ? {student.location_source === 'company_default' ? 'Company default' : 'Custom'}{student.location.label ? ` · ${student.location.label}` : ''}</span></span>
         </li>)}</ul>
       </div>
     </Popup>

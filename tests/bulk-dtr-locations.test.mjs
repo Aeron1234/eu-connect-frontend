@@ -78,6 +78,7 @@ test('rendered page keeps hidden selections, scopes select-all, reviews one loca
     '@/components/ui/ConfirmDialog': { __esModule: true, default: Confirmation },
     '@/components/ui/ErrorUI': { __esModule: true, default: ({ error }) => React.createElement('div', { role: 'alert' }, error.message) },
     '@/components/help-ui/HelpManual': { __esModule: true, default: Empty },
+    '@/components/ui/PageTitle': { __esModule: true, default: ({ title, description, titleAction }) => React.createElement('header', null, React.createElement('h1', null, title), description, titleAction) },
     '@/components/skeletons/EditableMapSkeleton': { __esModule: true, default: Empty },
     '@/lib/server-actions/bulk-dtr-actions': api,
     '@/lib/bulk-dtr-selection.mjs': { selectDtrPage, remainingDtrSelection, validDtrDraft, MAX_DTR_SELECTION: 100 },
