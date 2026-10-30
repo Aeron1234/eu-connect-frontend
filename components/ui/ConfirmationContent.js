@@ -56,7 +56,7 @@ export default function ConfirmationContent({
     <ConfirmationContext.Provider value={{ descriptionId: description ? undefined : descriptionId }}>
       <DialogContent
         showCloseButton={showCloseButton}
-        aria-describedby={description || formDescription ? descriptionId : undefined}
+        {...(!description && !formDescription ? { 'aria-describedby': undefined } : {})}
         className="flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-sm flex-col gap-4 overflow-y-auto rounded-2xl border-border bg-card p-5 shadow-xl sm:max-w-sm sm:gap-5 sm:p-6"
       >
         <DialogHeader className="items-center gap-3 text-center sm:text-center">
@@ -67,7 +67,7 @@ export default function ConfirmationContent({
             {title}
           </DialogTitle>
           {description && (
-            <DialogDescription id={descriptionId} className="w-full break-words text-center text-xs leading-relaxed text-foreground-soft sm:text-sm">
+            <DialogDescription className="w-full break-words text-center text-xs leading-relaxed text-foreground-soft sm:text-sm">
               {description}
             </DialogDescription>
           )}

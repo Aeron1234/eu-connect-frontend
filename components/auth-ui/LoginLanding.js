@@ -188,9 +188,9 @@ export default function LoginLanding({ initialSignInOpen = false }) {
         </div>
       </footer>
     </div>
-    <DialogContent overlayClassName="bg-black/45 backdrop-blur-[3px]" className={cn(modalFormContentClass, "block overflow-y-auto")} aria-describedby="login-dialog-description">
+    <DialogContent overlayClassName="bg-black/45 backdrop-blur-[3px]" className={cn(modalFormContentClass, "block overflow-y-auto")}>
       <DialogTitle className="sr-only">Sign in to EU-Connect</DialogTitle>
-      <DialogDescription id="login-dialog-description" className="sr-only">Enter your school credentials to open your OJT workspace.</DialogDescription>
+      <DialogDescription className="sr-only">Enter your school credentials to open your OJT workspace.</DialogDescription>
       <LoginForm />
     </DialogContent>
     </Dialog>

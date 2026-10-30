@@ -200,6 +200,9 @@
   --muted: #f5f5f4;
   --muted-foreground: #78716c;
   --accent: #f5f5f4;
+  /* Keep loading blocks visible on both white cards and the light canvas,
+     including the lower-opacity phase of animate-pulse. */
+  --skeleton: #c4bfbc;
   --accent-foreground: #292524;
   --destructive: oklch(0.577 0.245 27.325);
   --border: #d6d3d1;
@@ -255,6 +258,7 @@
   --muted: #302b29;
   --muted-foreground: #a8a29e;
   --accent: #38312f;
+  --skeleton: #38312f;
   --accent-foreground: #efefef;
   --destructive: oklch(0.704 0.191 22.216);
   --border: #514a46;

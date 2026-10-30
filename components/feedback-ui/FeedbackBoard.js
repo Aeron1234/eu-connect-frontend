@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageSquare, Plus, LockKeyhole } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import ErrorUI from "@/components/ui/ErrorUI";
 import HelpManual from "@/components/help-ui/HelpManual";
 import { socket } from "@/components/ui/SocketProvider";
@@ -112,5 +113,5 @@ export default function FeedbackBoard() {
   </div>;
 }
 export function FeedbackFeedSkeleton() {
-  return <div role="status" aria-label="Loading feedback" className="space-y-3 p-4">{[1,2,3,4].map(i => <div key={i} className="animate-pulse space-y-3 border-b border-border pb-4"><div className="h-3 w-24 rounded bg-muted" /><div className="h-4 w-3/4 rounded bg-muted" /><div className="h-3 w-full rounded bg-muted" /><div className="h-3 w-1/2 rounded bg-muted" /></div>)}</div>;
+  return <div role="status" aria-label="Loading feedback" className="space-y-3 p-4">{[1,2,3,4].map(i => <div key={i} className="space-y-3 border-b border-border pb-4"><Skeleton className="h-3 w-24" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-1/2" /></div>)}</div>;
 }

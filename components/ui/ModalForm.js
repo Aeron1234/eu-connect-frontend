@@ -1,6 +1,6 @@
 "use client";
 
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { DialogClose, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -135,10 +135,12 @@ function Footer({ children, className }) {
 function Confirmation({ children, title = "Confirm Action" }) {
   const confirmation = useConfirmationLayout();
   if (confirmation) {
+    // Register the body description with Radix only when the header has none.
+    const Description = confirmation.descriptionId ? DialogDescription : 'p';
     return (
-      <p id={confirmation.descriptionId} className="break-words text-center text-xs leading-relaxed text-foreground-soft sm:text-sm">
+      <Description className="break-words text-center text-xs leading-relaxed text-foreground-soft sm:text-sm">
         {children}
-      </p>
+      </Description>
     );
   }
   return (

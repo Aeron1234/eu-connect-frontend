@@ -139,6 +139,7 @@ export default function PhilippinesNetwork() {
         <div className="landing-network-orbit landing-network-orbit-two" aria-hidden="true" />
         <Image
           src={philippinesMap}
+          loading="eager"
           alt="Outline of the Philippine islands"
           width={520}
           height={640}
