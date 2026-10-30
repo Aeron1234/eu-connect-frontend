@@ -15,7 +15,7 @@ function render(mode,data,error){
   const Dashboard=load('components/analytics-ui/AnalyticsDashboard.js',{
     '@/contexts/UserContext':{useUser:()=>({user:{id:'viewer',role:mode==='registrar'?'department_head':'admin',department_code:mode==='registrar'?'REG':null}})},
     '@tanstack/react-query':{useQuery:()=>({data,isPending:false,isError:!!error,error,isFetching:false,refetch(){}})},
-    'react-to-print':{useReactToPrint:()=>()=>{}},
+    '@/components/ui/useExportPdf':{__esModule:true,default:()=>({isPending:false,handleExport:()=>{}})},
     'next/link':{__esModule:true,default:props=>React.createElement('a',props)},
     '@/lib/server-actions/analytics-actions':{},'@/lib/analytics-export.mjs':{analyticsCsv},
     '@/components/ui/button':{Button:({children,...props})=>React.createElement('button',Object.fromEntries(Object.entries(props).filter(([key])=>!['variant','size'].includes(key))),children)},

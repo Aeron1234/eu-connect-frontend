@@ -17,3 +17,5 @@ Non-PDF printing uses react-to-print on only the rendered document root, never t
 Install with npm ci; .npmrc sets allow-remote=root for the pinned official SheetJS tarball. Libraries are bundled locally, not fetched at preview time. No server conversion service/API key is used. Browser Office rendering may differ from Microsoft Office, including charts, formulas, and exact pagination. Downloading preserves the original document.
 
 Verification: node --test tests/office-preview.test.mjs tests/student-storage-download.test.mjs tests/pdf-preview.test.mjs tests/pdf-download.test.mjs.
+
+Company analytics uses useExportPdf with /api/reports/company-analytics. The server re-fetches the full authorized aggregate with applied filters and renders a landscape PDF through the existing bounded PDF runtime. The shared preview provides download/print; CSV remains separate. No new dependencies, environment variables or backend changes are required.

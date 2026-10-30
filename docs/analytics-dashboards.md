@@ -10,7 +10,7 @@ Most/least popular lists include ties; least excludes zeros. Compare the ranked 
 
 Dates are inclusive **start dates**, not overlap with estimated internship end dates. Academic years and terms follow existing SIPP semester rules, not a generic calendar-year assumption. Zero-placement companies are names from accessible confirmed history and alumni directory with no matching students for these filters; they are separate from least popular and do not represent all unfilled vacancies.
 
-The report table pages ten companies at a time and scrolls horizontally inside its card on phones. **CSV report** and **Print / Save PDF** include the entire filtered ranked and zero-match lists. The browser print dialog supplies Save as PDF, reusing the installed print library. Snapshots show when the report was read; Refresh obtains a new consistent read. Empty states mean no matches; failed reads show Retry/Clear filters, never invented zero totals.
+The report table pages ten companies at a time and scrolls horizontally inside its card on phones. **CSV report** and **Preview PDF** include the entire filtered ranked and zero-match lists. Preview PDF uses the shared React-PDF modal at 75% zoom, with explicit Download and Print actions. It regenerates the full report through the authorized backend API using the applied filters. Snapshots show when the report was read; Refresh obtains a new consistent read. Empty states mean no matches; failed reads show Retry/Clear filters, never invented zero totals.
 
 ## Registrar dashboard
 
