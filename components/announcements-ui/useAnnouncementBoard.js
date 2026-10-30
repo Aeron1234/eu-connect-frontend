@@ -207,6 +207,7 @@ export default function useAnnouncementBoard({
     );
     void queryClient.invalidateQueries({ queryKey: announcementsKeys.all(user.id) });
     void queryClient.invalidateQueries({ queryKey: calendarKeys.all(user.id) });
+    void queryClient.invalidateQueries({ queryKey: ['notifications', String(user.id)] });
   }
 
   const isPinnedExist = visiblePinned.length > 0;

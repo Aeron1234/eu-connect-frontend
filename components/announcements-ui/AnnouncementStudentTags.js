@@ -6,7 +6,7 @@ import { getAnnouncementTagStudents } from '@/lib/server-actions/announcements-a
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function AnnouncementStudentTags({ initialIds, initialStudents, disabled }) {
+export default function AnnouncementStudentTags({ initialIds, initialStudents, disabled, onSelectionChange }) {
   const { user } = useUser();
   const [selected, setSelected] = useState(() => {
     try { return typeof initialIds === 'string' ? JSON.parse(initialIds) || [] : initialIds || []; } catch { return []; }
@@ -16,6 +16,7 @@ export default function AnnouncementStudentTags({ initialIds, initialStudents, d
     try { const rows = typeof initialStudents === 'string' ? JSON.parse(initialStudents) : initialStudents; return Object.fromEntries((rows || []).map(row => [row.id, row.name])); } catch { return {}; }
   });
   useEffect(() => { const timer = setTimeout(() => setTerm(search.trim()), 300); return () => clearTimeout(timer); }, [search]);
+  useEffect(() => { onSelectionChange?.(selected.length); }, [selected.length, onSelectionChange]);
   const query = useQuery({ queryKey: ['announcement-tag-students', String(user.id), term], queryFn: async () => {
     const result = await getAnnouncementTagStudents(term);
     if (!result.success) throw new Error(result.error);
@@ -25,7 +26,7 @@ export default function AnnouncementStudentTags({ initialIds, initialStudents, d
     <input type="hidden" name="tagged_student_ids" value={JSON.stringify(selected)} />
     <p className="text-sm font-medium">Tag students (optional)</p>
     <p className="text-xs text-muted-foreground">{user.role === 'department_head' && user.department_code !== 'REG' ? 'Select multiple ongoing students from your department.' : 'Select multiple ongoing students from any department.'} Selections stay when you search.</p>
-    <p className="text-xs text-muted-foreground">With Visible to employers checked, only tagged students’ current supervisors can view this post and receive an employer notification. Without tags, it is shared with all employers. Choose Tagged students only above to restrict the school audience too.</p>
+    <p className="text-xs text-muted-foreground">With Visible to employers checked, only tagged students’ current supervisors can view this post and receive an employer notification. Without tags, it is shared with all employers. Tagging automatically restricts the school audience to tagged students, their department heads, admins and the author.</p>
     <input aria-label="Search students to tag" placeholder="Search ongoing interns…" maxLength={100} disabled={disabled} value={search} onChange={event => setSearch(event.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
     {selected.length > 0 && <ul className="flex max-h-28 flex-wrap gap-2 overflow-y-auto">{selected.map(id => <li key={id}><button type="button" disabled={disabled} className="rounded-md bg-muted px-2 py-1 text-xs" onClick={() => setSelected(previous => previous.filter(value => value !== id))}>{names[id] || query.data?.find(row => row.id === id)?.first_name || 'Tagged student'} ×<span className="sr-only"> Remove tag</span></button></li>)}</ul>}
     <div className="max-h-44 space-y-2 overflow-y-auto">

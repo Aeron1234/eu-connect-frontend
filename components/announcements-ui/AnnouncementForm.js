@@ -69,24 +69,26 @@ function CreateUpdateAnnouncementForm({
   const [eventDate, setEventDate] = useState(isEdit ? data.event_date?.slice(0, 10) || "" : "");
   const [eventEndDate, setEventEndDate] = useState(isEdit ? data.event_end_date?.slice(0, 10) || "" : "");
   const [audience, setAudience] = useState(isEdit && Number(data?.tagged_students_only) === 1 ? 'tagged' : 'usual');
+  const [tagCount, setTagCount] = useState(0);
+  const targeted = tagCount > 0 || audience === 'tagged';
 
   return (
     <ModalForm.Root action={handleAction}>
       {isEdit && <input type="hidden" name="id" defaultValue={data.id} />}
 
       <ModalForm.Section title="Announcement Details">
-        <input type="hidden" name="tagged_students_only" value={audience === 'tagged' ? '1' : '0'} />
+        <input type="hidden" name="tagged_students_only" value={targeted ? '1' : '0'} />
         <div className="space-y-2">
           <p className="text-sm font-medium">Audience</p>
-          <DropdownFilter value={audience} onValueChange={setAudience} disabled={isPending} aria-label="Announcement audience" className="w-full bg-card p-2" options={[{value:'usual',label:categoryName === 'Department' ? 'Whole department' : 'General school audience'},{value:'tagged',label:'Tagged students only'}]} />
-          <p className="text-xs text-muted-foreground">{audience === 'tagged' ? 'Only tagged students, their department heads and admins can view this post. Only involved students and heads are notified; admins retain access without an automatic alert. Tag at least one student.' : 'Uses the usual department or school-wide audience and notifications.'}</p>
+          <DropdownFilter value={targeted ? 'tagged' : 'usual'} onValueChange={setAudience} disabled={isPending || tagCount > 0} aria-label="Announcement audience" className="w-full bg-card p-2" options={[{value:'usual',label:categoryName === 'Department' ? 'Whole department' : 'General school audience'},{value:'tagged',label:'Tagged students only'}]} />
+          <p className="text-xs text-muted-foreground">{targeted ? 'Tagged students, their department heads, admins and the author can view this post. Students and heads are notified; admins retain access without an automatic alert. Supervisors are included when employer visibility is checked. Remove all tags to choose a broad audience.' : 'Uses the usual department or school-wide audience and notifications. Adding student tags automatically restricts the audience.'}</p>
         </div>
         <input type="hidden" name="visible_to_employers" value="0" />
         <label className="flex items-start gap-3 rounded-lg border border-border p-3">
           <input type="checkbox" name="visible_to_employers" value="1" defaultChecked={isEdit && Number(data?.visible_to_employers) === 1} disabled={isPending} className="mt-1 size-4 shrink-0 accent-primary" />
           <span className="min-w-0"><span className="block text-sm font-medium">Visible to employers</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">Share with tagged students’ supervisors, or all employers when no students are tagged. Leave unchecked for the usual school audience.</span></span>
         </label>
-        <AnnouncementStudentTags initialIds={isEdit ? data?.tagged_student_ids : []} initialStudents={isEdit ? data?.tagged_students : []} disabled={isPending} />
+        <AnnouncementStudentTags initialIds={isEdit ? data?.tagged_student_ids : []} initialStudents={isEdit ? data?.tagged_students : []} disabled={isPending} onSelectionChange={setTagCount} />
         <ModalForm.Row>
           <label className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-xs font-medium leading-5 text-foreground-soft">

@@ -405,3 +405,12 @@ Keep `/help` and page manuals backed by `components/help-ui/guides/` and filtere
 - HelpContact mounts AdminSupportContacts only for students/department heads. Read GET /help/admin-contacts with viewer-scoped query keys and no-store authenticated server action. Preserve skeleton/empty/retry states and mask cached contacts after 401/403. Employers get Create feedback instructions and /feedback navigation, not administrator contacts.
 
 Department-category announcement cards and expanded content show the author department name and acronym to employer and admin viewers. The API adds nullable author_department_name/author_department_code to pinned, regular, direct-link and update responses using the author's current department assignment, consistent with existing feed scope. Missing details display a dash; General posts omit the label. No additional migration or environment changes; deploy both applications.
+
+### Tagged announcement audience policy
+
+Student tags now automatically restrict the announcement to tagged students, their current department heads, admins and the author. Only involved students/heads are notified; opted-in current supervisors also receive access and alerts. Broad General/Department audiences require removing all student tags. Ordinary heads remain limited to their department; Registrar/admin tagging can span departments. Existing tagged posts must be converted with backend scripts/2026-10-31-tagged-announcements-default-private.sql after the two earlier announcement-tag/audience migrations. No new columns or environment settings.
+
+
+### Announcement mutation reliability
+
+Announcement writes have a 20-second fetch deadline with explicit refresh-before-retry guidance; never automatically retry an uncertain write. Successful author mutations refresh viewer-scoped announcements, calendar and notifications. announcements_changed also invalidates those projections for other open sessions, including silent pin/unpin changes. Editing ordinary content does not recreate dismissed alerts; newly eligible audience members receive notifications. Pinning is restricted on the backend to current readable announcements. Keep help/manual guidance aligned; no new dependencies or environment settings.

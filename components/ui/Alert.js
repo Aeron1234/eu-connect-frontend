@@ -28,6 +28,7 @@ function Alert() {
       if (!user?.id) return;
       void queryClient.invalidateQueries({ queryKey: ["announcements", String(user.id)] });
       void queryClient.invalidateQueries({ queryKey: ["notifications", String(user.id)] });
+      void queryClient.invalidateQueries({ queryKey: ["calendar", String(user.id)] });
     };
     socket.on("announcements_changed", handleAnnouncementChange);
 
