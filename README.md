@@ -79,6 +79,7 @@ Deploy both repositories together. No new environment variables or packages are 
 ### Shared experience
 
 - Responsive layouts, mobile navigation, light/dark themes, and page-specific loading skeletons.
+- Browser-native wheel and trackpad scrolling lets pages, sidebars, and nested lists keep their own scroll boundaries. Leaflet maps retain wheel zoom; CSS smooth scrolling remains for programmatic navigation.
 - Notification inbox and header dropdown with links to related records and discussions.
 - Shared form validation and loading/success/error action toasts.
 - Retry states that distinguish failed reads from empty results.

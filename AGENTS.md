@@ -68,6 +68,7 @@ Commands:
 ## Shared UI, mobile layouts, and form errors
 
 - Reuse the project's shadcn Select, dialog, button, and field components. Maintain light/dark theme contrast and keyboard/accessibility behavior.
+- Keep wheel and trackpad scrolling browser-native across the landing page and role layouts. Do not restore a document-level wheel interceptor: it made an outer page scroll when an `overscroll-contain` inner list reached its boundary. Preserve each component's native scroll area, Leaflet wheel zoom, and CSS smooth behavior for programmatic navigation.
 - Preserve responsive layouts and matching loading skeletons when changing a page.
 - `components/ui/ModalForm.js` and `lib/modal-form-validation.mjs` handle required-input feedback before submit controls can close a dialog.
 - ModalForm validates both click capture and submit, including keyboard submission. It uses the existing action error toast, focuses/scrolls to the first invalid control, and preserves the open form and entered values.

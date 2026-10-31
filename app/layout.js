@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { DM_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "@/contexts/SidebarContext";
-import SmoothScroll from "@/components/ui/SmoothScroll";
 import QueryProvider from "@/lib/cache/QueryProvider";
 import { PdfPreviewProvider } from "@/components/ui/PdfPreviewProvider";
 
@@ -32,7 +31,6 @@ export default function RootLayout({ children }) {
       <body className={`${DmSans.className} `}>
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <SmoothScroll />
             <SidebarProvider><PdfPreviewProvider>{children}</PdfPreviewProvider></SidebarProvider>
             <Toaster position="top-center" className="shadow-lg" />
           </ThemeProvider>
