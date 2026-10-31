@@ -335,9 +335,9 @@ test("posting from page two with restrictive filters reveals the saved post befo
     "@tanstack/react-query": { useQueryClient: () => client, useQuery: query => {
       options.push(query); return { data: client.getQueryData(query.queryKey) || { posts: [], page: query.queryKey.at(-1).page, totalPages: 3 } };
     } },
-    "lucide-react": { MessageSquare: Empty, Plus: Empty, LockKeyhole: Empty },
+    "lucide-react": { MessageSquare: Empty, Plus: Empty, LockKeyhole: Empty, ChevronLeft: Empty, ChevronRight: Empty },
     "@/contexts/UserContext": { useUser: () => ({ user: { id: "owner", role: "employer" } }) },
-    "@/components/ui/button": { Button }, "@/components/ui/ErrorUI": ErrorUI,
+    "@/components/ui/button": { Button }, "@/components/ui/ErrorUI": ErrorUI, "@/components/ui/skeleton": { Skeleton: Empty },
     "@/components/ui/SocketProvider": { socket: {} }, "@/lib/cache/feedback-queries": q, "@/lib/feedback.mjs": labels,
     "./FeedbackComposer": Composer, "@/components/ui/DropdownFilter": Select, "@/components/ui/SearchBar": Empty,
     "./FeedbackThread": { default: Empty, feedbackTime: () => "" },
@@ -347,7 +347,7 @@ test("posting from page two with restrictive filters reveals the saved post befo
     let tree = render();
     find(tree, n => n.type === Select && n.props.placeholder === "Status").props.onValueChange("resolved");
     tree = render();
-    find(tree, n => n.type === Button && n.props.children === "Next").props.onClick();
+    find(tree, n => n.type === Button && n.props['aria-label'] === "Next feedback page").props.onClick();
     tree = render();
     assert.equal(options.at(-1).queryKey.at(-1).page, 2);
     assert.equal(options.at(-1).queryKey.at(-1).status, "resolved");

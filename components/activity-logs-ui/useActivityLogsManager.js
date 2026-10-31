@@ -29,13 +29,13 @@ export default function useActivityLogsManager(initialPage) {
   const [targetType, setTargetType] = useState("");
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState(defaultFilters);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setFilters({
-      actorRole,
-      targetType,
-      search: query.trim(),
-    }), 500);
+    const timeout = setTimeout(() => {
+      setPage(1);
+      setFilters({ actorRole, targetType, search: query.trim() });
+    }, 500);
     return () => clearTimeout(timeout);
   }, [actorRole, targetType, query]);
 
@@ -65,10 +65,15 @@ export default function useActivityLogsManager(initialPage) {
   const filterOptions = firstPage?.filters ?? initialPage?.filters ?? emptyFilterOptions;
   const stats = firstPage?.stats ?? {};
   const total = firstPage?.pagination.total ?? 0;
+  const pageSize = firstPage?.pagination.limit || 10;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const visibleLogs = logs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const isFiltering = isChangingFilters || logsQuery.isPending || logsQuery.isPlaceholderData;
 
   function showCachedFilters(nextFilters) {
     if (userId && queryClient.getQueryData(activityLogsKeys.list(userId, nextFilters))?.pages?.length) {
+      setPage(1);
       setFilters(nextFilters);
     }
   }
@@ -115,10 +120,12 @@ export default function useActivityLogsManager(initialPage) {
     })),
   ];
 
-  function handleSeeMore() {
-    if (!isFiltering && !isDeleting && !logsQuery.isFetching && logsQuery.hasNextPage) {
-      void logsQuery.fetchNextPage();
-    }
+  async function handleNextPage() {
+    if (isFiltering || isDeleting || logsQuery.isFetching || currentPage >= totalPages) return;
+    if (currentPage * pageSize < logs.length) { setPage(currentPage + 1); return; }
+    if (!logsQuery.hasNextPage) return;
+    const result = await logsQuery.fetchNextPage();
+    if (!result.isError) setPage(currentPage + 1);
   }
 
   async function handleDelete(formData) {
@@ -170,6 +177,7 @@ export default function useActivityLogsManager(initialPage) {
       queryClient.setQueriesData({ queryKey }, (old) => old?.pages?.length
         ? { pages: [old.pages[0]], pageParams: [1] }
         : old);
+      setPage(1);
       await queryClient.invalidateQueries({ queryKey });
     });
   }
@@ -194,6 +202,7 @@ export default function useActivityLogsManager(initialPage) {
       queryClient.setQueriesData({ queryKey }, (old) => old?.pages?.length
         ? { pages: [old.pages[0]], pageParams: [1] }
         : old);
+      setPage(1);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey }),
         queryClient.invalidateQueries({ queryKey: dashboardOverviewKeys.all(userId) }),
@@ -211,6 +220,10 @@ export default function useActivityLogsManager(initialPage) {
   return {
     logsQuery,
     logs,
+    visibleLogs,
+    page: currentPage,
+    totalPages,
+    setPage,
     stats,
     total,
     isFiltering,
@@ -227,7 +240,7 @@ export default function useActivityLogsManager(initialPage) {
     actorRoleOptions,
     targetTypeOptions,
     showCachedFilters,
-    handleSeeMore,
+    handleNextPage,
     handleDelete,
   };
 }

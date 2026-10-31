@@ -67,6 +67,7 @@ Commands:
 
 ## Shared UI, mobile layouts, and form errors
 
+- Previous/Next pagination controls use chevron icon buttons with accessible page labels; show an animated spinner when a pagination button is fetching. Keep page counts visible and do not replace unrelated See more content expansion controls.
 - Reuse the project's shadcn Select, dialog, button, and field components. Maintain light/dark theme contrast and keyboard/accessibility behavior.
 - Keep wheel and trackpad scrolling browser-native across the landing page and role layouts. Do not restore a document-level wheel interceptor: it made an outer page scroll when an `overscroll-contain` inner list reached its boundary. Preserve each component's native scroll area, Leaflet wheel zoom, and CSS smooth behavior for programmatic navigation.
 - Preserve responsive layouts and matching loading skeletons when changing a page.
@@ -356,6 +357,8 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 
 ## Readable activity logs
 
+- Activity Logs shows one loaded page at a time with Previous/Next. Fetch the next server page only when its rows are not cached, and reset to page one after filter changes or deletions. Keep rows on one line in a horizontally scrolling table on narrow screens.
+
 - lib/activity-log-display.mjs supplies shared action/module labels and read-only legacy description formatting for the admin log, filters/summary cards, and all four dashboards. Preserve stored action/target codes and metadata identifiers for filtering and audit history.
 - Backend insert descriptions should identify the affected person, company, post, or report in plain language. Keep field names/IDs in structured metadata, rather than appending raw changed_fields lists to descriptions.
 - Expand update details with readable field labels. The list describes fields included in the update, not a claimed before/after diff. Do not expose unfiltered metadata or raw course IDs as submitted details.
@@ -415,3 +418,13 @@ Student tags now automatically restrict the announcement to tagged students, the
 ### Announcement mutation reliability
 
 Announcement writes have a 20-second fetch deadline with explicit refresh-before-retry guidance; never automatically retry an uncertain write. Successful author mutations refresh viewer-scoped announcements, calendar and notifications. announcements_changed also invalidates those projections for other open sessions, including silent pin/unpin changes. Editing ordinary content does not recreate dismissed alerts; newly eligible audience members receive notifications. Pinning is restricted on the backend to current readable announcements. Keep help/manual guidance aligned; no new dependencies or environment settings.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

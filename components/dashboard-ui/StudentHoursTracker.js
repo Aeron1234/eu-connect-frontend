@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Clock, AlertTriangle } from "lucide-react";
+import { Clock, AlertTriangle, ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import {
   dashboardListsKeys,
@@ -225,7 +225,7 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
         <span>
           {isPending
-            ? "Loading..."
+            ? <span role="status" aria-label="Loading active interns"><LoaderCircle className="size-4 animate-spin" aria-hidden="true" /></span>
             : hasError
               ? "Unavailable"
               : `${pageData?.total ?? 0} active intern${pageData?.total === 1 ? "" : "s"}`}
@@ -235,9 +235,10 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
             type="button"
             onClick={() => changePage(-1)}
             disabled={isPending || hasError || query.page <= 1}
-            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Previous active interns page"
+            className="grid size-9 place-items-center rounded-md text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Previous
+            <ChevronLeft className="size-4" aria-hidden="true" />
           </button>
           <span>
             Page {pageData?.page ?? 1} / {pageData?.totalPages ?? 1}
@@ -250,9 +251,10 @@ function StudentHoursTracker({ initialPage, courses = [] }) {
               hasError ||
               query.page >= (pageData?.totalPages ?? 1)
             }
-            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Next active interns page"
+            className="grid size-9 place-items-center rounded-md text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Next
+            <ChevronRight className="size-4" aria-hidden="true" />
           </button>
         </div>
       </div>

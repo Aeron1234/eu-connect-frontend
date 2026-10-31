@@ -1,7 +1,7 @@
 "use client";
 
 import ErrorUI from "@/components/ui/ErrorUI";
-import { Activity, ScrollText } from "lucide-react";
+import { Activity, ScrollText, ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
 import PageTitle from "../ui/PageTitle";
 import PageManual from "../ui/PageManual";
 import ActivityLogsTableSkeleton from "../skeletons/ActivityLogsTableSkeleton";
@@ -10,11 +10,16 @@ import ActivityLogsSummary from "./ActivityLogsSummary";
 import ActivityLogsFilters from "./ActivityLogsFilters";
 import ActivityLogsTable from "./ActivityLogsTable";
 import ActivityLogsBatchDelete from "./ActivityLogsBatchDelete";
+import { Button } from "@/components/ui/button";
 
 export default function ActivityLogsManager({ initialPage }) {
   const {
     logsQuery,
     logs,
+    visibleLogs,
+    page,
+    totalPages,
+    setPage,
     stats,
     total,
     isFiltering,
@@ -31,7 +36,7 @@ export default function ActivityLogsManager({ initialPage }) {
     actorRoleOptions,
     targetTypeOptions,
     showCachedFilters,
-    handleSeeMore,
+    handleNextPage,
     handleDelete,
   } = useActivityLogsManager(initialPage);
 
@@ -92,22 +97,20 @@ export default function ActivityLogsManager({ initialPage }) {
         </div>
       ) : (
         <ActivityLogsTable
-          logs={logs}
+          logs={visibleLogs}
           handleDelete={handleDelete}
           isDeleting={isDeleting}
         />
       )}
 
-      {!isFiltering && logsQuery.hasNextPage && (
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={handleSeeMore}
-            disabled={isDeleting || logsQuery.isFetching}
-            className="text-sm font-semibold text-foreground-soft hover:text-primary-emphasis transition disabled:opacity-50"
-          >
-            {logsQuery.isFetchingNextPage ? "Loading..." : "See more"}
-          </button>
+      {!isFiltering && logs.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span>{total} activity logs</span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon-sm" aria-label="Previous activity logs page" disabled={isDeleting || page <= 1} onClick={() => setPage(page - 1)}><ChevronLeft className="size-4" aria-hidden="true" /></Button>
+            <span>Page {page} / {totalPages}</span>
+            <Button variant="outline" size="icon-sm" aria-label="Next activity logs page" disabled={isDeleting || logsQuery.isFetching || page >= totalPages} onClick={handleNextPage}>{logsQuery.isFetchingNextPage ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <ChevronRight className="size-4" aria-hidden="true" />}</Button>
+          </div>
         </div>
       )}
     </div>

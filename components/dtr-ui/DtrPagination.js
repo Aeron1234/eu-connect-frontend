@@ -1,4 +1,5 @@
 "use client";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function DtrPagination({ page, totalPages = 1, onPageChange, disabled = false }) {
   const lastPage = Math.max(1, totalPages);
@@ -8,18 +9,20 @@ function DtrPagination({ page, totalPages = 1, onPageChange, disabled = false })
         type="button"
         onClick={() => onPageChange(page - 1)}
         disabled={disabled || page <= 1}
-        className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Previous time records page"
+        className="grid size-9 place-items-center rounded-md text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Previous
+        <ChevronLeft className="size-4" aria-hidden="true" />
       </button>
       <span>Page {page} / {lastPage}</span>
       <button
         type="button"
         onClick={() => onPageChange(page + 1)}
         disabled={disabled || page >= lastPage}
-        className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Next time records page"
+        className="grid size-9 place-items-center rounded-md text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Next
+        <ChevronRight className="size-4" aria-hidden="true" />
       </button>
     </nav>
   );

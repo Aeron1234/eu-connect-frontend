@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageSquare, Plus, LockKeyhole } from "lucide-react";
+import { MessageSquare, Plus, LockKeyhole, ChevronLeft, ChevronRight } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,7 +105,7 @@ export default function FeedbackBoard() {
           </button>)}
           {!query.isPending && !query.isError && !posts.length && <div className="p-8 text-center"><MessageSquare className="mx-auto mb-3 size-7 text-muted-foreground" /><p className="text-sm font-medium">No feedback found</p><p className="mt-1 text-xs text-muted-foreground">{user.role === "employer" ? "Share feedback or adjust your filters." : "Discussions shared with you will appear here."}</p></div>}
         </div>
-        <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border p-3 text-xs"><span>Page {page} / {pages}</span><div className="flex gap-1"><Button size="sm" variant="ghost" disabled={query.isFetching || page <= 1} onClick={() => setFilters(current => ({ ...current, page: current.page - 1 }))}>Previous</Button><Button size="sm" variant="ghost" disabled={query.isFetching || page >= pages} onClick={() => setFilters(current => ({ ...current, page: current.page + 1 }))}>Next</Button></div></div>
+        <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border p-3 text-xs"><span>Page {page} / {pages}</span><div className="flex gap-1"><Button size="icon-sm" variant="ghost" aria-label="Previous feedback page" disabled={query.isFetching || page <= 1} onClick={() => setFilters(current => ({ ...current, page: current.page - 1 }))}><ChevronLeft className="size-4" aria-hidden="true" /></Button><Button size="icon-sm" variant="ghost" aria-label="Next feedback page" disabled={query.isFetching || page >= pages} onClick={() => setFilters(current => ({ ...current, page: current.page + 1 }))}><ChevronRight className="size-4" aria-hidden="true" /></Button></div></div>
       </section>
       {selected ? <FeedbackThread key={user.id + ":" + selected} id={selected} user={user} onBack={back} onDeleted={() => { setFilters(current => ({ ...current, page: 1 })); back(); }} /> : <div className="hidden items-center justify-center rounded-xl border border-dashed border-border p-8 text-center lg:flex"><div><LockKeyhole className="mx-auto mb-3 size-8 text-muted-foreground" /><h2 className="font-semibold">Select a discussion</h2><p className="mt-2 max-w-xs text-sm text-muted-foreground">Read feedback, review tagged interns, and reply in one place.</p></div></div>}
     </div>

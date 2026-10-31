@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, Mail, Eye, Users } from "lucide-react";
+import { Calendar, Clock, Mail, Eye, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorUI from "@/components/ui/ErrorUI";
 import Link from "next/link";
@@ -184,18 +184,20 @@ function InternsSupervisedCard({ initialPage }) {
             type="button"
             onClick={() => setQuery((current) => ({ ...current, page: current.page - 1 }))}
             disabled={isLoading || hasError || query.page <= 1}
-            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Previous supervised interns page"
+            className="grid size-9 place-items-center rounded-md text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Previous
+            <ChevronLeft className="size-4" aria-hidden="true" />
           </button>
           <span>Page {pageData?.page ?? 1} / {pageData?.totalPages ?? 1}</span>
           <button
             type="button"
             onClick={() => setQuery((current) => ({ ...current, page: current.page + 1 }))}
             disabled={isLoading || hasError || query.page >= (pageData?.totalPages ?? 1)}
-            className="rounded-md px-2 py-1 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Next supervised interns page"
+            className="grid size-9 place-items-center rounded-md text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Next
+            <ChevronRight className="size-4" aria-hidden="true" />
           </button>
         </div>
       </div>

@@ -88,7 +88,7 @@ test('rendered page keeps hidden selections, scopes select-all, reviews one loca
     sonner: { toast: { loading() { return 'loading'; }, success() {} } },
   });
   const settle = async () => { await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)); }); };
-  const click = async label => { const button = [...document.querySelectorAll('button')].find(b => b.textContent.includes(label)); assert(button, label); await act(async () => button.click()); await settle(); };
+  const click = async label => { const button = [...document.querySelectorAll('button')].find(b => b.textContent.includes(label) || b.getAttribute('aria-label')?.includes(label)); assert(button, label); await act(async () => button.click()); await settle(); };
   const check = async label => { const input = document.querySelector(`input[aria-label="${label}"]`); assert(input, label); await act(async () => input.click()); await settle(); };
   const change = async (label, value) => { await act(async () => { const select = document.querySelector(`select[aria-label="${label}"]`); select.value = value; select.dispatchEvent(new dom.window.Event('change', { bubbles: true })); }); await settle(); };
   try {

@@ -51,7 +51,7 @@ feedbackStaff,
   "summary": "Trace recorded actions and review deletions before confirming.",
   "steps": [
     "Review the summary cards, search descriptions, and filter by Role or Module.",
-    "Read an entry's action, actor, time, and related details. Select View submitted details for a new internship post, View update details for readable field labels, or View full description for a long message.",
+    "Scroll the table horizontally on a narrow screen and use Previous/Next to move through log pages. Read an entry's action, actor, time, and related details. Select View submitted details for a new internship post, View update details for readable field labels, or View full description for a long message.",
     "Use a log's trash control and confirm to remove an individual entry.",
     "To delete a range, choose its From and Through dates and review the matching count before confirming. The date-range deletion is separate from the current search and role/module filters; check the preview carefully."
   ],

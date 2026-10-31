@@ -25,22 +25,22 @@ export default function ActivityLogRow({ log, handleDelete, isDeleting }) {
       key={log.id}
       className="border-b border-border last:border-0"
     >
-      <td className="px-4 sm:px-5 py-3 max-w-[180px]">
-        <p className="font-medium text-foreground truncate">
+      <td className="px-4 sm:px-5 py-3 whitespace-nowrap">
+        <p className="font-medium text-foreground whitespace-nowrap">
           {log.actor_name}
         </p>
-        <p className="text-xs text-muted-foreground truncate">
+        <p className="text-xs text-muted-foreground whitespace-nowrap">
           {ROLE_LABELS[log.actor_role] ||
             toTitleCase(log.actor_role)}
           {ip ? ` · ${ip}` : ""}
         </p>
       </td>
-      <td className="px-4 sm:px-5 py-3 max-w-[280px]">
+      <td className="px-4 sm:px-5 py-3 whitespace-nowrap">
         <p className="font-medium text-foreground">
           {createdPosting ? `Created internship post: ${metadata.position}` : activityActionLabel(log.action)}
         </p>
         {description && !createdPosting && (
-          <p className="break-words text-xs text-muted-foreground line-clamp-2">
+          <p className="whitespace-nowrap text-xs text-muted-foreground">
             {description}
           </p>
         )}
@@ -57,7 +57,7 @@ export default function ActivityLogRow({ log, handleDelete, isDeleting }) {
         {!createdPosting && !updatedFields.length && description.length > 180 && <details className="mt-1.5 text-xs"><summary className="w-fit cursor-pointer font-semibold text-primary-emphasis">View full description</summary><p className="mt-2 break-words whitespace-pre-wrap rounded-lg border border-border bg-muted/40 p-2.5 text-foreground">{description}</p></details>}
         {createdPosting && (
           <>
-            <p className="text-xs text-muted-foreground line-clamp-2">
+            <p className="whitespace-nowrap text-xs text-muted-foreground">
               {[metadata.company_name, metadata.location].filter(Boolean).join(" · ") || log.description}
             </p>
             {details.length > 0 && (

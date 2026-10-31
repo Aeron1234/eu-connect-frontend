@@ -51,8 +51,8 @@ test("history card shows completed placements and profile links without exposing
     assert.match(positions.textContent, /Ongoing/); assert.match(positions.textContent, /Completed/); assert.match(positions.textContent, /Developer intern/); assert.match(positions.textContent, /Support intern/);
     assert.match(positions.textContent, /May 1, 2026/); assert.match(doc.body.textContent, /6 students/);
     assert(!doc.body.textContent.includes("private@example.test")); assert(!doc.body.textContent.includes("123"));
-    assert.equal([...doc.querySelectorAll("button")].find(button => button.textContent === "Previous").disabled, true);
-    assert.equal([...doc.querySelectorAll("button")].find(button => button.textContent === "Next").disabled, false);
+    assert.equal(doc.querySelector('button[aria-label="Previous supervised interns page"]').disabled, true);
+    assert.equal(doc.querySelector('button[aria-label="Next supervised interns page"]').disabled, false);
   } finally { dom.window.close(); }
 });
 

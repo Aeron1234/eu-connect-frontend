@@ -28,13 +28,14 @@ function Pagination({
     return (
       <div className="flex items-center gap-4 font-semibold text-muted-foreground">
         {onPrev ? (
-          <button onClick={onPrev} disabled={currentPage <= 1} className="...">
-            <ChevronLeft size={16} />
+          <button type="button" onClick={onPrev} disabled={currentPage <= 1} aria-label="Previous page" className="grid size-9 place-items-center rounded-md hover:bg-muted disabled:opacity-40">
+            <ChevronLeft size={16} aria-hidden="true" />
           </button>
         ) : (
           <Link
             href={hrefPrev}
             scroll={false}
+            aria-label="Previous page"
             className={`${currentPage <= 1 ? "pointer-events-none opacity-30" : ""} rounded-full p-1`}
           >
             <ChevronLeft size={16} />
@@ -45,14 +46,17 @@ function Pagination({
           <button
             onClick={onNext}
             disabled={currentPage >= totalPages}
-            className="..."
+            aria-label="Next page"
+            type="button"
+            className="grid size-9 place-items-center rounded-md hover:bg-muted disabled:opacity-40"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={16} aria-hidden="true" />
           </button>
         ) : (
           <Link
             href={hrefNext}
             scroll={false}
+            aria-label="Next page"
             className={`${currentPage >= totalPages ? "pointer-events-none opacity-30" : ""} rounded-full p-1`}
           >
             <ChevronRight size={16} />

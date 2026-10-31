@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, Eye, Users } from "lucide-react";
+import { CalendarDays, Eye, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { format, isValid, parseISO } from "date-fns";
 import ErrorUI from "@/components/ui/ErrorUI";
@@ -49,9 +49,9 @@ export default function EmployerSupervisionHistory({ employerId, viewerId }) {
       </li>;
     })}</ul>}
     {(page > 1 || (data?.pagination.totalPages ?? 1) > 1) && <nav aria-label="Supervised intern history pages" className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-xs text-muted-foreground">
-      <button type="button" disabled={query.isFetching || currentPage <= 1} onClick={() => setPage(currentPage - 1)} className="min-h-9 rounded-md px-3 font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+      <button type="button" disabled={query.isFetching || currentPage <= 1} onClick={() => setPage(currentPage - 1)} aria-label="Previous supervised interns page" className="grid size-9 place-items-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"><ChevronLeft className="size-4" aria-hidden="true" /></button>
       <span>Page {currentPage}{data ? ` / ${data.pagination.totalPages}` : ""}</span>
-      <button type="button" disabled={query.isFetching || !data || currentPage >= data.pagination.totalPages} onClick={() => setPage(currentPage + 1)} className="min-h-9 rounded-md px-3 font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+      <button type="button" disabled={query.isFetching || !data || currentPage >= data.pagination.totalPages} onClick={() => setPage(currentPage + 1)} aria-label="Next supervised interns page" className="grid size-9 place-items-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"><ChevronRight className="size-4" aria-hidden="true" /></button>
     </nav>}
   </section>;
 }
