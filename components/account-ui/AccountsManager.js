@@ -36,10 +36,22 @@ function AccountsManager({ initialPage }) {
   const [debouncedFilters, setDebouncedFilters] = useState(defaultFilters);
 
   useEffect(() => {
-    const nextFilters = { filter, search: search.trim() };
-    const timer = setTimeout(() => setDebouncedFilters(nextFilters), 500);
+    const timer = setTimeout(() => setDebouncedFilters(previous => ({ ...previous, search: search.trim() })), 500);
     return () => clearTimeout(timer);
-  }, [filter, search]);
+  }, [search]);
+
+  function changeFilter(nextFilter) {
+    setFilter(nextFilter);
+    setDebouncedFilters(previous => ({ ...previous, filter: nextFilter }));
+  }
+
+  function changeSearch(nextSearch) {
+    setSearch(nextSearch);
+    const nextFilters = { filter, search: nextSearch.trim() };
+    if (queryClient.getQueryData(accountsKeys.list(userId, nextFilters))?.pages?.length) {
+      setDebouncedFilters(nextFilters);
+    }
+  }
 
   const isChangingFilters =
     debouncedFilters.filter !== filter ||
@@ -150,7 +162,7 @@ function AccountsManager({ initialPage }) {
             <div className="relative">
               <SearchBar
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => changeSearch(event.target.value)}
                 placeholder="Search by name or email..."
                 aria-label="Search accounts"
                 className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary-200 sm:max-w-md"
@@ -159,7 +171,7 @@ function AccountsManager({ initialPage }) {
             <AccountDropdownFilter
               roles={roles}
               value={filter}
-              onChange={setFilter}
+              onChange={changeFilter}
             />
           </div>
 

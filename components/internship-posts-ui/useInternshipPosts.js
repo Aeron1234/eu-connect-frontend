@@ -63,16 +63,27 @@ export default function useInternshipPosts({
   );
 
   useEffect(() => {
-    const nextFilters = {
-      workType,
-      courseId,
-      search: query,
-      mine: scope === "myposts" ? "true" : "",
-      favorite,
-    };
-    const timeout = setTimeout(() => setDebouncedFilters(nextFilters), 500);
+    const timeout = setTimeout(() => setDebouncedFilters(previous => ({ ...previous, search: query })), 500);
     return () => clearTimeout(timeout);
-  }, [query, workType, courseId, scope, favorite]);
+  }, [query]);
+
+  function changeFilter(key, value) {
+    switch (key) {
+      case "workType": setWorkType(value); break;
+      case "courseId": setCourseId(value); break;
+      case "mine": setScope(value ? "myposts" : "all"); break;
+      case "favorite": setFavorite(value); break;
+    }
+    setDebouncedFilters(previous => ({ ...previous, [key]: value }));
+  }
+
+  function changeSearch(nextSearch) {
+    setQuery(nextSearch);
+    const nextFilters = { ...debouncedFilters, search: nextSearch };
+    if (queryClient.getQueryData(internshipPostsKeys.list(userId, nextFilters))?.pages?.length) {
+      setDebouncedFilters(nextFilters);
+    }
+  }
 
   const isChangingFilters =
     debouncedFilters.workType !== workType ||
@@ -226,15 +237,15 @@ export default function useInternshipPosts({
 
   return {
     query,
-    setQuery,
+    setQuery: changeSearch,
     workType,
-    setWorkType,
+    setWorkType: value => changeFilter("workType", value),
     courseId,
-    setCourseId,
+    setCourseId: value => changeFilter("courseId", value),
     scope,
-    setScope,
+    setScope: value => changeFilter("mine", value === "myposts" ? "true" : ""),
     favorite,
-    setFavorite,
+    setFavorite: value => changeFilter("favorite", value),
     userRole,
     courses,
     coursesQuery,

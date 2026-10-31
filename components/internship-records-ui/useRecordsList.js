@@ -43,12 +43,23 @@ export default function useRecordsList({
   const statusParam = filter === "all" ? "" : filter;
 
   useEffect(() => {
-    const timeout = setTimeout(
-      () => setCriteria({ status: statusParam, search: query, limit }),
-      500,
-    );
+    // Status tabs switch immediately; only typed search waits before a request.
+    const timeout = setTimeout(() => setCriteria(previous => ({ ...previous, search: query })), 500);
     return () => clearTimeout(timeout);
-  }, [query, statusParam, limit]);
+  }, [query]);
+
+  function selectFilter(nextFilter) {
+    setFilter(nextFilter);
+    setCriteria(previous => ({ ...previous, status: nextFilter === "all" ? "" : nextFilter }));
+  }
+
+  function changeSearch(nextSearch) {
+    setQuery(nextSearch);
+    const nextCriteria = { status: statusParam, search: nextSearch, limit };
+    if (queryClient.getQueryData(internshipRecordsKeys.list(user.id, nextCriteria))?.pages?.length) {
+      setCriteria(nextCriteria);
+    }
+  }
 
   // Keep actions disabled while the visible filter/search is ahead of the debounced
   // query, including when the query temporarily shows results from previous criteria.
@@ -196,7 +207,7 @@ export default function useRecordsList({
   }
 
   return {
-    recordsQuery, query, setQuery, filter, setFilter, stats, total,
+    recordsQuery, query, setQuery: changeSearch, filter, setFilter: selectFilter, stats, total,
     records, isSearching, isLoadingMore,
     cardProps: { isPending, isSearching, setConfirmation },
     confirmationProps: {

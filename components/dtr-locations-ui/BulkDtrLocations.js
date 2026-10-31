@@ -52,8 +52,8 @@ function AssignmentPage({ user }) {
   }, [search, searchTerm]);
   const filters = { search: searchTerm, ...(department !== 'all' && user.role === 'admin' ? { departmentId: department } : {}), ...(course !== 'all' && user.role !== 'employer' ? { courseId: course } : {}) };
   const rootKey = ['bulk-dtr-locations', String(user.id)];
-  const students = useQuery({ queryKey: [...rootKey, 'students', filters, page], queryFn: () => checkedRead(getBulkDtrStudents, { ...filters, page: String(page) }), placeholderData: previous => previous, staleTime: 0, retry: false });
-  const pins = useQuery({ queryKey: [...rootKey, 'pins', filters], queryFn: () => checkedRead(getBulkDtrPins, filters), staleTime: 0, retry: false });
+  const students = useQuery({ queryKey: [...rootKey, 'students', filters, page], queryFn: () => checkedRead(getBulkDtrStudents, { ...filters, page: String(page) }), placeholderData: previous => previous, staleTime: 60_000, retry: false, refetchOnWindowFocus: false });
+  const pins = useQuery({ queryKey: [...rootKey, 'pins', filters], queryFn: () => checkedRead(getBulkDtrPins, filters), staleTime: 60_000, retry: false, refetchOnWindowFocus: false });
   useEffect(() => {
     const update = () => { void queryClient.invalidateQueries({ queryKey: ['bulk-dtr-locations', String(user.id)] }); };
     socket.on('dtr_locations_changed', update);
@@ -63,7 +63,16 @@ function AssignmentPage({ user }) {
   const rows = students.data?.students || [];
   const selected = [...selection.values()];
   const checkedCount = rows.filter(row => selection.has(row.internship_id)).length;
-  const filteredPending = search.trim() !== searchTerm || students.isFetching;
+  const filteredPending = search.trim() !== searchTerm || students.isPending || students.isPlaceholderData;
+  function changeSearch(nextSearch) {
+    setSearch(nextSearch);
+    const term = nextSearch.trim();
+    const cachedFilters = { ...filters, search: term };
+    if (queryClient.getQueryData([...rootKey, 'students', cachedFilters, 1])) {
+      setSearchTerm(term);
+      setPage(1);
+    }
+  }
   function toggle(rowsToToggle, checked) {
     const next = selectDtrPage(selection, rowsToToggle, checked);
     if (!next) return showActionError(toast, `Select up to ${MAX_DTR_SELECTION} students per assignment.`);
@@ -113,7 +122,7 @@ function AssignmentPage({ user }) {
   return <div className="space-y-5 p-4 sm:p-6 lg:p-8">
     <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><PageTitle Icon={MapPin} title="DTR Location Assignment" description={scopeText} titleAction={<HelpManual guideId="bulk-dtr-locations" />} /><Button variant="outline" className="self-start sm:self-auto" onClick={refresh} disabled={saving || students.isFetching || pins.isFetching}><RefreshCw className="size-4" />Refresh</Button></header>
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-      <label className="relative min-w-0 sm:max-w-sm sm:flex-1"><Search className="absolute left-3 top-2.5 size-4 text-foreground-soft" /><span className="sr-only">Search students by name</span><input value={search} maxLength={100} onChange={event => setSearch(event.target.value)} placeholder="Search student name…" className={`${fieldClass} pl-9`} disabled={saving} /></label>
+      <label className="relative min-w-0 sm:max-w-sm sm:flex-1"><Search className="absolute left-3 top-2.5 size-4 text-foreground-soft" /><span className="sr-only">Search students by name</span><input value={search} maxLength={100} onChange={event => changeSearch(event.target.value)} placeholder="Search student name…" className={`${fieldClass} pl-9`} disabled={saving} /></label>
       {user.role === 'admin' && <FilterSelect label="Departments" value={department} disabled={saving} options={students.data?.departments || []} onChange={value => { setDepartment(value); setCourse('all'); setPage(1); }} />}
       {user.role !== 'employer' && <FilterSelect label="Courses" value={course} disabled={saving || students.isFetching} options={students.data?.courses || []} onChange={value => { setCourse(value); setPage(1); }} />}
     </div>
