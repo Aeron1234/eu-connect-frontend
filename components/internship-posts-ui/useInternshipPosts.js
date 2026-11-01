@@ -71,7 +71,7 @@ export default function useInternshipPosts({
     switch (key) {
       case "workType": setWorkType(value); break;
       case "courseId": setCourseId(value); break;
-      case "mine": setScope(value ? "myposts" : "all"); break;
+      case "mine": setScope(value ? "myposts" : ""); break;
       case "favorite": setFavorite(value); break;
     }
     setDebouncedFilters(previous => ({ ...previous, [key]: value }));
