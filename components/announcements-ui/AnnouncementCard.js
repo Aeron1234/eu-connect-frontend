@@ -160,7 +160,7 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
       </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-        {Number(announcement.tagged_students_only) === 1 && <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${isPinned ? 'bg-white/15 text-white' : 'bg-primary/10 text-primary-emphasis'}`}>Tagged students only</span>}
+        {Number(announcement.tagged_students_only) === 1 && <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${isPinned ? 'bg-white/15 text-white' : 'bg-primary/10 text-primary-emphasis'}`}>{Number(announcement.visible_to_employers) === 1 ? 'Tagged students + Supervisor' : 'Tagged students'}</span>}
         <span
           className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
           style={{ backgroundColor: color, color: text_color }}

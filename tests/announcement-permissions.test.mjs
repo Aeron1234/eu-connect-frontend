@@ -137,6 +137,10 @@ test("announcement cards show tagged names from the feed's JSON metadata", () =>
   }).default;
   const announcement = { id: "post", author_id: "author", category: "General", title: "Notice", content: "Body", created_at: "2026-10-30", role: "admin" };
   const students = ["Ana Cruz", "Ben Santos", "Cara Reyes", "Dan Lopez"].map((name, index) => ({ id: String(index), name }));
+  const targeted = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, tagged_students_only: 1, visible_to_employers: 0 } }));
+  assert.match(targeted, />Tagged students<\/span>/);
+  const sharedWithSupervisors = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, tagged_students_only: 1, visible_to_employers: 1 } }));
+  assert.match(sharedWithSupervisors, />Tagged students \+ Supervisor<\/span>/);
   const html = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, tagged_students: JSON.stringify(students) } }));
   for (const [index, student] of students.entries()) {
     assert.equal(html.includes(`href="/users/${student.id}"`), index < 3);

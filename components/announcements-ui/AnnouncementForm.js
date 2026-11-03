@@ -80,7 +80,7 @@ function CreateUpdateAnnouncementForm({
         <input type="hidden" name="tagged_students_only" value={targeted ? '1' : '0'} />
         <div className="space-y-2">
           <p className="text-sm font-medium">Audience</p>
-          <DropdownFilter value={targeted ? 'tagged' : 'usual'} onValueChange={setAudience} disabled={isPending || tagCount > 0} aria-label="Announcement audience" className="w-full bg-card p-2" options={[{value:'usual',label:categoryName === 'Department' ? 'Whole department' : 'General school audience'},{value:'tagged',label:'Tagged students only'}]} />
+          <DropdownFilter value={targeted ? 'tagged' : 'usual'} onValueChange={setAudience} disabled={isPending || tagCount > 0} aria-label="Announcement audience" className="w-full bg-card p-2" options={[{value:'usual',label:categoryName === 'Department' ? 'Whole department' : 'General school audience'},{value:'tagged',label:'Tagged students'}]} />
           <p className="text-xs text-muted-foreground">{targeted ? 'Tagged students, their department heads, admins and the author can view this post. Students and heads are notified; admins retain access without an automatic alert. Supervisors are included when employer visibility is checked. Remove all tags to choose a broad audience.' : 'Uses the usual department or school-wide audience and notifications. Adding student tags automatically restricts the audience.'}</p>
         </div>
         <input type="hidden" name="visible_to_employers" value="0" />
