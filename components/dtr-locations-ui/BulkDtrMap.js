@@ -26,8 +26,8 @@ function SavedPins({ locations, hasDraft }) {
   </Marker>);
 }
 
-export default function BulkDtrMap({ draft, setDraft, radius, setRadius, locations }) {
-  return <MapForm data={draft} setData={setDraft} formType="setDtrLocation" radius={radius} setRadius={setRadius}>
+export default function BulkDtrMap({ draft, setDraft, radius, setRadius, locations, liveLocation }) {
+  return <MapForm data={draft} setData={setDraft} formType="setDtrLocation" radius={radius} setRadius={setRadius} liveLocation={liveLocation}>
     <SavedPins locations={locations} hasDraft={draft.lat !== '' && draft.lon !== ''} />
   </MapForm>;
 }

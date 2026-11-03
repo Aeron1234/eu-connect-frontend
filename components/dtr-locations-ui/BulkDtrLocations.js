@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, RefreshCw, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, RefreshCw, Search, X, ChevronLeft, ChevronRight, Radio } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUser } from '@/contexts/UserContext';
 import { socket } from '@/components/ui/SocketProvider';
@@ -20,6 +20,8 @@ import { MAX_DTR_SELECTION, selectDtrPage, remainingDtrSelection, validDtrDraft 
 import { showActionError } from '@/lib/toast-and-action.mjs';
 import { StudentTableSkeleton } from './BulkDtrSkeleton';
 import StudentAvatar from './StudentAvatar';
+import useLiveDtrLocationWatch from '@/components/map-ui/useLiveDtrLocationWatch';
+import DtrLiveLocationPanel from '@/components/dtr-ui/DtrLiveLocationPanel';
 
 const BulkDtrMap = dynamic(() => import('./BulkDtrMap'), { ssr: false, loading: () => <EditableMapSkeleton /> });
 const fieldClass = 'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm';
@@ -43,6 +45,8 @@ function AssignmentPage({ user }) {
   const [department, setDepartment] = useState('all'), [course, setCourse] = useState('all'), [page, setPage] = useState(1);
   const [selection, setSelection] = useState(new Map());
   const [draft, setDraft] = useState({ lat: '', lon: '', address: '', label: '' }), [radius, setRadius] = useState(150);
+  const [liveTarget, setLiveTarget] = useState(null);
+  const { liveLocation, liveStatus } = useLiveDtrLocationWatch(liveTarget?.user_id, liveTarget?.internship_id);
   const [confirmation, setConfirmation] = useState(null), [saving, setSaving] = useState(false), [outcome, setOutcome] = useState(null);
   const submitting = useRef(false);
   useEffect(() => {
@@ -77,6 +81,18 @@ function AssignmentPage({ user }) {
     const next = selectDtrPage(selection, rowsToToggle, checked);
     if (!next) return showActionError(toast, `Select up to ${MAX_DTR_SELECTION} students per assignment.`);
     setSelection(next); setOutcome(null);
+  }
+  function toggleLiveTarget(student) {
+    setLiveTarget(current => current?.internship_id === student.internship_id ? null : {
+      internship_id: student.internship_id, user_id: student.user_id, name: student.name,
+    });
+  }
+  function useSharedLocation() {
+    if (!liveLocation) return;
+    // The student's temporary pin is only a draft; review/save still applies the
+    // same confirmed location and radius to every selected internship.
+    setDraft(current => ({ ...current, lat: liveLocation.latitude, lon: liveLocation.longitude, address: '', label: '' }));
+    setOutcome(null);
   }
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: rootKey });
@@ -129,11 +145,16 @@ function AssignmentPage({ user }) {
     {outcome && <div role="status" className="rounded-xl border border-border bg-card p-4 text-sm"><p className="font-semibold">{outcome.error || outcome.message}</p>{outcome.results?.some(item => item.status === 'failed') && <ul className="mt-2 list-disc space-y-1 pl-5">{outcome.results.filter(item => item.status === 'failed').map(item => <li key={item.internship_id}>{item.name}: {item.reason}</li>)}</ul>}<p className="mt-1 text-foreground-soft">{outcome.error ? 'No success is confirmed. Refresh before trying again.' : 'Students not assigned remain selected. Successful changes notify students; staff changes also notify their supervisors.'}</p></div>}
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       <section className="min-w-0 overflow-hidden rounded-xl border border-border bg-card" aria-label="DTR location map and assignment">
-        <div className="border-b border-border p-4"><h2 className="font-semibold">Choose a DTR location</h2><p className="mt-1 text-xs text-foreground-soft">Search or click the map. Blue pins group custom and company-default DTR locations in your current filters; the maroon pin previews your selection.</p></div>
+        <div className="border-b border-border p-4"><h2 className="font-semibold">Choose a DTR location</h2><p className="mt-1 text-xs text-foreground-soft">Search or click the map. Blue numbered pins group saved locations; a blue live pin shows the student currently sharing; the maroon pin previews your selection.</p></div>
+        {liveTarget && <div className="border-b border-border p-3">
+          <div className="mb-2 flex items-center justify-between gap-2 text-sm"><p className="font-medium">Watching {liveTarget.name}</p><Button type="button" variant="ghost" size="sm" onClick={() => setLiveTarget(null)}>Stop watching</Button></div>
+          <DtrLiveLocationPanel liveStatus={liveStatus} liveLocation={liveLocation} radius={radius} handleUseSharedLocation={useSharedLocation} isPending={saving} />
+          <p className="mt-2 text-xs text-foreground-soft">Ask this student to use Share location on their dashboard. Using their pin copies a temporary position into the draft for all selected students; review the address and radius before saving.</p>
+        </div>}
         {pins.isPending ? <div className="h-[360px] sm:h-[460px]"><EditableMapSkeleton /></div> : pins.isError && !pins.data ? <ErrorUI error={pins.error} reset={pins.refetch} compact /> : <>
           {pins.isError && <p role="alert" className="p-3 text-sm text-destructive">Could not refresh map pins. Showing the last saved view. <button className="underline" onClick={() => pins.refetch()}>Retry</button></p>}
           <div className="relative h-[360px] sm:h-[460px]" aria-busy={pins.isFetching}>
-            <BulkDtrMap draft={draft} setDraft={setDraft} radius={radius} setRadius={setRadius} locations={pins.data?.locations || []} />
+            <BulkDtrMap draft={draft} setDraft={setDraft} radius={radius} setRadius={setRadius} locations={pins.data?.locations || []} liveLocation={liveLocation} />
             {pins.isFetching && <span role="status" className="absolute bottom-2 left-2 z-[500] rounded bg-background px-2 py-1 text-xs">Refreshing pins…</span>}
             {saving && <div className="absolute inset-0 z-[1200] bg-background/30" aria-label="Saving assignments" />}
           </div>
@@ -151,13 +172,13 @@ function AssignmentPage({ user }) {
       <div className="min-w-0 space-y-4">
         <section className="overflow-hidden rounded-xl border border-border bg-card" aria-label="Student selection">
           <div className="flex items-center justify-between gap-2 border-b border-border p-4"><h2 className="font-semibold">Selected students <span className="text-primary-emphasis">({selected.length})</span></h2><Button variant="ghost" size="sm" disabled={!selected.length || saving} onClick={() => setSelection(new Map())}>Clear all</Button></div>
-          {selected.length ? <ul className="max-h-44 space-y-2 overflow-auto p-3">{selected.map(student => <li key={student.internship_id} className="flex min-w-max items-center gap-2"><StudentAvatar student={student} /><span className="whitespace-nowrap text-sm">{student.name}</span><Button variant="ghost" size="icon" disabled={saving} aria-label={`Remove ${student.name} from selection`} onClick={() => toggle([student], false)}><X className="size-4" /></Button></li>)}</ul> : <p className="p-4 text-sm text-foreground-soft">Select one or more students below. Selections stay when you search, filter or change pages.</p>}
+          {selected.length ? <ul className="max-h-44 space-y-2 overflow-auto p-3">{selected.map(student => <li key={student.internship_id} className="flex min-w-max items-center gap-2"><StudentAvatar student={student} /><span className="whitespace-nowrap text-sm">{student.name}</span><Button type="button" variant={liveTarget?.internship_id === student.internship_id ? "default" : "outline"} size="sm" disabled={saving} aria-label={`${liveTarget?.internship_id === student.internship_id ? "Stop watching" : "Watch"} ${student.name}'s shared location`} onClick={() => toggleLiveTarget(student)}><Radio className="size-3.5" />{liveTarget?.internship_id === student.internship_id ? "Watching" : "Live pin"}</Button><Button variant="ghost" size="icon" disabled={saving} aria-label={`Remove ${student.name} from selection`} onClick={() => toggle([student], false)}><X className="size-4" /></Button></li>)}</ul> : <p className="p-4 text-sm text-foreground-soft">Select one or more students below. Selections stay when you search, filter or change pages.</p>}
           <p className="px-4 pb-3 text-xs text-foreground-soft">Up to {MAX_DTR_SELECTION} internship assignments per save. Selection includes students hidden by current filters.</p>
         </section>
         <section className="overflow-hidden rounded-xl border border-border bg-card" aria-label="Ongoing internship students">
           {students.isError && <ErrorUI error={students.error} reset={students.refetch} compact />}
           {filteredPending || students.isPending ? <StudentTableSkeleton /> : <>
-            <div className="max-w-full overflow-x-auto"><table className="w-full min-w-[900px] whitespace-nowrap text-left text-sm"><thead className="border-b border-border bg-muted/40"><tr><th className="p-3"><Checkbox aria-label="Select all students on this page" disabled={!rows.length || saving || students.isError} checked={checkedCount === rows.length && rows.length > 0 ? true : checkedCount > 0 ? 'indeterminate' : false} onCheckedChange={checked => toggle(rows, checked === true)} /></th><th className="p-3">Student</th><th className="p-3">DTR location</th></tr></thead><tbody>{rows.map(student => <tr key={student.internship_id} className="border-b border-border last:border-0"><td className="p-3 align-top"><Checkbox checked={selection.has(student.internship_id)} disabled={saving || students.isError} aria-label={`Select ${student.name}`} onCheckedChange={checked => toggle([student], checked === true)} /></td><td className="p-3 align-top"><div className="flex min-w-40 items-center gap-2"><StudentAvatar student={student} /><div><p className="font-semibold">{student.name}</p><p className="text-xs text-foreground-soft">{student.course_code || student.course_name || 'No course'}{user.role !== 'department_head' && student.department_code ? ` · ${student.department_code}` : ''}</p><p className="text-xs text-foreground-soft">{student.company_name}</p></div></div></td><td className="p-3 align-top text-xs whitespace-nowrap">{student.location ? <><span className="font-medium">{student.location.address || `${student.location.lat}, ${student.location.lon}`}</span><p>{student.location.radius_meters} m · Custom</p>{student.location.label && <p>{student.location.label}</p>}</> : student.company_location ? <><span>{student.company_location.address || `${student.company_location.lat}, ${student.company_location.lon}`}</span><p>150 m · Company default</p></> : 'No location assigned'}</td></tr>)}</tbody></table></div>
+            <div className="max-w-full overflow-x-auto"><table className="w-full min-w-[900px] whitespace-nowrap text-left text-sm"><thead className="border-b border-border bg-muted/40"><tr><th className="p-3"><Checkbox aria-label="Select all students on this page" disabled={!rows.length || saving || students.isError} checked={checkedCount === rows.length && rows.length > 0 ? true : checkedCount > 0 ? 'indeterminate' : false} onCheckedChange={checked => toggle(rows, checked === true)} /></th><th className="p-3">Student</th><th className="p-3">DTR location</th><th className="p-3">Live location</th></tr></thead><tbody>{rows.map(student => <tr key={student.internship_id} className="border-b border-border last:border-0"><td className="p-3 align-top"><Checkbox checked={selection.has(student.internship_id)} disabled={saving || students.isError} aria-label={`Select ${student.name}`} onCheckedChange={checked => toggle([student], checked === true)} /></td><td className="p-3 align-top"><div className="flex min-w-40 items-center gap-2"><StudentAvatar student={student} /><div><p className="font-semibold">{student.name}</p><p className="text-xs text-foreground-soft">{student.course_code || student.course_name || 'No course'}{user.role !== 'department_head' && student.department_code ? ` · ${student.department_code}` : ''}</p><p className="text-xs text-foreground-soft">{student.company_name}</p></div></div></td><td className="p-3 align-top text-xs whitespace-nowrap">{student.location ? <><span className="font-medium">{student.location.address || `${student.location.lat}, ${student.location.lon}`}</span><p>{student.location.radius_meters} m · Custom</p>{student.location.label && <p>{student.location.label}</p>}</> : student.company_location ? <><span>{student.company_location.address || `${student.company_location.lat}, ${student.company_location.lon}`}</span><p>150 m · Company default</p></> : 'No location assigned'}</td><td className="p-3 align-top"><Button type="button" variant={liveTarget?.internship_id === student.internship_id ? 'default' : 'outline'} size="sm" disabled={saving} onClick={() => toggleLiveTarget(student)} aria-label={`${liveTarget?.internship_id === student.internship_id ? 'Stop watching' : 'Watch'} ${student.name}'s shared location`}><Radio className="size-3.5" />{liveTarget?.internship_id === student.internship_id ? 'Watching' : 'Live pin'}</Button></td></tr>)}</tbody></table></div>
             {!rows.length && !students.isError && <p className="p-6 text-center text-sm text-foreground-soft">No accessible ongoing interns match these filters.</p>}
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border p-3 text-xs"><span>{students.data?.pagination.total || 0} internship records · Select all applies to this page only.</span><div className="flex items-center gap-2"><Button variant="outline" size="icon-sm" aria-label="Previous DTR locations page" disabled={saving || (students.data?.pagination.page || 1) <= 1} onClick={() => setPage((students.data?.pagination.page || page) - 1)}><ChevronLeft className="size-4" aria-hidden="true" /></Button><span>Page {students.data?.pagination.page || 1} / {students.data?.pagination.totalPages || 1}</span><Button variant="outline" size="icon-sm" aria-label="Next DTR locations page" disabled={saving || (students.data?.pagination.page || 1) >= (students.data?.pagination.totalPages || 1)} onClick={() => setPage((students.data?.pagination.page || page) + 1)}><ChevronRight className="size-4" aria-hidden="true" /></Button></div></div>
           </>}

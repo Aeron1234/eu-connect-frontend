@@ -6,8 +6,12 @@ import { socket } from "@/components/ui/SocketProvider";
 // Subscribe staff map tools to a student's temporary DTR location session.
 // Expose the latest location/status and release subscriptions when the target changes.
 export default function useLiveDtrLocationWatch(studentId, internshipId) {
-  const [liveLocation, setLiveLocation] = useState(null);
-  const [liveStatus, setLiveStatus] = useState("Waiting for the student to share a location.");
+  const targetKey = studentId && internshipId ? `${studentId}:${internshipId}` : null;
+  const [state, setState] = useState({ targetKey: null, location: null, status: null });
+  // A different student must never briefly inherit the previous student's pin.
+  const liveLocation = state.targetKey === targetKey ? state.location : null;
+  const liveStatus = state.targetKey === targetKey && state.status
+    ? state.status : "Waiting for the student to share a location.";
 
   useEffect(() => {
     if (!studentId || !internshipId) return;
@@ -24,22 +28,20 @@ export default function useLiveDtrLocationWatch(studentId, internshipId) {
         studentId: targetStudentId, internshipId: targetInternshipId,
       }, (reply) => {
         if (!active || version !== subscriptionVersion) return;
-        setLiveLocation(reply?.ok ? reply.location : null);
-        setLiveStatus(reply?.ok
-          ? reply.location ? "Student is sharing a live position." : "Waiting for the student to share a location."
-          : reply?.error || "Live location unavailable.");
+        setState({ targetKey, location: reply?.ok ? reply.location : null,
+          status: reply?.ok
+            ? reply.location ? "Student is sharing a live position." : "Waiting for the student to share a location."
+            : reply?.error || "Live location unavailable." });
       });
     }
     function onUpdate(event) {
       if (String(event?.studentId) !== targetStudentId || String(event?.internshipId) !== targetInternshipId) return;
-      setLiveLocation(event.location);
-      setLiveStatus(event.location
+      setState({ targetKey, location: event.location, status: event.location
         ? "Student is sharing a live position."
-        : "The student stopped sharing or their position expired.");
+        : "The student stopped sharing or their position expired." });
     }
     function onDisconnect() {
-      setLiveLocation(null);
-      setLiveStatus("Live connection unavailable.");
+      setState({ targetKey, location: null, status: "Live connection unavailable." });
     }
     socket.on("dtr_location:update", onUpdate);
     socket.on("connect", subscribe);
@@ -58,16 +60,15 @@ export default function useLiveDtrLocationWatch(studentId, internshipId) {
       socket.off("disconnect", onDisconnect);
       if (socket.connected) socket.emit("dtr_location:unwatch");
     };
-  }, [studentId, internshipId]);
+  }, [studentId, internshipId, targetKey]);
 
   // Expire the displayed pin after 60 seconds without a newer server-stamped position.
   useEffect(() => {
     if (!liveLocation) return;
     const timer = setTimeout(() => {
-      setLiveLocation(null);
-      setLiveStatus("The student's shared position expired.");
+      setState({ targetKey, location: null, status: "The student's shared position expired." });
     }, Math.max(0, 60_000 - (Date.now() - liveLocation.timestamp)));
     return () => clearTimeout(timer);
-  }, [liveLocation]);
+  }, [liveLocation, targetKey]);
   return { liveLocation, liveStatus };
 }

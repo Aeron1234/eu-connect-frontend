@@ -27,6 +27,8 @@ October 31 announcement update: create/edit forms support optional searchable st
 
 October 30: Added role-specific **DTR Locations** guidance to `/help` and the page manual using `guides/bulkDtrGuide.js`, with full workflow in [bulk-dtr-locations.md](bulk-dtr-locations.md). Covers individual/bulk selection, page-scoped Select all, retained selections, dependent admin filters, 100-record limit, map/group membership privacy, confirmation/reassignment, results/retry, radius and student/grouped employer notifications. Registrar heads and students do not receive this management guide. The existing single-location guide links to the bulk workflow and retains live sharing/removal instructions.
 
+November 3: Updated the shared DTR Locations guide for the live student pin on the bulk page. It explains one-student-at-a-time watching, the GPS accuracy circle, how **Use student's pin** copies a draft for all selected interns, and the required review/confirmation. The student dashboard Help guide clarifies that sharing does not change a saved DTR location.
+
 Paths below are repository-relative; backend sources are in the companion backend repository.
 
 | Feature | Current manual contract | Main source checked |

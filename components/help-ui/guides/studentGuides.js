@@ -9,7 +9,7 @@ const studentGuides = [
     "Check your ongoing internship, required hours, and completed hours on the dashboard. The statistics show favorite opportunities, unread announcements, stored documents, and missing requirements. Select Missing Requirements to open Storage. With no ongoing internship, start in My Records.",
     "Missing Requirements counts before- and after-deployment categories without a qualifying file for your ongoing internship. Open the card to go to Storage. Duplicate uploads and files from other internships do not satisfy extra categories; employer files count after you accept them.",
     "Use the Today card for attendance and Recent Time Records to review saved shifts. Breaks pause counted duty time.",
-    "Use the map's Share location only when authorized staff need your temporary position to set a DTR location. Allow browser access and keep the page open; Stop sharing or leave the page when finished.",
+    "Use the map's Share location only when authorized staff need your temporary position to set a DTR location. Staff can view that pin from the individual record or DTR Locations page; sharing does not change your saved attendance area. Allow browser access and keep the page open while they check the pin, then select Stop sharing or leave the page.",
     "Sharing a position and clocking attendance are separate actions. Each clock action checks your current position. Once credited hours reach your required total and you have clocked out, Finish Internship Record appears on Today. Review your saved work before confirming completion; it moves the internship to finished history."
   ],
   "href": "/student",
