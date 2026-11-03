@@ -35,7 +35,7 @@ Read [the analytics manual and setup](docs/analytics-dashboards.md) for exact co
 
 Announcement **Audience** now offers usual department/General sharing (default) or **Tagged students only**. Targeted posts are visible to selected students, their department heads, the author and admins; admins are not automatically notified. Optional employer sharing adds only selected students' supervisors. Targeted calendar entries and notification links enforce the same privacy. Apply backend `2026-10-31-targeted-announcement-audience.sql` after the student-tags migration, then deploy both repositories. No env/package changes.
 
-Announcement create/edit now supports searching and tagging up to 100 ongoing students. **Visible to employers** shares with only tagged students' current supervisors; without tags it shares with all employers. Unchecked means school audience only. Regular heads select within their department; admins/Registrar heads can select all ongoing interns. Selections persist while searching and restore on edit. School visibility remains unchanged. Apply backend `scripts/2026-10-31-announcement-student-tags.sql` before deploying both applications; no new environment variables or dependencies.
+Announcement create/edit now supports searching and tagging up to 100 ongoing students. **Visible to employers** shares with only tagged students' current supervisors; without tags it shares with all employers. Unchecked means school audience only. Regular heads select within their department; admins/Registrar heads can select all ongoing interns. Selections persist while searching and restore on edit. Tagging makes the school audience targeted as described above. Announcement cards show the first three tagged names as links to `/users/[userId]`, with Show all/Show fewer for longer lists. The links have hover and keyboard-focus styles on regular and pinned cards. Apply backend `scripts/2026-10-31-announcement-student-tags.sql` before deploying both applications; no new environment variables or dependencies.
 
 ### Individual and bulk DTR locations
 
@@ -49,7 +49,7 @@ Deploy both repositories together. No new environment variables or packages are 
 
 - A dashboard with internship progress, completed hours, attendance, favorite opportunities, unread announcements, stored documents, and missing requirements.
 - Internship record submission with company details, a required official company website/social page, dates, required hours, and a map-selected workplace. Pending records can be edited before approval and require the website when saved. Staff record Overview shows a safe clickable website link, or `-` for older records without one. Deploy the matching backend validation/overview response; no SQL or environment changes are needed.
-- Daily Time Records (DTR), including clock-in, breaks, resume duty, and clock-out with location checks against the approved attendance area.
+- Daily Time Records (DTR), including clock-in, breaks, resume duty, and clock-out with location checks against the approved attendance area. On the student dashboard, the clock-in/out confirmation closes after success, a server error, or a GPS error; the result toast remains visible. Only successful attendance writes refresh DTR/dashboard data. Break and other confirmations retain their own behavior.
 - Weekly narratives with saved coverage dates, readable cards, editing, and printable journals.
 - Summary reports with structured reflections, optional memorabilia images, and PDF export.
 - Before- and after-deployment document organization, supervisor-uploaded document review, and access to personal files from earlier internships.
@@ -60,7 +60,7 @@ Deploy both repositories together. No new environment variables or packages are 
 ### Employer supervision
 
 - An overview dashboard for posted opportunities, supervised interns, documents, and recent activity.
-- The **Interns You Supervised** card with All, Ongoing, and Completed filters and student profile links.
+- The **Interns You Supervised** card with All, Ongoing, and Completed filters and student profile links. Its pager stays at the bottom of the card even when a filter returns few interns.
 - Accept or decline supervision requests in **Notifications**. Unanswered active request notifications cannot be deleted.
 - Internship posting management with eligible-course and work-type choices.
 - Authorized access to supervised students' attendance, narratives, certificates, and evaluation tools.
@@ -281,13 +281,13 @@ Page access and available actions depend on the session and backend permissions.
 | `/admin/error-tracking` | Recorded backend error groups and occurrences. |
 | `/student/account`, `/employer/account`, `/department_head/account`, `/admin/account` | Role-specific account and password settings. |
 | `/internships` | Opportunity browsing, favorites, and employer posting controls. |
-| `/users`, `/users/[userId]` | User search, profiles, permitted internship tabs, and employer completed-supervision history. |
+| `/users`, `/users/[userId]` | First-name, last-name or full-name user search; profiles, permitted internship tabs, and employer completed-supervision history. |
 | `/internship-records`, `/internship-records/[internshipId]` | Administrator/department-head record review. |
 | `/map` | Administrator/department-head visit planning. |
 | `/company-analytics` | Confirmed company placement analytics for admins and non-Registrar department heads. |
 | `/dtr-locations` | Individual/bulk DTR geofence assignment for admins, non-Registrar heads and supervising employers. |
 | `/past-internships` | Alumni placements for students and school staff. |
-| `/announcements` | Announcements for students and school staff. |
+| `/announcements` | Announcements for students and school staff, plus posts explicitly shared with employers. |
 | `/calendar` | Student and school-staff calendar tools. |
 | `/feedback` | Employer and authorized school-staff discussions. |
 | `/notifications` | Notification inbox and supervisor-request responses. |

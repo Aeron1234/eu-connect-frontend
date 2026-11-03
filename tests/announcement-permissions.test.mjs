@@ -127,6 +127,34 @@ test("Department announcement cards and expanded posts label the author's depart
   }
 });
 
+test("announcement cards show tagged names from the feed's JSON metadata", () => {
+  const Card = load("components/announcements-ui/AnnouncementCard.js", {
+    react: { ...React, useEffect() {}, useRef: () => ({ current: null }), useState: (initial) => [initial, () => {}] },
+    "@/contexts/UserContext": { useUser: () => ({ user: { id: "viewer", role: "student" } }) },
+    "@/lib/announcement-event-dates.mjs": {},
+    "../ui/Modal": childrenOnly, "./AnnouncementTogglePin": empty, "./AnnouncementUpdate": empty, "./AnnouncementDelete": empty,
+    "next/link": ({ children, ...props }) => React.createElement("a", props, children),
+  }).default;
+  const announcement = { id: "post", author_id: "author", category: "General", title: "Notice", content: "Body", created_at: "2026-10-30", role: "admin" };
+  const students = ["Ana Cruz", "Ben Santos", "Cara Reyes", "Dan Lopez"].map((name, index) => ({ id: String(index), name }));
+  const html = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, tagged_students: JSON.stringify(students) } }));
+  for (const [index, student] of students.entries()) {
+    assert.equal(html.includes(`href="/users/${student.id}"`), index < 3);
+  }
+  assert.match(html, /hover:underline/);
+  assert.match(html, /Ana Cruz/);
+  assert.match(html, /Ben Santos/);
+  assert.match(html, /Cara Reyes/);
+  assert.match(html, /Show all 4/);
+  assert(!html.includes("Dan Lopez"));
+
+  const single = renderToStaticMarkup(React.createElement(Card, { announcement: { ...announcement, tagged_students: [students[0]] } }));
+  assert.match(single, /Tagged students:.*Ana Cruz/);
+  assert(!single.includes("Show all"));
+  const untagged = renderToStaticMarkup(React.createElement(Card, { announcement }));
+  assert(!untagged.includes("Tagged students:"));
+});
+
 test("employer navigation and Help allow shared announcements while Calendar stays restricted", () => {
   const { getSidebarRouteGroups } = load("components/ui/sidebar/sidebarRoutes.js");
   const routes = role => getSidebarRouteGroups(role, "CCS", `/${role}`).flatMap(group => group.routes);

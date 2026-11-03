@@ -13,10 +13,9 @@ function DtrButton({ internshipData, status, disabled = false }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useUser();
-  // Close the confirmation only after a successful attendance write, then refresh
-  // this student's DTR queries and dashboard. Failed writes leave the modal available.
+  // Refresh attendance only after a successful write. The DTR form closes the
+  // confirmation after either result, leaving its success/error toast visible.
   function handleSuccess() {
-    setOpen(false);
     void queryClient.invalidateQueries({
       queryKey: dtrKeys.student(user?.id, internshipData?.id),
     });
@@ -65,7 +64,7 @@ function DtrButton({ internshipData, status, disabled = false }) {
       }
       title={<span className={`text-primary-emphasis`}>{theme.label}?</span>}
     >
-      <DtrForm isOut={isOut} onSuccess={handleSuccess} />
+      <DtrForm isOut={isOut} onSuccess={handleSuccess} onSettled={() => setOpen(false)} />
     </Modal>
   );
 }

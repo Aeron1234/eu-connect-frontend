@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { formatCompactEventDateRange, formatEventDateRange } from "@/lib/announcement-event-dates.mjs";
-import { Calendar, CalendarDays, Pencil, Pin, Trash2 } from "lucide-react";
+import { Calendar, CalendarDays, Pencil, Pin, Trash2, Users } from "lucide-react";
 import Modal from "../ui/Modal";
 import AnnouncementTogglePin from "./AnnouncementTogglePin";
 import AnnouncementUpdate from "./AnnouncementUpdate";
@@ -10,6 +10,17 @@ import AnnouncementDelete from "./AnnouncementDelete";
 import { useUser } from "@/contexts/UserContext";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+function getTaggedStudents(value) {
+  try {
+    const students = typeof value === "string" ? JSON.parse(value) : value;
+    return Array.isArray(students)
+      ? students.filter((student) => typeof student?.name === "string" && student.name.trim())
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 function AnnouncementCard({ announcement, categories = null, onChanged, highlighted = false }) {
   const {
@@ -42,6 +53,9 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
   const isPinned = Boolean(is_pinned);
   const previewRef = useRef(null);
   const [isContentClipped, setIsContentClipped] = useState(false);
+  const [showAllTaggedStudents, setShowAllTaggedStudents] = useState(false);
+  const taggedStudents = getTaggedStudents(announcement.tagged_students);
+  const visibleTaggedStudents = showAllTaggedStudents ? taggedStudents : taggedStudents.slice(0, 3);
 
   useEffect(() => {
     const preview = previewRef.current;
@@ -163,6 +177,36 @@ function AnnouncementCard({ announcement, categories = null, onChanged, highligh
           Posted {format(new Date(created_at), "MMM d, yyyy")}
         </time>
       </div>
+
+      {taggedStudents.length > 0 && (
+        <div className={`mt-3 flex items-start gap-2 text-xs ${isPinned ? "text-white/90" : "text-muted-foreground"}`}>
+          <Users className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <div className="min-w-0">
+            <span className="font-semibold">Tagged students: </span>
+            {visibleTaggedStudents.map((student, index) => (
+              <span key={student.id}>
+                {index > 0 && ", "}
+                <Link
+                  href={`/users/${student.id}`}
+                  className={`font-medium transition-colors hover:underline focus-visible:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${isPinned ? "text-white hover:text-primary-200 focus-visible:text-primary-200" : "text-foreground hover:text-primary-emphasis focus-visible:text-primary-emphasis"}`}
+                >
+                  {student.name.trim()}
+                </Link>
+              </span>
+            ))}
+            {taggedStudents.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setShowAllTaggedStudents((current) => !current)}
+                aria-expanded={showAllTaggedStudents}
+                className={`ml-1 font-semibold underline underline-offset-2 ${isPinned ? "text-white" : "text-primary-emphasis"}`}
+              >
+                {showAllTaggedStudents ? "Show fewer" : `Show all ${taggedStudents.length}`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <p
         ref={previewRef}

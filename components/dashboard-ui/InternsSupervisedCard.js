@@ -75,7 +75,7 @@ function InternsSupervisedCard({ initialPage }) {
   const interns = (pageData?.interns || []).map(mapIntern);
 
   return (
-    <div className="h-full min-w-0 rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
+    <div className="flex h-full min-w-0 flex-col rounded-xl bg-card border border-border shadow-sm p-5 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Users className="w-4 h-4 text-primary-emphasis" />
@@ -102,7 +102,7 @@ function InternsSupervisedCard({ initialPage }) {
       {pageQuery.isError && (
         <ErrorUI error={pageQuery.error} reset={() => void pageQuery.refetch()} compact logError={false} />
       )}
-      <div className="space-y-3" aria-live="polite" aria-busy={isLoading}>
+      <div className="flex-1 space-y-3" aria-live="polite" aria-busy={isLoading}>
         {isLoading ? (
           Array.from({ length: 4 }, (_, index) => (
             <div key={index} className="flex items-center gap-3 rounded-lg border border-border p-4" role="status" aria-label="Loading interns">

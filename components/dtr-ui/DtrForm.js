@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toastAndAction, useGetLocation } from "../../lib/helpers";
 import { toast } from "sonner";
 
-function DtrForm({ isOut, onSuccess }) {
+function DtrForm({ isOut, onSuccess, onSettled }) {
   // isOut means currently CLOCKED_OUT, so this form will clock in.
   const action = isOut ? clockIn : clockOut;
 
@@ -17,6 +17,7 @@ function DtrForm({ isOut, onSuccess }) {
   async function handleAction(formData) {
     if (isPending) return;
     setIsPending(true);
+    let actionStarted = false;
     try {
       // Get the position at submission time. The modal may open before a
       // phone has its first GPS fix, and an earlier reading may be stale.
@@ -24,6 +25,7 @@ function DtrForm({ isOut, onSuccess }) {
       formData.set(isOut ? "lat_in" : "lat_out", String(latitude));
       formData.set(isOut ? "lon_in" : "lon_out", String(longitude));
 
+      actionStarted = true;
       const result = await toastAndAction({
         loadingLabel: isOut ? "Clocking in..." : "Clocking out...",
         successLabel: isOut ? "Clocked in!" : "Clocked out!",
@@ -33,11 +35,12 @@ function DtrForm({ isOut, onSuccess }) {
       });
       if (result?.success) onSuccess?.();
     } catch (error) {
-      toast.error(error.message || "Could not get your current location. Please try again.");
-    // Keep submission disabled through GPS acquisition and the server action.
-    // Always release pending state after failure so the student can retry.
+      // toastAndAction already reports action failures. GPS errors need their own toast.
+      if (!actionStarted) toast.error(error.message || "Could not get your current location. Please try again.");
     } finally {
+      // Close this DTR confirmation after either result, including a GPS failure.
       setIsPending(false);
+      onSettled?.();
     }
   }
 
@@ -46,7 +49,7 @@ function DtrForm({ isOut, onSuccess }) {
       <ModalForm.Confirmation>
         {isOut ? "Record your clock-in now?" : "Record your clock-out now?"}
       </ModalForm.Confirmation>
-      <ModalForm.Actions isPending={isPending} submitLabel="Save" closeOnSubmit={false} />
+      <ModalForm.Actions isPending={isPending} submitLabel="Save" closeOnSubmit={false} disableCancelWhilePending />
     </ModalForm.Root>
   );
 }
