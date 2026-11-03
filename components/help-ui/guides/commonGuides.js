@@ -48,7 +48,7 @@ export const recordsGuide = {
     "In Overview, click the company pin and choose See on Google Maps to open campus-to-company directions in a new tab.",
     "In DTR, authorized staff can set the attendance pin and radius for an ongoing record. Ask the student to share their dashboard location if you need help placing the pin. Review saved shifts, break time and credited hours before making completion decisions.",
     "Employer performance evaluations are confidential to the employer and authorized staff. Evaluation notifications open the related internship record. Use the available PDF control to preview, print, or download.",
-    "Employers may post multiple performance evaluations per internship. Students may have one active supervisor evaluation and replace it after deletion. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies only after author deletion.",
+    "Employers may post multiple performance evaluations per ongoing internship, and students may post multiple supervisor evaluations for theirs. Deleting one evaluation leaves the others intact. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies only after author deletion.",
     "Mark Finished is a staff completion decision and does not require credited hours to meet the required total. Check the student's record first. The student's Finish Internship Record control requires the hours target and no open shift. Completion preserves history; it does not delete attendance, narratives or rotations."
   ],
   "href": "/internship-records",
