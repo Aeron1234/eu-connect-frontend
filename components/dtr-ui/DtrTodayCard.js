@@ -24,6 +24,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
     ? startDate
     : startDate ? manilaDay(startDate) : null;
   const todayDay = manilaDay(new Date());
+  const shiftStartDay = dtrToday?.clock_in ? manilaDay(dtrToday.clock_in) : null;
   // Gate clock controls using the Philippine start day; backend checks remain authoritative.
   const dtrAvailable = Boolean(startDay && todayDay >= startDay);
 
@@ -47,32 +48,31 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
           </p>
           <h2 className="text-xl sm:text-2xl font-bold mt-0.5">{today}</h2>
           {hasOngoingInternship ? (
-            <div className="grid grid-cols-3 gap-6 mt-4 max-w-md">
-              <div>
-                <p className="text-[11px] uppercase tracking-wide text-primary-200">
-                  Clock In
+            <div className="mt-4">
+              {shiftStartDay && shiftStartDay < todayDay && (
+                <p className="mb-2 text-xs text-primary-foreground/85">
+                  Overnight shift started {formatDtrDate(dtrToday.clock_in)}.
                 </p>
-                <p className="text-lg font-semibold mt-0.5">
-                  {formatDtrTime(dtrToday?.clock_in)}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wide text-primary-200">
-                  Clock Out
-                </p>
-                <p className="text-lg font-semibold mt-0.5">
-                  {formatDtrTime(dtrToday?.clock_out)}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wide text-primary-200">
-                  Status
-                </p>
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[11px] font-medium">
-                  {dtrToday?.status === "on-break" || status === "ON_BREAK"
-                    ? "On break"
-                    : dtrToday?.status || "No shift"}
-                </span>
+              )}
+              <div className="grid grid-cols-3 gap-6 max-w-md">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock In</p>
+                  <p className="text-lg font-semibold mt-0.5">{formatDtrTime(dtrToday?.clock_in)}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock Out</p>
+                  <p className="text-lg font-semibold mt-0.5">{formatDtrTime(dtrToday?.clock_out)}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-primary-200">Status</p>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[11px] font-medium">
+                    {dtrToday?.clock_out
+                      ? "Clocked out"
+                      : dtrToday?.status === "on-break" || status === "ON_BREAK"
+                      ? "On break"
+                      : dtrToday?.status || "No shift"}
+                  </span>
+                </div>
               </div>
             </div>
           ) : (

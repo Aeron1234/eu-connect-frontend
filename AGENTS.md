@@ -189,6 +189,7 @@ Primary directory: `components/map-ui/`. Detailed routing notes: `app/api/map/RE
 - Compare dates using the Asia/Manila calendar day; unlock at midnight of the start date. Missing/invalid dates fail closed.
 - Refresh the gate on time/focus/visibility changes. Existing history remains readable. Backend checks remain authoritative.
 - DTR uses Manila time. Acquire a fresh accurate geolocation fix at clock submission, rather than reusing the position captured when a modal opened.
+- Clock-in permits one shift start per Philippine calendar day across a student's internships, with at least six hours since the previous clock-out. Overnight shifts retain their clock-in date for this limit and stay visible on Today's card after midnight. The backend enforces the rule; show its specific refusal message. Open, same-start-day and recently ended DTR rows cannot be deleted to bypass it.
 - The student dashboard `DtrForm` keeps its confirmation open while obtaining GPS and awaiting clock-in/out. Its `onSettled` closes after success, returned failure, thrown failure, or GPS failure; leave the result toast visible and avoid duplicate action-error toasts. Disable Cancel while pending. Only confirmed success invalidates the student's DTR and dashboard queries. This is scoped to clock-in/out, not break or finish dialogs.
 - Preserve the geofence, assigned work location, meaningful backend error messages, and break/resume/finish confirmations.
 
