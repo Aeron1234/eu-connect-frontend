@@ -224,6 +224,10 @@ export default function useAnnexCReports(initialPage) {
       setReportsYear(academicYear);
       setReportsStatus(status);
       setFilters({ academicYear, status, search: "" });
+    } catch {
+      // A lost server-action response does not prove the write failed. Keep the
+      // editor open so the user can check Reports before trying again.
+      setFormError("We couldn't confirm whether the report was saved. Check Reports before trying again.");
     } finally {
       setIsSaving(false);
     }
