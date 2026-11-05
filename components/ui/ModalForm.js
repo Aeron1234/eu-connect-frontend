@@ -168,13 +168,14 @@ function Actions({
   submitClassName,
   closeOnSubmit = true,
   disableCancelWhilePending = false,
+  submitDisabled = false,
 }) {
   const confirmation = useConfirmationLayout();
   const submitButton = (
     <Button
       type="submit"
       className={cn(confirmation ? confirmationPrimaryClass : modalFormPrimaryClass, submitClassName)}
-      disabled={isPending}
+      disabled={isPending || submitDisabled}
     >
       {isPending ? (
         <Spinner className="size-4" />

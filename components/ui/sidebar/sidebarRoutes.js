@@ -89,7 +89,7 @@ function roleRouteGroups(userRole, userDepartment) {
 
     if (userDepartment !== "REG") {
       staffRoutes.push({ name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> });
-      staffRoutes.push({ name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> });
+      staffRoutes.push({ name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({
         name: "Records",
         href: "/internship-records",
@@ -141,7 +141,7 @@ function roleRouteGroups(userRole, userDepartment) {
         label: "Staff tools",
         routes: [
           { name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> },
-          { name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> },
+          { name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> },
           {
             name: "Map",
             href: "/map",
@@ -162,7 +162,7 @@ function roleRouteGroups(userRole, userDepartment) {
     ];
   }
 
-  if (userRole === "employer") return [{ label: "Intern tools", routes: [{ name: "DTR Locations", href: "/dtr-locations", icon: <MapPin className="h-5 w-5 shrink-0" /> }] }];
+  if (userRole === "employer") return [{ label: "Intern tools", routes: [{ name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> }] }];
   return [];
 }
 

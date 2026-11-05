@@ -3,6 +3,9 @@
 import ModalForm from "@/components/ui/ModalForm";
 import { clockIn, clockOut } from "@/lib/server-actions/dtr-actions";
 import { useState } from "react";
+import { useRef } from "react";
+import Webcam from "react-webcam";
+import Image from "next/image";
 import { toastAndAction, useGetLocation } from "../../lib/helpers";
 import { toast } from "sonner";
 
@@ -11,11 +14,19 @@ function DtrForm({ isOut, onSuccess, onSettled }) {
   const action = isOut ? clockIn : clockOut;
 
   const [isPending, setIsPending] = useState(false);
+  const [photo, setPhoto] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [cameraError, setCameraError] = useState("");
+  const webcamRef = useRef(null);
 
   const { refreshLocation } = useGetLocation(false);
 
   async function handleAction(formData) {
     if (isPending) return;
+    if (!photoFile) {
+      toast.error("Take an attendance photo before continuing.");
+      return;
+    }
     setIsPending(true);
     let actionStarted = false;
     try {
@@ -24,6 +35,7 @@ function DtrForm({ isOut, onSuccess, onSettled }) {
       const { latitude, longitude } = await refreshLocation();
       formData.set(isOut ? "lat_in" : "lat_out", String(latitude));
       formData.set(isOut ? "lon_in" : "lon_out", String(longitude));
+      formData.set("photo", photoFile);
 
       actionStarted = true;
       const result = await toastAndAction({
@@ -44,12 +56,51 @@ function DtrForm({ isOut, onSuccess, onSettled }) {
     }
   }
 
+  async function capturePhoto() {
+    const image = webcamRef.current?.getScreenshot();
+    if (!image) {
+      setCameraError("The camera could not capture a photo. Check camera permission and try again.");
+      return;
+    }
+    try {
+      const blob = await (await fetch(image)).blob();
+      setPhotoFile(new File([blob], "attendance.jpg", { type: "image/jpeg" }));
+      setPhoto(image);
+      setCameraError("");
+    } catch {
+      setCameraError("The photo could not be prepared. Please take it again.");
+    }
+  }
+
   return (
     <ModalForm.Root action={handleAction} className="w-full">
       <ModalForm.Confirmation>
-        {isOut ? "Record your clock-in now?" : "Record your clock-out now?"}
+        Take a clear photo, review it, then record your {isOut ? "clock-in" : "clock-out"}. The official Philippine time is stamped onto the saved image.
       </ModalForm.Confirmation>
-      <ModalForm.Actions isPending={isPending} submitLabel="Save" closeOnSubmit={false} disableCancelWhilePending />
+      <div className="space-y-2">
+        {photo ? (
+          <Image src={photo} alt="Your attendance photo preview" width={960} height={720} unoptimized className="aspect-video w-full rounded-lg border border-border object-cover" />
+        ) : (
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            mirrored
+            screenshotFormat="image/jpeg"
+            screenshotQuality={0.8}
+            videoConstraints={{ facingMode: "user", width: { ideal: 960 }, height: { ideal: 720 } }}
+            onUserMedia={() => setCameraError("")}
+            onUserMediaError={() => setCameraError("Camera access is unavailable. Allow camera permission and try again.")}
+            className="aspect-video w-full rounded-lg border border-border bg-muted object-cover"
+          />
+        )}
+        {cameraError && <p role="alert" className="text-xs text-destructive">{cameraError}</p>}
+        {photo && <p className="text-xs text-foreground-soft">Preview only. The saved image will include the server time.</p>}
+        <button type="button" disabled={isPending} onClick={photo ? () => { setPhoto(null); setPhotoFile(null); } : capturePhoto}
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50">
+          {photo ? "Retake photo" : "Take photo"}
+        </button>
+      </div>
+      <ModalForm.Actions isPending={isPending} submitDisabled={!photoFile} submitLabel={isOut ? "Clock in" : "Clock out"} closeOnSubmit={false} disableCancelWhilePending />
     </ModalForm.Root>
   );
 }
