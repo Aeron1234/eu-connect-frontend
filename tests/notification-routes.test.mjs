@@ -8,12 +8,16 @@ test("student approval notifications open My Records for socket payloads and rea
   }
 });
 
+test("DTR shift schedule notifications open the student's dashboard", () => {
+  assert.equal(getNotificationTargetPath({ type: "dtr_shift_schedule", link: "/student" }), "/student");
+});
+
 test("department-head evaluation notifications navigate to the internship record instead of the evaluation UUID", () => {
   for (const is_read of [true, false]) {
-    assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "internship-uuid", link_uuid: "evaluation-uuid", is_read }), "/internship-records/internship-uuid");
+    assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "internship-uuid", link_uuid: "evaluation-uuid", is_read }), "/department_head/internship-records/internship-uuid");
   }
   assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link_uuid: "evaluation-uuid" }), null);
-  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "record/unsafe?" }), "/internship-records/record%2Funsafe%3F");
+  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "record/unsafe?" }), "/department_head/internship-records/record%2Funsafe%3F");
 });
 
 test("finished internship notifications open their record for both unread and read items", () => {
@@ -21,11 +25,11 @@ test("finished internship notifications open their record for both unread and re
   for (const is_read of [false, true]) {
     assert.equal(
       getNotificationTargetPath({ type: "internship_record_finished", link_uuid: internshipId, is_read }),
-      `/internship-records/${internshipId}`,
+      `/department_head/internship-records/${internshipId}`,
     );
     assert.equal(
       getNotificationTargetPath({ type: "internship_record_finished", link: internshipId, is_read }),
-      `/internship-records/${internshipId}`,
+      `/department_head/internship-records/${internshipId}`,
     );
   }
 });
@@ -33,14 +37,14 @@ test("finished internship notifications open their record for both unread and re
 test("finished internship links prefer the UUID field and require a record ID", () => {
   assert.equal(
     getNotificationTargetPath({ type: "internship_record_finished", link_uuid: "current-record", link: "old-record" }),
-    "/internship-records/current-record",
+    "/department_head/internship-records/current-record",
   );
   for (const item of [{}, { link: null, link_uuid: null }, { link: "", link_uuid: "" }]) {
     assert.equal(getNotificationTargetPath({ ...item, type: "internship_record_finished" }), null);
   }
   assert.equal(
     getNotificationTargetPath({ type: "internship_record_finished", link_uuid: "record/id?tab=dtr" }),
-    "/internship-records/record%2Fid%3Ftab%3Ddtr",
+    "/department_head/internship-records/record%2Fid%3Ftab%3Ddtr",
   );
 });
 

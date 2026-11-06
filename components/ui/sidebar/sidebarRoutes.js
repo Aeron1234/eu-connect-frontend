@@ -88,11 +88,12 @@ function roleRouteGroups(userRole, userDepartment) {
     );
 
     if (userDepartment !== "REG") {
+      staffRoutes.push({ name: "Evaluation Criteria", href: "/department_head/evaluation-criteria", icon: <SlidersHorizontal className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({ name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({ name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> });
       staffRoutes.push({
         name: "Records",
-        href: "/internship-records",
+        href: "/department_head/internship-records",
         icon: <LibraryBig className="h-5 w-5 shrink-0" />,
       });
     }
@@ -130,11 +131,6 @@ function roleRouteGroups(userRole, userDepartment) {
             href: "/admin/cache-monitoring",
             icon: <Gauge className="h-5 w-5 shrink-0" />,
           },
-          {
-            name: "Evaluation Criteria",
-            href: "/admin/evaluation-criteria",
-            icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
-          },
         ],
       },
       {
@@ -146,11 +142,6 @@ function roleRouteGroups(userRole, userDepartment) {
             name: "Map",
             href: "/map",
             icon: <MapIcon className="h-5 w-5 shrink-0" />,
-          },
-          {
-            name: "Records",
-            href: "/internship-records",
-            icon: <LibraryBig className="h-5 w-5 shrink-0" />,
           },
           {
             name: "Past Internships",

@@ -1,6 +1,6 @@
 import {
   FileText, Megaphone, CalendarDays, CheckCircle2, XCircle, ClipboardCheck,
-  Star, ClipboardX, Award, UserPlus, UserCheck, UserX, MapPin,
+  Star, ClipboardX, Award, UserPlus, UserCheck, UserX, MapPin, Clock3,
 } from "lucide-react";
 
 // Shared display metadata for inbox cards and the header dropdown. An optional dropdownIcon
@@ -25,6 +25,7 @@ const NOTIFICATION_TYPES = {
   supervisor_request_accepted: { icon: UserCheck, label: "Supervisor request", tone: "success" },
   supervisor_request_rejected: { icon: UserX, label: "Supervisor request", tone: "destructive" },
   dtr_location_set: { icon: MapPin, label: "DTR location", tone: "primary" },
+  dtr_shift_schedule: { icon: Clock3, label: "DTR shift hours", tone: "primary" },
 };
 
 export const TONE_STYLES = {

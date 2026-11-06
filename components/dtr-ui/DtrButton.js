@@ -56,7 +56,7 @@ function DtrButton({ internshipData, status, disabled = false }) {
       triggerStyles="w-full sm:w-auto"
       trigger={
         <div
-          className="inline-flex items-center justify-center gap-2 bg-white text-primary px-4 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 transition w-full sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-xs font-medium text-primary transition hover:bg-white/90 sm:w-auto"
           title={theme.label}
         >
           {theme.icon} {theme.label}

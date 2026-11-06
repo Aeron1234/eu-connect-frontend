@@ -33,7 +33,7 @@ export default function useEmployerEvaluationForm({ employerEvaluationCriterias,
     };
 
     for (const [key, value] of Object.entries(evaluationGrades)) {
-      formData.scores.push({ criterion_name: key, score: value });
+      formData.scores.push({ criterion_id: Number(key), score: value });
     }
 
     startTransition(async () => {

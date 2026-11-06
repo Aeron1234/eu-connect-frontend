@@ -6,6 +6,20 @@ const departmentHeadGuides = [
 companyAnalyticsGuide, registrarDashboardGuide,
 bulkDtrGuide('department_head'),
 {
+  id: "evaluation-criteria",
+  hideForRegistrar: true,
+  title: "Manage your department's evaluation criteria",
+  summary: "Set the questions students and their supervisors answer for your department.",
+  steps: [
+    "Switch between Student performance and Supervisor evaluation forms. Each form shows only your department's questions.",
+    "Use the active and inactive filters. Add a section, then add its first criterion to save it.",
+    "Add more questions or deactivate and reactivate a question or whole section. Confirm changes before saving.",
+    "Inactive questions are removed from new forms; existing evaluation scores remain available in past reports. Students and supervisors can submit only when the department has active questions for that form."
+  ],
+  href: "/department_head/evaluation-criteria",
+  linkText: "Open Evaluation Criteria"
+},
+{
   "id": "dashboard",
   "hideForRegistrar": true,
   "title": "Track your department overview",

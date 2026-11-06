@@ -17,8 +17,49 @@ function manilaDay(value) {
   return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
+function scheduleTime(value) {
+  if (!/^\d{2}:\d{2}$/.test(value || "")) return null;
+  const [hours, minutes] = value.split(":").map(Number);
+  if (hours > 23 || minutes > 59) return null;
+  return new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" })
+    .format(new Date(Date.UTC(2020, 0, 1, hours, minutes)));
+}
+
+function scheduleDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return null;
+  return new Intl.DateTimeFormat("en-PH", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
+    .format(new Date(`${value}T00:00:00Z`));
+}
+
+function shiftPosition(clockIn, start, end) {
+  if (!clockIn || !start || !end) return null;
+  const date = new Date(clockIn);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Manila", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(date);
+  const clock = Number(parts.find((part) => part.type === "hour")?.value) * 60 + Number(parts.find((part) => part.type === "minute")?.value);
+  const minutes = (value) => { const [hour, minute] = value.split(":").map(Number); return hour * 60 + minute; };
+  const first = minutes(start);
+  const last = minutes(end);
+  const duration = (last - first + 1440) % 1440;
+  if (!Number.isFinite(clock) || !duration) return null;
+  const elapsed = (clock - first + 1440) % 1440;
+  if (elapsed > duration) return 0;
+  return Math.min(100, Math.max(0, elapsed / duration * 100));
+}
+
 function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
   const hasOngoingInternship = internshipData?.status === "ongoing";
+  const requiredHours = Number(internshipData?.total_hours);
+  const creditedHours = Number(internshipData?.accumulated_hours);
+  const safeCreditedHours = Number.isFinite(creditedHours) ? Math.max(0, creditedHours) : 0;
+  const remainingHours = Number.isFinite(requiredHours) && requiredHours > 0
+    ? Math.max(0, requiredHours - safeCreditedHours)
+    : null;
+  const hoursFormatter = new Intl.NumberFormat("en-PH", { maximumFractionDigits: 2 });
+  const scheduleIn = scheduleTime(internshipData?.schedule_in);
+  const scheduleOut = scheduleTime(internshipData?.schedule_out);
+  const hasSchedule = Boolean(scheduleIn && scheduleOut);
+  const clockInPosition = hasSchedule ? shiftPosition(dtrToday?.clock_in, internshipData.schedule_in, internshipData.schedule_out) : null;
   const startDate = internshipData?.date_started;
   const startDay = typeof startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(startDate)
     ? startDate
@@ -37,31 +78,61 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
   const today = formatDtrDate(new Date());
 
   return (
-    <section className="brand-orbit relative rounded-xl bg-primary text-white p-5 sm:p-6 shadow-sm">
+    <section className="relative overflow-hidden rounded-xl bg-primary p-4 text-white shadow-sm sm:p-5">
       {hasOngoingInternship && (
         <HelpManual guideId="dtr" title="How to use your daily time record" triggerStyles="absolute right-5 top-5 z-10 inline-flex size-8 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-6 sm:top-6" />
       )}
-      <div className="flex flex-1 flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-        <div className={`min-w-0 flex-1 ${hasOngoingInternship ? "pr-9 sm:pr-10" : ""}`}>
-          <p className="text-[11px] uppercase tracking-widest text-primary-foreground/70">
-            Today
-          </p>
-          <h2 className="text-xl sm:text-2xl font-bold mt-0.5">{today}</h2>
-          {hasOngoingInternship ? (
-            <div className="mt-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-white/20 pb-3 pr-9 sm:pb-4">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold leading-tight sm:text-xl">DTR Today</h2>
+          <p className="mt-0.5 text-xs text-white/80 sm:text-sm">{today}</p>
+        </div>
+        {hasOngoingInternship && <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium">{status === "CLOCKED_IN" ? "On shift" : status === "ON_BREAK" ? "On break" : "Off shift"}</span>}
+      </div>
+      <div className="min-w-0">
+          {hasOngoingInternship && hasSchedule && (
+            <div className="border-b border-white/20 py-3 sm:py-4" aria-label={`Employer schedule: ${scheduleIn} to ${scheduleOut}`}>
+              <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2 sm:gap-4">
+                <div><p className="text-[10px] text-white/70">Scheduled in</p><p className="whitespace-nowrap text-sm font-semibold tabular-nums sm:text-base">{scheduleIn}</p></div>
+                <div className="relative mb-1.5 h-1.5 rounded-full bg-white/30" aria-hidden="true">
+                  {clockInPosition !== null && <><span className="absolute inset-y-0 left-0 rounded-full bg-white/80" style={{ width: `${clockInPosition}%` }} /><span className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" style={{ left: `${clockInPosition}%` }} /></>}
+                </div>
+                <div className="text-right"><p className="text-[10px] text-white/70">Scheduled out</p><p className="whitespace-nowrap text-sm font-semibold tabular-nums sm:text-base">{scheduleOut}</p></div>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-medium">{dtrToday?.clock_in ? `Clocked in ${formatDtrTime(dtrToday.clock_in)}` : "Not clocked in yet"}</span>
+                {Boolean(dtrToday?.is_late) && <span className="rounded-full bg-white/15 px-2 py-0.5 font-medium">Late</span>}
+                {internshipData.schedule_in > internshipData.schedule_out && <span className="text-white/75">Overnight shift</span>}
+              </div>
+              {(internshipData.schedule_start_date || internshipData.schedule_end_date) && (
+                <p className="mt-1 text-[11px] text-white/75">Effective {scheduleDate(internshipData.schedule_start_date) || "any date"} – {scheduleDate(internshipData.schedule_end_date) || "ongoing"}</p>
+              )}
+            </div>
+          )}
+          <div className="grid gap-3 border-b border-white/20 py-3 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            {hasOngoingInternship && remainingHours !== null && (
+              <div className="min-w-0" aria-label={`${hoursFormatter.format(remainingHours)} internship hours remaining`}>
+                <p className="flex flex-wrap items-baseline gap-x-2 text-2xl font-semibold leading-none tabular-nums sm:text-3xl">
+                  {hoursFormatter.format(remainingHours)} <span className="text-sm font-normal text-white/85 sm:text-base">{remainingHours > 0 ? "hours remaining" : "hours left"}</span>
+                </p>
+                <p className="mt-1 text-xs text-white/75">{hoursFormatter.format(safeCreditedHours)} / {hoursFormatter.format(requiredHours)} hours credited</p>
+              </div>
+            )}
+          {hasOngoingInternship && !hasSchedule ? (
+            <div className="min-w-0 lg:border-l lg:border-white/20 lg:pl-4">
               {shiftStartDay && shiftStartDay < todayDay && (
                 <p className="mb-2 text-xs text-primary-foreground/85">
                   Overnight shift started {formatDtrDate(dtrToday.clock_in)}.
                 </p>
               )}
-              <div className="grid grid-cols-3 gap-6 max-w-md">
+              <div className="grid grid-cols-3 gap-2 sm:gap-6">
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock In</p>
-                  <p className="text-lg font-semibold mt-0.5">{formatDtrTime(dtrToday?.clock_in)}</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-lg">{formatDtrTime(dtrToday?.clock_in)}</p>
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock Out</p>
-                  <p className="text-lg font-semibold mt-0.5">{formatDtrTime(dtrToday?.clock_out)}</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-lg">{formatDtrTime(dtrToday?.clock_out)}</p>
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-primary-200">Status</p>
@@ -75,12 +146,12 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                 </div>
               </div>
             </div>
-          ) : (
-            <p className="mt-4 text-sm text-primary-foreground/80 max-w-md">
+          ) : !hasOngoingInternship ? (
+            <p className="text-sm text-white/80">
               You don&apos;t have an ongoing internship record. Start or
               activate a record to track your daily attendance.
             </p>
-          )}
+          ) : null}
           {hasOngoingInternship && !dtrAvailable && (
             <p className="mt-3 text-xs text-primary-foreground/85" role="status">
               {startDay
@@ -88,19 +159,6 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                 : "DTR is unavailable until your internship start date is set."}
             </p>
           )}
-          <p className="flex items-center gap-1.5 mt-4 text-xs text-primary-foreground/75 ">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{" "}
-            <span
-              className="truncate w-full"
-              title={internshipData?.company_address || ""}
-            >
-              Company Address:{" "}
-              {internshipData?.company_address ||
-                "No saved company address available"}
-            </span>
-          </p>
-        </div>
-
         {hasOngoingInternship ? (
           canFinish ? (
             <Modal variant="confirmation"
@@ -124,7 +182,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
               />
             </Modal>
           ) : (
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto lg:border-l lg:border-white/20 lg:pl-4">
               <DtrButton internshipData={internshipData} status={status} disabled={!dtrAvailable} />
               <BreakButton status={status} record={dtrRecord} />
             </div>
@@ -139,6 +197,19 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
             Internship Records
           </Link>
         )}
+        </div>
+          <p className="flex min-w-0 items-start gap-1.5 pt-3 text-xs text-white/75">
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{" "}
+            <span
+              className="min-w-0 break-words line-clamp-3 sm:line-clamp-none"
+              title={internshipData?.company_address || ""}
+            >
+              <strong className="text-[#fff4ee]">{internshipData?.company_name || "Company"}</strong>{" - "}
+              {internshipData?.company_address ||
+                "No saved company address available"}
+            </span>
+          </p>
+
       </div>
     </section>
   );

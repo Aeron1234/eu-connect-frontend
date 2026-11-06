@@ -10,7 +10,7 @@ const pageGuides = {
   "admin-accounts": "accounts",
   "admin-departments": "departments",
   "admin-activity-logs": "activity-logs",
-  "admin-evaluation-criteria": "evaluation-criteria",
+  "department-head-evaluation-criteria": "evaluation-criteria",
   announcements: "announcements",
   internships: "internships",
   users: "users",

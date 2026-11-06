@@ -35,12 +35,17 @@ function StudentDashboardSkeleton() {
   return (
     <>
       <DashboardStatsSkeleton />
-      <PanelSkeleton>
-        <Skeleton className="h-4 w-32" />
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <Skeleton className="h-20 w-full rounded-lg" />
-          <Skeleton className="h-20 w-full rounded-lg" />
-          <Skeleton className="h-20 w-full rounded-lg" />
+      <PanelSkeleton className="!border-primary !bg-primary">
+        <Skeleton className="h-5 w-32 bg-white/25" />
+        <Skeleton className="mt-2 h-4 w-48 max-w-full bg-white/25" />
+        <div className="mt-4 border-t border-white/20 pt-4">
+          <Skeleton className="h-4 w-36 bg-white/25" />
+          <Skeleton className="mt-3 h-2 w-full rounded-full bg-white/25" />
+          <Skeleton className="mt-3 h-4 w-48 max-w-full bg-white/25" />
+        </div>
+        <div className="mt-4 grid gap-4 border-t border-white/20 pt-4 lg:grid-cols-2">
+          <Skeleton className="h-12 w-full max-w-sm rounded-lg bg-white/25" />
+          <Skeleton className="h-10 w-full max-w-sm rounded-lg bg-white/25" />
         </div>
       </PanelSkeleton>
       <PanelSkeleton>

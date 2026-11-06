@@ -12,7 +12,7 @@ export const rotationsGuide = {
     "Authorized staff read rotations in internship record details. In a searched student's Info tab, only that student's own department head sees the rotation panel. Finding a profile or being named as a rotation supervisor does not grant private record access.",
     "Wait for the skeleton to finish. If loading fails, use Retry. Previously loaded assignments stay visible during a refresh failure, but editing is unavailable until a successful refresh."
   ],
-  href: "/internship-records",
+  href: "/department_head/internship-records",
   linkText: "Open Records"
 };
 
@@ -51,7 +51,7 @@ export const recordsGuide = {
     "Employers may post multiple performance evaluations per ongoing internship, and students may post multiple supervisor evaluations for theirs. Deleting one evaluation leaves the others intact. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies only after author deletion.",
     "Mark Finished is a staff completion decision and does not require credited hours to meet the required total. Check the student's record first. The student's Finish Internship Record control requires the hours target and no open shift. Completion preserves history; it does not delete attendance, narratives or rotations."
   ],
-  "href": "/internship-records",
+  "href": "/department_head/internship-records",
   "linkText": "Open Records"
 };
 
@@ -190,6 +190,6 @@ export const dtrLocationGuide = {
     "Save the location and ask the student to stop sharing after setup. Map position sharing does not replace the separate location checks when clocking in or out.",
     "Remove a saved custom DTR location only after reviewing the confirmation: attendance returns to the saved company location and default radius. Removing an unsaved pin only clears that form selection."
   ],
-  "href": "/internship-records",
+  "href": "/department_head/internship-records",
   "linkText": "Open Records"
 };

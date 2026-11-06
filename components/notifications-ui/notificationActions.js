@@ -11,6 +11,9 @@ export function invalidateNotificationTarget(queryClient, userId, notification) 
       void queryClient.invalidateQueries({ queryKey: [key, String(userId)] });
     }
   }
+  if (notification?.type === "dtr_shift_schedule") {
+    void queryClient.invalidateQueries({ queryKey: ["dashboard-overview", String(userId), "student"] });
+  }
   if (notification?.type === "internship_record_approved") {
     // The student may still have a freshly cached pending record when the
     // approval arrives. Invalidate only this viewer's My Records before opening.

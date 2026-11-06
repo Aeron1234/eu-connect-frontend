@@ -22,15 +22,15 @@ function displayDate(value, pattern) {
 function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
   return (
     <div className="w-full min-w-0 overflow-x-auto">
-      <table className="w-full min-w-[700px] text-sm">
+      <table className="w-full min-w-[790px] text-sm">
         <thead>
           <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
             <th className="py-2 text-left font-medium">Date</th>
             <th className="py-2 text-left font-medium">Clock In</th>
             <th className="py-2 text-left font-medium">Clock Out</th>
             <th className="py-2 text-left font-medium">Pictures</th>
-            <th className="py-2 text-left font-medium">Timing</th>
             <th className="py-2 text-right font-medium">Hours</th>
+            <th className="py-2 text-right font-medium">Timing</th>
             <th className="py-2 text-right font-medium">Status</th>
             {allowDelete && <th className="w-10 py-2"><span className="sr-only">Actions</span></th>}
           </tr>
@@ -64,19 +64,23 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
                   {!dtr.clock_in_photo_path && !dtr.clock_out_photo_path && <span className="text-foreground-soft">—</span>}
                 </div>
               </td>
-              <td className="py-3"><div className="flex gap-1 whitespace-nowrap text-xs">
-                {dtr.is_late ? <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-900">Late</span> : null}
-                {dtr.is_undertime ? <span className="rounded bg-rose-100 px-2 py-0.5 text-rose-900">Undertime</span> : null}
-                {dtr.is_overtime ? <span className="rounded bg-sky-100 px-2 py-0.5 text-sky-900">Overtime</span> : null}
-                {!dtr.is_late && !dtr.is_undertime && !dtr.is_overtime && <span className="text-foreground-soft">-</span>}
-              </div></td>
               <td className="py-3 text-right font-medium text-foreground">
                 {dtr.total_hours == null ? "-" : Number(dtr.total_hours).toFixed(1)}
               </td>
               <td className="py-3 text-right">
-                <span className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${statusStyles[dtr.status] || "bg-muted text-foreground-soft"}`}>
-                  {dtr.status === "on-break" ? "On break" : dtr.status}
-                </span>
+                <div className="flex items-center justify-end gap-1 whitespace-nowrap text-xs">
+                  {Boolean(dtr.is_late) && <span className="rounded-md bg-amber-100 px-2 py-0.5 font-medium text-amber-900">Late</span>}
+                  {Boolean(dtr.is_undertime) && <span className="rounded-md bg-rose-100 px-2 py-0.5 font-medium text-rose-900">Undertime</span>}
+                  {Boolean(dtr.is_overtime) && <span className="rounded-md bg-sky-100 px-2 py-0.5 font-medium text-sky-900">Overtime</span>}
+                  {!dtr.is_late && !dtr.is_undertime && !dtr.is_overtime && <span className="text-foreground-soft">—</span>}
+                </div>
+              </td>
+              <td className="py-3 text-right">
+                <div className="flex items-center justify-end whitespace-nowrap text-xs">
+                  <span className={`inline-block rounded-md px-2 py-0.5 font-medium ${statusStyles[dtr.status] || "bg-muted text-foreground-soft"}`}>
+                    {dtr.status === "on-break" ? "On break" : dtr.status}
+                  </span>
+                </div>
               </td>
               {allowDelete && (
                 <td className="py-3 pl-2 text-right">

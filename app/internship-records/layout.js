@@ -11,7 +11,7 @@ async function InternshipRecordsLayout({ children }) {
   const session = await getUserSession();
   if (!session?.user) return redirect("/login");
 
-  if (!["department_head", "admin"].includes(session.user.role))
+  if (session.user.role !== "department_head")
     return notFound();
 
   return (

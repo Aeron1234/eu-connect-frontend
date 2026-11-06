@@ -1,5 +1,5 @@
 import { companyAnalyticsGuide } from './analyticsGuides';
-import { feedbackStaff, recordsGuide, rotationsGuide, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
+import { feedbackStaff, mapGuide, calendarStaff, generalAnnouncements, dtrLocationGuide, pastGuide } from "./commonGuides";
 
 import { bulkDtrGuide } from './bulkDtrGuide';
 const adminGuides = [
@@ -72,21 +72,6 @@ feedbackStaff,
   "href": "/admin/cache-monitoring",
   "linkText": "Open Cache Monitoring"
 },
-{
-  "id": "evaluation-criteria",
-  "title": "Manage evaluation criteria",
-  "summary": "Maintain the sections and questions available for new evaluations.",
-  "steps": [
-    "Switch between Student and Employer evaluation forms and use the active or inactive filters.",
-    "Enter a section title and Add Section. The section is saved after its first criterion is added.",
-    "Use Add criterion for further questions in that section. Use the available controls to deactivate or reactivate a criterion or section.",
-    "Confirm deactivation. Inactive questions are unavailable to new evaluations."
-  ],
-  "href": "/admin/evaluation-criteria",
-  "linkText": "Open Evaluation Criteria"
-},
-recordsGuide,
-rotationsGuide,
 mapGuide,
 {
   "id": "error-tracking",

@@ -49,7 +49,7 @@ function BreakAction({ label, action, Icon }) {
       intent={label === "Start break" ? "break" : "resume"}
       triggerStyles="w-full sm:w-auto"
       trigger={
-        <div className="flex w-full items-center justify-center gap-2 rounded-md bg-white px-3 py-2.5 text-sm font-semibold text-primary-500 transition-colors hover:brightness-95 sm:w-auto xl:px-5">
+        <div className="flex w-full items-center justify-center gap-2 rounded-md border border-white/70 bg-transparent px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-white/10 sm:w-auto">
           <Icon className="h-5 w-5" /> {label}
         </div>
       }

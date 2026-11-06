@@ -86,16 +86,20 @@ test("help and page manual lookups exclude restricted roles and registrar-only w
   for (const id of ["calendar", "past-internships", "records", "sipp", "rotations"]) assert.equal(getPageGuide(employer, id), undefined);
   const registrar = { role: "department_head", department_code: "REG" };
   assert(getPageGuide(registrar, "sipp"));
-  for (const id of ["records", "dashboard", "dtr-location", "rotations", "bulk-dtr-locations"]) assert.equal(getPageGuide(registrar, id), undefined);
+  for (const id of ["records", "dashboard", "dtr-location", "rotations", "bulk-dtr-locations", "evaluation-criteria"]) assert.equal(getPageGuide(registrar, id), undefined);
   for (const user of viewers) {
     const permitted = ["admin", "employer", "department_head"].includes(user.role) && !(user.role === "department_head" && user.department_code === "REG");
-    const hasRoute = getSidebarRouteGroups(user.role, user.department_code, "/").flatMap(group => group.routes).some(route => route.href === "/dtr-locations");
+    const hasRoute = getSidebarRouteGroups(user.role, user.department_code, "/").flatMap(group => group.routes).some(route => route.href === "/dtr-restrictions");
     assert.equal(hasRoute, permitted);
     assert.equal(Boolean(getPageGuide(user, "bulk-dtr-locations")), permitted);
   }
+  assert.equal(getPageGuide({ role: "admin" }, "evaluation-criteria"), undefined);
+  assert.equal(getPageGuide({ role: "department_head", department_code: "CCS" }, "evaluation-criteria").href, "/department_head/evaluation-criteria");
   for (const user of viewers) assert.equal(getPageGuide(user, "password-setup").href, "/forgot-password");
   assert.equal(getPageGuide(student, "rotations").href, "/student/internship-record");
-  assert.equal(getPageGuide({ role: "admin" }, "rotations").href, "/internship-records");
+  assert.equal(getPageGuide({ role: "admin" }, "rotations"), undefined);
+  assert.equal(getPageGuide({ role: "admin" }, "records"), undefined);
+  assert.equal(getPageGuide({ role: "department_head", department_code: "CCS" }, "records").href, "/department_head/internship-records");
   assert.equal(getPageGuide({ role: "admin", department_code: "REG" }, "sipp"), undefined);
   assert.equal(getPageGuide({ role: "department_head", department_code: "CCS" }, "sipp"), undefined);
   assert.match(getPageGuide(registrar, "announcements").steps[0], /General/);

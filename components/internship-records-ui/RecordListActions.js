@@ -47,7 +47,7 @@ export default function RecordListActions({ record: r, isPending, isSearching, s
         </button>
       )}
       <Link
-        href={`/internship-records/${r.id}`}
+        href={`/department_head/internship-records/${r.id}`}
         className="rounded-lg bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-emphasis hover:bg-primary-100 transition"
       >
         View Record

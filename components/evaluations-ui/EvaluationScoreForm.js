@@ -13,8 +13,10 @@ export default function EvaluationScoreForm({
   isPending,
   handleEvaluation,
 }) {
+  const hasQuestions = criteria.some((group) => group.items.length > 0);
   return (
     <form className="flex-1 flex flex-col gap-6" onSubmit={handleEvaluation}>
+      {!hasQuestions && <p className="text-sm text-muted-foreground">Your department has no active evaluation questions yet. Ask your department head to set them up.</p>}
       {/* 1. Loop through each Category */}
       {criteria.map((group) => (
         <div
@@ -51,7 +53,7 @@ export default function EvaluationScoreForm({
 
       <button
         className="p-2 rounded-sm bg-primary w-fit self-end text-white font-semibold cursor-pointer hover:bg-primary-600 transition-colors"
-        disabled={isPending}
+        disabled={isPending || !hasQuestions}
       >
         Submit Evaluation
       </button>

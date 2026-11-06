@@ -277,14 +277,15 @@ Page access and available actions depend on the session and backend permissions.
 | `/admin` | Administrator overview. |
 | `/admin/create-account` | Account creation and account management. |
 | `/admin/departments-and-courses` | Academic reference data. |
-| `/admin/evaluation-criteria` | Evaluation sections and criteria. |
+| `/department_head/evaluation-criteria` | Department-specific evaluation sections and criteria; available to non-Registrar department heads. |
+
 | `/admin/activity-logs` | Activity history and management. |
 | `/admin/cache-monitoring` | Backend response-cache diagnostics. |
 | `/admin/error-tracking` | Recorded backend error groups and occurrences. |
 | `/student/account`, `/employer/account`, `/department_head/account`, `/admin/account` | Role-specific account and password settings. |
 | `/internships` | Opportunity browsing, favorites, and employer posting controls. |
 | `/users`, `/users/[userId]` | First-name, last-name or full-name user search; profiles, permitted internship tabs, and employer completed-supervision history. |
-| `/internship-records`, `/internship-records/[internshipId]` | Administrator/department-head record review. |
+| `/department_head/internship-records`, `/department_head/internship-records/[internshipId]` | Department-head record review. Legacy `/internship-records` links redirect for department heads; admins cannot open the page. |
 | `/map` | Administrator/department-head visit planning. |
 | `/company-analytics` | Confirmed company placement analytics for admins and non-Registrar department heads. |
 | `/dtr-restrictions` | Individual/bulk DTR geofence assignment and employer shift hours for admins, non-Registrar heads and supervising employers. |
@@ -294,6 +295,8 @@ Page access and available actions depend on the session and backend permissions.
 | `/feedback` | Employer and authorized school-staff discussions. |
 | `/notifications` | Notification inbox and supervisor-request responses. |
 | `/help` | Role-aware instructions and page manuals. |
+
+Evaluation Criteria moved from Admin to non-Registrar Department Head. Each head manages only their department's student performance and supervisor evaluation questions. The existing CCS questions are preserved by the backend migration `scripts/2026-11-06-department-evaluation-criteria.sql`, which must run before deploying the paired frontend/backend. Other departments begin with no questions and must add their own before evaluations can be submitted. Existing evaluation scores retain their original question IDs. No new frontend packages or environment variables are needed.
 
 Student internship approval notifications open `/student/internship-record`
 from the live toast, header dropdown and full inbox. Opening refreshes the
@@ -387,7 +390,7 @@ The map uses React-Leaflet with OpenStreetMap data. Search, region and departmen
 - Successful road routes display geometry, distance, and estimated driving time. Traffic and stops are excluded.
 - Google Maps directions remain available for fallback and navigation while travelling.
 - Company details slide out inside the map on desktop and mobile. The mobile panel covers the map height and scrolls internally. Routing keeps it open while loading or after failure, and closes it only after success. A small in-map icon reopens it; route controls are not duplicated below the map.
-- In `/internship-records/[internshipId]` → Overview, the company pin popup includes **See on Google Maps**. It uses the saved company coordinates and the same campus-to-company directions helper as `/map`, opening in a new tab without requesting a road route.
+- In `/department_head/internship-records/[internshipId]` → Overview, the company pin popup includes **See on Google Maps**. It uses the saved company coordinates and the same campus-to-company directions helper as `/map`, opening in a new tab without requesting a road route.
 
 Viewer location is refreshed approximately 10 seconds after each completed location read. Active routes refresh after movement/time thresholds; location access requires permission and HTTPS or localhost. Position updates are scoped to the viewer's map session and stop when the page is left. Coordinates used to calculate routes are sent to the configured routing provider.
 
@@ -551,4 +554,8 @@ Announcement writes have a 20-second fetch deadline with explicit refresh-before
 ### Employer DTR shift restrictions (November 5, 2026)
 
 `/dtr-restrictions` replaces the DTR Locations page name; old `/dtr-locations` links redirect. Admin and non-Registrar department heads can manage authorized attendance locations. An employer can also set expected daily clock-in/out times for only their currently supervised ongoing interns. DTR tables label Late (at least 10 minutes after start), Undertime (before end), and Overtime (at least 30 minutes after end). Overnight times are supported. A schedule labels future shifts without blocking attendance or changing credited hours. Apply backend `scripts/2026-11-05-dtr-shift-restrictions.sql` after the photo migration, deploy the backend, then deploy this frontend. No new frontend environment variable or package is required.
+
+Shift hours can also have optional inclusive start and end dates. Leave either blank to keep that side of the period open; existing schedules remain unbounded. For overnight work, the start date of the shift determines whether the schedule applies. Changing or removing a schedule notifies the student and records an activity log, while earlier DTR labels stay as saved. Apply backend `scripts/2026-11-06-dtr-shift-date-range-notifications.sql` after the initial shift migration and before deploying this frontend. No new environment variables or packages are required.
+
+The student dashboard's compact maroon **DTR Today** card shows remaining required hours and credited hours, plus the current shift controls. An applicable employer schedule displays its expected clock-in/out times and any effective date range; without one, the card shows the current clock times and status. The company address is clamped to three lines on phones. Recent Time Records keeps Late, Undertime and Overtime in a separate **Timing** column immediately before **Status**; Status shows the attendance state. The dashboard skeleton uses the same maroon card treatment.
 

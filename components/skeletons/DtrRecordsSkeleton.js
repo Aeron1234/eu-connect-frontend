@@ -20,6 +20,9 @@ function DtrRecordsSkeleton({ rows = 5, pagination = true, embedded = false, all
             <th className="text-left py-2">
               <Skeleton className="h-2.5 w-16" />
             </th>
+            <th className="text-left py-2">
+              <Skeleton className="h-2.5 w-14" />
+            </th>
             <th className="text-right py-2">
               <Skeleton className="h-2.5 w-10 ml-auto" />
             </th>
@@ -40,6 +43,9 @@ function DtrRecordsSkeleton({ rows = 5, pagination = true, embedded = false, all
               </td>
               <td className="py-3">
                 <Skeleton className="h-5 w-20 rounded-md" />
+              </td>
+              <td className="py-3">
+                <Skeleton className="h-5 w-16 rounded-md" />
               </td>
               <td className="py-3 text-right">
                 <Skeleton className="h-3.5 w-8 ml-auto" />
