@@ -5,7 +5,7 @@ import EvaluationEmptyState from "./EvaluationEmptyState";
 import useEvaluationItems from "./useEvaluationItems";
 import { useUser } from "@/contexts/UserContext";
 
-function EvaluationCard({ evaluations = [], type = "default", onChanged }) {
+function EvaluationCard({ evaluations = [], type = "default", onChanged, focusId = null }) {
   const { items, removeItem, restoreItem } = useEvaluationItems(evaluations);
   const { user } = useUser();
   // Filter confidential/deleted entries defensively in the UI as well as on the API.
@@ -21,7 +21,7 @@ function EvaluationCard({ evaluations = [], type = "default", onChanged }) {
           <PostedEvaluationItem
             key={ev.id}
             ev={ev}
-            defaultOpen={i === 0}
+            defaultOpen={focusId ? String(ev.id) === String(focusId) : i === 0}
             type={type}
             onOptimisticRemove={() => removeItem(ev.id)}
             onOptimisticRestore={() => restoreItem(ev)}

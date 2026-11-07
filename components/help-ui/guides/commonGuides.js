@@ -37,18 +37,17 @@ export const mapGuide = {
 export const recordsGuide = {
   "id": "records",
   "title": "Review internship records",
-  "summary": "Approve placements and inspect attendance, reports, and confidential evaluations.",
+  "summary": "Approve, reject, restore, and inspect internship placements.",
   "steps": [
     "Search by student, company, or course and select a status tab. Use See more to load additional records.",
     "Review Pending Approval records before approving or rejecting them. Reject opens a confirmation with a required reason of up to 1,000 characters. The student sees this exact note in their notification and rejected record card. If saving fails, the dialog stays open with the entered reason. Approval makes a record ongoing; Restore returns a rejected record to pending and clears its saved rejection reason, while earlier notifications remain as history, and Mark Finished completes an ongoing record.",
-    "Select a student's name or View Record to open the overview, DTR, narratives, summary report, evaluations, and documents available to you.",
+    "Select a student's name or View Record to open the placement overview. Use the Attendance, Student Submissions, and Evaluations links when you need to review that student's work; those tools also have department-wide lists in the sidebar.",
     "In Overview, open Company website to review the company's official website or social media page in a new tab alongside the placement details. Older records without a website display a dash (-).",
     "Overview uses a building icon; Rotations uses repeat arrows. For records with tracking enabled or saved rotation history, open Rotations for the dated timeline. The Company rotations panel in Overview shows the current assignment and View rotations. Staff can read assignments but only the owning student manages them; company units do not change the academic department, accepted supervisor, or duty hours.",
-    "Rotations may continue past the estimated internship end date while the record is ongoing. In Narratives, selected company rotations appear with the saved coverage dates and in the printed journal, including work beyond that estimate. These are saved labels, so later timeline changes do not rewrite old narrative assignments. Finished records keep their timeline and journals available for review.",
+    "Rotations may continue past the estimated internship end date while the record is ongoing. Finished records keep their timeline available for review. Student Submissions shows narratives and their saved rotation labels, including in printed journals.",
     "In Overview, click the company pin and choose See on Google Maps to open campus-to-company directions in a new tab.",
-    "In DTR, authorized staff can set the attendance pin and radius for an ongoing record. Ask the student to share their dashboard location if you need help placing the pin. Review saved shifts, break time, credited hours and the Pictures buttons for clock-in/out evidence before making completion decisions. Older and automatically closed entries may have no photo.",
-    "Employer performance evaluations are confidential to the employer and authorized staff. Evaluation notifications open the related internship record. Use the available PDF control to preview, print, or download.",
-    "Employers may post multiple performance evaluations per ongoing internship, and students may post multiple supervisor evaluations for theirs. Deleting one evaluation leaves the others intact. Deleted evaluations remain visible to authorized staff with a Deleted label; staff can permanently delete these copies only after author deletion.",
+    "Attendance shows saved shifts, break time, credited hours, and clock-in/out photos. DTR Restrictions manages location pins and radii. Review these before marking an internship finished.",
+    "Evaluations lists confidential employer performance evaluations and student evaluations of supervisors. A notification or list entry opens the focused evaluation. Authorized staff can preview, print, download, and permanently delete an author-deleted copy there.",
     "Mark Finished is a staff completion decision and does not require credited hours to meet the required total. Check the student's record first. The student's Finish Internship Record control requires the hours target and no open shift. Completion preserves history; it does not delete attendance, narratives or rotations."
   ],
   "href": "/department_head/internship-records",
@@ -184,12 +183,12 @@ export const dtrLocationGuide = {
   "title": "Set a student's DTR location",
   "summary": "Place the attendance pin and choose its permitted radius.",
   "steps": [
-    "Open an ongoing internship's DTR tab and select Set DTR Location. Employers use the profile of an intern whose supervision request they accepted. Admins, non-Registrar department heads and employers can also use DTR Restrictions in the sidebar to select one or many authorized ongoing interns at once; see the separate individual/bulk assignment guide.",
+    "Open DTR Restrictions in the sidebar to select one or many authorized ongoing interns and set an attendance location. Department heads can also open a student's Attendance detail; employers use the profile of an intern whose supervision request they accepted.",
     "Search for the workplace or place the map pin manually. A short delay prevents repeated location searches; wait for the loading indicator and suggestions. Choose an allowed radius from 20 to 2,000 metres and optionally add a location label.",
     "Ask the student to Share location from their dashboard when needed. Check the temporary position and accuracy circle before choosing the workplace pin and attendance radius.",
     "Save the location and ask the student to stop sharing after setup. Map position sharing does not replace the separate location checks when clocking in or out.",
     "Remove a saved custom DTR location only after reviewing the confirmation: attendance returns to the saved company location and default radius. Removing an unsaved pin only clears that form selection."
   ],
-  "href": "/department_head/internship-records",
-  "linkText": "Open Records"
+  "href": "/dtr-restrictions",
+  "linkText": "Open DTR Restrictions"
 };

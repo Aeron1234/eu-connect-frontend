@@ -1,5 +1,17 @@
 # Frontend agent guide
 
+## Department-head review navigation (November 7, 2026)
+
+`/department_head/internship-records/[internshipId]` is for approval, rejection, restoration, completion and placement overview, including company website, map, hours and rotations. Attendance, Student Submissions and Evaluations have department-wide lists and focused `/[internshipId]` details under their own routes. Keep the review actions in Records only. Their focused pages reuse the existing per-record readers and backend authorization. Legacy Records `?tab=dtr|narratives|summary-report|documents|evaluations` links redirect to the corresponding task detail; request and finished notifications still open Records overview, while evaluation notifications open focused Evaluations when both IDs exist. The Registrar and all other roles remain excluded from these department-head pages. No new API, SQL, environment variable or package is required for this navigation change.
+
+## Department Evaluations (November 7, 2026)
+
+`/department_head/evaluations` is a metadata-only department-wide review list for non-Registrar heads. It distinguishes confidential supervisor-to-student performance evaluations from student-to-supervisor evaluations, and includes soft-deleted history with a visible label. Filter by student/company/type/status/course/date, then Review opens the focused evaluation in `/department_head/evaluations/[internshipId]?evaluationId=...`. Notifications open that detail when both IDs are available, otherwise the filtered evaluation list. The backend resolves current head/student department membership and independently authorizes full detail and permanent deletion. Do not expose performance scores to students. The shared Help guide and page manual describe these rules. No frontend package or environment change is needed.
+
+## Department Student Submissions (November 7, 2026)
+
+`/department_head/submissions` is a department-wide read for non-Registrar heads. It combines student-authored weekly narratives, summary reports, and student-uploaded internship documents, with student/type/course/date filters and server pagination. The backend derives the head's current department and each student's latest academic membership. Review links open `narratives`, `summary-report`, or `documents` under `/department_head/submissions/[internshipId]?tab=...`. Old Records tab links redirect to these canonical task routes. Keep the Registrar exclusion in layout, navigation, guide and API. The list does not broaden access to file contents; existing detail/download endpoints authorize those separately. No schema, package or environment change is required.
+
 ## Department-head internship record review (November 6, 2026)
 
 The staff Records list and detail live under `/department_head/internship-records`; the old paths redirect only for authenticated heads. Admins have no Records sidebar/help entry and cannot open either path. Keep student My Records at `/student/internship-record`, and keep backend `/internship-records/...` API paths unchanged; their staff list/detail/lifecycle authorization is department-head only. Update notification links and revalidation paths when changing this route. Registrar remains excluded from staff Records.
@@ -226,7 +238,7 @@ Primary directory: `components/evaluations-ui/`; actions: `lib/server-actions/ev
 - Author deletion is a soft delete using deleted_at. Hide only that evaluation from its author; other reviews remain available. Both directions can post again without deleting an earlier review.
 - Authorized staff retain deleted history with a Deleted label.
 - Staff permanent deletion is available only for evaluations already soft-deleted, within the existing access rules.
-- Employer evaluation notifications target `/department_head/internship-records/[internshipId]`, not a student profile ID. Refresh the relevant evaluation data on notification actions.
+- Employer evaluation notifications target `/department_head/evaluations`, filtered by evaluation ID when available. Review opens `/department_head/evaluations/[internshipId]?evaluationId=...`; refresh the relevant evaluation data on notification actions.
 - Database lifecycle/uniqueness migrations belong to the backend. Apply `scripts/2026-10-29-multiple-performance-evaluations.sql` if needed, then `scripts/2026-11-04-multiple-supervisor-evaluations.sql` to drop the two single-active indexes. Do not replay the older consolidation migration afterward or reintroduce status requirements.
 
 ## Weekly narrative coverage dates
@@ -456,3 +468,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+## Department Attendance (November 7, 2026)
+
+`/department_head/attendance` is the department-wide DTR review page for ordinary heads only. Registrar is excluded by sidebar, route layout, help guide and backend endpoint. The server action reads `/dtr/department-attendance` with page, student-name, course, internship and clock-in date filters; the API resolves the head's department from current database membership and uses each student's latest academic record. Reuse `DtrTable` with `showStudent` so timestamped photo previews retain the existing signed-URL authorization. Student links open `/department_head/attendance/[internshipId]`. DTR Restrictions remains the place for location assignments. Do not fetch each internship's DTR endpoint to assemble the department list.
+# DTR overtime and auto-close review
+
+The DTR credit cap (`MAX_SHIFT_HOURS`, currently 10) is separate from the backend 16-wall-hour safety close. Student overtime requests are written to the open `daily_time_records` row and are decided by its assigned employer; they never waive the manual photo/geofence clock-out. The hourly job sends a one-time 12-hour reminder; Today also warns while open. A new auto-closed row has no clock-out photo, zero credited hours, `proposed_hours`, and a review state. The student must submit an explanation before another clock-in, including when the shift belongs to an earlier internship; the backend searches all pending explanations, not just the latest shift. Only the current assigned employer or the student's non-Registrar department head may confirm or reduce hours, after the explanation. Keep `DtrTable` review controls, `DtrTodayCard` prompt/warning, notification routes, help guides, and cache invalidation aligned with the backend migration. Historical `legacy_credited` rows retain their hours and accept an optional student note from Recent Time Records without changing credit or entering the new review flow.

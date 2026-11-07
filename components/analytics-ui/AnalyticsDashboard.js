@@ -10,7 +10,7 @@ import { useUser } from '@/contexts/UserContext';
 import { getAnalytics } from '@/lib/server-actions/analytics-actions';
 import { analyticsCsv } from '@/lib/analytics-export.mjs';
 import { Button } from '@/components/ui/button';
-import DropdownFilter from '@/components/ui/DropdownFilter';
+import FilterSelectField from '@/components/ui/FilterSelectField';
 import PageTitle from '@/components/ui/PageTitle';
 import HelpManual from '@/components/help-ui/HelpManual';
 import DashboardStats from '@/components/dashboard-ui/DashboardStats';
@@ -20,7 +20,7 @@ import AnalyticsCharts from './AnalyticsCharts';
 
 const panel='min-w-0 space-y-3 rounded-xl border border-border bg-card p-4 sm:p-5';
 const control='h-10 w-full min-w-0 rounded-md border border-input bg-card px-3 text-xs';
-function Select({label,value,onChange,rows}){return <DropdownFilter aria-label={label} placeholder={label} value={value||''} onValueChange={onChange} className={control} options={[{value:'',label},...rows]}/>;}
+function AnalyticsSelect({label,allLabel,value,onChange,rows}){return <FilterSelectField label={label} value={value||''} onValueChange={onChange} className={control} options={[{value:'',label:allLabel},...rows]}/>;}
 function CompanyTable({rows}){return <table className="w-full min-w-[1120px] whitespace-nowrap text-left text-xs"><thead><tr>{['Rank','Company','Distinct students','Ongoing','Finished','Share','Courses','Departments'].map(label=><th key={label} className="border-b border-border p-3">{label}</th>)}</tr></thead><tbody>{rows.map(row=><tr key={row.key} className="border-b border-border"><td className="p-3">{row.rank||'—'}</td><td className="p-3 font-medium whitespace-nowrap">{row.company}</td><td className="p-3">{row.students}</td><td className="p-3">{row.ongoing}</td><td className="p-3">{row.finished}</td><td className="p-3">{(row.share||0).toFixed(1)}%</td><td className="p-3 whitespace-nowrap">{row.courses.join(', ')||'—'}</td><td className="p-3">{row.departments.join(', ')||'—'}</td></tr>)}</tbody></table>;}
 const options=(rows,label)=>rows.map(row=>({value:String(row.id),label:row[label]||row.course_name||row.name}));
 export default function AnalyticsDashboard({mode='companies'}){
@@ -54,10 +54,10 @@ function Insights({user,mode}){
   return <div className="min-w-0 space-y-5 p-4 sm:p-6 lg:p-8">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><PageTitle Icon={registrar?FileText:Building2} title={title} description={registrar?'Your authorized SIPP reporting overview.':'Confirmed placements, counted once per student and company.'} titleAction={<HelpManual guideId={registrar?'registrar-dashboard':'company-analytics'}/>}/><Button variant="outline" className="self-start" onClick={()=>query.refetch()} disabled={query.isFetching}><RefreshCw className="size-4"/>Refresh</Button></div>
     <form className={panel} onSubmit={event=>{event.preventDefault();setApplied({...draft});setPage(1);}}><div className={`grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 ${!registrar&&user.role==='admin'?'xl:grid-cols-4':'xl:grid-cols-3'}`}>
-      {!registrar&&user.role==='admin'&&<Select label="Departments" value={draft.departmentId} onChange={value=>set('departmentId',value)} rows={options(data.options.departments,'code')}/>}
-      {!registrar&&<Select label="Courses" value={draft.courseId} onChange={value=>set('courseId',value)} rows={options(data.options.courses.filter(row=>!draft.departmentId||String(row.department_id)===String(draft.departmentId)),'short_name')}/>}
-      <Select label={registrar?'Current academic year':'All academic years'} value={draft.academicYear} onChange={value=>set('academicYear',value)} rows={data.options.academicYears.map(year=>({value:year,label:year}))}/>
-      {!registrar&&<Select label="All terms" value={draft.term} onChange={value=>set('term',value)} rows={[{value:'1st',label:'First semester'},{value:'2nd',label:'Second semester'},{value:'summer',label:'Summer'}]}/>}
+      {!registrar&&user.role==='admin'&&<AnalyticsSelect label="Department" allLabel="Departments" value={draft.departmentId} onChange={value=>set('departmentId',value)} rows={options(data.options.departments,'code')}/>}
+      {!registrar&&<AnalyticsSelect label="Course" allLabel="Courses" value={draft.courseId} onChange={value=>set('courseId',value)} rows={options(data.options.courses.filter(row=>!draft.departmentId||String(row.department_id)===String(draft.departmentId)),'short_name')}/>}
+      <AnalyticsSelect label="Academic year" allLabel={registrar?'Current academic year':'All academic years'} value={draft.academicYear} onChange={value=>set('academicYear',value)} rows={data.options.academicYears.map(year=>({value:year,label:year}))}/>
+      {!registrar&&<AnalyticsSelect label="Term" allLabel="All terms" value={draft.term} onChange={value=>set('term',value)} rows={[{value:'1st',label:'First semester'},{value:'2nd',label:'Second semester'},{value:'summer',label:'Summer'}]}/>}
     </div>{!registrar&&<div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2"><label className="min-w-0 text-xs">Internship starts from<input type="date" value={draft.from||''} onChange={event=>set('from',event.target.value)} className={control}/></label><label className="min-w-0 text-xs">Internship starts through<input type="date" min={draft.from||undefined} value={draft.to||''} onChange={event=>set('to',event.target.value)} className={control}/></label></div>}<div className="flex flex-wrap gap-2"><Button type="submit" disabled={query.isFetching}>Apply filters</Button><Button type="button" variant="outline" onClick={()=>{setDraft({});setApplied({});setPage(1);}}>Reset</Button></div></form>
     <p className="break-words text-xs text-muted-foreground">Displayed period: {period}{!registrar&&` · ${departmentLabel} · ${courseLabel}`} · Snapshot {snapshot}</p>
     {query.isError&&<ErrorUI compact error={query.error} reset={()=>query.refetch()}/>}

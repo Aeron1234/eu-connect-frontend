@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { departmentRecordDestination } from "@/lib/department-record-navigation";
 
-export default async function LegacyRecordDetail({ params }) {
+export default async function LegacyRecordDetail({ params, searchParams }) {
   const { internshipId } = await params;
-  redirect(`/department_head/internship-records/${encodeURIComponent(internshipId)}`);
+  redirect(departmentRecordDestination(internshipId, await searchParams));
 }

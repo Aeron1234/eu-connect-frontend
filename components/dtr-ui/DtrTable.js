@@ -5,6 +5,8 @@ import { LogIn, LogOut, Trash2 } from "lucide-react";
 import DtrDeleteForm from "./DtrDeleteForm";
 import Modal from "../ui/Modal";
 import DtrPhotoButton from "./DtrPhotoButton";
+import Link from "next/link";
+import DtrReviewDetails from "./DtrReviewDetails";
 
 const statusStyles = {
   present: "text-emerald-700 bg-emerald-50",
@@ -19,29 +21,35 @@ function displayDate(value, pattern) {
   return Number.isNaN(date.getTime()) ? "—" : format(date, pattern);
 }
 
-function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
+function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = false }) {
   return (
     <div className="w-full min-w-0 overflow-x-auto">
-      <table className="w-full min-w-[790px] text-sm">
+      <table className={`w-full ${showStudent ? "min-w-[1600px]" : "min-w-[1380px]"} text-sm`}>
         <thead>
           <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
-            <th className="py-2 text-left font-medium">Date</th>
-            <th className="py-2 text-left font-medium">Clock In</th>
-            <th className="py-2 text-left font-medium">Clock Out</th>
-            <th className="py-2 text-left font-medium">Pictures</th>
-            <th className="py-2 text-right font-medium">Hours</th>
-            <th className="py-2 text-right font-medium">Timing</th>
-            <th className="py-2 text-right font-medium">Status</th>
-            {allowDelete && <th className="w-10 py-2"><span className="sr-only">Actions</span></th>}
+            {showStudent && <th className="min-w-56 px-3 py-2 text-left font-medium">Student / internship</th>}
+            <th className="min-w-32 px-3 py-2 text-left font-medium">Date</th>
+            <th className="min-w-32 px-3 py-2 text-left font-medium">Clock In</th>
+            <th className="min-w-40 px-3 py-2 text-left font-medium">Clock Out</th>
+            <th className="min-w-72 px-3 py-2 text-left font-medium">Pictures</th>
+            <th className="min-w-20 px-3 py-2 text-left font-medium">Hours</th>
+            <th className="min-w-32 px-3 py-2 text-left font-medium">Timing</th>
+            <th className="min-w-36 px-3 py-2 text-left font-medium">Status</th>
+            <th className="min-w-64 px-3 py-2 text-left font-medium">Review</th>
+            {allowDelete && <th className="w-12 px-3 py-2 text-left"><span className="sr-only">Actions</span></th>}
           </tr>
         </thead>
         <tbody>
           {dtrs.map((dtr) => (
             <tr key={dtr.id} className="border-b border-border last:border-b-0">
-              <td className="py-3 text-foreground">
+              {showStudent && <td className="px-3 py-3 text-left">
+                <Link href={`/department_head/attendance/${encodeURIComponent(dtr.internship_id)}`} className="font-medium text-primary-emphasis hover:underline">{dtr.student_name || "Student"}</Link>
+                <div className="max-w-56 truncate text-xs text-muted-foreground" title={dtr.company_name}>{dtr.company_name || "—"}</div>
+              </td>}
+              <td className="whitespace-nowrap px-3 py-3 text-left text-foreground">
                 {displayDate(dtr.created_at, "MMM d, yyyy")}
               </td>
-              <td className="py-3">
+              <td className="whitespace-nowrap px-3 py-3 text-left">
                 {dtr.clock_in && dtr.clock_in !== "—" ? (
                   <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                     <LogIn className="size-3" />
@@ -49,42 +57,51 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
                   </span>
                 ) : <span className="text-foreground-soft">—</span>}
               </td>
-              <td className="py-3">
-                {dtr.clock_out ? (
+              <td className="whitespace-nowrap px-3 py-3 text-left">
+                {dtr.auto_closed ? (
+                  <span className="inline-flex flex-col text-xs text-amber-800">
+                    <span className="font-medium">System closed</span>
+                    <span>{displayDate(dtr.auto_closed_at || dtr.clock_out, "MMM d, h:mm a")}</span>
+                  </span>
+                ) : dtr.clock_out ? (
                   <span className="inline-flex items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-primary-emphasis">
                     <LogOut className="size-3" />
                     {displayDate(dtr.clock_out, "h:mm a")}
                   </span>
                 ) : <span className="text-foreground-soft">—</span>}
               </td>
-              <td className="py-3">
+              <td className="px-3 py-3 text-left">
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
-                  {dtr.clock_in_photo_path && <DtrPhotoButton dtrId={dtr.id} kind="in" />}
-                  {dtr.clock_out_photo_path && <DtrPhotoButton dtrId={dtr.id} kind="out" />}
-                  {!dtr.clock_in_photo_path && !dtr.clock_out_photo_path && <span className="text-foreground-soft">—</span>}
+                  {Boolean(dtr.clock_in_photo_path) && <DtrPhotoButton dtrId={dtr.id} kind="in" />}
+                  {Boolean(dtr.clock_out_photo_path) && !dtr.auto_closed && <DtrPhotoButton dtrId={dtr.id} kind="out" />}
+                  {Boolean(dtr.auto_closed) && <span className="text-xs text-amber-800 dark:text-amber-300">No clock-out photo</span>}
+                  {!dtr.clock_in_photo_path && !dtr.clock_out_photo_path && !dtr.auto_closed && <span className="text-foreground-soft">—</span>}
                 </div>
               </td>
-              <td className="py-3 text-right font-medium text-foreground">
+              <td className="whitespace-nowrap px-3 py-3 text-left font-medium text-foreground">
                 {dtr.total_hours == null ? "-" : Number(dtr.total_hours).toFixed(1)}
               </td>
-              <td className="py-3 text-right">
-                <div className="flex items-center justify-end gap-1 whitespace-nowrap text-xs">
+              <td className="px-3 py-3 text-left">
+                <div className="flex items-center justify-start gap-1 whitespace-nowrap text-xs">
                   {Boolean(dtr.is_late) && <span className="rounded-md bg-amber-100 px-2 py-0.5 font-medium text-amber-900">Late</span>}
                   {Boolean(dtr.is_undertime) && <span className="rounded-md bg-rose-100 px-2 py-0.5 font-medium text-rose-900">Undertime</span>}
                   {Boolean(dtr.is_overtime) && <span className="rounded-md bg-sky-100 px-2 py-0.5 font-medium text-sky-900">Overtime</span>}
                   {!dtr.is_late && !dtr.is_undertime && !dtr.is_overtime && <span className="text-foreground-soft">—</span>}
                 </div>
               </td>
-              <td className="py-3 text-right">
-                <div className="flex items-center justify-end whitespace-nowrap text-xs">
-                  <span className={`inline-block rounded-md px-2 py-0.5 font-medium ${statusStyles[dtr.status] || "bg-muted text-foreground-soft"}`}>
-                    {dtr.status === "on-break" ? "On break" : dtr.status}
+              <td className="px-3 py-3 text-left">
+                <div className="flex items-center justify-start whitespace-nowrap text-xs">
+                  <span className={`inline-block rounded-md px-2 py-0.5 font-medium ${dtr.auto_closed ? "bg-amber-100 text-amber-900" : statusStyles[dtr.status] || "bg-muted text-foreground-soft"}`}>
+                    {dtr.auto_closed ? "Auto-closed" : dtr.status === "on-break" ? "On break" : dtr.status}
                   </span>
                 </div>
               </td>
+              <td className="whitespace-nowrap px-3 py-3 text-left">
+                {dtr.auto_closed || dtr.overtime_status ? <DtrReviewDetails dtr={dtr} /> : <span className="text-foreground-soft">—</span>}
+              </td>
               {allowDelete && (
-                <td className="py-3 pl-2 text-right">
-                  <Modal variant="confirmation"
+                <td className="px-3 py-3 text-left">
+                  {!dtr.auto_closed && <Modal variant="confirmation"
                     trigger={
                       <div className="flex items-center justify-center">
                         <Trash2 className="size-4" />
@@ -95,14 +112,14 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted }) {
                     title={<span className="text-primary-emphasis">Delete Daily Time Record</span>}
                   >
                     <DtrDeleteForm dtrId={dtr.id} onDeleted={onDeleted} />
-                  </Modal>
+                  </Modal>}
                 </td>
               )}
             </tr>
           ))}
           {dtrs.length === 0 && (
             <tr>
-              <td colSpan={allowDelete ? 8 : 7} className="py-6 text-center text-sm text-foreground-soft">
+              <td colSpan={(allowDelete ? 9 : 8) + Number(showStudent)} className="py-6 text-center text-sm text-foreground-soft">
                 No time records.
               </td>
             </tr>

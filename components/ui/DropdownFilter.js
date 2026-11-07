@@ -36,6 +36,7 @@ const ALL_VALUE = "__all__";
  *   />
  */
 function DropdownFilter({
+  id,
   value,
   onValueChange,
   options,
@@ -58,7 +59,7 @@ function DropdownFilter({
       onValueChange={handleValueChange}
       disabled={disabled}
     >
-      <SelectTrigger className={className} aria-label={ariaLabel}>
+      <SelectTrigger id={id} className={className} aria-label={ariaLabel}>
         <SelectValue placeholder={placeholder}>
           {selected?.label ?? placeholder}
         </SelectValue>

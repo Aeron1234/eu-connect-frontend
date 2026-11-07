@@ -10,7 +10,7 @@ function RecordsPageHeader({ query, setQuery, isPending }) {
           Icon={ClipboardList}
           title={"Internship Records"}
           description={
-            "Review, approve and monitor every internship record in your department."
+            "Approve, reject, restore, and review internship placements in your department."
           }
           titleAction={
             <HelpManual guideId="records" title="How to manage internship records" />

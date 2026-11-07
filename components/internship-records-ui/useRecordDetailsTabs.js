@@ -8,11 +8,11 @@ import { internshipRecordDetailsKeys, internshipRecordDetailsTabOptions } from "
 
 // Load record-detail sections on demand while Overview uses its existing record prop.
 // Expose tab/loading state, DTR paging and targeted cache updates after child mutations.
-export default function useRecordDetailsTabs(record, internshipId) {
+export default function useRecordDetailsTabs(record, internshipId, initialTab = "overview") {
   const { user } = useUser();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState("overview");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedTab, setSelectedTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [dtrPage, setDtrPage] = useState(1);
   const tabQuery = useQuery({
     ...internshipRecordDetailsTabOptions(

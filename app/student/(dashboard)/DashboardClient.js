@@ -8,6 +8,7 @@ import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewS
 import DashboardStatsSection from "@/components/dashboard-ui/StudentDashboardStats";
 import MapSmallContainer from "@/components/map-ui/MapSmallContainer";
 import DtrTodayCard from "@/components/dtr-ui/DtrTodayCard";
+import DtrReviewDetails from "@/components/dtr-ui/DtrReviewDetails";
 import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatDistanceToNow } from "date-fns";
@@ -65,6 +66,7 @@ function StudentDashboardPage() {
   const dtrToday = dashboardRes?.dtrToday || {};
   const dtrStatus = dashboardRes?.dtrStatus?.status;
   const dtrRecord = dashboardRes?.dtrStatus?.record;
+  const pendingAutoCloseRecord = dashboardRes?.pendingAutoCloseRecord;
   const locationData = dashboardRes?.location || {};
 
   const activities = (activityLogs?.data || []).slice(0, 5).map((log) => {
@@ -97,6 +99,11 @@ function StudentDashboardPage() {
         dtrRecord={dtrRecord}
         dtrToday={dtrToday}
       />
+      {pendingAutoCloseRecord && pendingAutoCloseRecord.id !== dtrRecord?.id &&
+        <div className="rounded-xl border border-amber-500/40 bg-card px-4 py-3 text-sm">
+          <p className="mb-1 font-medium">An earlier shift was closed by the system. Add your explanation before your next clock-in.</p>
+          <DtrReviewDetails dtr={pendingAutoCloseRecord} prompt />
+        </div>}
 
       {/* Recent Time Records */}
 

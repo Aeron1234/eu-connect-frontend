@@ -14,6 +14,11 @@ export function invalidateNotificationTarget(queryClient, userId, notification) 
   if (notification?.type === "dtr_shift_schedule") {
     void queryClient.invalidateQueries({ queryKey: ["dashboard-overview", String(userId), "student"] });
   }
+  if (["dtr_overtime_request", "dtr_overtime_decision", "dtr_wall_warning", "dtr_auto_close"].includes(notification?.type)) {
+    void queryClient.invalidateQueries({ queryKey: ["dashboard-overview", String(userId)] });
+    void queryClient.invalidateQueries({ queryKey: ["dtr", "student", String(userId)] });
+    void queryClient.invalidateQueries({ queryKey: ["user-profile", String(userId)] });
+  }
   if (notification?.type === "internship_record_approved") {
     // The student may still have a freshly cached pending record when the
     // approval arrives. Invalidate only this viewer's My Records before opening.

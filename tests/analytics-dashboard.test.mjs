@@ -19,7 +19,7 @@ function render(mode,data,error){
     'next/link':{__esModule:true,default:props=>React.createElement('a',props)},
     '@/lib/server-actions/analytics-actions':{},'@/lib/analytics-export.mjs':{analyticsCsv},
     '@/components/ui/button':{Button:({children,...props})=>React.createElement('button',Object.fromEntries(Object.entries(props).filter(([key])=>!['variant','size'].includes(key))),children)},
-    '@/components/ui/DropdownFilter':{__esModule:true,default:Empty},
+    '@/components/ui/FilterSelectField':{__esModule:true,default:Empty},
     '@/components/ui/PageTitle':{__esModule:true,default:({title})=>React.createElement('h1',null,title)},
     '@/components/help-ui/HelpManual':{__esModule:true,default:Empty},
     '@/components/dashboard-ui/DashboardStats':{__esModule:true,default:Stats},

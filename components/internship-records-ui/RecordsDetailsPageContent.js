@@ -13,27 +13,26 @@ import RecordDtrTab from "./RecordDtrTab";
 import RecordNarrativesTab from "./RecordNarrativesTab";
 import useRecordDetailsTabs from "./useRecordDetailsTabs";
 
-const tabs = [
-  { value: "overview", text: "Overview" },
-  { value: "dtr", text: "DTR" },
+const submissionTabs = [
   { value: "narratives", text: "Narratives" },
   { value: "summary-report", text: "Summary Report" },
-  { value: "evaluations", text: "Evaluations" },
   { value: "documents", text: "Documents" },
 ];
 
-function RecordsDetailsPageContent({ record, internshipId }) {
+function RecordsDetailsPageContent({ record, internshipId, initialTab = "overview", initialEvaluationId = null, mode = "records" }) {
   const {
     selectedTab, activeTab, dtrPage, setDtrPage, tabQuery,
     data, isPending, loadError, handleTabClick,
     handleDtrLocationSaved, refreshEvaluations,
-  } = useRecordDetailsTabs(record, internshipId);
+  } = useRecordDetailsTabs(record, internshipId, initialTab);
 
-  const rotations = useInternshipRotations(internshipId);
-  const visibleTabs = rotations.data?.enabled || rotations.data?.rotations?.length ? [...tabs, { value: "rotations", text: "Rotations" }] : tabs;
+  const rotations = useInternshipRotations(internshipId, mode === "records");
+  const visibleTabs = mode === "records"
+    ? [{ value: "overview", text: "Overview" }, ...(rotations.data?.enabled || rotations.data?.rotations?.length ? [{ value: "rotations", text: "Rotations" }] : [])]
+    : mode === "submissions" ? submissionTabs : [];
   return (
     <>
-      <TabBar tabs={visibleTabs} selectedTab={selectedTab} onSelect={handleTabClick} />
+      {visibleTabs.length > 0 && <TabBar tabs={visibleTabs} selectedTab={selectedTab} onSelect={handleTabClick} />}
 
       {!isPending && tabQuery.isError && tabQuery.data && (
         <ErrorUI error={tabQuery.error} reset={() => void tabQuery.refetch()} compact logError={false} />
@@ -68,6 +67,7 @@ function RecordsDetailsPageContent({ record, internshipId }) {
           {activeTab === "evaluations" && (
             <EvaluationCard
               evaluations={data?.evaluations || []}
+              focusId={initialEvaluationId}
               onChanged={refreshEvaluations}
             />
           )}

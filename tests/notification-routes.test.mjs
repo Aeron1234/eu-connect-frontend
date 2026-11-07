@@ -12,12 +12,18 @@ test("DTR shift schedule notifications open the student's dashboard", () => {
   assert.equal(getNotificationTargetPath({ type: "dtr_shift_schedule", link: "/student" }), "/student");
 });
 
-test("department-head evaluation notifications navigate to the internship record instead of the evaluation UUID", () => {
+test("department-head evaluation notifications open the filtered evaluation list", () => {
   for (const is_read of [true, false]) {
-    assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "internship-uuid", link_uuid: "evaluation-uuid", is_read }), "/department_head/internship-records/internship-uuid");
+    assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "internship-uuid", link_uuid: "evaluation-uuid", is_read }), "/department_head/evaluations/internship-uuid?evaluationId=evaluation-uuid");
   }
-  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link_uuid: "evaluation-uuid" }), null);
-  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "record/unsafe?" }), "/department_head/internship-records/record%2Funsafe%3F");
+  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link_uuid: "evaluation-uuid" }), "/department_head/evaluations?evaluationId=evaluation-uuid");
+  assert.equal(getNotificationTargetPath({ type: "evaluation_submitted", link: "record/unsafe?" }), "/department_head/evaluations?internshipId=record%2Funsafe%3F");
+});
+
+test("record requests open placement overview from saved and live notifications", () => {
+  for (const notification of [{ link_uuid: "record-id" }, { link: "record-id" }]) {
+    assert.equal(getNotificationTargetPath({ type: "internship_record_request", ...notification }), "/department_head/internship-records/record-id");
+  }
 });
 
 test("finished internship notifications open their record for both unread and read items", () => {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Modal from "../ui/Modal";
 import HelpManual from "@/components/help-ui/HelpManual";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
+import DtrOvertimeControls from "./DtrOvertimeControls";
 
 function manilaDay(value) {
   const date = new Date(value);
@@ -73,6 +74,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
   // credited accumulated hours reach the required total.
   const canFinish =
     status !== "CLOCKED_IN" && status !== "ON_BREAK" &&
+    !["pending_explanation", "pending_review"].includes(dtrRecord?.auto_close_review_status) &&
     internshipData?.accumulated_hours >= internshipData?.total_hours;
 
   const today = formatDtrDate(new Date());
@@ -132,13 +134,17 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock Out</p>
-                  <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-lg">{formatDtrTime(dtrToday?.clock_out)}</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-lg">{dtrToday?.auto_closed ? "System closed" : formatDtrTime(dtrToday?.clock_out)}</p>
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wide text-primary-200">Status</p>
                   <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[11px] font-medium">
                     {dtrToday?.clock_out
-                      ? "Clocked out"
+                      ? dtrToday?.auto_closed
+                        ? dtrToday.auto_close_review_status === "pending_explanation" ? "Needs explanation"
+                          : dtrToday.auto_close_review_status === "pending_review" ? "Needs review"
+                            : "System closed"
+                        : "Clocked out"
                       : dtrToday?.status === "on-break" || status === "ON_BREAK"
                       ? "On break"
                       : dtrToday?.status || "No shift"}
@@ -198,6 +204,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
           </Link>
         )}
         </div>
+          {hasOngoingInternship && <DtrOvertimeControls record={dtrRecord} internshipId={internshipData?.id} status={status} />}
           <p className="flex min-w-0 items-start gap-1.5 pt-3 text-xs text-white/75">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{" "}
             <span

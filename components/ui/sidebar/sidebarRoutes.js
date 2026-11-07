@@ -6,6 +6,7 @@ import {
   BriefcaseBusiness,
   Building2,
   ClipboardCheck,
+  ClipboardClock,
   FileText,
   FolderOpen,
   Gauge,
@@ -21,14 +22,19 @@ import {
   Users,
 } from "lucide-react";
 
-// Registrar heads receive SIPP Reports in place of the Records link. These route
-// choices organize navigation; pages and APIs still enforce their own access.
+// Order each role's tools by its common workflow. These links organize navigation;
+// pages and APIs still enforce their own access.
 function roleRouteGroups(userRole, userDepartment) {
   if (userRole === "student") {
     return [
       {
         label: "Student",
         routes: [
+          {
+            name: "My Records",
+            href: "/student/internship-record",
+            icon: <LibraryBig className="h-5 w-5 shrink-0" />,
+          },
           {
             name: "Narratives",
             href: "/student/narratives",
@@ -38,11 +44,6 @@ function roleRouteGroups(userRole, userDepartment) {
             name: "Summary Reports",
             href: "/student/summary-reports",
             icon: <FileText className="h-5 w-5 shrink-0" />,
-          },
-          {
-            name: "My Records",
-            href: "/student/internship-record",
-            icon: <LibraryBig className="h-5 w-5 shrink-0" />,
           },
           {
             name: "Storage",
@@ -65,40 +66,31 @@ function roleRouteGroups(userRole, userDepartment) {
   }
 
   if (userRole === "department_head") {
-    const staffRoutes = [];
     if (userDepartment === "REG") {
-      staffRoutes.push({
-        name: "SIPP Reports",
-        href: "/department_head/sipp-reports",
-        icon: <FileText className="h-5 w-5 shrink-0" />,
-      });
+      return [{
+        label: "Staff tools",
+        routes: [
+          { name: "SIPP Reports", href: "/department_head/sipp-reports", icon: <FileText className="h-5 w-5 shrink-0" /> },
+          { name: "Map", href: "/map", icon: <MapIcon className="h-5 w-5 shrink-0" /> },
+          { name: "Past Internships", href: "/past-internships", icon: <History className="h-5 w-5 shrink-0" /> },
+        ],
+      }];
     }
 
-    staffRoutes.push(
-      {
-        name: "Map",
-        href: "/map",
-        icon: <MapIcon className="h-5 w-5 shrink-0" />,
-      },
-      {
-        name: "Past Internships",
-        href: "/past-internships",
-        icon: <History className="h-5 w-5 shrink-0" />,
-      },
-    );
-
-    if (userDepartment !== "REG") {
-      staffRoutes.push({ name: "Evaluation Criteria", href: "/department_head/evaluation-criteria", icon: <SlidersHorizontal className="h-5 w-5 shrink-0" /> });
-      staffRoutes.push({ name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> });
-      staffRoutes.push({ name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> });
-      staffRoutes.push({
-        name: "Records",
-        href: "/department_head/internship-records",
-        icon: <LibraryBig className="h-5 w-5 shrink-0" />,
-      });
-    }
-
-    return [{ label: "Staff tools", routes: staffRoutes }];
+    return [{
+      label: "Staff tools",
+      routes: [
+        { name: "Internship Records", href: "/department_head/internship-records", icon: <LibraryBig className="h-5 w-5 shrink-0" /> },
+        { name: "Attendance", href: "/department_head/attendance", icon: <ClipboardClock className="h-5 w-5 shrink-0" /> },
+        { name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> },
+        { name: "Student Submissions", href: "/department_head/submissions", icon: <FileText className="h-5 w-5 shrink-0" /> },
+        { name: "Evaluations", href: "/department_head/evaluations", icon: <ClipboardCheck className="h-5 w-5 shrink-0" /> },
+        { name: "Evaluation Criteria", href: "/department_head/evaluation-criteria", icon: <SlidersHorizontal className="h-5 w-5 shrink-0" /> },
+        { name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> },
+        { name: "Map", href: "/map", icon: <MapIcon className="h-5 w-5 shrink-0" /> },
+        { name: "Past Internships", href: "/past-internships", icon: <History className="h-5 w-5 shrink-0" /> },
+      ],
+    }];
   }
 
   if (userRole === "admin") {
@@ -116,27 +108,11 @@ function roleRouteGroups(userRole, userDepartment) {
             href: "/admin/departments-and-courses",
             icon: <Layers className="h-5 w-5 shrink-0" />,
           },
-          {
-            name: "Activity Logs",
-            href: "/admin/activity-logs",
-            icon: <Activity className="h-5 w-5 shrink-0" />,
-          },
-          {
-            name: "Error Tracking",
-            href: "/admin/error-tracking",
-            icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
-          },
-          {
-            name: "Cache Monitoring",
-            href: "/admin/cache-monitoring",
-            icon: <Gauge className="h-5 w-5 shrink-0" />,
-          },
         ],
       },
       {
         label: "Staff tools",
         routes: [
-          { name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> },
           { name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> },
           {
             name: "Map",
@@ -148,6 +124,15 @@ function roleRouteGroups(userRole, userDepartment) {
             href: "/past-internships",
             icon: <History className="h-5 w-5 shrink-0" />,
           },
+          { name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> },
+        ],
+      },
+      {
+        label: "System monitoring",
+        routes: [
+          { name: "Activity Logs", href: "/admin/activity-logs", icon: <Activity className="h-5 w-5 shrink-0" /> },
+          { name: "Error Tracking", href: "/admin/error-tracking", icon: <AlertTriangle className="h-5 w-5 shrink-0" /> },
+          { name: "Cache Monitoring", href: "/admin/cache-monitoring", icon: <Gauge className="h-5 w-5 shrink-0" /> },
         ],
       },
     ];
@@ -159,14 +144,14 @@ function roleRouteGroups(userRole, userDepartment) {
 
 const publicRoutes = [
   {
-    name: "Announcements",
-    href: "/announcements",
-    icon: <Megaphone className="h-5 w-5 shrink-0" />,
-  },
-  {
     name: "Internships",
     href: "/internships",
     icon: <BriefcaseBusiness className="h-5 w-5 shrink-0" />,
+  },
+  {
+    name: "Announcements",
+    href: "/announcements",
+    icon: <Megaphone className="h-5 w-5 shrink-0" />,
   },
   {
     name: "Search Users",
