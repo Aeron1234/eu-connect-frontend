@@ -17,6 +17,7 @@ function DtrForm({ isOut, onSuccess, onSettled }) {
   const [photo, setPhoto] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
   const [cameraError, setCameraError] = useState("");
+  const [cameraFacingMode, setCameraFacingMode] = useState("environment");
   const webcamRef = useRef(null);
 
   const { refreshLocation } = useGetLocation(false);
@@ -82,12 +83,13 @@ function DtrForm({ isOut, onSuccess, onSettled }) {
           <Image src={photo} alt="Your attendance photo preview" width={960} height={720} unoptimized className="aspect-video w-full rounded-lg border border-border object-cover" />
         ) : (
           <Webcam
+            key={cameraFacingMode}
             ref={webcamRef}
             audio={false}
-            mirrored
+            mirrored={cameraFacingMode === "user"}
             screenshotFormat="image/jpeg"
             screenshotQuality={0.8}
-            videoConstraints={{ facingMode: "user", width: { ideal: 960 }, height: { ideal: 720 } }}
+            videoConstraints={{ facingMode: { ideal: cameraFacingMode }, width: { ideal: 960 }, height: { ideal: 720 } }}
             onUserMedia={() => setCameraError("")}
             onUserMediaError={() => setCameraError("Camera access is unavailable. Allow camera permission and try again.")}
             className="aspect-video w-full rounded-lg border border-border bg-muted object-cover"
@@ -95,10 +97,18 @@ function DtrForm({ isOut, onSuccess, onSettled }) {
         )}
         {cameraError && <p role="alert" className="text-xs text-destructive">{cameraError}</p>}
         {photo && <p className="text-xs text-foreground-soft">Preview only. The saved image will include the server time.</p>}
-        <button type="button" disabled={isPending} onClick={photo ? () => { setPhoto(null); setPhotoFile(null); } : capturePhoto}
-          className="w-full rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50">
-          {photo ? "Retake photo" : "Take photo"}
-        </button>
+        <div className="flex gap-2">
+          <button type="button" disabled={isPending} onClick={photo ? () => { setPhoto(null); setPhotoFile(null); } : capturePhoto}
+            className="min-w-0 flex-1 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50">
+            {photo ? "Retake photo" : "Take photo"}
+          </button>
+          {!photo && <button type="button" disabled={isPending} onClick={() => {
+            setCameraError("");
+            setCameraFacingMode(current => current === "environment" ? "user" : "environment");
+          }} className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50">
+            Switch camera
+          </button>}
+        </div>
       </div>
       <ModalForm.Actions isPending={isPending} submitDisabled={!photoFile} submitLabel={isOut ? "Clock in" : "Clock out"} closeOnSubmit={false} disableCancelWhilePending />
     </ModalForm.Root>

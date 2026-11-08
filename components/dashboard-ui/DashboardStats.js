@@ -10,7 +10,7 @@ function DashboardStats({ stats = [] }) {
       {stats.map((s) => {
         const Card = s.href ? Link : "div";
         return (
-          <Card key={s.label} href={s.href} className={`min-w-0 rounded-xl p-4 ${s.accent} shadow-sm ${s.href ? "transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" : ""}`}>
+          <Card key={s.label} href={s.href} className={`min-w-0 rounded-xl p-4 ${s.accent} shadow-sm ${s.href ? `transition-colors ${s.hoverClass || "hover:bg-muted"} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring` : ""}`}>
             <div className="flex items-center gap-2">
               <s.icon className="size-4 shrink-0 opacity-90" aria-hidden="true" />
               <p className={`text-sm font-medium ${s.labelClass}`}>{s.label}</p>

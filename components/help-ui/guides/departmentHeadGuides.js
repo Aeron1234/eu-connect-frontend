@@ -40,7 +40,7 @@ bulkDtrGuide('department_head'),
   steps: [
     "Search by student name, choose a course, or set a clock-in date range. Apply the filters to update the paginated list.",
     "Open View in or View out to inspect a saved timestamped attendance photo. Older and automatically closed records may have no photo.",
-    "An auto-closed shift shows System closed rather than a student clock-out. After the student submits an explanation, open View explanation to review and confirm or reduce credited hours. Pending auto-closed hours do not count toward the student's internship total. Overtime requests are decided by the assigned supervisor; the timing badge and review state remain separate.",
+    "A reported missed clock-out shows the student's claimed end and explanation without a clock-out photo or location check. Open View explanation to confirm or reduce proposed hours. An automatic 16-hour closure instead says System closed and needs an explanation before review. Neither type earns hours until review. Scheduled Undertime begins one hour before expected end; without a schedule it means under seven net duty hours. Overtime requests are decided by the assigned supervisor; timing and review state remain separate.",
     "Select a student's name to open that internship's attendance details and location controls. DTR Restrictions also manages locations for one or more students.",
     "The list follows your current department membership. Registrar heads cannot access this page."
   ],

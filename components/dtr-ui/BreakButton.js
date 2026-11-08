@@ -14,7 +14,8 @@ export default function BreakButton({ status, record }) {
   if (
     (status !== "CLOCKED_IN" && status !== "ON_BREAK") ||
     !record?.clock_in ||
-    record.clock_out != null
+    record.clock_out != null ||
+    record.auto_closed
   ) return null;
 
   const onBreak = status === "ON_BREAK";

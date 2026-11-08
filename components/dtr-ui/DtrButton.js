@@ -9,7 +9,7 @@ import { useUser } from "@/contexts/UserContext";
 import { dtrKeys } from "@/lib/cache/dtr-queries";
 import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 
-function DtrButton({ internshipData, status, disabled = false }) {
+function DtrButton({ internshipData, status, record, disabled = false, pendingExplanation = false }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useUser();
@@ -23,9 +23,13 @@ function DtrButton({ internshipData, status, disabled = false }) {
       queryKey: dashboardOverviewKeys.role(user?.id, "student"),
     });
   }
+  const hasOpenShift = Boolean(record?.clock_in && !record.clock_out && !record.auto_closed);
   if (
     !internshipData ||
     status === "ON_BREAK" ||
+    (status !== "CLOCKED_OUT" && !hasOpenShift) ||
+    (status === "CLOCKED_OUT" && hasOpenShift) ||
+    (status === "CLOCKED_OUT" && pendingExplanation) ||
     internshipData?.accumulated_hours >= internshipData?.total_hours
   )
     return null;

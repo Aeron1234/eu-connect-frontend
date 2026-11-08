@@ -7,6 +7,8 @@ import Modal from "../ui/Modal";
 import HelpManual from "@/components/help-ui/HelpManual";
 import InternshipRecordFinishForm from "./InternshipRecordFinishForm";
 import DtrOvertimeControls from "./DtrOvertimeControls";
+import MissedClockOutButton from "./MissedClockOutButton";
+import DtrReviewDetails from "./DtrReviewDetails";
 
 function manilaDay(value) {
   const date = new Date(value);
@@ -48,7 +50,7 @@ function shiftPosition(clockIn, start, end) {
   return Math.min(100, Math.max(0, elapsed / duration * 100));
 }
 
-function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
+function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {}, pendingAutoCloseRecord }) {
   const hasOngoingInternship = internshipData?.status === "ongoing";
   const requiredHours = Number(internshipData?.total_hours);
   const creditedHours = Number(internshipData?.accumulated_hours);
@@ -69,6 +71,11 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
   const shiftStartDay = dtrToday?.clock_in ? manilaDay(dtrToday.clock_in) : null;
   // Gate clock controls using the Philippine start day; backend checks remain authoritative.
   const dtrAvailable = Boolean(startDay && todayDay >= startDay);
+  const hasOpenShift = Boolean(
+    (status === "CLOCKED_IN" || status === "ON_BREAK") &&
+    dtrRecord?.clock_in && !dtrRecord.clock_out && !dtrRecord.auto_closed
+  );
+  const systemClosed = status === "CLOCKED_OUT" && Boolean(dtrRecord?.auto_closed);
 
   // Offer internship completion only outside an open shift/break and after
   // credited accumulated hours reach the required total.
@@ -89,7 +96,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
           <h2 className="text-lg font-semibold leading-tight sm:text-xl">DTR Today</h2>
           <p className="mt-0.5 text-xs text-white/80 sm:text-sm">{today}</p>
         </div>
-        {hasOngoingInternship && <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium">{status === "CLOCKED_IN" ? "On shift" : status === "ON_BREAK" ? "On break" : "Off shift"}</span>}
+        {hasOngoingInternship && <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium">{hasOpenShift ? status === "ON_BREAK" ? "On break" : "On shift" : systemClosed ? dtrRecord.missed_clock_out ? "Missed clock-out" : "System closed" : "Off shift"}</span>}
       </div>
       <div className="min-w-0">
           {hasOngoingInternship && hasSchedule && (
@@ -111,6 +118,44 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
               )}
             </div>
           )}
+          {hasOngoingInternship && !hasSchedule && (
+            <div className="border-b border-white/20 py-3 sm:py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Today&apos;s attendance</p>
+                  <p className="mt-0.5 text-[11px] text-white/70">No employer shift hours set</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-6">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-white/70">Clock in</p>
+                    <p className="mt-0.5 whitespace-nowrap text-sm font-semibold tabular-nums">{formatDtrTime(dtrToday?.clock_in)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-white/70">Clock out</p>
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums">{dtrToday?.missed_clock_out ? "Reported end" : dtrToday?.auto_closed ? "System closed" : formatDtrTime(dtrToday?.clock_out)}</p>
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <p className="text-[10px] uppercase tracking-wide text-white/70">Status</p>
+                    <span className="mt-1 inline-block rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-medium">
+                      {dtrToday?.clock_out
+                        ? dtrToday?.auto_closed
+                          ? dtrToday.missed_clock_out ? "Missed clock-out"
+                            : dtrToday.auto_close_review_status === "pending_explanation" ? "Needs explanation"
+                            : dtrToday.auto_close_review_status === "pending_review" ? "Needs review"
+                              : "System closed"
+                          : "Clocked out"
+                        : dtrToday?.status === "on-break" || status === "ON_BREAK"
+                          ? "On break"
+                          : dtrToday?.status || "No shift"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {shiftStartDay && shiftStartDay < todayDay && (
+                <p className="mt-2 text-xs text-white/80">Overnight shift started {formatDtrDate(dtrToday.clock_in)}.</p>
+              )}
+            </div>
+          )}
           <div className="grid gap-3 border-b border-white/20 py-3 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             {hasOngoingInternship && remainingHours !== null && (
               <div className="min-w-0" aria-label={`${hoursFormatter.format(remainingHours)} internship hours remaining`}>
@@ -120,39 +165,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
                 <p className="mt-1 text-xs text-white/75">{hoursFormatter.format(safeCreditedHours)} / {hoursFormatter.format(requiredHours)} hours credited</p>
               </div>
             )}
-          {hasOngoingInternship && !hasSchedule ? (
-            <div className="min-w-0 lg:border-l lg:border-white/20 lg:pl-4">
-              {shiftStartDay && shiftStartDay < todayDay && (
-                <p className="mb-2 text-xs text-primary-foreground/85">
-                  Overnight shift started {formatDtrDate(dtrToday.clock_in)}.
-                </p>
-              )}
-              <div className="grid grid-cols-3 gap-2 sm:gap-6">
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock In</p>
-                  <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-lg">{formatDtrTime(dtrToday?.clock_in)}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-primary-200">Clock Out</p>
-                  <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-lg">{dtrToday?.auto_closed ? "System closed" : formatDtrTime(dtrToday?.clock_out)}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-primary-200">Status</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[11px] font-medium">
-                    {dtrToday?.clock_out
-                      ? dtrToday?.auto_closed
-                        ? dtrToday.auto_close_review_status === "pending_explanation" ? "Needs explanation"
-                          : dtrToday.auto_close_review_status === "pending_review" ? "Needs review"
-                            : "System closed"
-                        : "Clocked out"
-                      : dtrToday?.status === "on-break" || status === "ON_BREAK"
-                      ? "On break"
-                      : dtrToday?.status || "No shift"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : !hasOngoingInternship ? (
+          {!hasOngoingInternship ? (
             <p className="text-sm text-white/80">
               You don&apos;t have an ongoing internship record. Start or
               activate a record to track your daily attendance.
@@ -188,9 +201,16 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
               />
             </Modal>
           ) : (
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto lg:border-l lg:border-white/20 lg:pl-4">
-              <DtrButton internshipData={internshipData} status={status} disabled={!dtrAvailable} />
-              <BreakButton status={status} record={dtrRecord} />
+            <div className="w-full lg:w-auto lg:border-l lg:border-white/20 lg:pl-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <DtrButton internshipData={internshipData} status={status} record={dtrRecord} disabled={!dtrAvailable} pendingExplanation={Boolean(pendingAutoCloseRecord)} />
+                <BreakButton status={status} record={dtrRecord} />
+              </div>
+              {hasOpenShift && (
+                <div className="mt-1.5">
+                  <MissedClockOutButton record={dtrRecord} internshipId={internshipData?.id} />
+                </div>
+              )}
             </div>
           )
         ) : (
@@ -204,6 +224,11 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {} }) {
           </Link>
         )}
         </div>
+          {systemClosed && <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-white/20 py-2 text-xs text-white/90" role="status">
+            <span>{dtrRecord.missed_clock_out ? "Missed clock-out reported. Hours await review." : "System closed this shift without a clock-out photo."}</span>
+            {dtrRecord.auto_close_review_status === "pending_explanation" && <span>Explain this shift before your next clock-in.</span>}
+            <DtrReviewDetails dtr={dtrRecord} prompt={dtrRecord.auto_close_review_status === "pending_explanation"} onMaroon />
+          </div>}
           {hasOngoingInternship && <DtrOvertimeControls record={dtrRecord} internshipId={internshipData?.id} status={status} />}
           <p className="flex min-w-0 items-start gap-1.5 pt-3 text-xs text-white/75">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{" "}

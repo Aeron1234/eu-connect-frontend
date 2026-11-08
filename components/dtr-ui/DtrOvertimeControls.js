@@ -34,7 +34,8 @@ export default function DtrOvertimeControls({ record, internshipId, status }) {
   }, []);
 
   if (!record) return null;
-  const active = status === "CLOCKED_IN" || status === "ON_BREAK";
+  const active = (status === "CLOCKED_IN" || status === "ON_BREAK") &&
+    Boolean(record.clock_in) && !record.clock_out && !record.auto_closed;
   const started = new Date(record.clock_in).getTime();
   const elapsedHours = active && Number.isFinite(started) ? Math.max(0, (now - started) / 3_600_000) : 0;
   const expectedEnd = record.expected_clock_out ? new Date(record.expected_clock_out).getTime() : NaN;
@@ -42,7 +43,7 @@ export default function DtrOvertimeControls({ record, internshipId, status }) {
     ? now >= expectedEnd - 30 * 60_000
     : elapsedHours >= 8;
   const canRequest = active && nearEnd && !record.overtime_status && elapsedHours < 16;
-  const hasReview = Boolean(record.auto_closed || record.overtime_status);
+  const hasReview = Boolean(record.overtime_status && !record.auto_closed);
 
   async function submit() {
     if (busy) return;
@@ -85,11 +86,11 @@ export default function DtrOvertimeControls({ record, internshipId, status }) {
       </div>
     </Modal>}
     {hasReview && <div className="flex flex-wrap items-center gap-2 text-xs text-white/90">
-      {record.auto_closed && <span>{record.auto_close_review_status === "legacy_credited"
+      {record.missed_clock_out ? <span>Missed clock-out reported. Hours await review.</span> : record.auto_closed && <span>{record.auto_close_review_status === "legacy_credited"
         ? "System closed—no clock-out photo. Previously credited hours remain unchanged."
         : "System closed—no clock-out photo. Hours await review."}</span>}
       {record.overtime_status && <span>Overtime: {record.overtime_status === "not_approved" ? "Not approved" : record.overtime_status === "approved" ? "Approved" : "Requested"}</span>}
-      <DtrReviewDetails dtr={record} prompt={record.auto_close_review_status === "pending_explanation"} onMaroon />
+      {!record.auto_closed && <DtrReviewDetails dtr={record} onMaroon />}
     </div>}
   </div>;
 }

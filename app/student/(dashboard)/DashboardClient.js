@@ -98,6 +98,7 @@ function StudentDashboardPage() {
         status={dtrStatus}
         dtrRecord={dtrRecord}
         dtrToday={dtrToday}
+        pendingAutoCloseRecord={pendingAutoCloseRecord}
       />
       {pendingAutoCloseRecord && pendingAutoCloseRecord.id !== dtrRecord?.id &&
         <div className="rounded-xl border border-amber-500/40 bg-card px-4 py-3 text-sm">

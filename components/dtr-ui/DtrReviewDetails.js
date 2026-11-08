@@ -8,6 +8,16 @@ import Modal from "@/components/ui/Modal";
 import { useUser } from "@/contexts/UserContext";
 import { decideDtrOvertime, explainAutoClosedDtr, reviewAutoClosedDtr } from "@/lib/server-actions/dtr-actions";
 
+function manilaInputTime(value) {
+  if (!value) return undefined;
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(new Date(value));
+  const part = type => parts.find(item => item.type === type)?.value;
+  return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
+}
+
 export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false }) {
   const { user } = useUser();
   const router = useRouter();
@@ -15,6 +25,7 @@ export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [explanation, setExplanation] = useState("");
+  const [claimedEnd, setClaimedEnd] = useState("");
   const [hours, setHours] = useState(String(dtr.proposed_hours ?? 0));
   const promptedId = useRef(null);
   const isStudent = user?.role === "student";
@@ -63,23 +74,29 @@ export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false
         if (nextOpen) setHours(String(dtr.proposed_hours ?? 0));
         setOpen(nextOpen);
       }}
-      trigger={<span className={`text-xs font-medium hover:underline ${onMaroon ? "text-white" : "text-primary-emphasis"}`}>{dtr.auto_closed ? `${canAddExplanation ? "Add explanation" : "View explanation"} · ${reviewLabel || "Auto-closed"}` : `Overtime · ${overtimeLabel || "Requested"}`}</span>}
+      trigger={<span className={`text-xs font-medium hover:underline ${onMaroon ? "text-white" : "text-primary-emphasis"}`}>{dtr.auto_closed ? `${canAddExplanation ? "Add explanation" : "View explanation"} · ${reviewLabel || (dtr.missed_clock_out ? "Missed clock-out" : "Auto-closed")}` : `Overtime · ${overtimeLabel || "Requested"}`}</span>}
       triggerStyles="inline-flex min-h-8 items-center whitespace-nowrap text-left"
-      title={dtr.auto_closed ? "Automatically closed shift" : "Overtime request"}
-      description={dtr.auto_closed ? "The system closed this entry without a student clock-out photo or location check." : "The student can still clock out normally while a request is pending."}
+      title={dtr.missed_clock_out ? "Reported missed clock-out" : dtr.auto_closed ? "Automatically closed shift" : "Overtime request"}
+      description={dtr.missed_clock_out ? "The student reported when they stopped working. This time has no clock-out photo or location check and needs review." : dtr.auto_closed ? "The system closed this entry without a student clock-out photo or location check." : "The student can still clock out normally while a request is pending."}
     >
       <div className="space-y-3 text-sm text-foreground">
         {dtr.auto_closed && <>
           <p><strong>Review:</strong> {({ pending_explanation: "Awaiting student explanation", pending_review: "Awaiting staff review", approved: "Approved", adjusted: "Hours adjusted", legacy_credited: "Credited before this review process" })[dtr.auto_close_review_status] || "Auto-closed"}</p>
           <p><strong>Proposed duty:</strong> {dtr.proposed_hours == null ? "—" : `${Number(dtr.proposed_hours).toFixed(2)} hours`} · <strong>Credited:</strong> {Number(dtr.total_hours || 0).toFixed(2)} hours</p>
           <p><strong>Student explanation:</strong> {dtr.student_explanation || "Not submitted yet."}</p>
+          {dtr.claimed_clock_out_at && <p><strong>Student-reported end:</strong> {new Date(dtr.claimed_clock_out_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}</p>}
           {canAddExplanation && <div className="space-y-2 border-t border-border pt-3">
             {dtr.auto_close_review_status === "legacy_credited" &&
               <p className="text-xs text-foreground-soft">This older shift was already credited. Your explanation is optional and will not change its hours.</p>}
+            {needsExplanation && <label htmlFor={`dtr-claimed-end-${dtr.id}`} className="block font-medium">When did you stop working? (Philippine time)
+              <input id={`dtr-claimed-end-${dtr.id}`} type="datetime-local" value={claimedEnd} onChange={event => setClaimedEnd(event.target.value)}
+                min={manilaInputTime(dtr.clock_in)} max={manilaInputTime(dtr.auto_closed_at || dtr.clock_out)}
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground" />
+            </label>}
             <label htmlFor={`dtr-explanation-${dtr.id}`} className="block font-medium">Why did you miss clock-out?</label>
             <textarea id={`dtr-explanation-${dtr.id}`} value={explanation} onChange={event => setExplanation(event.target.value)} maxLength={1000} rows={4}
               className="w-full rounded-md border border-border bg-background p-2 text-foreground" placeholder="Explain what happened and when you stopped working." />
-            <button type="button" disabled={busy || explanation.trim().length < 15} onClick={() => save(() => explainAutoClosedDtr(dtr.id, explanation.trim()))}
+            <button type="button" disabled={busy || explanation.trim().length < 15 || (needsExplanation && !claimedEnd)} onClick={() => save(() => explainAutoClosedDtr(dtr.id, explanation.trim(), needsExplanation ? claimedEnd : null))}
               className="rounded-md bg-primary px-3 py-2 text-white disabled:opacity-50">Submit explanation</button>
           </div>}
           {isReviewer && needsReview && <div className="space-y-2 border-t border-border pt-3">

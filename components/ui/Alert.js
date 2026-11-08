@@ -12,7 +12,9 @@ function Alert() {
   const { user } = useUser();
   useEffect(() => {
     const handleNewNotification = (data) => {
-      if (user?.id && data?.type === "dtr_location_set") invalidateNotificationTarget(queryClient, user.id, data);
+      if (user?.id && ["dtr_location_set", "dtr_auto_close"].includes(data?.type)) {
+        invalidateNotificationTarget(queryClient, user.id, data);
+      }
       if (user?.id && data?.type === "announcement") {
         void queryClient.invalidateQueries({ queryKey: ["announcements", String(user.id)] });
       }

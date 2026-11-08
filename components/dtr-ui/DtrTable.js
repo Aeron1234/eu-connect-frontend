@@ -58,7 +58,12 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
                 ) : <span className="text-foreground-soft">—</span>}
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-left">
-                {dtr.auto_closed ? (
+                {dtr.missed_clock_out ? (
+                  <span className="inline-flex flex-col text-xs text-amber-800 dark:text-amber-300">
+                    <span className="font-medium">Reported end</span>
+                    <span>{displayDate(dtr.claimed_clock_out_at, "MMM d, h:mm a")}</span>
+                  </span>
+                ) : dtr.auto_closed ? (
                   <span className="inline-flex flex-col text-xs text-amber-800">
                     <span className="font-medium">System closed</span>
                     <span>{displayDate(dtr.auto_closed_at || dtr.clock_out, "MMM d, h:mm a")}</span>
@@ -92,7 +97,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
               <td className="px-3 py-3 text-left">
                 <div className="flex items-center justify-start whitespace-nowrap text-xs">
                   <span className={`inline-block rounded-md px-2 py-0.5 font-medium ${dtr.auto_closed ? "bg-amber-100 text-amber-900" : statusStyles[dtr.status] || "bg-muted text-foreground-soft"}`}>
-                    {dtr.auto_closed ? "Auto-closed" : dtr.status === "on-break" ? "On break" : dtr.status}
+                    {dtr.missed_clock_out ? "Missed clock-out" : dtr.auto_closed ? "Auto-closed" : dtr.status === "on-break" ? "On break" : dtr.status}
                   </span>
                 </div>
               </td>
