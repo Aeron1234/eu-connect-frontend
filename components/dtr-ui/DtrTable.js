@@ -84,7 +84,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
                 </div>
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-left font-medium text-foreground">
-                {dtr.total_hours == null ? "-" : Number(dtr.total_hours).toFixed(1)}
+                {dtr.total_hours == null ? "-" : Number(dtr.total_hours).toFixed(2)}
               </td>
               <td className="px-3 py-3 text-left">
                 <div className="flex items-center justify-start gap-1 whitespace-nowrap text-xs">
