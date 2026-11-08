@@ -204,7 +204,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {}, pendin
             <div className="w-full lg:w-auto lg:border-l lg:border-white/20 lg:pl-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                 <DtrButton internshipData={internshipData} status={status} record={dtrRecord} disabled={!dtrAvailable} pendingExplanation={Boolean(pendingAutoCloseRecord)} />
-                <BreakButton status={status} record={dtrRecord} />
+                <BreakButton status={status} record={dtrRecord} internshipId={internshipData?.id} />
               </div>
               {hasOpenShift && (
                 <div className="mt-1.5">

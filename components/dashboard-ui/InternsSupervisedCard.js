@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, Mail, Eye, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, Mail, Eye, Users, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorUI from "@/components/ui/ErrorUI";
 import Link from "next/link";
@@ -51,6 +51,13 @@ function InternsSupervisedCard({ initialPage }) {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState({ page: 1, status: "all" });
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
+  const toggleIntern = (id) => setExpandedIds((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
   const pageQuery = useQuery({
     ...employerInternsPageOptions(user?.id, query),
     enabled: Boolean(user?.id),
@@ -123,9 +130,9 @@ function InternsSupervisedCard({ initialPage }) {
           interns.map((intern) => (
             <div
               key={intern.id}
-              className="flex w-full min-w-0 flex-col items-start justify-between gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center"
+              className="w-full min-w-0 rounded-lg border border-border p-4"
             >
-              <div className="flex items-start gap-3 min-w-0">
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="w-10 h-10 flex-shrink-0 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center text-xs font-semibold">
                   {intern.name
                     .split(" ")
@@ -133,19 +140,22 @@ function InternsSupervisedCard({ initialPage }) {
                     .slice(0, 2)
                     .join("")}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-foreground">
-                      {intern.name}
-                    </p>
-
-                  </div>
-                  <p
-                    className="mt-0.5 break-words text-xs text-muted-foreground"
-                    title={intern.programShort || undefined}
-                  >
-                    {intern.program}
-                  </p>
+                <button type="button" onClick={() => toggleIntern(intern.id)}
+                  aria-expanded={expandedIds.has(intern.id)} aria-controls={`supervised-intern-${intern.id}`}
+                  className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md text-left hover:text-primary-emphasis focus-visible:outline-2 focus-visible:outline-ring">
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-foreground">{intern.name}</span>
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground" title={intern.programShort || undefined}>{intern.program}</span>
+                  </span>
+                  <ChevronDown className={`size-4 shrink-0 transition-transform ${expandedIds.has(intern.id) ? "rotate-180" : ""}`} aria-hidden="true" />
+                </button>
+                <Link href={`/users/${encodeURIComponent(intern.id)}`}
+                  className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-primary-emphasis transition-colors hover:text-primary-600 hover:underline">
+                  <Eye className="size-3.5" aria-hidden="true" />
+                  <span className="hidden sm:inline">View profile</span><span className="sr-only sm:hidden">View profile of {intern.name}</span>
+                </Link>
+              </div>
+              {expandedIds.has(intern.id) && <div id={`supervised-intern-${intern.id}`} className="mt-3 border-t border-border pt-3 pl-[3.25rem]">
                   {intern.email && <p className="mt-2 flex min-w-0 items-start gap-1 text-xs text-foreground-soft"><Mail className="mt-0.5 size-3.5 shrink-0" /><span className="break-all">{intern.email}</span></p>}
                   <ul aria-label={`Internship positions of ${intern.name}`} className="mt-3 space-y-3">
                     {intern.placements.map((placement) => {
@@ -162,15 +172,7 @@ function InternsSupervisedCard({ initialPage }) {
                       </li>;
                     })}
                   </ul>
-                </div>
-              </div>
-              <Link
-                href={`/users/${encodeURIComponent(intern.id)}`}
-                className="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-primary-emphasis hover:text-primary-600 transition-colors"
-              >
-                <Eye className="w-3.5 h-3.5" />
-                View profile
-              </Link>
+              </div>}
             </div>
           ))
         )}

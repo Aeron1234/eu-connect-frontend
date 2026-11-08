@@ -9,7 +9,7 @@ bulkDtrGuide('employer'),
   "summary": "Monitor supervised interns and posted opportunities.",
   "steps": [
     "Use the dashboard's overview cards for your postings, supervised internships, and uploaded documents. The current and past intern statistics count internship records, while the supervised list counts distinct students; a student with two placements can contribute twice to a statistic but has one list card.",
-    "The supervised interns list has one card per student, listing each position with its status, start date and hours. Switch between All, Ongoing and Completed to filter positions. Pagination counts students, five per page. Open View profile for student details.",
+    "The supervised interns list has one compact card per student. Select a student card to expand their positions, status, start dates, hours and email. Switch between All, Ongoing and Completed to filter positions. Pagination counts students, five per page. Open View profile for student details.",
     "Review your posted jobs and recent activity, or use the quick actions to manage opportunities and find students.",
     "Accept or decline supervision requests from notifications before managing a student's internship tools."
   ],

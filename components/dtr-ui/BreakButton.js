@@ -9,8 +9,9 @@ import Modal from "../ui/Modal";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
+import { dtrKeys } from "@/lib/cache/dtr-queries";
 
-export default function BreakButton({ status, record }) {
+export default function BreakButton({ status, record, internshipId }) {
   if (
     (status !== "CLOCKED_IN" && status !== "ON_BREAK") ||
     !record?.clock_in ||
@@ -21,10 +22,10 @@ export default function BreakButton({ status, record }) {
   const onBreak = status === "ON_BREAK";
   const label = onBreak ? "Resume duty" : "Start break";
   const Icon = onBreak ? Play : Coffee;
-  return <BreakAction label={label} action={onBreak ? resumeDuty : startBreak} Icon={Icon} />;
+  return <BreakAction label={label} action={onBreak ? resumeDuty : startBreak} Icon={Icon} internshipId={internshipId} />;
 }
 
-function BreakAction({ label, action, Icon }) {
+function BreakAction({ label, action, Icon, internshipId }) {
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
   const { user } = useUser();
@@ -38,9 +39,14 @@ function BreakAction({ label, action, Icon }) {
         action,
       });
       if (result?.success) {
-        void queryClient.invalidateQueries({
-          queryKey: dashboardOverviewKeys.role(user?.id, "student"),
-        });
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: dashboardOverviewKeys.role(user?.id, "student"),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: dtrKeys.student(user?.id, internshipId),
+          }),
+        ]);
       }
     });
   }
