@@ -19,7 +19,7 @@ export default function EvaluationEmptyState({ type }) {
   if (type === "all")
     return (
       <div className="rounded-xl border border-dashed border-border shadow-sm bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-        You have not submitted a supervisor evaluation yet.
+        You have not submitted a company evaluation yet.
       </div>
     );
 

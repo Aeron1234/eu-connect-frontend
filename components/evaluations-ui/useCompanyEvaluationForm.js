@@ -3,14 +3,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
-import { postEmployerEvaluation } from "@/lib/server-actions/evaluations-actions";
+import { postCompanyEvaluation } from "@/lib/server-actions/evaluations-actions";
 
-// The student submits a Supervisor Evaluation of their accepted employer.
+// The student submits a Company Evaluation of their ongoing internship company.
 // Posting is direct; reset scores and refresh availability only after confirmed success.
-export default function useEmployerEvaluationForm({ employerEvaluationCriterias, onSubmitted }) {
+export default function useCompanyEvaluationForm({ companyEvaluationCriterias, onSubmitted }) {
   const [evaluationGrades, setEvaluationGrades] = useState(() => {
     const initialState = {};
-    employerEvaluationCriterias.forEach((cat) => {
+    companyEvaluationCriterias.forEach((cat) => {
       cat.items.forEach((item) => {
         initialState[item.id] = null;
       });
@@ -38,10 +38,10 @@ export default function useEmployerEvaluationForm({ employerEvaluationCriterias,
 
     startTransition(async () => {
       const result = await toastAndAction({
-        loadingLabel: "Posting supervisor/employer evaluation...",
-        successLabel: "Supervisor/employer evaluation posted!",
-        errorLabel: "Posting supervisor/employer evaluation failed.",
-        action: postEmployerEvaluation,
+        loadingLabel: "Posting company evaluation...",
+        successLabel: "Company evaluation posted!",
+        errorLabel: "Posting company evaluation failed.",
+        action: postCompanyEvaluation,
         args: [formData],
       });
 
@@ -54,7 +54,7 @@ export default function useEmployerEvaluationForm({ employerEvaluationCriterias,
 
       setEvaluationGrades(() => {
         const initialState = {};
-        employerEvaluationCriterias.forEach((cat) => {
+        companyEvaluationCriterias.forEach((cat) => {
           cat.items.forEach((item) => {
             initialState[item.id] = null;
           });

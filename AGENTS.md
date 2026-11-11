@@ -8,9 +8,13 @@ While a student has an open shift, the Today card keeps verified Clock out promi
 
 `/department_head/internship-records/[internshipId]` is for approval, rejection, restoration, completion and placement overview, including company website, map, hours and rotations. Attendance, Student Submissions and Evaluations have department-wide lists and focused `/[internshipId]` details under their own routes. Keep the review actions in Records only. Their focused pages reuse the existing per-record readers and backend authorization. Legacy Records `?tab=dtr|narratives|summary-report|documents|evaluations` links redirect to the corresponding task detail; request and finished notifications still open Records overview, while evaluation notifications open focused Evaluations when both IDs exist. The Registrar and all other roles remain excluded from these department-head pages. No new API, SQL, environment variable or package is required for this navigation change.
 
+## Evaluated Companies (November 11, 2026)
+
+Evaluated Companies is a separate non-Registrar department-head page at `/department_head/evaluated-companies`. Its sidebar entry sits under the Evaluations dropdown with Evaluation Criteria and Evaluations. The backend computes company ratings across departments from active student-authored company evaluations, grouping normalized name plus address and keeping missing-address internships separate. It averages repeated submissions per student before averaging students, shows category ratings, and labels fewer than three student reviewers as Limited feedback. Filter courses are limited to the head's current department; dates filter internship starts. Other-department student names are masked and remarks omitted by the API itself. Admins and Registrar heads cannot access this summary. No new schema, package or environment variable is required beyond the existing company-evaluations migration.
+
 ## Department Evaluations (November 7, 2026)
 
-`/department_head/evaluations` is a metadata-only department-wide review list for non-Registrar heads. It distinguishes confidential supervisor-to-student performance evaluations from student-to-supervisor evaluations, and includes soft-deleted history with a visible label. Filter by student/company/type/status/course/date, then Review opens the focused evaluation in `/department_head/evaluations/[internshipId]?evaluationId=...`. Notifications open that detail when both IDs are available, otherwise the filtered evaluation list. The backend resolves current head/student department membership and independently authorizes full detail and permanent deletion. Do not expose performance scores to students. The shared Help guide and page manual describe these rules. No frontend package or environment change is needed.
+`/department_head/evaluations` is a metadata-only department-wide review list for non-Registrar heads. It distinguishes confidential employer-to-student performance evaluations from student-to-company evaluations, and includes soft-deleted history with a visible label. Filter by student/company/type/status/course/date, then Review opens the focused evaluation in `/department_head/evaluations/[internshipId]?evaluationId=...`. Notifications open that detail when both IDs are available, otherwise the filtered evaluation list. The backend resolves current head/student department membership and independently authorizes full detail and permanent deletion. Do not expose performance scores to students. The shared Help guide and page manual describe these rules. No frontend package or environment change is needed.
 
 ## Department Student Submissions (November 7, 2026)
 
@@ -233,17 +237,17 @@ Primary directory: `components/map-ui/`. Detailed routing notes: `app/api/map/RE
 
 Primary directory: `components/evaluations-ui/`; actions: `lib/server-actions/evaluations-actions.js`.
 
-- Terminology matters: Performance Evaluation is the employer evaluating a student (student-evaluation API). Supervisor Evaluation is the student evaluating their supervisor/employer.
+- Terminology matters: Performance Evaluation is the employer evaluating a student (`student_evaluation_*` tables). Company Evaluation is the student evaluating their internship company (`company_evaluation_*` tables). The old `employer_evaluation_*` supervisor tables are deleted by the November 10 migration.
 - Students must never see employer performance scores, including through cached summaries, record tabs, print actions, or notification navigation.
-- Students retain access to their own supervisor feedback. The submitting employer and authorized department head/admin can view/print performance evaluations within backend-enforced scope.
+- Students retain access to their own company evaluations. The submitting employer and authorized department head/admin can view/print performance evaluations within backend-enforced scope.
 - Posting is immediate: no pending/posted status selector and no extra posting confirmation.
-- Allow multiple employer-authored performance and student-authored supervisor evaluations per ongoing internship record for all departments. Do not require deletion of earlier reviews or enforce automatic 200-hour milestones.
-- `EvaluationPostingGuard` must fail closed while eligibility is loading or failed. Backend ongoing-assignment authorization remains required in both directions; the start-date gate applies to employer performance reviews. Neither direction has an active-evaluation slot after the November 4 backend migration.
+- Allow multiple employer-authored performance and student-authored company evaluations per ongoing internship record for all departments. Do not require deletion of earlier reviews or enforce automatic 200-hour milestones.
+- `EvaluationPostingGuard` must fail closed while eligibility is loading or failed. Backend ongoing-internship authorization remains required in both directions; only employer performance reviews require the accepted supervisor and start-date gate. Company evaluations do not require an assigned supervisor. Neither direction has an active-evaluation slot after the November 4 backend migration.
 - Author deletion is a soft delete using deleted_at. Hide only that evaluation from its author; other reviews remain available. Both directions can post again without deleting an earlier review.
 - Authorized staff retain deleted history with a Deleted label.
 - Staff permanent deletion is available only for evaluations already soft-deleted, within the existing access rules.
 - Employer evaluation notifications target `/department_head/evaluations`, filtered by evaluation ID when available. Review opens `/department_head/evaluations/[internshipId]?evaluationId=...`; refresh the relevant evaluation data on notification actions.
-- Database lifecycle/uniqueness migrations belong to the backend. Apply `scripts/2026-10-29-multiple-performance-evaluations.sql` if needed, then `scripts/2026-11-04-multiple-supervisor-evaluations.sql` to drop the two single-active indexes. Do not replay the older consolidation migration afterward or reintroduce status requirements.
+- Database migrations belong to the backend. Apply `scripts/2026-11-10-company-evaluations.sql` before deploying the company evaluation frontend/backend. It deletes prior student-to-supervisor evaluations and criteria. Preserve the employer-authored `student_evaluation_*` tables. Do not replay the older supervisor-index or consolidation migrations afterward.
 
 ## Weekly narrative coverage dates
 
@@ -307,6 +311,9 @@ Implementation notes: `components/ui/PDF_PREVIEW.md`.
 ## /past-internships filters
 
 Primary component: `components/past-internship-ui/PastInternshipsPageContent.js`.
+
+- `AlumniCompanies.js` renders one row for each student within a company. The API supplies a `records` array for linked internships; show the distinct nonempty internship positions on that row to every viewer. If all positions are empty, omit the position line. Do not render an extra row for another record of the same student.
+- Authorized staff select a specific underlying record before editing or deleting it. Manual alumni entries have no linked student account and remain separate; do not merge them by name alone.
 
 - Combine existing alumni/company search with academic-year and department filters.
 - Use the shadcn Select. The all/default department label is **Departments**.

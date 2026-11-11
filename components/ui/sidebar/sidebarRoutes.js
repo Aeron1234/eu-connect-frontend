@@ -84,8 +84,11 @@ function roleRouteGroups(userRole, userDepartment) {
         { name: "Attendance", href: "/department_head/attendance", icon: <ClipboardClock className="h-5 w-5 shrink-0" /> },
         { name: "DTR Restrictions", href: "/dtr-restrictions", icon: <MapPin className="h-5 w-5 shrink-0" /> },
         { name: "Student Submissions", href: "/department_head/submissions", icon: <FileText className="h-5 w-5 shrink-0" /> },
-        { name: "Evaluations", href: "/department_head/evaluations", icon: <ClipboardCheck className="h-5 w-5 shrink-0" /> },
-        { name: "Evaluation Criteria", href: "/department_head/evaluation-criteria", icon: <SlidersHorizontal className="h-5 w-5 shrink-0" /> },
+        { name: "Evaluations", icon: <ClipboardCheck className="h-5 w-5 shrink-0" />, children: [
+          { name: "Evaluation Criteria", href: "/department_head/evaluation-criteria", icon: <SlidersHorizontal className="h-4 w-4 shrink-0" /> },
+          { name: "Evaluations", href: "/department_head/evaluations", icon: <ClipboardCheck className="h-4 w-4 shrink-0" /> },
+          { name: "Evaluated Companies", href: "/department_head/evaluated-companies", icon: <Building2 className="h-4 w-4 shrink-0" /> },
+        ] },
         { name: "Company Analytics", href: "/company-analytics", icon: <Building2 className="h-5 w-5 shrink-0" /> },
         { name: "Map", href: "/map", icon: <MapIcon className="h-5 w-5 shrink-0" /> },
         { name: "Past Internships", href: "/past-internships", icon: <History className="h-5 w-5 shrink-0" /> },

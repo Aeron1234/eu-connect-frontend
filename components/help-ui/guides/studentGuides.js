@@ -98,10 +98,10 @@ const studentGuides = [
 },
 {
   "id": "evaluations",
-  "title": "Evaluate your supervisor",
-  "summary": "Evaluate your supervisor more than once during the same ongoing internship.",
+  "title": "Evaluate your company",
+  "summary": "Evaluate your company more than once during the same ongoing internship.",
   "steps": [
-    "An ongoing internship with an accepted supervisor is required. Open Evaluate Supervisor and review the 0-5 grade scale. Select a score for every criterion and add optional remarks.",
+    "An ongoing internship is required. Open Evaluate Company and review the 0-5 grade scale. Select a score for every criterion and add optional remarks.",
     "Select Submit Evaluation. It is posted immediately without a separate status choice or posting confirmation. You can return to the form and submit another evaluation for the same ongoing internship.",
     "Past Evaluations lists each submission separately, including several evaluations for the same internship. Earlier evaluations do not block a new submission.",
     "You may delete one of your evaluations without affecting the others. It disappears from your history, but authorized staff keep a Deleted copy for review.",

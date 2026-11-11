@@ -10,7 +10,7 @@ const FILTERS = [
 
 const FORM_TYPES = [
   { value: "student", label: "Student" },
-  { value: "employer", label: "Employer" },
+  { value: "company", label: "Company" },
 ];
 
 export default function EvaluationCriteriaToolbar({

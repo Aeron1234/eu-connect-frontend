@@ -65,9 +65,9 @@ test("role, document-stage and report-status legacy templates are humanized only
 
 test("evaluation action labels match their actual direction and module labels hide database table names", () => {
   assert.equal(display.activityActionLabel("student_evaluation_submitted"), "Performance evaluation submitted");
-  assert.equal(display.activityActionLabel("employer_evaluation_submitted"), "Supervisor evaluation submitted");
+  assert.equal(display.activityActionLabel("company_evaluation_submitted"), "Company evaluation submitted");
   assert.equal(display.activityModuleLabel("student_evaluation_masters"), "Performance evaluations");
-  assert.equal(display.activityModuleLabel("employer_evaluation_masters"), "Supervisor evaluations");
+  assert.equal(display.activityModuleLabel("company_evaluation_masters"), "Company evaluations");
   assert.equal(display.activityModuleLabel("users"), "Accounts");
   assert.equal(display.activityModuleLabel("program_annual_reports"), "SIPP reports");
   assert.equal(display.activityActionLabel("future_feature_updated"), "Future feature updated");

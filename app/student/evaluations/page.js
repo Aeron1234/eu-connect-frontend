@@ -12,7 +12,7 @@ function EvaluationsPage() {
       <PageTitle
         Icon={ClipboardCheck}
         title="Evaluations"
-        description="Rate your supervisor and review your submitted evaluations."
+        description="Rate your internship company and review your submitted evaluations."
         titleAction={<StudentEvaluationsHelp />}
       />
 

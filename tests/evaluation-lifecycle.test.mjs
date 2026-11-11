@@ -20,7 +20,7 @@ function load(file, mocks = {}, globals = {}) {
 const example = { id: 'evaluation', type: 'Performance Evaluation', evaluator_id: 'author', period: 'October 2026', evaluator: 'Employer', submittedDate: 'Oct 21, 2026', breakdown: [] };
 
 test('delete and print permissions distinguish author soft deletion from staff purge for both directions', () => {
-  for (const type of ['Performance Evaluation', 'Supervisor Evaluation']) for (const deleted of [false, true]) {
+  for (const type of ['Performance Evaluation', 'Company Evaluation']) for (const deleted of [false, true]) {
     for (const role of ['employer', 'student', 'admin', 'department_head']) for (const id of ['author', 'other']) {
       const Hook = load('components/evaluations-ui/usePostedEvaluation.js', { react: hooks,
         '@/contexts/UserContext': { useUser: () => ({ user: { role, id } }) } }).default;
@@ -35,7 +35,7 @@ test('delete and print permissions distinguish author soft deletion from staff p
 
 test('deleted cached summaries are hidden from both author roles but remain visible for staff', () => {
   const items = [{ ...example, comments: 'Active scores' }, { ...example, id: 'deleted', deleted_at: 'date', comments: 'Deleted scores' },
-    { ...example, id: 'own', type: 'Supervisor Evaluation', comments: 'Own supervisor scores' }, { ...example, id: 'old-own', type: 'Supervisor Evaluation', deleted_at: 'date', comments: 'Deleted supervisor scores' }];
+    { ...example, id: 'own', type: 'Company Evaluation', comments: 'Own company scores' }, { ...example, id: 'old-own', type: 'Company Evaluation', deleted_at: 'date', comments: 'Deleted company scores' }];
   for (const role of ['student', 'employer', 'admin', 'department_head']) {
     const Card = load('components/evaluations-ui/EvaluationCard.js', {
       './useEvaluationItems': () => ({ items }), '@/contexts/UserContext': { useUser: () => ({ user: { role } }) },
@@ -43,8 +43,8 @@ test('deleted cached summaries are hidden from both author roles but remain visi
     }).default;
     const html = renderToStaticMarkup(React.createElement(Card, { evaluations: items }));
     assert.equal(html.includes('Deleted scores'), ['admin', 'department_head'].includes(role));
-    assert.equal(html.includes('Deleted supervisor scores'), ['admin', 'department_head'].includes(role));
-    if (role === 'student') { assert(!html.includes('Active scores')); assert(html.includes('Own supervisor scores')); }
+    assert.equal(html.includes('Deleted company scores'), ['admin', 'department_head'].includes(role));
+    if (role === 'student') { assert(!html.includes('Active scores')); assert(html.includes('Own company scores')); }
   }
 });
 
@@ -108,12 +108,12 @@ test('deletion sends each direction to the right API and revalidates only after 
     './auth': { getAccessToken: async () => 'test-token', getUserSession: async () => ({ user: { id: 'author' } }) },
     '../api-response': responses, 'next/cache': { revalidatePath: path => paths.push(path) },
   }, { console, fetch: async (url, options) => { calls.push({ url, options }); return Response.json(ok ? { success: true } : { error: 'Forbidden' }, { status: ok ? 200 : 403 }); } });
-  for (const type of ['Performance Evaluation', 'Supervisor Evaluation']) {
+  for (const type of ['Performance Evaluation', 'Company Evaluation']) {
     const data = new FormData(); data.set('evaluationId', 'record'); data.set('evaluationType', type);
     assert.equal((await actions.deleteEvaluation(data)).success, true);
   }
-  assert(calls[0].url.endsWith('/student-evaluation/record')); assert(calls[1].url.endsWith('/evaluations/employer/record'));
+  assert(calls[0].url.endsWith('/student-evaluation/record')); assert(calls[1].url.endsWith('/evaluations/company/record'));
   assert(calls.every(value => value.options.method === 'DELETE')); const count = paths.length;
-  ok = false; const data = new FormData(); data.set('evaluationId', 'record'); data.set('evaluationType', 'Supervisor Evaluation');
+  ok = false; const data = new FormData(); data.set('evaluationId', 'record'); data.set('evaluationType', 'Company Evaluation');
   assert.equal((await actions.deleteEvaluation(data)).success, false); assert.equal(paths.length, count);
 });

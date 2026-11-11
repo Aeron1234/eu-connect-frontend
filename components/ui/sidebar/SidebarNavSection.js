@@ -1,4 +1,5 @@
 import NavLink from "./SidebarNavLink";
+import NavGroup from "./SidebarNavGroup";
 
 export default function SidebarNavSection({
   label,
@@ -20,8 +21,8 @@ export default function SidebarNavSection({
       </h3>
       <ul className="flex flex-col gap-1">
         {routes.map((item) => (
-          <li key={item.href}>
-            <NavLink
+          <li key={item.href || item.name}>
+            {item.children ? <NavGroup key={pathName} item={item} pathName={pathName} isCollapsed={isCollapsed} onClick={onClick} /> : <NavLink
               scroll={false}
               href={item.href}
               name={item.name}
@@ -30,7 +31,7 @@ export default function SidebarNavSection({
               isCollapsed={isCollapsed}
               onClick={onClick}
               exact={item.exact}
-            />
+            />}
           </li>
         ))}
       </ul>

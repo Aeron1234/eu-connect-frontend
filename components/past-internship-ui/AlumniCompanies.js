@@ -66,18 +66,11 @@ function AlumniCompanies({
 
       {isOpen && (
         <div className="border-t border-border">
-          {company.alumni.map((a) => (
-            <AlumniRow
-              key={a.id}
-              alumni={a}
-              batch={a.academic_year?.split("-")[1]}
-              onUpdate={handleItemUpdate}
-              onDelete={handleItemDelete}
-              courses={courses}
-              companyName={company.company_name}
-              companyAddress={company.company_address}
-              industry={company.industry}
-            />
+          {company.alumni.map((student) => (
+            <AlumniRow key={student.id} student={student}
+              onUpdate={handleItemUpdate} onDelete={handleItemDelete}
+              courses={courses} companyName={company.company_name}
+              companyAddress={company.company_address} industry={company.industry} />
           ))}
         </div>
       )}
@@ -86,8 +79,7 @@ function AlumniCompanies({
 }
 
 function AlumniRow({
-  alumni,
-  batch,
+  student,
   onDelete,
   onUpdate,
   courses = [],
@@ -96,6 +88,16 @@ function AlumniRow({
   industry,
 }) {
   const [isPending, startTransition] = useTransition();
+  const records = student.records || [student];
+  const [selectedRecordId, setSelectedRecordId] = useState(records[0].id);
+  const alumni = records.find((record) => record.id === selectedRecordId) || records[0];
+  const batch = student.academic_year?.split("-")[1];
+  const positions = [...new Map(
+    records
+      .map((record) => record.internship_position?.trim())
+      .filter(Boolean)
+      .map((position) => [position.toLocaleLowerCase(), position]),
+  ).values()];
   const { user } = useUser();
 
   const userRole = user.role;
@@ -147,21 +149,31 @@ function AlumniRow({
       <div className="flex w-full items-center justify-between gap-3 px-4 sm:px-5 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <span className="grid size-9 flex-shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-emphasis">
-            {initialsOf(alumni.alumni_name)}
+            {initialsOf(student.alumni_name)}
           </span>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">
-              {alumni.alumni_name}
+              {student.alumni_name}
             </p>
             <p className="text-xs text-muted-foreground">
-              {alumni.course_name}
+              {student.course_name}
+              {records.length > 1 && ` · ${records.length} records`}
               {batch ? ` · Batch ${batch}` : ""}
             </p>
+            {positions.length > 0 && (
+              <p className="mt-1 text-xs text-foreground-soft">
+                {positions.length === 1 ? "Position: " : "Positions: "}
+                {positions.join(" · ")}
+              </p>
+            )}
           </div>
         </div>
 
         {isAuthorizedStaff ? (
           <div className="flex gap-3 flex-shrink-0">
+            {records.length > 1 && <select value={alumni.id} onChange={(event) => setSelectedRecordId(event.target.value)} className="max-w-28 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground" aria-label={`Choose record for ${student.alumni_name}`}>
+              {records.map((record, index) => <option key={record.id} value={record.id}>{record.internship_position || `Record ${index + 1}`}{record.date_started ? ` · ${String(record.date_started).slice(0, 10)}` : ""}</option>)}
+            </select>}
             <Modal variant="form"
               title={
                 <span className="text-primary-emphasis">Update Record</span>

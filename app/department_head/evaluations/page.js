@@ -9,7 +9,7 @@ export const metadata = { title: "Evaluations" };
 
 const typeLabels = {
   performance: "Supervisor → student",
-  supervisor: "Student → supervisor",
+  company: "Student to company",
 };
 
 export default async function EvaluationsPage({ searchParams }) {
@@ -37,13 +37,13 @@ export default async function EvaluationsPage({ searchParams }) {
   return <main className="min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
     <header>
       <h1 className="flex items-center gap-2 text-2xl font-semibold"><ClipboardCheck className="size-6 text-primary-emphasis" />Evaluations <HelpManual guideId="department-evaluations" /></h1>
-      <p className="mt-1 text-sm text-muted-foreground">Review evaluations for students in your department. Supervisor evaluations of students remain confidential.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Review evaluations for students in your department. Employer evaluations of students remain confidential.</p>
     </header>
     {filters.evaluationId && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm">Showing the evaluation from your notification.<Link href="/department_head/evaluations" className="font-medium text-primary-emphasis hover:underline">View all evaluations</Link></div>}
     <form method="get" className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Evaluation filters">
       <label className="text-xs font-medium">Student name<input name="search" defaultValue={filters.search} placeholder="Search student" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm" /></label>
       <label className="text-xs font-medium">Company<input name="company" defaultValue={filters.company} placeholder="Search placement" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm" /></label>
-      <FilterSelectField key={`type-${filters.type}`} name="type" label="Evaluation type" value={filters.type} options={[{ value: "", label: "Both types" }, { value: "performance", label: "Supervisor → student" }, { value: "supervisor", label: "Student → supervisor" }]} />
+      <FilterSelectField key={`type-${filters.type}`} name="type" label="Evaluation type" value={filters.type} options={[{ value: "", label: "Both types" }, { value: "performance", label: "Supervisor → student" }, { value: "company", label: "Student to company" }]} />
       <FilterSelectField key={`status-${filters.status}`} name="status" label="Status" value={filters.status} options={[{ value: "", label: "All statuses" }, { value: "active", label: "Submitted" }, { value: "deleted", label: "Deleted by author" }]} />
       <FilterSelectField key={`course-${filters.courseId}`} name="courseId" label="Course" value={filters.courseId} options={[{ value: "", label: "All courses" }, ...data.courses.map(course => ({ value: String(course.id), label: course.short_name || course.course_name }))]} />
       <label className="text-xs font-medium">Submitted from<input type="date" name="from" defaultValue={filters.from} className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm" /></label>

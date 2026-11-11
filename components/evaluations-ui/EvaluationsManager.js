@@ -1,6 +1,6 @@
 "use client";
 
-import EmployerEvaluations from "./EmployerEvaluations";
+import CompanyEvaluations from "./CompanyEvaluations";
 import EvaluationCard from "./EvaluationCard";
 import TabBar from "../ui/TabBar";
 import EvaluationsTabContentSkeleton from "../skeletons/EvaluationsTabContentSkeleton";
@@ -36,10 +36,10 @@ function EvaluationsManager({ initialCriteria }) {
           <EvaluationsTabContentSkeleton tab={selectedTab} />
         ) : (
           <>
-            {activeTab === "evaluate-supervisor" && (
+            {activeTab === "evaluate-company" && (
               <div className="mb-8 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
-                <EmployerEvaluations
-                  employerEvaluationCriterias={data?.criteria || []}
+                <CompanyEvaluations
+                  companyEvaluationCriterias={data?.criteria || []}
                   onSubmitted={refreshEvaluations}
                 />
               </div>

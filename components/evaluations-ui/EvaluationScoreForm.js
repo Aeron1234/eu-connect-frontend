@@ -12,11 +12,12 @@ export default function EvaluationScoreForm({
   setRemarks,
   isPending,
   handleEvaluation,
+  emptyMessage = "No active evaluation questions are available yet.",
 }) {
   const hasQuestions = criteria.some((group) => group.items.length > 0);
   return (
     <form className="flex-1 flex flex-col gap-6" onSubmit={handleEvaluation}>
-      {!hasQuestions && <p className="text-sm text-muted-foreground">Your department has no active evaluation questions yet. Ask your department head to set them up.</p>}
+      {!hasQuestions && <p className="text-sm text-muted-foreground">{emptyMessage}</p>}
       {/* 1. Loop through each Category */}
       {criteria.map((group) => (
         <div

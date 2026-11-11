@@ -35,7 +35,7 @@ function PageManual({ page, searchedRole, hasOngoingInternship = false, supervis
       "Review the employer's profile and select Set as Supervisor when available to request supervision.",
       "In Info, Supervised interns appears below the employer details when ongoing or completed placements exist. Each student has one card listing all ongoing and completed positions and dates under that supervisor, with five students per page. Open a student's View profile link or use Previous and Next for more history. Every signed-in role can see these basic placement details; student work tabs keep their normal access rules.",
       "Check the button for the request status. You can manage a pending request or remove an existing supervisor from the profile.",
-      "The employer responds to the request through notifications. Under Evaluations in your student menu, you can evaluate your accepted supervisor more than once during an ongoing internship and review each submission in Past Evaluations.",
+      "The employer responds to the request through notifications. Under Evaluations in your student menu, you can evaluate the company of your ongoing internship more than once and review each submission in Past Evaluations.",
     ];
   } else if (page === "user-profile" && searchedRole === "employer") {
     title = "How to review this employer";

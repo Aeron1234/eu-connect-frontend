@@ -47,7 +47,7 @@ export const recordsGuide = {
     "Rotations may continue past the estimated internship end date while the record is ongoing. Finished records keep their timeline available for review. Student Submissions shows narratives and their saved rotation labels, including in printed journals.",
     "In Overview, click the company pin and choose See on Google Maps to open campus-to-company directions in a new tab.",
     "Attendance shows saved shifts, break time, credited hours, and clock-in/out photos. DTR Restrictions manages location pins and radii. Review these before marking an internship finished.",
-    "Evaluations lists confidential employer performance evaluations and student evaluations of supervisors. A notification or list entry opens the focused evaluation. Authorized staff can preview, print, download, and permanently delete an author-deleted copy there.",
+    "Evaluations lists confidential employer performance evaluations and student evaluations of companies. A notification or list entry opens the focused evaluation. Authorized staff can preview, print, download, and permanently delete an author-deleted copy there.",
     "Mark Finished is a staff completion decision and does not require credited hours to meet the required total. Check the student's record first. The student's Finish Internship Record control requires the hours target and no open shift. Completion preserves history; it does not delete attendance, narratives or rotations."
   ],
   "href": "/department_head/internship-records",
@@ -60,10 +60,10 @@ export const pastGuide = {
   "summary": "Find alumni placements by company, department, and academic year.",
   "steps": [
     "Search for a company or alumnus and combine the Academic Year and Departments filters. Department choices use acronyms such as CCS; Departments shows all departments.",
-    "Open a company to see the alumni placement entries matching your filters. Use See more when more results are available.",
+    "Open a company to see the alumni matching your filters. A student with multiple linked internships at that company appears once; available internship positions appear under their name. Use See more when more results are available.",
     "This page lists historical alumni placements. Your personal internship documents are in Storage.",
     "Department heads outside the registrar can select Post Record for their department. Enter the required alumni, company, industry, course, address, batch year, and academic year; position, hours, supervisor, and notes are optional.",
-    "Those department heads can edit or delete entries in their department with the pencil or trash controls. Confirm deletion. If required details are missing, the form stays open and an error toast identifies what to complete."
+    "Those department heads can edit or delete entries in their department with the pencil or trash controls. For a student with multiple records, choose which record to change first. Confirm deletion. If required details are missing, the form stays open and an error toast identifies what to complete."
   ],
   "href": "/past-internships",
   "linkText": "Open Past Internships"

@@ -17,7 +17,7 @@ export default async function EvaluationCriteriaPage() {
       <PageTitle
         Icon={SlidersHorizontal}
         title="Evaluation Criteria"
-        description="Manage the evaluation questions used by students in your department and their supervisors."
+        description="Manage performance questions for supervisors and company questions for students in your department."
         titleAction={<PageManual page="department-head-evaluation-criteria" />}
       />
       <EvaluationCriteriaPageContent />

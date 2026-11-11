@@ -63,7 +63,7 @@ Camera attendance requires HTTPS (or localhost), browser camera/location permiss
 - Before- and after-deployment document organization, supervisor-uploaded document review, and access to personal files from earlier internships.
 - Internship opportunity search, filters, and favorites.
 - Supervisor search and supervision requests.
-- Supervisor evaluations and a history of the student's own submissions.
+- Company evaluations and a history of the student's own submissions.
 
 ### Employer supervision
 
@@ -102,7 +102,7 @@ The application uses four role codes. Registrar access is a department-head acco
 
 | Role | Main responsibilities |
 | --- | --- |
-| Student (`student`) | Manage personal internship records, attendance, requirements, narratives, reports, and supervisor evaluations. |
+| Student (`student`) | Manage personal internship records, attendance, requirements, narratives, reports, and company evaluations. |
 | Employer (`employer`) | Manage opportunities, respond to supervision requests, supervise accepted interns, submit performance evaluations, and post feedback. |
 | Department head (`department_head`) | Review permitted internship records, monitor student progress, plan visits, post department announcements, and participate in relevant discussions. |
 | Registrar (`department_head` + `REG`) | Prepare SIPP reports and post General announcements through the office's permitted tools. |
@@ -115,7 +115,7 @@ Important access rules:
 - Employers can read only announcements shared through the Visible to employers checkbox. They cannot post or manage announcements. The full Calendar page remains unavailable; their header calendar stays a month-view popup.
 - Regular department heads post **Department** announcements and can read General announcements. Registrar accounts and administrators post **General** announcements.
 - Employer performance evaluations are confidential to the submitting employer and authorized school staff. Students cannot view them.
-- Employers can submit multiple performance evaluations and students can submit multiple supervisor evaluations per ongoing internship, without deleting earlier reviews. Author deletion hides only that evaluation; authorized staff retain deleted history and can permanently delete those copies. Apply backend `scripts/2026-10-29-multiple-performance-evaluations.sql` if needed, then `scripts/2026-11-04-multiple-supervisor-evaluations.sql` before deploying this change with the backend. No environment or package changes are needed.
+- Employers can submit multiple confidential student performance evaluations per supervised ongoing internship. Students can submit multiple company evaluations per ongoing internship, whether or not a supervisor is assigned. Author deletion hides only that evaluation; authorized staff retain deleted history and can permanently delete those copies. Apply backend `scripts/2026-11-10-company-evaluations.sql` before deploying this change. It replaces and deletes the old student-to-supervisor evaluation tables; the confidential performance tables remain unchanged. Department heads must create new company-focused criteria before students can submit. No frontend environment or package changes are needed.
 - Narrative creation/editing, summary report creation/editing, and employer performance-evaluation submission require the applicable internship start date to have arrived in Philippine time.
 - Students cannot access Feedback & Concerns. General Feedback reaches the author, administrators, and all department heads. Technical Issues and Platform Feedback reach the author and administrators. Internship concerns also reach the department heads of tagged students.
 - Profile tabs and record details remain subject to the viewer's supervision relationship, department, role, and backend authorization.
@@ -276,7 +276,7 @@ Page access and available actions depend on the session and backend permissions.
 | `/student/narratives` | Weekly narratives and journal export. |
 | `/student/summary-reports` | Summary reports and PDF export. |
 | `/student/storage` | Personal requirements and document history. |
-| `/student/evaluations` | Student-authored supervisor evaluations. |
+| `/student/evaluations` | Student-authored company evaluations. |
 | `/employer` | Employer dashboard and supervised interns. |
 | `/department_head` | Department overview. |
 | `/department_head/sipp-reports` | Registrar-only SIPP Annex C/D tools. |
@@ -296,14 +296,14 @@ Page access and available actions depend on the session and backend permissions.
 | `/map` | Administrator/department-head visit planning. |
 | `/company-analytics` | Confirmed company placement analytics for admins and non-Registrar department heads. |
 | `/dtr-restrictions` | Individual/bulk DTR geofence assignment and employer shift hours for admins, non-Registrar heads and supervising employers. |
-| `/past-internships` | Alumni placements for students and school staff. |
+| `/past-internships` | Alumni placements for students and school staff. Linked records for the same student at one company appear in one row with their available internship positions; staff can select an individual record to edit or delete. |
 | `/announcements` | Announcements for students and school staff, plus posts explicitly shared with employers. |
 | `/calendar` | Student and school-staff calendar tools. |
 | `/feedback` | Employer and authorized school-staff discussions. |
 | `/notifications` | Notification inbox and supervisor-request responses. |
 | `/help` | Role-aware instructions and page manuals. |
 
-Evaluation Criteria moved from Admin to non-Registrar Department Head. Each head manages only their department's student performance and supervisor evaluation questions. The existing CCS questions are preserved by the backend migration `scripts/2026-11-06-department-evaluation-criteria.sql`, which must run before deploying the paired frontend/backend. Other departments begin with no questions and must add their own before evaluations can be submitted. Existing evaluation scores retain their original question IDs. No new frontend packages or environment variables are needed.
+Evaluation Criteria moved from Admin to non-Registrar Department Head. Each head manages only their department's student performance and company evaluation questions. The earlier department-criteria migration retains existing CCS performance questions. The company-evaluation migration removes old supervisor questions and creates empty company criteria for every department. Heads must add company questions before students can submit. Existing performance scores retain their question IDs. No new frontend packages or environment variables are needed.
 
 Student internship approval notifications open `/student/internship-record`
 from the live toast, header dropdown and full inbox. Opening refreshes the
@@ -580,5 +580,9 @@ Regular department heads can open `/department_head/submissions` for a paginated
 
 ### Department Evaluations (November 7, 2026)
 
-Regular department heads can open `/department_head/evaluations` to review a paginated, department-scoped list of supervisor-to-student performance evaluations and student-to-supervisor evaluations. Search by student/company and filter by direction, active/deleted state, course, or submission date. The list includes author-deleted evaluations for staff review; Review opens the selected evaluation in the focused Evaluations detail. Evaluation notifications link directly there when both IDs are available, or filter the list when only an evaluation ID is known. The Registrar and other roles cannot access the page or backend read. Performance evaluations remain confidential from students. Deploy the paired backend endpoint first. No new SQL migration, package, or environment variable is required.
+Regular department heads can open `/department_head/evaluations` to review a paginated, department-scoped list of employer-to-student performance evaluations and student-to-company evaluations. Search by student/company and filter by direction, active/deleted state, course, or submission date. The list includes author-deleted evaluations for staff review; Review opens the selected evaluation in the focused Evaluations detail. Evaluation notifications link directly there when both IDs are available, or filter the list when only an evaluation ID is known. The Registrar and other roles cannot access the page or backend read. Performance evaluations remain confidential from students. Deploy the paired backend endpoint and run `scripts/2026-11-10-company-evaluations.sql` before deploying this frontend. No new package or environment variable is required.
+
+### Evaluated Companies (November 11, 2026)
+
+Non-Registrar department heads can use the **Evaluations** sidebar dropdown for Evaluation Criteria, Evaluations, and Evaluated Companies. The new `/department_head/evaluated-companies` page compares active student-authored company evaluations across departments. Ratings group by normalized company name **and** address, average a student's repeated evaluations before averaging students, and support highest-to-lowest or lowest-to-highest sorting. A course filter is limited to the head's department; date filters use the internship start date. The company detail page shows individual scores but the backend masks other-department student names and omits their remarks. Fewer than three reviewers is labeled Limited feedback. Admins and Registrar heads have no access. Deploy the matching backend; it reuses the existing November 10 company evaluation tables and needs no additional SQL, package, or environment variable.
 

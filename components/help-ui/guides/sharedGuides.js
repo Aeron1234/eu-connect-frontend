@@ -34,7 +34,7 @@ const sharedGuides = [
   "summary": "Open related pages and manage unread updates.",
   "steps": [
     "Select the header bell for recent notifications and use its page controls for older items.",
-    "Select a notification to open the related page. Feedback notifications open the discussion; department-head notifications about employer evaluations open the filtered Evaluations list, where Review opens the internship record.",
+    "Select a notification to open the related page. Feedback notifications open the discussion; department-head notifications about employer-authored performance evaluations open the filtered Evaluations list, where Review opens the internship record.",
     "For students, Internship Record Approved opens My Records from the live notification popup, header dropdown, or notification list. Unread notifications have a subtle maroon tint in dark mode. Closing a popup dismisses it without deleting or marking the saved notification as read.",
     "For students, an internship rejection notification contains the reason entered by staff and opens My Records. Find the same reason on the rejected record card. Restoring the record clears the card reason but keeps the old notification as history.",
     "Open Notifications for the full list. Mark items as read, use Mark all as read, or delete an eligible notification. Deleting a notification removes the alert, not the underlying record or feedback discussion.",

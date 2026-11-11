@@ -7,7 +7,7 @@ import { notifyReadError } from "@/lib/client-read-error";
 import { evaluationsKeys, evaluationsTabOptions } from "@/lib/cache/evaluations-queries";
 
 const tabs = [
-  { value: "evaluate-supervisor", text: "Evaluate Supervisor" },
+  { value: "evaluate-company", text: "Evaluate Company" },
   { value: "past-evaluations", text: "Past Evaluations" },
 ];
 const changedEvaluationTabs = ["past-evaluations"];
@@ -17,11 +17,11 @@ export default function useEvaluationsManager(initialCriteria) {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const serverSnapshotRef = useRef(null);
-  const [selectedTab, setSelectedTab] = useState("evaluate-supervisor");
-  const [activeTab, setActiveTab] = useState("evaluate-supervisor");
+  const [selectedTab, setSelectedTab] = useState("evaluate-company");
+  const [activeTab, setActiveTab] = useState("evaluate-company");
   const tabQuery = useQuery({
     ...evaluationsTabOptions(user.id, activeTab),
-    initialData: activeTab === "evaluate-supervisor" && Array.isArray(initialCriteria)
+    initialData: activeTab === "evaluate-company" && Array.isArray(initialCriteria)
       ? { criteria: initialCriteria }
       : undefined,
   });
@@ -30,7 +30,7 @@ export default function useEvaluationsManager(initialCriteria) {
     if (!Array.isArray(initialCriteria) || serverSnapshotRef.current === initialCriteria) return;
     serverSnapshotRef.current = initialCriteria;
     queryClient.setQueryData(
-      evaluationsKeys.tab(user.id, "evaluate-supervisor"),
+      evaluationsKeys.tab(user.id, "evaluate-company"),
       { criteria: initialCriteria },
     );
   }, [initialCriteria, queryClient, user.id]);

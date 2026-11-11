@@ -43,18 +43,18 @@ test("the full calendar page redirects employer requests", async () => {
   await assert.rejects(() => Layout({}), /Redirect:\/employer/);
 });
 
-test("student evaluation tabs contain only their supervisor form and own submitted history", () => {
+test("student evaluation tabs contain only their company form and own submitted history", () => {
   const Hook = load("components/evaluations-ui/useEvaluationsManager.js", {
     react: hooks, "@tanstack/react-query": { useQuery: () => ({}), useQueryClient: () => ({}) },
     "@/contexts/UserContext": { useUser: () => ({ user: { id: "student" } }) },
     "@/lib/client-read-error": {}, "@/lib/cache/evaluations-queries": { evaluationsTabOptions: () => ({}) },
   }).default;
-  assert.deepEqual(Array.from(Hook([]).tabs, tab => tab.value), ["evaluate-supervisor", "past-evaluations"]);
+  assert.deepEqual(Array.from(Hook([]).tabs, tab => tab.value), ["evaluate-company", "past-evaluations"]);
 });
 
 test("student cards never render a cached employer performance evaluation", () => {
   const evaluations = [{ id: "private", type: "Performance Evaluation", comments: "PRIVATE SCORES" },
-    { id: "own", type: "Supervisor Evaluation", comments: "Own submitted feedback" }];
+    { id: "own", type: "Company Evaluation", comments: "Own submitted feedback" }];
   const Card = load("components/evaluations-ui/EvaluationCard.js", {
     "./useEvaluationItems": () => ({ items: evaluations }), "@/contexts/UserContext": { useUser: () => ({ user: { role: "student" } }) },
     "./PostedEvaluationItem": ({ ev }) => ev.comments, "./EvaluationEmptyState": empty,

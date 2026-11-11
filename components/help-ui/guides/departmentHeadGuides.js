@@ -6,13 +6,28 @@ const departmentHeadGuides = [
 companyAnalyticsGuide, registrarDashboardGuide,
 bulkDtrGuide('department_head'),
 {
+  id: "evaluated-companies",
+  hideForRegistrar: true,
+  title: "Compare evaluated companies",
+  summary: "See how students rated internship companies before placing another student there.",
+  steps: [
+    "Use the Evaluations menu, then open Evaluated Companies. Filter by one of your department's courses or by internship start date. Sort ratings from highest to lowest or lowest to highest.",
+    "Ratings include active student evaluations from ongoing and finished internships across departments. Companies are grouped by both name and address; a missing address or several addresses for one name is flagged for review.",
+    "Each student counts equally: if they submitted several evaluations for one company, those scores are averaged first. Limited feedback means fewer than three distinct student reviewers.",
+    "Open a company to read individual scores. Your department's students appear by full name with remarks; students from other departments have masked names and no remarks.",
+    "Only department heads outside the Registrar can open this page. Admins cannot access the ratings."
+  ],
+  href: "/department_head/evaluated-companies",
+  linkText: "Open Evaluated Companies"
+},
+{
   id: "department-evaluations",
   hideForRegistrar: true,
   title: "Review department evaluations",
-  summary: "Find supervisor-to-student and student-to-supervisor evaluations across your department.",
+  summary: "Find employer-to-student performance and student-to-company evaluations across your department.",
   steps: [
     "Search by student or company and filter by evaluation type, course, status, or submission date.",
-    "Supervisor-to-student evaluations are confidential: students cannot view them. Student-to-supervisor evaluations are a separate direction.",
+    "Employer-to-student performance evaluations are confidential: students cannot view them. Student-to-company evaluations are a separate direction.",
     "Deleted by author entries remain visible to department heads. Choose Review to open the focused evaluation, where authorized review, print, and permanent-delete actions remain. Use View placement overview to check the internship record.",
     "Only students in your current department appear. Registrar heads cannot access this page."
   ],
@@ -53,7 +68,7 @@ bulkDtrGuide('department_head'),
   title: "Manage your department's evaluation criteria",
   summary: "Set the questions students and their supervisors answer for your department.",
   steps: [
-    "Switch between Student performance and Supervisor evaluation forms. Each form shows only your department's questions.",
+    "Switch between Student performance and Company evaluation forms. Each form shows only your department's questions.",
     "Use the active and inactive filters. Add a section, then add its first criterion to save it.",
     "Add more questions or deactivate and reactivate a question or whole section. Confirm changes before saving.",
     "Inactive questions are removed from new forms; existing evaluation scores remain available in past reports. Students and supervisors can submit only when the department has active questions for that form."

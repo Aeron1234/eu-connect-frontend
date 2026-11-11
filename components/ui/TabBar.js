@@ -29,7 +29,7 @@ const iconMap = {
   evaluations: Star,
   certificates: FileCheck,
   info: User,
-  "evaluate-supervisor": ClipboardCheck,
+  "evaluate-company": ClipboardCheck,
   "pending-confirmation": Hourglass,
   "past-evaluations": History,
   disputed: AlertTriangle,

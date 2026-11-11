@@ -5,9 +5,9 @@ import EvaluationPostingGuard from "./EvaluationPostingGuard";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import EvaluationsCriteria from "./EvaluationsCriteria";
-import EmployerEvaluationForm from "./EmployerEvaluationForm";
+import CompanyEvaluationForm from "./CompanyEvaluationForm";
 
-function EmployerEvaluations({ employerEvaluationCriterias, onSubmitted }) {
+function CompanyEvaluations({ companyEvaluationCriterias, onSubmitted }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -15,7 +15,7 @@ function EmployerEvaluations({ employerEvaluationCriterias, onSubmitted }) {
       <div
         className={`flex gap-2 items-center justify-between ${isOpen ? "mb-4" : ""}`}
       >
-        <h3 className="text-base font-semibold">Supervisor Evaluation Form</h3>
+        <h3 className="text-base font-semibold">Company Evaluation Form</h3>
 
         <button
           className="flex gap-1 items-center transition-all hover:bg-muted/50 p-1 rounded-lg"
@@ -36,11 +36,11 @@ function EmployerEvaluations({ employerEvaluationCriterias, onSubmitted }) {
 
           <h3 className="text-base font-semibold">Submit New Evaluation</h3>
 
-          <EvaluationPostingGuard direction="supervisor">
-          <EmployerEvaluationForm
-            employerEvaluationCriterias={employerEvaluationCriterias}
-            onSubmitted={onSubmitted}
-          />
+          <EvaluationPostingGuard direction="company">
+            <CompanyEvaluationForm
+              companyEvaluationCriterias={companyEvaluationCriterias}
+              onSubmitted={onSubmitted}
+            />
           </EvaluationPostingGuard>
         </>
       )}
@@ -48,4 +48,4 @@ function EmployerEvaluations({ employerEvaluationCriterias, onSubmitted }) {
   );
 }
 
-export default EmployerEvaluations;
+export default CompanyEvaluations;

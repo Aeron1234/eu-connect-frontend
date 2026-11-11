@@ -88,7 +88,7 @@ function DepartmentHeadDashboardPage() {
   });
 
   const studentEvalScores = dashboardRes?.studentEvaluationAverages || [];
-  const employerEvalScores = dashboardRes?.employerEvaluationAverages || [];
+  const companyEvalScores = dashboardRes?.companyEvaluationAverages || [];
   const courses = dashboardRes?.hoursTracker?.courses || [];
 
   return (
@@ -118,10 +118,10 @@ function DepartmentHeadDashboardPage() {
           data={studentEvalScores}
         />
         <EvaluationScoresChart
-          title="Employer Evaluations"
+          title="Company Evaluations"
           description="Average score per category, rated by students"
           icon={<Building2 className="w-4 h-4 text-primary-emphasis" />}
-          data={employerEvalScores}
+          data={companyEvalScores}
         />
       </div>
 

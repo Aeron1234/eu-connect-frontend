@@ -2,7 +2,7 @@ import EvaluationCriteriaSkeleton from "./EvaluationCriteriaSkeleton";
 import EvaluationListSkeleton from "./EvaluationListSkeleton";
 
 function EvaluationsTabContentSkeleton({ tab }) {
-  if (tab === "evaluate-supervisor") {
+  if (tab === "evaluate-company") {
     return (
       <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-6 mb-8">
         <EvaluationCriteriaSkeleton />
