@@ -44,7 +44,7 @@ export default async function AttendancePage({ searchParams }) {
       <div className="flex items-end gap-2"><button className="h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Apply</button><Link href="/department_head/attendance" className="grid h-10 place-items-center rounded-md border border-border px-4 text-sm">Reset</Link></div>
     </form>
     <section className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6" aria-label="Department time records">
-      <div className="mb-3 text-sm text-muted-foreground">{data.total} time {data.total === 1 ? "record" : "records"} · Page {data.page} of {data.totalPages}</div>
+      <div className="mb-3 text-sm text-muted-foreground">{data.total} attendance {data.total === 1 ? "record" : "records"} · Page {data.page} of {data.totalPages}</div>
       <DtrTable dtrs={data.rows} showStudent />
       <nav aria-label="Attendance pages" className="mt-4 flex items-center justify-end gap-3 border-t border-border pt-3 text-sm">
         {data.page > 1 ? <Link href={pageHref(data.page - 1)} aria-label="Previous page" className="rounded-md border border-border p-2 hover:bg-muted"><ChevronLeft className="size-4" /></Link> : <span className="rounded-md border border-border p-2 opacity-40"><ChevronLeft className="size-4" /></span>}

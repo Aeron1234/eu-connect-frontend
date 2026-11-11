@@ -1,5 +1,11 @@
 # Weekly duty schedules and absence reporting
 
+Absence explanation dialogs now use the same shared modal-form shell, fields, validation and Cancel/Submit footer as Weekly Narratives, including new reports, pending-reason edits and department-head review/corrections. All report entry points use the form dialog; failed saves retain the open form and entered values.
+
+Schedule and DTR explanation dialogs reuse Weekly Narratives' shared modal-form fields, validation, scrollable body and footer actions. Clock-in/out opens a wider responsive camera form. Use Switch camera for the front/rear camera and the zoom buttons or slider for 1x–3x digital zoom before capture; higher zoom reduces detail. Preview/retake remains available, and the saved image receives its official timestamp from the backend. This UI update needs no backend or SQL changes.
+
+Attendance and private absence reports now share the student Recent Time Records table and the regular department head Attendance table. One chronological backend-paginated timeline drives totals and pages; department filters apply to both sources. Corrected reports are attached to their DTR instead of appearing twice. Schedule controls/history remain separate because schedules have different fields. Use View reason in the Review column; absence-only rows show zero hours and dash placeholders. The category selector follows Storage's modal Select styling. Deploy the matching backend; this table change requires no additional migration or environment variable.
+
 Implemented November 11, 2026. This supersedes earlier guidance allowing unscheduled clock-in.
 
 ## Deployment order

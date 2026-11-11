@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Modal from "@/components/ui/Modal";
+import ModalForm from "@/components/ui/ModalForm";
 import { useUser } from "@/contexts/UserContext";
 import { dashboardOverviewKeys } from "@/lib/cache/dashboard-overview-queries";
 import { dtrKeys } from "@/lib/cache/dtr-queries";
@@ -47,22 +48,21 @@ export default function MissedClockOutButton({ record, internshipId }) {
     triggerStyles="inline-flex min-h-8 items-center rounded-md px-1 text-xs font-medium text-white/80 underline-offset-2 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
     title="Report a missed clock-out"
     description="Use this only if you already stopped working and forgot to clock out. Your reported time and hours need staff review; there will be no clock-out photo or location check.">
-    <div className="space-y-3 p-4 text-sm sm:p-6">
-      <label className="block font-medium text-foreground">When did you stop working? (Philippine time)
-        <input type="datetime-local" value={claimedEnd} onChange={event => setClaimedEnd(event.target.value)}
+    <ModalForm.Root onSubmit={event => { event.preventDefault(); void submit(); }}>
+    <ModalForm.Section title="Missed clock out explanation">
+      <ModalForm.Field label="When did you stop working? (Philippine time)">
+        <ModalForm.Input type="datetime-local" required disabled={busy} value={claimedEnd} onChange={event => setClaimedEnd(event.target.value)}
           min={manilaInputTime(record.clock_in)} max={manilaInputTime(new Date())}
           className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground" />
-      </label>
-      <label className="block font-medium text-foreground">Why did you miss clock-out?
-        <textarea value={explanation} onChange={event => setExplanation(event.target.value)} maxLength={1000} rows={4}
+      </ModalForm.Field>
+      <ModalForm.Field label="Why did you miss clock out?">
+        <ModalForm.Textarea required disabled={busy} minLength={15} value={explanation} onChange={event => setExplanation(event.target.value)} maxLength={1000} rows={4}
           placeholder="Explain what happened and when you stopped working."
           className="mt-1 w-full rounded-md border border-border bg-background p-2 text-foreground" />
-      </label>
+      </ModalForm.Field>
       <p className="text-xs text-foreground-soft">You can start another shift only after the existing daily and six-hour rest rules allow it.</p>
-      <button type="button" onClick={submit} disabled={busy || !claimedEnd || explanation.trim().length < 15}
-        className="rounded-md bg-primary px-3 py-2 font-medium text-white disabled:opacity-50">
-        {busy ? "Submitting…" : "Submit for review"}
-      </button>
-    </div>
+    </ModalForm.Section>
+    <ModalForm.Actions isPending={busy} submitDisabled={!claimedEnd || explanation.trim().length < 15} submitLabel="Submit for review" closeOnSubmit={false} disableCancelWhilePending />
+    </ModalForm.Root>
   </Modal>;
 }

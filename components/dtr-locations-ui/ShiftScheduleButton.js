@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import Modal from '@/components/ui/Modal';
 import { Button } from '@/components/ui/button';
+import ModalForm from '@/components/ui/ModalForm';
 import { updateDtrShiftSchedule } from '@/lib/server-actions/bulk-dtr-actions';
 
 export default function ShiftScheduleButton({ student, onSaved }) {
@@ -38,26 +39,28 @@ export default function ShiftScheduleButton({ student, onSaved }) {
       toast.error('Could not confirm the schedule change. Refresh before retrying.', { id });
     } finally { setPending(false); }
   }
-  return <Modal open={open} onOpenChange={toggleOpen} title={`Shift hours for ${student.name}`}
+  return <Modal variant="form" open={open} onOpenChange={toggleOpen} title={`Shift hours for ${student.name}`}
     description="Set expected daily hours. Optional dates limit when they apply; leaving both blank keeps them active until removed. Overnight shifts are supported."
     trigger={<span>{student.schedule ? 'Edit hours' : 'Set hours'}</span>}
     triggerStyles="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-primary-emphasis hover:bg-muted">
-    <form className="space-y-4" onSubmit={event => { event.preventDefault(); void change({ clockInTime, clockOutTime, workingDays, startDate: startDate || null, endDate: endDate || null }); }}>
-      <fieldset><legend className="mb-2 text-sm font-medium">Working days</legend><div className="flex flex-wrap gap-3">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((day,i)=><label key={day} className="flex items-center gap-1 text-sm"><input type="checkbox" checked={workingDays.includes(i)} onChange={e=>setWorkingDays(e.target.checked?[...workingDays,i]:workingDays.filter(d=>d!==i))}/>{day}</label>)}</div></fieldset>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="text-sm font-medium">Expected clock-in<input type="time" required value={clockInTime} disabled={pending} onChange={event => setClockInTime(event.target.value)} className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2" /></label>
-        <label className="text-sm font-medium">Expected clock-out<input type="time" required value={clockOutTime} disabled={pending} onChange={event => setClockOutTime(event.target.value)} className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2" /></label>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="text-sm font-medium">Starts on (optional)<input type="date" value={startDate} max={endDate || undefined} disabled={pending} onChange={event => setStartDate(event.target.value)} className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2" /></label>
-        <label className="text-sm font-medium">Ends on (optional)<input type="date" value={endDate} min={startDate || undefined} disabled={pending} onChange={event => setEndDate(event.target.value)} className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2" /></label>
-      </div>
+    <ModalForm.Root onSubmit={event => { event.preventDefault(); void change({ clockInTime, clockOutTime, workingDays, startDate: startDate || null, endDate: endDate || null }); }}>
+      <ModalForm.Section title="Intern shift schedule">
+      <fieldset disabled={pending} data-required-group data-validation-message="Choose at least one working day."><legend className="mb-2 text-sm font-medium">Working days</legend><div className="flex flex-wrap gap-3">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((day,i)=><label key={day} className="flex items-center gap-1 text-sm"><input type="checkbox" checked={workingDays.includes(i)} onChange={e=>setWorkingDays(e.target.checked?[...workingDays,i]:workingDays.filter(d=>d!==i))}/>{day}</label>)}</div></fieldset>
+      <ModalForm.Row>
+        <ModalForm.Field label="Expected clock in"><ModalForm.Input type="time" required value={clockInTime} disabled={pending} onChange={event => setClockInTime(event.target.value)} /></ModalForm.Field>
+        <ModalForm.Field label="Expected clock out"><ModalForm.Input type="time" required value={clockOutTime} disabled={pending} onChange={event => setClockOutTime(event.target.value)} /></ModalForm.Field>
+      </ModalForm.Row>
+      <ModalForm.Row>
+        <ModalForm.Field label="Starts on (optional)"><ModalForm.Input type="date" value={startDate} max={endDate || undefined} disabled={pending} onChange={event => setStartDate(event.target.value)} /></ModalForm.Field>
+        <ModalForm.Field label="Ends on (optional)"><ModalForm.Input type="date" value={endDate} min={startDate || undefined} disabled={pending} onChange={event => setEndDate(event.target.value)} /></ModalForm.Field>
+      </ModalForm.Row>
       <p className="text-xs text-foreground-soft">Both dates include that whole shift. Leave either date blank for an open-ended period. A night shift uses the date it starts.</p>
-      <p className="text-xs text-foreground-soft">Schedule edits take effect tomorrow; initial schedules can begin today. Late: 10 minutes or more after start. Undertime: before end. Overtime: 30 minutes or more after end. Times use Philippine time.</p>
+      <p className="text-xs text-foreground-soft">Schedule edits take effect tomorrow; initial schedules can begin today. Late: 10 minutes or more after start. Undertime: at least one hour before end. Overtime: 30 minutes or more after end. Times use Philippine time.</p>
       <div className="flex flex-wrap justify-end gap-2">
         {student.schedule && <Button type="button" variant="outline" disabled={pending} onClick={() => void change(null)}>Remove hours</Button>}
-        <Button type="submit" disabled={pending || clockInTime === clockOutTime || Boolean(startDate && endDate && startDate > endDate)}>{pending ? 'Saving…' : 'Save hours'}</Button>
       </div>
-    </form>
+      </ModalForm.Section>
+      <ModalForm.Actions isPending={pending} submitDisabled={!workingDays.length || clockInTime === clockOutTime || Boolean(startDate && endDate && startDate > endDate)} submitLabel="Save hours" closeOnSubmit={false} disableCancelWhilePending />
+    </ModalForm.Root>
   </Modal>;
 }

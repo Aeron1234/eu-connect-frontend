@@ -1,5 +1,7 @@
 # Feature manuals and Help audit
 
+November 11 attendance update: the shared student-duty and department-duty guides describe the unified attendance/absence DTR timeline, common filters/pagination and Review-column reasons. Schedule history remains available; the separate absence table is removed. Storage's styled category Select is reused. Absence privacy and review/credit rules are unchanged.
+
 Reviewed against the local frontend and companion backend source on October 30, 2026.
 This is a source audit, not a claim that production, email delivery, geolocation or
 printed page layout was exercised. No live database was queried.

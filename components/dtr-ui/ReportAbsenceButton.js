@@ -11,6 +11,6 @@ export default function ReportAbsenceButton({ hasOpenShift }) {
     const query = useQuery(dutyOptions(user?.id));
     if (hasOpenShift || !query.data?.canReport)
         return null;
-    return <Modal open={open} onOpenChange={setOpen} title="Report absence / no duty" trigger={<span>Report absence</span>} triggerStyles="rounded-md border border-white/60 px-3 py-2 text-xs text-white hover:bg-white/10">
+    return <Modal variant="form" open={open} onOpenChange={setOpen} title="Report absence / no duty" trigger={<span>Report absence</span>} triggerStyles="rounded-md border border-white/60 px-3 py-2 text-xs text-white hover:bg-white/10">
  <AbsenceForm date={query.data.duty.shift_date} onSaved={() => setOpen(false)}/></Modal>;
 }

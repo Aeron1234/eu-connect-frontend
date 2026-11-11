@@ -21,6 +21,7 @@ function Modal({
   open,
   onOpenChange,
   variant = "default",
+  contentClassName,
   intent = "warning",
 }) {
   if (disabled) return null;
@@ -41,7 +42,7 @@ function Modal({
           {children}
         </ConfirmationContent>
       ) : variant === "form" ? (
-        <FormDialogContent title={title} description={description} titleStyles={titleStyles}>
+        <FormDialogContent title={title} description={description} titleStyles={titleStyles} className={contentClassName}>
           {children}
         </FormDialogContent>
       ) : (

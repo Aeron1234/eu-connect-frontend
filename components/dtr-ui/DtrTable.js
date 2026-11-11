@@ -109,7 +109,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
               </td>
               {allowDelete && (
                 <td className="px-3 py-3 text-left">
-                  {!dtr.auto_closed && <Modal variant="confirmation"
+                  {!dtr.auto_closed && !dtr.absence_report && <Modal variant="confirmation"
                     trigger={
                       <div className="flex items-center justify-center">
                         <Trash2 className="size-4" />

@@ -61,7 +61,8 @@ function DtrButton({ internshipData, status, record, disabled = false, pendingEx
   }
 
   return (
-    <Modal variant="confirmation"
+    <Modal variant="form"
+      contentClassName="sm:max-w-4xl"
       intent={isOut ? "clock-in" : "clock-out"}
       open={open}
       onOpenChange={setOpen}

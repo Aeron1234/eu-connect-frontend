@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Modal from "@/components/ui/Modal";
+import ModalForm from "@/components/ui/ModalForm";
 import { useUser } from "@/contexts/UserContext";
 import { decideDtrOvertime, explainAutoClosedDtr, reviewAutoClosedDtr } from "@/lib/server-actions/dtr-actions";
 
@@ -68,7 +69,7 @@ export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false
   }
 
   return (
-    <Modal
+    <Modal variant="form"
       open={open}
       onOpenChange={(nextOpen) => {
         if (nextOpen) setHours(String(dtr.proposed_hours ?? 0));
@@ -79,7 +80,8 @@ export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false
       title={dtr.missed_clock_out ? "Reported missed clock-out" : dtr.auto_closed ? "Automatically closed shift" : "Overtime request"}
       description={dtr.missed_clock_out ? "The student reported when they stopped working. This time has no clock-out photo or location check and needs review." : dtr.auto_closed ? "The system closed this entry without a student clock-out photo or location check." : "The student can still clock out normally while a request is pending."}
     >
-      <div className="space-y-3 text-sm text-foreground">
+      <ModalForm.Root onSubmit={event => { event.preventDefault(); if (canAddExplanation) void save(() => explainAutoClosedDtr(dtr.id, explanation.trim(), needsExplanation ? claimedEnd : null)); else if (isReviewer && needsReview) void save(() => reviewAutoClosedDtr(dtr.id, Number(hours))); }}>
+      <ModalForm.Section title="Shift review">
         {dtr.auto_closed && <>
           <p><strong>Review:</strong> {({ pending_explanation: "Awaiting student explanation", pending_review: "Awaiting staff review", approved: "Approved", adjusted: "Hours adjusted", legacy_credited: "Credited before this review process" })[dtr.auto_close_review_status] || "Auto-closed"}</p>
           <p><strong>Proposed duty:</strong> {dtr.proposed_hours == null ? "—" : `${Number(dtr.proposed_hours).toFixed(2)} hours`} · <strong>Credited:</strong> {Number(dtr.total_hours || 0).toFixed(2)} hours</p>
@@ -88,24 +90,21 @@ export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false
           {canAddExplanation && <div className="space-y-2 border-t border-border pt-3">
             {dtr.auto_close_review_status === "legacy_credited" &&
               <p className="text-xs text-foreground-soft">This older shift was already credited. Your explanation is optional and will not change its hours.</p>}
-            {needsExplanation && <label htmlFor={`dtr-claimed-end-${dtr.id}`} className="block font-medium">When did you stop working? (Philippine time)
-              <input id={`dtr-claimed-end-${dtr.id}`} type="datetime-local" value={claimedEnd} onChange={event => setClaimedEnd(event.target.value)}
+            {needsExplanation && <ModalForm.Field label="When did you stop working? (Philippine time)">
+              <ModalForm.Input id={`dtr-claimed-end-${dtr.id}`} type="datetime-local" required disabled={busy} value={claimedEnd} onChange={event => setClaimedEnd(event.target.value)}
                 min={manilaInputTime(dtr.clock_in)} max={manilaInputTime(dtr.auto_closed_at || dtr.clock_out)}
-                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground" />
-            </label>}
-            <label htmlFor={`dtr-explanation-${dtr.id}`} className="block font-medium">Why did you miss clock-out?</label>
-            <textarea id={`dtr-explanation-${dtr.id}`} value={explanation} onChange={event => setExplanation(event.target.value)} maxLength={1000} rows={4}
-              className="w-full rounded-md border border-border bg-background p-2 text-foreground" placeholder="Explain what happened and when you stopped working." />
-            <button type="button" disabled={busy || explanation.trim().length < 15 || (needsExplanation && !claimedEnd)} onClick={() => save(() => explainAutoClosedDtr(dtr.id, explanation.trim(), needsExplanation ? claimedEnd : null))}
-              className="rounded-md bg-primary px-3 py-2 text-white disabled:opacity-50">Submit explanation</button>
+                 />
+            </ModalForm.Field>}
+            <ModalForm.Field label="Why did you miss clock out?">
+            <ModalForm.Textarea id={`dtr-explanation-${dtr.id}`} value={explanation} onChange={event => setExplanation(event.target.value)} required minLength={15} maxLength={1000} rows={4} disabled={busy}
+              placeholder="Explain what happened and when you stopped working." />
+            </ModalForm.Field>
           </div>}
           {isReviewer && needsReview && <div className="space-y-2 border-t border-border pt-3">
             <label htmlFor={`dtr-hours-${dtr.id}`} className="block font-medium">Hours to credit (0 to {Number(dtr.proposed_hours || 0).toFixed(2)})</label>
-            <input id={`dtr-hours-${dtr.id}`} type="number" min="0" max={Number(dtr.proposed_hours || 0)} step="0.01" value={hours} onChange={event => setHours(event.target.value)}
+            <ModalForm.Input id={`dtr-hours-${dtr.id}`} type="number" required disabled={busy} min="0" max={Number(dtr.proposed_hours || 0)} step="0.01" value={hours} onChange={event => setHours(event.target.value)}
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground" />
             <p className="text-xs text-foreground-soft">The explanation does not verify the actual clock-out time. Review before crediting hours.</p>
-            <button type="button" disabled={busy || hours === "" || Number(hours) < 0 || Number(hours) > Number(dtr.proposed_hours || 0)} onClick={() => save(() => reviewAutoClosedDtr(dtr.id, Number(hours)))}
-              className="rounded-md bg-primary px-3 py-2 text-white disabled:opacity-50">Confirm credited hours</button>
           </div>}
         </>}
         {dtr.overtime_status && <div className="space-y-2 border-t border-border pt-3">
@@ -117,7 +116,10 @@ export default function DtrReviewDetails({ dtr, prompt = false, onMaroon = false
             <button type="button" disabled={busy} onClick={() => save(() => decideDtrOvertime(dtr.id, "not_approved"))} className="rounded-md border border-border px-3 py-2 disabled:opacity-50">Not approved</button>
           </div>}
         </div>}
-      </div>
+      </ModalForm.Section>
+      {canAddExplanation && <ModalForm.Actions isPending={busy} submitDisabled={explanation.trim().length < 15 || (needsExplanation && !claimedEnd)} submitLabel="Submit explanation" closeOnSubmit={false} disableCancelWhilePending />}
+      {isReviewer && needsReview && <ModalForm.Actions isPending={busy} submitDisabled={hours === "" || Number(hours) < 0 || Number(hours) > Number(dtr.proposed_hours || 0)} submitLabel="Confirm credited hours" closeOnSubmit={false} disableCancelWhilePending />}
+      </ModalForm.Root>
     </Modal>
   );
 }
