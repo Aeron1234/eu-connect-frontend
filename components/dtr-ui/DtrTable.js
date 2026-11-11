@@ -8,6 +8,8 @@ import DtrPhotoButton from "./DtrPhotoButton";
 import Link from "next/link";
 import DtrReviewDetails from "./DtrReviewDetails";
 
+import {AbsenceDetails} from './AbsenceDetails';
+
 const statusStyles = {
   present: "text-emerald-700 bg-emerald-50",
   "on-break": "text-amber-700 bg-amber-50",
@@ -47,7 +49,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
                 <div className="max-w-56 truncate text-xs text-muted-foreground" title={dtr.company_name}>{dtr.company_name || "—"}</div>
               </td>}
               <td className="whitespace-nowrap px-3 py-3 text-left text-foreground">
-                {displayDate(dtr.created_at, "MMM d, yyyy")}
+                {displayDate(dtr.clock_in || dtr.created_at, "MMM d, yyyy")}
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-left">
                 {dtr.clock_in && dtr.clock_in !== "—" ? (
@@ -79,6 +81,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   {Boolean(dtr.clock_in_photo_path) && <DtrPhotoButton dtrId={dtr.id} kind="in" />}
                   {Boolean(dtr.clock_out_photo_path) && !dtr.auto_closed && <DtrPhotoButton dtrId={dtr.id} kind="out" />}
+                  {Boolean(dtr.flagged) && dtr.flag_reason?.startsWith("Department-head attendance correction") && <span className="text-xs text-muted-foreground">Staff correction - no camera/GPS evidence</span>}
                   {Boolean(dtr.auto_closed) && <span className="text-xs text-amber-800 dark:text-amber-300">No clock-out photo</span>}
                   {!dtr.clock_in_photo_path && !dtr.clock_out_photo_path && !dtr.auto_closed && <span className="text-foreground-soft">—</span>}
                 </div>
@@ -102,7 +105,7 @@ function DtrTable({ dtrs = [], allowDelete = false, onDeleted, showStudent = fal
                 </div>
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-left">
-                {dtr.auto_closed || dtr.overtime_status ? <DtrReviewDetails dtr={dtr} /> : <span className="text-foreground-soft">—</span>}
+                {dtr.absence_report ? <div className="space-y-1"><span className="block text-xs text-muted-foreground">{dtr.absence_report.review_status.replaceAll("_"," ")}</span><AbsenceDetails report={dtr.absence_report} staff={dtr.absence_staff} /></div> : dtr.auto_closed || dtr.overtime_status ? <DtrReviewDetails dtr={dtr} /> : <span className="text-foreground-soft">—</span>}
               </td>
               {allowDelete && (
                 <td className="px-3 py-3 text-left">

@@ -7,6 +7,8 @@ import { dashboardOverviewOptions } from "@/lib/cache/dashboard-overview-queries
 import DashboardOverviewState from "@/components/dashboard-ui/DashboardOverviewState";
 import DashboardStatsSection from "@/components/dashboard-ui/StudentDashboardStats";
 import MapSmallContainer from "@/components/map-ui/MapSmallContainer";
+import DutySchedulePanel from "@/components/dtr-ui/DutySchedulePanel";
+import {dutyOptions} from "@/lib/cache/duty-queries";
 import DtrTodayCard from "@/components/dtr-ui/DtrTodayCard";
 import DtrReviewDetails from "@/components/dtr-ui/DtrReviewDetails";
 import RecentActivityCard from "@/components/dashboard-ui/RecentActivityCard";
@@ -58,11 +60,15 @@ function StudentDashboardPage() {
     ...dashboardOverviewOptions(user?.id, "student"),
     enabled: Boolean(user?.id),
   });
+  const dutyQuery=useQuery({...dutyOptions(user?.id),enabled:Boolean(user?.id && query.data?.overview?.internshipData?.status==="ongoing")});
   const dashboardRes = query.data?.overview;
   const activityLogs = query.data?.activity;
   if (!dashboardRes) return <DashboardOverviewState query={query} role="student" />;
 
-  const internshipData = dashboardRes?.internshipData || {};
+  const duty=dutyQuery.data?.duty;
+  const internshipData = {...(dashboardRes?.internshipData || {}),
+    schedule_in:duty?.isDuty?duty.clock_in_time:null, schedule_out:duty?.isDuty?duty.clock_out_time:null,
+    schedule_start_date:duty?.effective_from, schedule_end_date:duty?.effective_until};
   const dtrToday = dashboardRes?.dtrToday || {};
   const dtrStatus = dashboardRes?.dtrStatus?.status;
   const dtrRecord = dashboardRes?.dtrStatus?.record;
@@ -100,6 +106,7 @@ function StudentDashboardPage() {
         dtrToday={dtrToday}
         pendingAutoCloseRecord={pendingAutoCloseRecord}
       />
+      {internshipData.status==="ongoing" && <DutySchedulePanel />}
       {pendingAutoCloseRecord && pendingAutoCloseRecord.id !== dtrRecord?.id &&
         <div className="rounded-xl border border-amber-500/40 bg-card px-4 py-3 text-sm">
           <p className="mb-1 font-medium">An earlier shift was closed by the system. Add your explanation before your next clock-in.</p>

@@ -3,6 +3,21 @@ import { feedbackStaff, recordsGuide, rotationsGuide, mapGuide, calendarStaff, d
 
 import { bulkDtrGuide } from './bulkDtrGuide';
 const departmentHeadGuides = [
+{
+  "id": "department-duty",
+  "hideForRegistrar": true,
+  "title": "Review duty schedules and absence explanations",
+  "summary": "Review only your department's schedules and private attendance explanations.",
+  "href": "/department_head/attendance",
+  "linkText": "Open Attendance",
+  "steps": [
+    "Open Attendance, then Duty schedules and absence reports. Use the dropdown to switch between schedule history and absence reports, search student names, and use the page arrows. Both views are restricted to students currently in your department. Registrar heads, admins and employers cannot use these endpoints.",
+    "You receive a notification when a student submits a fallback schedule or an absence explanation, and when the scheduled-shift detector finds missing attendance. Supervisor schedules take priority; the student schedule applies when no supervisor schedule covers that date. New schedule versions preserve past attendance.",
+    "Open View reason or Add reason to inspect the shift start date, student submission time and explanation. Confirm Absent, Leave or Holiday / No duty and enter your review note. Students can edit reasons until reviewed. Holiday and leave reports can be filed up to 30 days ahead; new past reports have a seven-day window.",
+    "For I worked but missed clock-in, verify the actual start/end and net duty hours excluding breaks. Enter no more than elapsed time or the configured daily credit cap; future work cannot be credited. This creates one flagged DTR correction, with no camera/GPS evidence, and credits the verified hours once. An already corrected report cannot create another correction.",
+    "Absence and no-duty reports credit zero hours. Review results notify the student. Employers do not receive absence notices or see the private reports and reasons; ordinary attendance corrections remain visible through their established attendance access."
+  ]
+},
 companyAnalyticsGuide, registrarDashboardGuide,
 bulkDtrGuide('department_head'),
 {

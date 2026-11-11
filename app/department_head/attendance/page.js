@@ -1,3 +1,4 @@
+import DutySchedulePanel from "@/components/dtr-ui/DutySchedulePanel";
 import Link from "next/link";
 import { ClipboardClock, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import DtrTable from "@/components/dtr-ui/DtrTable";
@@ -33,6 +34,7 @@ export default async function AttendancePage({ searchParams }) {
       <div><h1 className="flex items-center gap-2 text-2xl font-semibold"><ClipboardClock className="size-6 text-primary-emphasis" />Attendance <HelpManual guideId="department-attendance" /></h1><p className="mt-1 text-sm text-muted-foreground">Review your department’s time records and clock-in/out photos.</p></div>
       <Link href="/dtr-restrictions" className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"><MapPin className="size-4" />DTR Restrictions</Link>
     </div>
+    <DutySchedulePanel staff initialSection={input.section === "schedules" ? "schedules" : "absences"} />
     <form method="get" className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Attendance filters">
       <label className="text-xs font-medium">Student name<input name="search" defaultValue={filters.search} placeholder="Search student" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm" /></label>
       <label className="text-xs font-medium">Company<input name="company" defaultValue={filters.company} placeholder="Search placement" className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-sm" /></label>

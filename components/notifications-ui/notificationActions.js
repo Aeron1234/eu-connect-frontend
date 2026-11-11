@@ -11,7 +11,8 @@ export function invalidateNotificationTarget(queryClient, userId, notification) 
       void queryClient.invalidateQueries({ queryKey: [key, String(userId)] });
     }
   }
-  if (notification?.type === "dtr_shift_schedule") {
+  if (["dtr_shift_schedule","dtr_absence","dtr_duty_schedule"].includes(notification?.type)) {
+    void queryClient.invalidateQueries({ queryKey: ["dtr-duty", userId] });
     void queryClient.invalidateQueries({ queryKey: ["dashboard-overview", String(userId), "student"] });
   }
   if (["dtr_overtime_request", "dtr_overtime_decision", "dtr_wall_warning", "dtr_auto_close"].includes(notification?.type)) {

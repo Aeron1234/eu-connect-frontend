@@ -25,6 +25,8 @@ const NOTIFICATION_TYPES = {
   supervisor_request_accepted: { icon: UserCheck, label: "Supervisor request", tone: "success" },
   supervisor_request_rejected: { icon: UserX, label: "Supervisor request", tone: "destructive" },
   dtr_location_set: { icon: MapPin, label: "DTR location", tone: "primary" },
+  dtr_absence: { icon: Clock3, label: "Attendance explanation", tone: "primary" },
+  dtr_duty_schedule: { icon: Clock3, label: "Duty schedule", tone: "primary" },
   dtr_shift_schedule: { icon: Clock3, label: "DTR shift hours", tone: "primary" },
 };
 

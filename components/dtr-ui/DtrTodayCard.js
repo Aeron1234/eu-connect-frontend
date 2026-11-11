@@ -1,3 +1,4 @@
+import ReportAbsenceButton from "./ReportAbsenceButton";
 import { FileText, MapPin } from "lucide-react";
 import DtrButton from "./DtrButton";
 import BreakButton from "./BreakButton";
@@ -123,7 +124,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {}, pendin
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                 <div className="min-w-0">
                   <p className="text-xs font-medium">Today&apos;s attendance</p>
-                  <p className="mt-0.5 text-[11px] text-white/70">No employer shift hours set</p>
+                  <p className="mt-0.5 text-[11px] text-white/70">No duty schedule applies today</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-6">
                   <div>
@@ -204,6 +205,7 @@ function DtrTodayCard({ internshipData, status, dtrRecord, dtrToday = {}, pendin
             <div className="w-full lg:w-auto lg:border-l lg:border-white/20 lg:pl-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                 <DtrButton internshipData={internshipData} status={status} record={dtrRecord} disabled={!dtrAvailable} pendingExplanation={Boolean(pendingAutoCloseRecord)} />
+                <ReportAbsenceButton hasOpenShift={hasOpenShift} />
                 <BreakButton status={status} record={dtrRecord} internshipId={internshipData?.id} />
               </div>
               {hasOpenShift && (
