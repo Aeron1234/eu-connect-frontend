@@ -1,5 +1,7 @@
 # DTR location assignment manual and handoff
 
+Supervisor schedule dates now preselect working days: both endpoints count, ranges shorter than seven days select only the covered weekdays, and longer ranges select all seven. Uncheck rest days as needed. Open-ended periods use manual day selection. Existing saved schedules stay unchanged until saved. Search placeholders and student/location/count separators use plain punctuation after correcting garbled source text. No backend/schema/configuration change is required.
+
 Open **DTR Restrictions** from the sidebar, or `/dtr-restrictions` directly. Old `/dtr-locations` links redirect here. The page manual and `/help` cards use `components/help-ui/guides/bulkDtrGuide.js` as the shared role-aware source.
 
 ## Who can use it

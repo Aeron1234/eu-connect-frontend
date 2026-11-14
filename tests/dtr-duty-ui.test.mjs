@@ -7,12 +7,44 @@ import vm from 'node:vm';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {getNotificationTargetPath} from '../lib/notification-routes.js';
+import * as scheduleWeekdays from '../lib/schedule-weekdays.mjs';
 const require=createRequire(import.meta.url);
 const {transformSync}=require('next/dist/compiled/babel/core');
 function load(file,mocks,exportName='default'){const path=fileURLToPath(new URL('../'+file,import.meta.url));const {code}=transformSync(readFileSync(path,'utf8'),{filename:path,babelrc:false,configFile:false,presets:[[require('next/babel'),{'preset-env':{modules:'commonjs'},'preset-react':{runtime:'automatic'}}]]});const module={exports:{}};vm.runInNewContext(code,{module,exports:module.exports,require:id=>Object.hasOwn(mocks,id)?mocks[id]:require(id)});return module.exports[exportName];}
 const Empty=()=>null;
 const Modal=({trigger})=>React.createElement('button',null,trigger);
-const shared={ '../ui/Modal':{__esModule:true,default:Modal},'@/contexts/UserContext':{useUser:()=>({user:{id:'student'}})},'@/lib/cache/duty-queries':{dutyOptions:()=>({})}};
+const shared={ '@/lib/schedule-weekdays.mjs':scheduleWeekdays,'../ui/Modal':{__esModule:true,default:Modal},'@/contexts/UserContext':{useUser:()=>({user:{id:'student'}})},'@/lib/cache/duty-queries':{dutyOptions:()=>({})}};
+
+test('student and supervisor date inputs update weekday checkboxes and allow rest-day choices',()=>{
+ for(const studentForm of [true,false]){
+  const state=[];let cursor=0;
+  const useState=initial=>{const index=cursor++;if(!(index in state))state[index]=typeof initial==='function'?initial():initial;return [state[index],value=>{state[index]=typeof value==='function'?value(state[index]):value;}];};
+  const mocks={...shared,react:{...React,useState},'@/components/ui/Modal':{__esModule:true,default:Empty},
+   '@/components/ui/button':{Button:Empty},'@/components/ui/ModalForm':{__esModule:true,default:{Root:Empty,Section:Empty,Row:Empty,Field:Empty,Input:Empty,Actions:Empty}},
+   '../ui/ModalForm':{__esModule:true,default:{Root:Empty,Section:Empty,Row:Empty,Field:Empty,Input:Empty,Actions:Empty}},
+   '../ui/button':{Button:Empty},'../ui/DropdownFilter':{__esModule:true,default:Empty},'../ui/skeleton':{Skeleton:Empty},'../help-ui/HelpManual':{__esModule:true,default:Empty},
+   './AbsenceDetails':{useDutySave:()=>({pending:false,save(){}}),AbsenceForm:Empty,AbsenceDetails:Empty},
+   '@/lib/server-actions/bulk-dtr-actions':{updateDtrShiftSchedule(){}},
+  };
+  const Component=load(studentForm?'components/dtr-ui/DutySchedulePanel.js':'components/dtr-locations-ui/ShiftScheduleButton.js',mocks,studentForm?'DutyScheduleForm':'default');
+  const props=studentForm?{today:'2026-11-16'}:{student:{name:'Student',internship_id:'ir'}};
+  const render=()=>{cursor=0;return Component(props);};
+  function find(node,predicate){if(!node||typeof node!=='object')return [];return [...(predicate(node)?[node]:[]),...React.Children.toArray(node.props?.children).flatMap(child=>find(child,predicate))];}
+  let tree=render();
+  let dates=find(tree,node=>node.props?.type==='date');
+  if(!studentForm){dates[0].props.onChange({target:{value:'2026-11-16'}});tree=render();dates=find(tree,node=>node.props?.type==='date');}
+  dates[1].props.onChange({target:{value:'2026-11-18'}});
+  tree=render();
+  let checks=find(tree,node=>node.props?.type==='checkbox');
+  assert.deepEqual(checks.map(node=>Boolean(node.props.checked)),[false,true,true,true,false,false,false]);
+  assert.equal(checks[0].props.disabled,true);
+  checks[2].props.onChange({target:{checked:false}});tree=render();
+  assert.equal(find(tree,node=>node.props?.type==='checkbox')[2].props.checked,false);
+  find(tree,node=>node.props?.type==='date')[1].props.onChange({target:{value:'2026-11-29'}});tree=render();
+  checks=find(tree,node=>node.props?.type==='checkbox');
+  assert(checks.every(node=>node.props.checked && !node.props.disabled));
+ }
+});
 
 test('absence explanation and head review use the shared form shell and success-only closing footer',()=>{
  const actions=[];

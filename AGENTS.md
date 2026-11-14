@@ -1,5 +1,9 @@
 # Frontend agent guide
 
+## Schedule date-range weekdays (November 14, 2026)
+
+`lib/schedule-weekdays.mjs` derives Sunday=0 through Saturday=6 using validated date-only UTC arithmetic. Both student DutyScheduleForm and employer ShiftScheduleButton recompute checked working days when either date changes: inclusive ranges under seven days select only covered weekdays, and seven or more select all seven. Out-of-range days are disabled for bounded ranges; users may uncheck covered days for rest days. Incomplete/open-ended ranges preserve manual choices. Reopening employer schedules preserves saved rest-day choices while removing impossible out-of-range days. Keep backend working_days, effective-date versioning, schedule priority, overnight start dates and validation unchanged. The DTR Restrictions search/table strings use plain punctuation to avoid mojibake. No SQL/backend/env/package change is required.
+
 ## DTR modal forms and camera (November 11, 2026)
 
 Absence explanations also use the shared ModalForm for initial reporting, editing a pending reason and department-head review/corrections. Every entry point (View/Add reason, Report absence, Report another date and the automatic prompt) opens `Modal variant="form"`. Keep category as the existing shadcn Select and footer Actions direct under Root with success-only closing; shared validation covers reason, date and correction fields.
@@ -93,7 +97,7 @@ This guide applies to this frontend repository and its descendants. It records t
 - Next.js App Router, React, Tailwind CSS v4, shadcn/Radix components, next-themes, Lucide icons, Sonner action toasts, and TanStack Query.
 - React-Leaflet/Leaflet and OpenStreetMap power the interactive maps. The landing-page Philippines illustration is a separate SVG feature.
 - Server-generated reports use HTML templates and Puppeteer/Chromium. React-PDF/PDF.js displays and prints the resulting PDFs; it does not replace the report generator.
-- Node engine requirement: `>=24.22.1 <25`, recorded in both `package.json` and `package-lock.json`. This baseline was updated for the Node security patch. Do not silently lower it.
+- Node engine requirement: `>=24.22.3 <25`, recorded in both `package.json` and `package-lock.json` for the November 11, 2026 security patch. Do not silently lower it. Verify each local/hosted runtime separately; metadata changes do not upgrade a running process. Restart development/production processes after the runtime is replaced. No new environment settings are needed.
 - Application routes, loading/error boundaries, and API handlers live in `app/`. Feature components live in `components/`; shared UI in `components/ui/`; query definitions in `lib/cache/`; backend requests in `lib/server-actions/`.
 - Shared styles: `app/_styles/globals.css`. Root providers: `app/layout.js`.
 - Next.js 16 authentication entry point: `proxy.js`. API routes excluded from its matcher must enforce their own authentication and authorization.

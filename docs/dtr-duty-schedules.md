@@ -1,5 +1,9 @@
 # Weekly duty schedules and absence reporting
 
+## Selecting weekdays from dates
+
+Student and supervisor schedule forms automatically check the weekdays present between the selected start and end dates, inclusive. November 16-18, 2026 checks Monday, Tuesday and Wednesday only. A seven-day, two-week or month-long range checks all seven days. Users can uncheck rest days; days not occurring in a short bounded range are disabled. Changing either date recalculates these defaults. Open-ended or incomplete ranges retain manual selection, and reopening a saved supervisor schedule preserves its valid rest-day choices. Calculations use date-only UTC arithmetic so device timezone/DST cannot change weekdays. Overnight shifts still belong to their start date. Existing saved schedules are not changed until submitted; no migration is needed.
+
 Absence explanation dialogs now use the same shared modal-form shell, fields, validation and Cancel/Submit footer as Weekly Narratives, including new reports, pending-reason edits and department-head review/corrections. All report entry points use the form dialog; failed saves retain the open form and entered values.
 
 Schedule and DTR explanation dialogs reuse Weekly Narratives' shared modal-form fields, validation, scrollable body and footer actions. Clock-in/out opens a wider responsive camera form. Use Switch camera for the front/rear camera and the zoom buttons or slider for 1x–3x digital zoom before capture; higher zoom reduces detail. Preview/retake remains available, and the saved image receives its official timestamp from the backend. This UI update needs no backend or SQL changes.

@@ -8,6 +8,8 @@ This repository contains the **Next.js frontend**, including its server-rendered
 
 ## Contents
 
+Schedule forms automatically select weekdays from a complete inclusive date range: November 16-18, 2026 selects Monday-Wednesday; ranges of seven days or more select every day. Students and supervisors can uncheck rest days, while open-ended schedules keep manual day selection. DTR Restrictions search/table text has been corrected. This frontend-only update needs no SQL, backend, dependency or environment change.
+
 DTR forms use the same shared modal-form layout as Weekly Narratives for shift schedules, student schedules, auto-close/missed-clock-out reasons and clock-in/out capture. Camera dialogs have a larger responsive preview and 1x–3x digital zoom; the captured photo matches the zoomed view, while the backend still stamps the official time. No additional dependency, SQL or environment setting is needed.
 
 Attendance update (November 11): student Recent Time Records and regular department-head Attendance include private absence reports in the same date-ordered, paginated DTR table. Department filters apply to both record types; reviewed corrections appear once with their reason attached. Schedule controls/history remain available. Absence categories use the same styled Select as Storage uploads. Deploy the matching backend; no additional SQL, package or environment change is needed beyond the existing duty-schedule migration. See [duty schedules](docs/dtr-duty-schedules.md).
@@ -177,7 +179,7 @@ This frontend does not need direct database credentials. Database access and mig
 
 ### Prerequisites
 
-- **Node.js `>=24.22.1 <25`**, matching this repository's engine requirement.
+- **Node.js `>=24.22.3 <25`**, matching this repository's engine requirement and the November 11, 2026 security patch. Update the runtime on each deployment separately; changing package metadata does not replace a running Node executable. No environment variable or application dependency upgrade is required for this runtime patch.
 - npm and access to the package registry and the pinned SheetJS distribution.
 - A running compatible backend, with its database, file storage, and authentication configured.
 - An account provisioned through the backend/administrator workflow.

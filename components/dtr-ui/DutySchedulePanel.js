@@ -12,17 +12,28 @@ import DropdownFilter from '../ui/DropdownFilter';
 import { Skeleton } from '../ui/skeleton';
 import { AbsenceForm, AbsenceDetails } from './AbsenceDetails';
 import HelpManual from '../help-ui/HelpManual';
+import { weekdaysForDateRange } from '@/lib/schedule-weekdays.mjs';
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 function shortDate(value) { return value ? new Date(String(value).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('en-US', { timeZone: 'UTC', month: '2-digit', day: '2-digit', year: 'numeric' }) : '-'; }
 export function DutyScheduleForm({ today, onSaved }) {
     const [workingDays, setDays] = useState([1, 2, 3, 4, 5]);
+    const [from, setFrom] = useState(today);
+    const [until, setUntil] = useState('');
+    const coveredDays = weekdaysForDateRange(from, until);
+    function changeDates(start, end) {
+        setFrom(start);
+        setUntil(end);
+        const covered = weekdaysForDateRange(start, end);
+        if (covered) setDays(covered);
+    }
     const { pending, save } = useDutySave(onSaved);
     return <ModalForm.Root onSubmit={e => { e.preventDefault(); if (pending) return; const f = new FormData(e.currentTarget); void save({ action: 'schedule', workingDays, ...Object.fromEntries(f) }); }}>
  <ModalForm.Section title="Weekly duty schedule">
  <p className="text-sm text-muted-foreground">Your supervisor’s schedule takes priority. Changes to an existing student schedule start tomorrow or later. Hours use Philippine time.</p>
- <fieldset disabled={pending} data-required-group data-validation-message="Choose at least one working day."><legend className="mb-2 text-sm font-medium">Working days</legend><div className="flex flex-wrap gap-3">{days.map((day, i) => <label key={day} className="flex items-center gap-1.5 text-sm"><input type="checkbox" checked={workingDays.includes(i)} onChange={e => setDays(e.target.checked ? [...workingDays, i] : workingDays.filter(d => d !== i))}/>{day.slice(0, 3)}</label>)}</div></fieldset>
+ <fieldset disabled={pending} data-required-group data-validation-message="Choose at least one working day."><legend className="mb-2 text-sm font-medium">Working days</legend><div className="flex flex-wrap gap-3">{days.map((day, i) => <label key={day} className="flex items-center gap-1.5 text-sm"><input type="checkbox" disabled={Boolean(coveredDays && !coveredDays.includes(i))} checked={workingDays.includes(i)} onChange={e => setDays(e.target.checked ? [...workingDays, i] : workingDays.filter(d => d !== i))}/>{day.slice(0, 3)}</label>)}</div></fieldset>
+ <p className="text-xs text-muted-foreground">Changing a complete date range selects its weekdays. Seven days or more selects all days. You can uncheck rest days. Without an end date, choose your weekly working days manually.</p>
  <ModalForm.Row><ModalForm.Field label="Clock in"><ModalForm.Input type="time" name="clockInTime" required disabled={pending} defaultValue="08:00"/></ModalForm.Field><ModalForm.Field label="Clock out"><ModalForm.Input type="time" name="clockOutTime" required disabled={pending} defaultValue="17:00"/></ModalForm.Field></ModalForm.Row>
- <ModalForm.Row><ModalForm.Field label="Effective from"><ModalForm.Input type="date" name="effectiveFrom" min={today} required disabled={pending} defaultValue={today}/></ModalForm.Field><ModalForm.Field label="Effective until (optional)"><ModalForm.Input type="date" name="effectiveUntil" min={today} disabled={pending}/></ModalForm.Field></ModalForm.Row>
+ <ModalForm.Row><ModalForm.Field label="Effective from"><ModalForm.Input type="date" name="effectiveFrom" min={today} max={until || undefined} required disabled={pending} value={from} onChange={e => changeDates(e.target.value, until)}/></ModalForm.Field><ModalForm.Field label="Effective until (optional)"><ModalForm.Input type="date" name="effectiveUntil" min={from || today} disabled={pending} value={until} onChange={e => changeDates(from, e.target.value)}/></ModalForm.Field></ModalForm.Row>
  <p className="text-xs text-muted-foreground">For a temporary change, submit a new schedule with an end date, then submit the normal schedule with its next effective date. For holidays or leave, use Report absence / no duty.</p>
  </ModalForm.Section><ModalForm.Actions isPending={pending} submitDisabled={!workingDays.length} closeOnSubmit={false} disableCancelWhilePending submitLabel="Submit schedule"/></ModalForm.Root>;
 }

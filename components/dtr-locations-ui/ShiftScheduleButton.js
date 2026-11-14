@@ -5,19 +5,27 @@ import Modal from '@/components/ui/Modal';
 import { Button } from '@/components/ui/button';
 import ModalForm from '@/components/ui/ModalForm';
 import { updateDtrShiftSchedule } from '@/lib/server-actions/bulk-dtr-actions';
+import { weekdaysForDateRange, initialScheduleWeekdays } from '@/lib/schedule-weekdays.mjs';
 
 export default function ShiftScheduleButton({ student, onSaved }) {
   const [open, setOpen] = useState(false);
-  const [workingDays,setWorkingDays]=useState(student.schedule?.workingDays || [0,1,2,3,4,5,6]);
+  const [workingDays,setWorkingDays]=useState(() => initialScheduleWeekdays(student.schedule));
   const [clockInTime, setClockInTime] = useState(student.schedule?.clockInTime || '08:00');
   const [clockOutTime, setClockOutTime] = useState(student.schedule?.clockOutTime || '17:00');
   const [startDate, setStartDate] = useState(student.schedule?.startDate || '');
   const [endDate, setEndDate] = useState(student.schedule?.endDate || '');
   const [pending, setPending] = useState(false);
+  const coveredDays = weekdaysForDateRange(startDate, endDate);
+  function changeDates(from, until) {
+    setStartDate(from);
+    setEndDate(until);
+    const days = weekdaysForDateRange(from, until);
+    if (days) setWorkingDays(days);
+  }
   function toggleOpen(next) {
     if (pending) return;
     if (next) {
-      setWorkingDays(student.schedule?.workingDays || [0,1,2,3,4,5,6]);
+      setWorkingDays(initialScheduleWeekdays(student.schedule));
       setClockInTime(student.schedule?.clockInTime || '08:00');
       setClockOutTime(student.schedule?.clockOutTime || '17:00');
       setStartDate(student.schedule?.startDate || '');
@@ -45,14 +53,15 @@ export default function ShiftScheduleButton({ student, onSaved }) {
     triggerStyles="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-primary-emphasis hover:bg-muted">
     <ModalForm.Root onSubmit={event => { event.preventDefault(); void change({ clockInTime, clockOutTime, workingDays, startDate: startDate || null, endDate: endDate || null }); }}>
       <ModalForm.Section title="Intern shift schedule">
-      <fieldset disabled={pending} data-required-group data-validation-message="Choose at least one working day."><legend className="mb-2 text-sm font-medium">Working days</legend><div className="flex flex-wrap gap-3">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((day,i)=><label key={day} className="flex items-center gap-1 text-sm"><input type="checkbox" checked={workingDays.includes(i)} onChange={e=>setWorkingDays(e.target.checked?[...workingDays,i]:workingDays.filter(d=>d!==i))}/>{day}</label>)}</div></fieldset>
+      <fieldset disabled={pending} data-required-group data-validation-message="Choose at least one working day."><legend className="mb-2 text-sm font-medium">Working days</legend><div className="flex flex-wrap gap-3">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((day,i)=><label key={day} className="flex items-center gap-1 text-sm"><input type="checkbox" disabled={Boolean(coveredDays && !coveredDays.includes(i))} checked={workingDays.includes(i)} onChange={e=>setWorkingDays(e.target.checked?[...workingDays,i]:workingDays.filter(d=>d!==i))}/>{day}</label>)}</div></fieldset>
+      <p className="text-xs text-foreground-soft">Changing a complete date range selects its weekdays. Seven days or more selects all days. Uncheck rest days if needed; open-ended schedules use your manual selection.</p>
       <ModalForm.Row>
         <ModalForm.Field label="Expected clock in"><ModalForm.Input type="time" required value={clockInTime} disabled={pending} onChange={event => setClockInTime(event.target.value)} /></ModalForm.Field>
         <ModalForm.Field label="Expected clock out"><ModalForm.Input type="time" required value={clockOutTime} disabled={pending} onChange={event => setClockOutTime(event.target.value)} /></ModalForm.Field>
       </ModalForm.Row>
       <ModalForm.Row>
-        <ModalForm.Field label="Starts on (optional)"><ModalForm.Input type="date" value={startDate} max={endDate || undefined} disabled={pending} onChange={event => setStartDate(event.target.value)} /></ModalForm.Field>
-        <ModalForm.Field label="Ends on (optional)"><ModalForm.Input type="date" value={endDate} min={startDate || undefined} disabled={pending} onChange={event => setEndDate(event.target.value)} /></ModalForm.Field>
+        <ModalForm.Field label="Starts on (optional)"><ModalForm.Input type="date" value={startDate} max={endDate || undefined} disabled={pending} onChange={event => changeDates(event.target.value, endDate)} /></ModalForm.Field>
+        <ModalForm.Field label="Ends on (optional)"><ModalForm.Input type="date" value={endDate} min={startDate || undefined} disabled={pending} onChange={event => changeDates(startDate, event.target.value)} /></ModalForm.Field>
       </ModalForm.Row>
       <p className="text-xs text-foreground-soft">Both dates include that whole shift. Leave either date blank for an open-ended period. A night shift uses the date it starts.</p>
       <p className="text-xs text-foreground-soft">Schedule edits take effect tomorrow; initial schedules can begin today. Late: 10 minutes or more after start. Undertime: at least one hour before end. Overtime: 30 minutes or more after end. Times use Philippine time.</p>

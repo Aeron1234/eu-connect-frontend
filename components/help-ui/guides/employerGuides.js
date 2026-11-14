@@ -9,6 +9,7 @@ const employerGuides = [
   "href": "/dtr-restrictions",
   "steps": [
     "In DTR Restrictions, select Set hours or Edit hours for a current supervised ongoing intern. Select working days, expected clock-in/out and optional date limits. Overnight shifts use the start date.",
+    "Changing both date limits automatically checks the weekdays within that inclusive range. Seven days or more checks all seven days. You can uncheck rest days; weekdays outside a short range are disabled. Without both dates, choose working days manually. Reopening saved hours preserves valid rest-day choices.",
     "Your applicable schedule takes priority over the student's fallback schedule, including rest days. Initial schedules may start today; edits and removal apply tomorrow onward so today's duty and previous DTR results stay stable. Students are notified through the existing shift notification.",
     "Absence requests and their reasons are handled privately by the student's department head. Employers do not receive or review these reports. Your existing attendance, overtime and missed-clock-out review permissions remain available."
   ]
