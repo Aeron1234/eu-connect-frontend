@@ -460,7 +460,7 @@ For handoffs, identify frontend files changed, any required backend contract/mig
 
 ## Next.js security baseline
 
-Next.js and eslint-config-next are aligned at 16.4.3 following the October 2026 security update. Keep the package lock with this change and rebuild/redeploy the frontend. This update requires no backend, SQL or environment changes.
+Next.js and eslint-config-next are aligned at 16.4.6 following the November 17, 2026 security upgrade from affected 16.4.3. Keep package.json and package-lock.json together, restart local Next processes, and rebuild/redeploy hosted instances. experimental.agentUpgrade is explicitly set to security. The 16.4.6 production build and 44 targeted frontend tests passed. npm audit reports no Next.js advisory after this patch, while 16 advisories in other packages remain for a separate dependency review. This update requires no backend, SQL or environment changes. Maintainer advisory: https://github.com/vercel/next.js/security/advisories/GHSA-7qx7-33qx-rqx2
 
 
 ## Password setup interface
@@ -506,3 +506,10 @@ The DTR credit cap (`MAX_SHIFT_HOURS`, currently 10) is separate from the backen
 Clock-in now requires an applicable weekly duty schedule. Supervisor schedules take priority; students submit fallback working days/hours in the dashboard. Clock-in opens 30 minutes before start, including overnight shifts, and closes at scheduled end. Schedule versions preserve earlier attendance; edits begin tomorrow. Every 15 minutes the backend detects missing attendance after scheduled end and prompts for an explanation. Students report Absent, Leave, Holiday / No duty, or missed clock-in; new past reports have a seven-day window and future reports a 30-day window. Only the student and their current same-department non-Registrar head can view these private reports. Heads review in Attendance; no employer/admin/Registrar absence access or notifications. Head-verified worked corrections are flagged and credited once within the configured cap. Sunday EmailJS reminders ask ongoing interns to review next week's schedule.
 
 Deploy `scripts/2026-11-11-dtr-duty-schedules-absence.sql` before paired code. Backend needs the new `EMAILJS_DTR_TEMPLATE_ID` and a separate reminder template using existing EmailJS credentials/service; frontend needs no new env/package. See `docs/dtr-duty-schedules.md` for migration order, operational limits, manuals and reminder setup. The shared role help/page manuals are updated. Keep absence data separate from employer-visible DTR reads and derive department scope from current database membership.
+
+
+## Student account usernames and optional CSV import (November 17, 2026)
+
+Administrators retain manual creation and can import up to 100 students from a UTF-8 CSV (256 KB maximum), preview validation errors, create eligible rows and download rows to correct. Both creation paths generate LastName.FirstName.SCHOOL-ID using optional school IDs; no-ID name collisions receive numeric suffixes. IDs are saved in user_profiles.school_id and mirrored to the initial academic student_number. Existing usernames are preserved. Duplicate checks include inactive accounts and historical student numbers. Other roles retain manual usernames.
+
+Apply backend scripts/2026-11-17-student-account-import.sql before paired deployment. Bulk invitations are durable account_invitation_jobs processed five per minute, using existing EmailJS configuration; failed/uncertain sends retain accounts and require explicit resend. Preview/import/status APIs are admin-only; validate again on import and serialize creation via DB lock. Keep both studentIdentity.mjs copies identical. Help/page manuals share the accounts guide. See docs/student-account-import.md for format, limits, partial-success/retry behavior and operations. No new package or environment variable is required. A production schema migration and real email/browser verification are separate deployment steps.

@@ -21,6 +21,7 @@ function CreateAccountForm({ roles, courses, departments, onCreated }) {
     <form className="relative min-w-0 overflow-clip rounded-2xl border border-border bg-card text-sm shadow-sm" action={handleAction} aria-busy={isPending}>
       {creationResult && <div role="status" className="m-4 space-y-3 rounded-xl border border-border bg-muted/30 p-4 text-sm sm:m-6">
         <p>{creationResult.message}</p>
+        {creationResult.username && <p>Username: <strong>{creationResult.username}</strong></p>}
         {!creationResult.invitation_sent && <ResendAccountInvitation accountId={creationResult.accountId} onSuccess={onInvitationResent} />}
       </div>}
       <div className="border-b border-border p-5 sm:p-6">
@@ -32,7 +33,7 @@ function CreateAccountForm({ roles, courses, departments, onCreated }) {
             <AccountIdentityFields {...identityProps} />
           </AccountFormSection>
           <div className="border-t border-border" />
-          <AccountFormSection number="02" title="Sign-in details" description="Choose the username. The account holder sets their own password through email.">
+          <AccountFormSection number="02" title="Sign-in details" description="Student usernames are generated automatically. The account holder sets their own password through email.">
             <AccountCredentialsFields {...credentialsProps} />
           </AccountFormSection>
           {showConditionalRow && <>

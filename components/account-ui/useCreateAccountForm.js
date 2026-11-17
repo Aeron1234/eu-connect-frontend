@@ -1,5 +1,7 @@
 "use client";
 
+import { studentUsername } from "@/lib/studentIdentity.mjs";
+
 import { useState, useTransition } from "react";
 import { toastAndAction } from "@/lib/helpers";
 import { createUser } from "@/lib/server-actions/account-actions";
@@ -9,6 +11,7 @@ const EMPTY_ACCOUNT_FORM = {
   middle_initial: "",
   last_name: "",
   username: "",
+  school_id: "",
   email: "",
 };
 
@@ -72,6 +75,14 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
   // from the fetched roles list instead of hardcoding ids here.
   const selectedRoleName = roles.find((r) => `${r.id}` === selectedRole)?.role;
 
+  let generatedUsername = "";
+  let usernameError = "";
+  if (selectedRoleName === "student") {
+    try { generatedUsername = studentUsername(accountForm.first_name, accountForm.last_name, accountForm.school_id); }
+    catch (error) { usernameError = error.message; }
+  }
+  const displayedAccount = selectedRoleName === "student" ? { ...accountForm, username: generatedUsername } : accountForm;
+
   // Students select a course and gender; their department is derived from that course.
   // Department heads select a department directly.
   const showCourse = selectedRoleName === "student";
@@ -93,7 +104,7 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
       roles, selectedRole, setSelectedRole, isPending, formatRolesForSelect,
     },
     previewProps: {
-      accountForm, selectedRoleName,
+      accountForm: displayedAccount, selectedRoleName,
       roleLabel: formatRolesForSelect(selectedRoleName),
       course: courses.find(course => String(course.id) === String(selectedCourseId)),
       department: departments.find(department => String(department.id) === String(showCourse
@@ -104,7 +115,7 @@ export default function useCreateAccountForm({ roles, courses, departments, onCr
       accountForm, setAccountForm, isPending,
     },
     credentialsProps: {
-      accountForm, setAccountForm, isPending,
+      accountForm: displayedAccount, setAccountForm, isPending, isStudent: selectedRoleName === "student", usernameError,
     },
     assignmentProps: {
       showCourse, showDepartment, showGender, courses, departments, isPending,

@@ -8,6 +8,7 @@ import { useUser } from "@/contexts/UserContext";
 import { accountsInfiniteOptions, accountsKeys } from "@/lib/cache/accounts-queries";
 import { accountFormOptions } from "@/lib/cache/account-form-queries";
 import { canKeepLoadedPages } from "@/lib/see-more-pagination.mjs";
+import BulkAccountImport from "./BulkAccountImport";
 import CreateAccountForm from "./CreateAccountForm";
 import ExistingAccountList from "./ExistingAccountList";
 import ExistingAccountListSkeleton from "../skeletons/ExistingAccountListSkeleton";
@@ -15,7 +16,7 @@ import CreateAccountFormSkeleton from "../skeletons/CreateAccountFormSkeleton";
 import SearchBar from "../ui/SearchBar";
 import AccountDropdownFilter from "./AccountDropdownFilter";
 
-const tabs = ["Form", "Accounts"];
+const tabs = ["Form", "Import CSV", "Accounts"];
 const defaultFilters = { filter: "all", search: "" };
 
 function AccountsManager({ initialPage }) {
@@ -143,7 +144,7 @@ function AccountsManager({ initialPage }) {
         <ErrorUI error={formQuery.error} reset={() => void formQuery.refetch()} compact logError={false} />
       )}
 
-      {tab === "Form" ? (
+      {tab === "Import CSV" ? <BulkAccountImport onCreated={refreshList} /> : tab === "Form" ? (
         <div>
           {formQuery.isPending ? (
             <CreateAccountFormSkeleton />

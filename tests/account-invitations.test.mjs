@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
+import * as studentIdentity from "../lib/studentIdentity.mjs";
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 const require=createRequire(import.meta.url);
@@ -64,6 +65,7 @@ test('account creation no longer collects a password and preserves the committed
   const jobs=[],states=[];let created=0;
   const hooks={useState:value=>[value,v=>states.push(v)],useTransition:()=>[false,fn=>jobs.push(fn())]};
   const Hook=load('components/account-ui/useCreateAccountForm.js',{
+    "@/lib/studentIdentity.mjs": studentIdentity,
     react:hooks,'@/lib/helpers':{toastAndAction:async()=>({success:true,accountId:'new',invitation_sent:false,message:'Account created; delivery unconfirmed.'})},
     '@/lib/server-actions/account-actions':{},
   }).default;

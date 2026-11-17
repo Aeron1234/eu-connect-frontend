@@ -12,6 +12,7 @@ const nextConfig = {
     ],
   },
   experimental: {
+    agentUpgrade: "security",
     serverActions: {
       // This Server Action transport cap is separate from backend JSON/multipart limits.
       // Feature validation still enforces its smaller file/count/type policies.
