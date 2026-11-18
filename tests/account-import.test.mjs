@@ -1,3 +1,4 @@
+import { formatAccountCsv } from "../lib/accountCsv.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -51,24 +52,48 @@ test("student username follows edits while other roles retain their entered user
 
 test("CSV cannot import until validated and refreshes the account list only after confirmed creation", async () => {
   const h = hooks(); let imported = 0, refreshed = 0;
+  const header = "first_name,last_name,email,course_code,gender";
+  const original = header + "\njUaN,pEREZ,juan@example.test,BSCS,MALE";
+  const formatted = header + "\nJuan,Perez,juan@example.test,BSCS,male";
   const data = { first_name: "Juan", last_name: "Perez", email: "juan@example.test" };
+  const Select = ({ children }) => children;
   const View = load("components/account-ui/BulkAccountImport.js", {
     react: h.api,
     "@/lib/server-actions/account-actions": {
-      previewStudentCsv: async csv => { assert.equal(csv, "csv"); return { success: true, rows: [{ row: 2, data, username: "Perez.Juan" }] }; },
-      importStudentCsv: async () => { imported++; return { success: true, results: [{ row: 2, data, status: "created", accountId: "id", username: "Perez.Juan" }] }; },
+      previewAccountCsv: async (csv, role) => { assert.equal(csv, formatted); assert.equal(role, "student"); return { success: true, rows: [{ row: 2, data, username: "Perez.Juan" }] }; },
+      importAccountCsv: async (csv, role) => { assert.equal(csv, formatted); assert.equal(role, "student"); imported++; return { success: true, results: [{ row: 2, data, status: "created", accountId: "id", username: "Perez.Juan" }] }; },
     },
+    "@/lib/accountCsv.mjs": { formatAccountCsv },
+    "@/components/ui/select": { Select, SelectContent: "div", SelectItem: "span", SelectTrigger: "button", SelectValue: "span" },
     "./ResendAccountInvitation": () => null, "./accountFormStyles": {},
   });
   const render = () => { h.reset(); return View({ onCreated: () => refreshed++ }); };
   const elements = node => !node || typeof node !== "object" ? [] : [node, ...React.Children.toArray(node.props?.children).flatMap(elements)];
   let tree = render();
-  await elements(tree).find(n => n.type === "input").props.onChange({ target: { files: [{ name: "students.csv", size: 3, text: async () => "csv" }] } });
+  const select = tree => elements(tree).find(node => node.type === Select);
+  const fileInput = tree => elements(tree).find(node => node.type === "input");
+  assert.equal(fileInput(tree).props.disabled, true);
+  select(tree).props.onValueChange("student");
+  tree = render();
+  assert.equal(fileInput(tree).props.disabled, false);
+  await elements(tree).find(n => n.type === "input").props.onChange({ target: { files: [{ name: "students.csv", size: original.length, text: async () => original }] } });
   tree = render();
   assert.equal(imported, 0);
   await elements(tree).find(n => n.type === "button" && n.props.children === "Validate and preview").props.onClick();
   tree = render();
-  await elements(tree).find(n => n.type === "button" && n.props.children === "Create 1 accounts").props.onClick();
+  const create = tree => elements(tree).find(n => n.type === "button" && n.props.children === "Create 1 student account");
+  assert.ok(create(tree));
+  select(tree).props.onValueChange("department_head");
+  tree = render();
+  assert.equal(create(tree), undefined);
+  assert.match(renderToStaticMarkup(tree), /active department code/);
+  select(tree).props.onValueChange("student");
+  tree = render();
+  await fileInput(tree).props.onChange({ target: { files: [{ name: "students.csv", size: original.length, text: async () => original }] } });
+  tree = render();
+  await elements(tree).find(n => n.type === "button" && n.props.children === "Validate and preview").props.onClick();
+  tree = render();
+  await create(tree).props.onClick();
   assert.equal(imported, 1);
   assert.equal(refreshed, 1);
   assert.match(renderToStaticMarkup(tree), /Perez.Juan/);
